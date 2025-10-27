@@ -5185,11 +5185,11 @@
             // Check if the completed task matches the challenge criteria
             let shouldIncrement = false;
             
-            // 1. Quick Task challenges
+            // 1. Quick Task SPECIFIC challenges (only count quick tasks)
             if (challengeDesc.includes('quick task') && isQuickTask) {
                 shouldIncrement = true;
             }
-            // 2. Category-based challenges (all 10 categories)
+            // 2. Category-based challenges (all 10 categories) - only for regular tasks
             else if (!isQuickTask && task && task.category) {
                 const taskCategory = task.category.toLowerCase();
                 
@@ -5259,8 +5259,9 @@
                     shouldIncrement = true;
                 }
             }
-            // 8. Generic "complete X tasks" challenges (count any task)
-            else if (challengeDesc.match(/complete \d+ task/) && 
+            // 8. Generic "complete X tasks" challenges (count any task - both regular and quick)
+            // This is a separate if (not else if) so it checks even after section 1 fails for quick tasks
+            if (!shouldIncrement && challengeDesc.match(/complete \d+ task/) && 
                      !challengeDesc.includes('work') && 
                      !challengeDesc.includes('goals') && 
                      !challengeDesc.includes('finance') && 
@@ -5472,90 +5473,90 @@
         // Daily Challenge System - Simplified & Trackable
         // All challenges have clear, automatically verifiable acceptance criteria
         const DAILY_CHALLENGES = [
-            // Basic Task Completion (Any Type)
-            "Complete 1 task today",
-            "Complete 2 tasks today",
-            "Complete 3 tasks today",
-            "Complete 4 tasks today",
-            "Complete 5 tasks today",
-            "Complete 6 tasks today",
-            "Complete 7 tasks today",
-            "Complete 8 tasks today",
-            "Complete 10 tasks today",
+            // Basic Task Completion (Any Type - Regular or Quick Tasks)
+            "Complete 1 task today (any type)",
+            "Complete 2 tasks today (any type)",
+            "Complete 3 tasks today (any type)",
+            "Complete 4 tasks today (any type)",
+            "Complete 5 tasks today (any type)",
+            "Complete 6 tasks today (any type)",
+            "Complete 7 tasks today (any type)",
+            "Complete 8 tasks today (any type)",
+            "Complete 10 tasks today (any type)",
             
-            // Work Category
-            "Complete 1 work task",
-            "Complete 2 work tasks",
-            "Complete 3 work tasks",
-            "Complete 4 work tasks",
+            // Work Category (Regular Tasks Only)
+            "Complete 1 work task (Work & Career category)",
+            "Complete 2 work tasks (Work & Career category)",
+            "Complete 3 work tasks (Work & Career category)",
+            "Complete 4 work tasks (Work & Career category)",
             
             // Goals Category (Personal Goals)
-            "Complete 1 goals task",
-            "Complete 2 goals tasks",
-            "Complete 3 goals tasks",
+            "Complete 1 goals task (Personal Goals category)",
+            "Complete 2 goals tasks (Personal Goals category)",
+            "Complete 3 goals tasks (Personal Goals category)",
             
             // Finance Category
-            "Complete 1 finance task",
-            "Complete 2 finance tasks",
+            "Complete 1 finance task (Finance & Planning category)",
+            "Complete 2 finance tasks (Finance & Planning category)",
             
             // Projects Category
-            "Complete 1 projects task",
-            "Complete 2 projects tasks",
+            "Complete 1 projects task (Projects & Hobbies category)",
+            "Complete 2 projects tasks (Projects & Hobbies category)",
             
             // Errands Category
-            "Complete 1 errands task",
-            "Complete 2 errands tasks",
+            "Complete 1 errands task (Errands & Appointments category)",
+            "Complete 2 errands tasks (Errands & Appointments category)",
             
             // Digital Category
-            "Complete 1 digital task",
-            "Complete 2 digital tasks",
+            "Complete 1 digital task (Digital & Technology category)",
+            "Complete 2 digital tasks (Digital & Technology category)",
             
             // Social Category
-            "Complete 1 social task",
-            "Complete 2 social tasks",
+            "Complete 1 social task (Social & Relationships category)",
+            "Complete 2 social tasks (Social & Relationships category)",
             
             // Home Category
-            "Complete 1 home task",
-            "Complete 2 home tasks",
-            "Complete 3 home tasks",
+            "Complete 1 home task (Home & Family category)",
+            "Complete 2 home tasks (Home & Family category)",
+            "Complete 3 home tasks (Home & Family category)",
             
             // Learning Category
-            "Complete 1 learning task",
-            "Complete 2 learning tasks",
+            "Complete 1 learning task (Learning & Education category)",
+            "Complete 2 learning tasks (Learning & Education category)",
             
             // Wellness Category
-            "Complete 1 wellness task",
-            "Complete 2 wellness tasks",
+            "Complete 1 wellness task (Wellness category)",
+            "Complete 2 wellness tasks (Wellness category)",
             
             // Creative Category
-            "Complete 1 creative task",
-            "Complete 2 creative tasks",
+            "Complete 1 creative task (Creative & Arts category)",
+            "Complete 2 creative tasks (Creative & Arts category)",
             
-            // Quick Tasks
-            "Complete 1 quick task",
-            "Complete 2 quick tasks",
-            "Complete 3 quick tasks",
-            "Complete 4 quick tasks",
-            "Complete 5 quick tasks",
-            "Complete 6 quick tasks",
-            "Complete 8 quick tasks",
-            "Complete 10 quick tasks",
+            // Quick Tasks (Only Quick Tasks Count)
+            "Complete 1 quick task (quick tasks only)",
+            "Complete 2 quick tasks (quick tasks only)",
+            "Complete 3 quick tasks (quick tasks only)",
+            "Complete 4 quick tasks (quick tasks only)",
+            "Complete 5 quick tasks (quick tasks only)",
+            "Complete 6 quick tasks (quick tasks only)",
+            "Complete 8 quick tasks (quick tasks only)",
+            "Complete 10 quick tasks (quick tasks only)",
             
-            // Priority-Based
-            "Complete 1 high-priority task",
-            "Complete 2 high-priority tasks",
-            "Complete 3 high-priority tasks",
-            "Complete 1 low-priority task",
-            "Complete 2 low-priority tasks",
+            // Priority-Based (Regular Tasks Only)
+            "Complete 1 high-priority task (high priority)",
+            "Complete 2 high-priority tasks (high priority)",
+            "Complete 3 high-priority tasks (high priority)",
+            "Complete 1 low-priority task (low priority)",
+            "Complete 2 low-priority tasks (low priority)",
             
-            // Difficulty-Based
-            "Complete 1 easy task",
-            "Complete 2 easy tasks",
-            "Complete 3 easy tasks",
-            "Complete 1 medium task",
-            "Complete 2 medium tasks",
-            "Complete 1 hard task",
-            "Complete 2 hard tasks",
+            // Difficulty-Based (Regular Tasks Only)
+            "Complete 1 easy task (easy difficulty)",
+            "Complete 2 easy tasks (easy difficulty)",
+            "Complete 3 easy tasks (easy difficulty)",
+            "Complete 1 medium task (medium difficulty)",
+            "Complete 2 medium tasks (medium difficulty)",
+            "Complete 1 hard task (hard difficulty)",
+            "Complete 2 hard tasks (hard difficulty)",
             
             // Mixed Combinations
             "Complete 1 work and 1 goals task",
