@@ -109,8 +109,11 @@ class BattleManager {
             return;
         }
         
-        // Calculate damage
-        const damage = Math.max(3, Math.floor(this.hero.attack - this.enemy.defense / 2));
+        // Calculate damage using base attack (level-based)
+        // Enemy defense reduces damage slightly but not too much
+        const baseDamage = this.hero.attack;
+        const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
+        const damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
         const isDead = this.enemy.takeDamage(damage);
 
         // Play enemy hurt animation
@@ -269,11 +272,21 @@ class BattleManager {
 
     // Player uses potion
     async playerPotion() {
-        if (this.state !== BattleState.PLAYER_TURN) return;
+        console.log('🧪 playerPotion called');
+        console.log('Battle state:', this.state);
+        console.log('gameState.battleInventory:', gameState.battleInventory);
+        
+        if (this.state !== BattleState.PLAYER_TURN) {
+            console.log('❌ Not player turn, state is:', this.state);
+            return;
+        }
 
         const potionCount = gameState.battleInventory?.health_potion || 0;
+        console.log('Potion count:', potionCount);
+        
         if (potionCount <= 0) {
             addBattleLog('❌ No potions left!');
+            console.log('❌ No potions in inventory');
             return;
         }
 
@@ -454,8 +467,19 @@ class BattleManager {
 
     // End battle
     async endBattle(result) {
+        let xpGained = 0;
+        let xpLost = 0;
+        
         if (result === 'victory') {
             addBattleLog(`🎉 VICTORY! You defeated the ${this.enemy.name}!`);
+            
+            // Calculate XP reward based on enemy level
+            xpGained = Math.floor(15 + (this.enemy.level * 5));
+            
+            // Award XP
+            if (window.gameState && typeof window.addJerryXP === 'function') {
+                window.addJerryXP(xpGained);
+            }
             
             // Track battle win
             if (window.gameState) {
@@ -467,8 +491,21 @@ class BattleManager {
             
             // Play enemy die animation
             await playEnemyAnimation(this.enemy, 'die', 1000);
+            
+            // Show friendly victory message
+            await new Promise(resolve => setTimeout(resolve, 500));
+            alert(`🎉 Victory!\n\nYou defeated the ${this.enemy.name}!\n\n✨ +${xpGained} XP earned!\n\nGreat job, keep it up! 💪`);
+            
         } else if (result === 'defeat') {
             addBattleLog('💫 DEFEAT! You were defeated...');
+            
+            // Calculate XP loss (smaller penalty)
+            xpLost = Math.floor(5 + (this.enemy.level * 2));
+            
+            // Deduct XP (but don't go below 0)
+            if (window.gameState) {
+                window.gameState.jerryXP = Math.max(0, (window.gameState.jerryXP || 0) - xpLost);
+            }
             
             // Track battle loss
             if (window.gameState) {
@@ -481,6 +518,10 @@ class BattleManager {
             // Play hero death animation
             startHeroAnimation('death');
             await new Promise(resolve => setTimeout(resolve, 1200)); // 8 frames * 150ms
+            
+            // Show friendly defeat message
+            alert(`💫 Defeat...\n\nThe ${this.enemy.name} was too strong this time.\n\n📉 -${xpLost} XP lost\n\nDon't give up! Train harder and try again! 🔥`);
+            
         } else if (result === 'fled') {
             addBattleLog('🏃 You fled from battle!');
         }

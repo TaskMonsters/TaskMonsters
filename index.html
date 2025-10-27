@@ -2209,25 +2209,10 @@
         }
         
         .owned-items-grid {
-            display: flex;
-            overflow-x: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
             padding: 20px;
-            scroll-snap-type: x mandatory;
-        }
-        
-        .owned-items-grid::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .owned-items-grid::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-        
-        .owned-items-grid::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
         }
 
     .owned-item-card {
@@ -2513,6 +2498,7 @@
     gap: 8px;
     flex-wrap: wrap;
     margin-top: 10px;
+    justify-content: center;
 }
 
 .monster-tag {
@@ -3049,7 +3035,7 @@
                 <!-- Energy Gauge -->
                 <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 16px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);">
                     <div style="font-size: 28px; text-align: center; margin-bottom: 8px;">⚡</div>
-                    <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">ENERGY</div>
+                    <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">HP</div>
                     <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
                         <div id="energyFill" style="height: 100%; background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); width: 75%; transition: width 0.3s ease-in-out;"></div>
                     </div>
@@ -3321,11 +3307,14 @@
             <div id="themesSubTabContent" class="shop-sub-content">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">🎨 Themes</div>
+                        <div class="card-title">🎨 Background Themes</div>
+                        <div class="card-subtitle" id="themesCount">5 themes</div>
                     </div>
-                    <div style="padding: 40px 20px; text-align: center; color: #999;">
-                        <p style="font-size: 16px;">🎨 Themes coming soon!</p>
-                        <p style="font-size: 14px; margin-top: 12px;">Customize your hero's appearance.</p>
+                    <div style="padding: 20px;">
+                        <p style="text-align: center; color: #666; margin-bottom: 20px;">Customize your monster's background!</p>
+                        <div id="themesGrid" class="owned-items-grid">
+                            <!-- Themes will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3573,7 +3562,10 @@
                 defense_refill: 2
             },
             unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'], // Track which items have ever been unlocked (fireball requires level 10)
-            xp: 0
+            xp: 0,
+            // Theme system
+            ownedThemes: [], // Array of owned theme IDs
+            activeTheme: null // Currently active theme URL
         };
         
         // Expose gameState to window for external scripts
@@ -3754,6 +3746,11 @@
                     gameState.questTasksOffered = 0;
                 }
                 
+                // Migration: Ensure health is never 0 (fix for existing users)
+                if (!gameState.health || gameState.health === 0) {
+                    gameState.health = 75; // Reset to default
+                }
+                
                 // Migration: Initialize achievement tracking for existing users
                 if (typeof gameState.achievementProgress === 'undefined') {
                     gameState.achievementProgress = {};
@@ -3813,6 +3810,9 @@
         // Check and update energy based on pending/overdue tasks
         function checkAndUpdateEnergy() {
             if (!gameState || !gameState.tasks) return;
+            
+            // Skip if potion was just used to prevent immediate drain
+            if (window.justUsedPotion) return;
             
             const now = Date.now();
             const pendingTasks = gameState.tasks.filter(t => !t.completed && t.dueDate);
@@ -5161,12 +5161,20 @@
 
         // Challenge Progress Tracking System
         function updateChallengeProgress(task, isQuickTask = false) {
+            console.log('📊 updateChallengeProgress called:', {
+                task,
+                isQuickTask,
+                hasChallenge: !!gameState.dailyChallenge,
+                completed: gameState.dailyChallengeCompleted
+            });
+            
             if (!gameState.dailyChallenge || gameState.dailyChallengeCompleted) {
                 return;
             }
 
             const challenge = gameState.dailyChallenge;
             const challengeDesc = (challenge.desc || '').toLowerCase();
+            console.log('🎯 Challenge desc:', challengeDesc);
             
             // Special case: Rest day challenge (no tasks required)
             if (challengeDesc.includes('take a break') || challengeDesc.includes('no tasks required')) {
@@ -5180,8 +5188,33 @@
             // 1. Quick Task challenges
             if (challengeDesc.includes('quick task') && isQuickTask) {
                 shouldIncrement = true;
+                console.log('✅ Matched: Quick task challenge');
             }
-            // 2. Category-specific challenges (work, personal, home, learning, wellness, creative)
+            // 2. Future self challenges (learning, wellness, or any productive task) - CHECK FIRST!
+            else if (challengeDesc.includes('future self') || challengeDesc.includes('future')) {
+                console.log('🔍 Future self challenge detected');
+                console.log('Task category:', task?.category);
+                console.log('Is quick task:', isQuickTask);
+                
+                // Count learning, wellness, work, or personal tasks as "future self" tasks
+                if (!isQuickTask && task && task.category) {
+                    const taskCategory = task.category.toLowerCase();
+                    console.log('Task category (lowercase):', taskCategory);
+                    
+                    if (taskCategory.includes('learning') || 
+                        taskCategory.includes('wellness') ||
+                        taskCategory.includes('work') ||
+                        taskCategory.includes('personal')) {
+                        shouldIncrement = true;
+                        console.log('✅ Matched: Future self task with matching category');
+                    }
+                } else if (!isQuickTask) {
+                    // If no category, count any regular task
+                    shouldIncrement = true;
+                    console.log('✅ Matched: Future self task (no category)');
+                }
+            }
+            // 3. Category-specific challenges (work, personal, home, learning, wellness, creative)
             else if (!isQuickTask && task && task.category) {
                 const taskCategory = task.category.toLowerCase();
                 
@@ -5208,6 +5241,13 @@
             // 4. Priority-based challenges (high-priority, low-priority)
             else if (!isQuickTask && task && task.priority) {
                 const taskPriority = task.priority.toLowerCase();
+                console.log('🎯 Priority check:', {
+                    challengeDesc,
+                    taskPriority,
+                    hasHighPriority: challengeDesc.includes('high-priority'),
+                    hasLowPriority: challengeDesc.includes('low-priority'),
+                    match: (challengeDesc.includes('high-priority') && taskPriority === 'high') || (challengeDesc.includes('low-priority') && taskPriority === 'low')
+                });
                 
                 if ((challengeDesc.includes('high-priority') && taskPriority === 'high') ||
                     (challengeDesc.includes('low-priority') && taskPriority === 'low')) {
@@ -5224,7 +5264,8 @@
             else if (challengeDesc.includes('xp') || challengeDesc.includes('earn')) {
                 shouldIncrement = true;
             }
-            // 7. Generic "complete X tasks" challenges (count any task)
+            // (Future self challenges moved to position #2 above)
+            // 8. Generic "complete X tasks" challenges (count any task)
             else if (challengeDesc.match(/complete \d+ task/) && 
                      !challengeDesc.includes('work') && 
                      !challengeDesc.includes('personal') && 
@@ -5245,6 +5286,13 @@
             // Only increment if criteria is met
             if (shouldIncrement) {
                 challenge.progress++;
+                console.log('✅ Challenge progress incremented!', {
+                    progress: challenge.progress,
+                    target: challenge.target,
+                    challengeDesc
+                });
+            } else {
+                console.log('❌ Challenge criteria not met for this task');
             }
             
             // Check if challenge is completed
@@ -5504,12 +5552,13 @@
             "Earn 150 XP today",
             "Earn 200 XP today",
             
-            // Streak-Based (tracks streak days)
-            "Reach a 2-day streak",
-            "Reach a 3-day streak",
-            "Reach a 4-day streak",
-            "Reach a 5-day streak",
-            "Reach a 7-day streak",
+            // Streak-Based (only single-day achievable)
+            // Note: Multi-day streaks removed as they can't be completed in one day
+            
+            // Future Self Challenges (Learning, Wellness, Planning)
+            "Finish a task that helps your future self",
+            "Complete 1 learning or wellness task",
+            "Complete 1 task for your future",
             
             // Rest Day
             "Take a break! No tasks required today—you've earned it"
@@ -5800,6 +5849,8 @@
                 updateShopDisplay();
             } else if (subTabName === 'owned') {
                 updateOwnedItemsDisplay();
+            } else if (subTabName === 'themes') {
+                updateThemesDisplay();
             }
         }
 
@@ -5841,7 +5892,7 @@
                 name: 'Potion',
                 emoji: '🧪',
                 description: 'Instantly restores 20 HP in battle',
-                cost: 40,
+                cost: 20,
                 effect: 'heal',
                 value: 20
             },
@@ -5904,10 +5955,21 @@
                     <div class="shop-item-description">${item.description}</div>
                     ${quantityDisplay}
                     <div class="shop-item-cost">${item.cost} XP</div>
-                    <button class="buy-now-btn" onclick="buyItem('${item.id}')" ${buttonDisabled}>
+                    <button class="buy-now-btn" data-item-id="${item.id}" ${buttonDisabled}>
                         ${buttonText}
                     </button>
                 `;
+                
+                // Add event listener to button
+                const button = card.querySelector('.buy-now-btn');
+                if (button && !button.disabled) {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        buyItem(item.id);
+                    });
+                }
+                
                 grid.appendChild(card);
             });
         }
@@ -5940,12 +6002,15 @@
                     const card = document.createElement('div');
                     card.className = 'shop-item-card'; // Use same class as shop items
                     
+                    // Show quantity display
+                    const quantityDisplay = item.maxQuantity ? `<div style="font-size: 12px; color: #999; margin-top: 4px;">${count}/${item.maxQuantity} owned</div>` : `<div style="font-size: 12px; color: #999; margin-top: 4px;">${count} owned</div>`;
+                    
                     card.innerHTML = `
                         <div class="shop-item-emoji">${item.emoji}</div>
                         <div class="shop-item-name">${item.name}</div>
                         <div class="shop-item-description">${item.description}</div>
-                        <div class="shop-item-quantity">Owned: ${count}</div>
-                        <button class="use-now-btn" onclick="useItemFromShop('${itemId}')">
+                        ${quantityDisplay}
+                        <button class="buy-now-btn" onclick="useItemFromShop('${itemId}')">
                             Use Now
                         </button>
                     `;
@@ -6007,7 +6072,7 @@
             
             // Save and update displays
             saveGameState();
-            updateHeroCard();
+            updateUI(); // Update all UI elements including XP
             updateShopDisplay(); // Refresh shop to show updated quantities
             updateOwnedItemsDisplay();
             
@@ -6020,35 +6085,92 @@
         function useItemFromShop(itemId) {
             const item = battleItems[itemId];
             if (!item || !gameState.battleInventory[itemId] || gameState.battleInventory[itemId] <= 0) {
-                alert('Item not available!');
+                alert('⚠️ Item not available!');
                 return;
             }
             
-            // Allow potion to be used outside of battle to heal monster
-            if (itemId === 'health_potion') {
+            // Handle healing items (can be used outside of battle)
+            if (item.effect === 'heal') {
                 // Check if monster needs healing
-                const maxHP = 100; // Monster's max HP
-                const currentHP = gameState.health || maxHP;
+                const maxHP = 100;
+                
+                // Use the SAME logic as updateUI display: gameState.health || 75
+                // This ensures we read the same HP value that's shown to the user
+                const currentHP = gameState.health || 75;
+                
+                console.log('Potion Debug - Before:', {
+                    currentHP: currentHP,
+                    healthType: typeof gameState.health,
+                    healthValue: gameState.health
+                });
                 
                 if (currentHP >= maxHP) {
                     alert('💚 Your monster is already at full health!');
                     return;
                 }
                 
-                // Use potion
-                gameState.battleInventory.health_potion--;
-                const healAmount = 30;
-                gameState.health = Math.min(maxHP, currentHP + healAmount);
+                // Use healing item
+                gameState.battleInventory[itemId]--;
+                const healAmount = Number(item.value);
+                const newHP = Math.min(maxHP, currentHP + healAmount);
+                const actualHealed = newHP - currentHP;
                 
-                // Save and update
+                console.log('Potion Debug - Calculation:', {
+                    healAmount: healAmount,
+                    currentHP: currentHP,
+                    newHP: newHP,
+                    actualHealed: actualHealed
+                });
+                
+                // Set new health as a number (ensure it's never 0 unless actually dead)
+                gameState.health = Number(newHP);
+                
+                // If gameState.health was 0 before, make sure it's now properly set
+                if (gameState.health === 0) {
+                    gameState.health = newHP;
+                }
+                
+                console.log('Potion Debug - After:', {
+                    newHealth: gameState.health,
+                    healthType: typeof gameState.health
+                });
+                
+                // Save immediately to persist the heal
                 saveGameState();
+                
+                // Prevent energy drain from running for 2 seconds after healing
+                window.justUsedPotion = true;
+                setTimeout(() => {
+                    window.justUsedPotion = false;
+                }, 2000);
+                
+                // Update all displays
                 updateOwnedItemsDisplay();
+                updateShopDisplay();
                 updateUI();
                 
-                alert(`🧪 Potion used! Healed ${healAmount} HP.\n\nCurrent HP: ${gameState.health}/${maxHP}`);
-            } else {
-                alert(`🎮 ${item.name} will be available in your next battle!\n\nComplete a task to trigger a battle.`);
+                // Force update the health display
+                const healthFill = document.querySelector('.health-fill');
+                const healthText = document.querySelector('.health-text');
+                if (healthFill) {
+                    healthFill.style.width = `${gameState.health}%`;
+                }
+                if (healthText) {
+                    healthText.textContent = `${Math.round(gameState.health)}/100`;
+                }
+                
+                alert(`${item.emoji} ${item.name} used! Healed ${actualHealed} HP.\n\nBefore: ${currentHP} HP\nAfter: ${gameState.health} HP`);
+                return;
             }
+            
+            // Handle battle items (attack, defense, etc.)
+            if (item.effect === 'attack' || item.effect === 'defense' || item.effect === 'attack_gauge') {
+                alert(`🎮 ${item.name} is ready!\n\nThis item will be automatically available in your next battle.\n\nComplete a task to trigger a battle and use it!`);
+                return;
+            }
+            
+            // Default message for other items
+            alert(`🎮 ${item.name} will be available in your next battle!`);
         }
 
         // Modal functions
@@ -6605,6 +6727,11 @@
             while (gameState.jerryXP >= gameState.jerryXPToNext) {
                 levelUpJerry();
             }
+            
+            // Refresh shop display to update affordability
+            if (typeof updateShopDisplay === 'function') {
+                updateShopDisplay();
+            }
         }
 
         function levelUpJerry() {
@@ -6670,7 +6797,7 @@
             
             // Save and update displays
             saveGameState();
-            updateHeroCard();
+            updateUI(); // Update all UI elements including XP
             updateShopDisplay(); // Refresh shop to show updated quantities
             updateOwnedItemsDisplay();
             
@@ -6774,6 +6901,11 @@
             const activeTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
             if (activeTab) {
                 activeTab.classList.add('active');
+            }
+            
+            // Refresh shop display when opening shop tab to show current XP
+            if (tabName === 'rockshop' && typeof updateShopDisplay === 'function') {
+                updateShopDisplay();
             }
         }
 
@@ -7080,6 +7212,7 @@
     
     <!-- Background Manager for time-based backgrounds -->
     <script src="js/backgroundManager.js"></script>
+    <script src="js/themeManager.js"></script>
     
     <!-- Battle System Modules -->
     <script src="js/enemy.js"></script>
