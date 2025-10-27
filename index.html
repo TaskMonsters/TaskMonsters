@@ -5189,13 +5189,17 @@
             if (challengeDesc.includes('quick task') && isQuickTask) {
                 shouldIncrement = true;
             }
-            // 2. Category-specific challenges (work, personal, home, learning, wellness, creative)
+            // 2. Category-based challenges (all 10 categories)
             else if (!isQuickTask && task && task.category) {
                 const taskCategory = task.category.toLowerCase();
                 
-                // Check for specific category mentions
                 if ((challengeDesc.includes('work') && taskCategory.includes('work')) ||
-                    (challengeDesc.includes('personal') && taskCategory.includes('personal')) ||
+                    (challengeDesc.includes('goals') && taskCategory.includes('goals')) ||
+                    (challengeDesc.includes('finance') && taskCategory.includes('finance')) ||
+                    (challengeDesc.includes('projects') && taskCategory.includes('projects')) ||
+                    (challengeDesc.includes('errands') && taskCategory.includes('errands')) ||
+                    (challengeDesc.includes('digital') && taskCategory.includes('digital')) ||
+                    (challengeDesc.includes('social') && taskCategory.includes('social')) ||
                     (challengeDesc.includes('home') && taskCategory.includes('home')) ||
                     (challengeDesc.includes('learning') && taskCategory.includes('learning')) ||
                     (challengeDesc.includes('wellness') && taskCategory.includes('wellness')) ||
@@ -5241,13 +5245,13 @@
             }
             // 7. Future self challenges (learning, wellness, or any productive task)
             else if (challengeDesc.includes('future self') || challengeDesc.includes('future')) {
-                // Count learning, wellness, work, or personal tasks as "future self" tasks
+                // Count learning, wellness, work, or goals tasks as "future self" tasks
                 if (!isQuickTask && task && task.category) {
                     const taskCategory = task.category.toLowerCase();
                     if (taskCategory.includes('learning') || 
                         taskCategory.includes('wellness') ||
                         taskCategory.includes('work') ||
-                        taskCategory.includes('personal')) {
+                        taskCategory.includes('goals')) {
                         shouldIncrement = true;
                     }
                 } else if (!isQuickTask) {
@@ -5258,7 +5262,12 @@
             // 8. Generic "complete X tasks" challenges (count any task)
             else if (challengeDesc.match(/complete \d+ task/) && 
                      !challengeDesc.includes('work') && 
-                     !challengeDesc.includes('personal') && 
+                     !challengeDesc.includes('goals') && 
+                     !challengeDesc.includes('finance') && 
+                     !challengeDesc.includes('projects') && 
+                     !challengeDesc.includes('errands') && 
+                     !challengeDesc.includes('digital') && 
+                     !challengeDesc.includes('social') && 
                      !challengeDesc.includes('home') && 
                      !challengeDesc.includes('learning') &&
                      !challengeDesc.includes('wellness') &&
@@ -5480,10 +5489,30 @@
             "Complete 3 work tasks",
             "Complete 4 work tasks",
             
-            // Personal Category
-            "Complete 1 personal task",
-            "Complete 2 personal tasks",
-            "Complete 3 personal tasks",
+            // Goals Category (Personal Goals)
+            "Complete 1 goals task",
+            "Complete 2 goals tasks",
+            "Complete 3 goals tasks",
+            
+            // Finance Category
+            "Complete 1 finance task",
+            "Complete 2 finance tasks",
+            
+            // Projects Category
+            "Complete 1 projects task",
+            "Complete 2 projects tasks",
+            
+            // Errands Category
+            "Complete 1 errands task",
+            "Complete 2 errands tasks",
+            
+            // Digital Category
+            "Complete 1 digital task",
+            "Complete 2 digital tasks",
+            
+            // Social Category
+            "Complete 1 social task",
+            "Complete 2 social tasks",
             
             // Home Category
             "Complete 1 home task",
@@ -5529,9 +5558,10 @@
             "Complete 2 hard tasks",
             
             // Mixed Combinations
-            "Complete 1 work and 1 personal task",
+            "Complete 1 work and 1 goals task",
             "Complete 1 work and 1 wellness task",
             "Complete 2 work and 1 wellness task",
+            "Complete 1 learning and 1 home task",
             "Complete 1 hard and 1 easy task",
             "Complete 1 high-priority and 1 low-priority task",
             
@@ -5685,15 +5715,16 @@
                 };
                 gameState.dailyChallengeCompleted = false;
                 gameState.lastDailyChallengeDate = today;
-            } else if (!gameState.dailyChallenge) {
-                // Load existing challenge from localStorage
+            } else if (!gameState.dailyChallenge || !gameState.dailyChallenge.color) {
+                // Load existing challenge from localStorage or fix missing color
                 const challengeDesc = DAILY_CHALLENGES[challengeIndex];
+                const existingProgress = gameState.dailyChallenge?.progress || 0;
                 gameState.dailyChallenge = {
                     id: 'daily_' + challengeIndex,
                     name: 'Daily Challenge',
                     desc: challengeDesc,
                     target: parseChallengeTarget(challengeDesc),
-                    progress: 0,
+                    progress: existingProgress,
                     reward: 50,
                     color: CARD_COLORS[cardColorIndex]
                 };
