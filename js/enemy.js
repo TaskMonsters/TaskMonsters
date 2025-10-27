@@ -131,7 +131,6 @@ function createRandomEnemy(playerLevel) {
     }
 
     enemy.scaleToLevel(playerLevel);
-    enemy.level = playerLevel; // Store level for XP calculations
     return enemy;
 }
 
