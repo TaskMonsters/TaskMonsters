@@ -272,11 +272,21 @@ class BattleManager {
 
     // Player uses potion
     async playerPotion() {
-        if (this.state !== BattleState.PLAYER_TURN) return;
+        console.log('🧪 playerPotion called');
+        console.log('Battle state:', this.state);
+        console.log('gameState.battleInventory:', gameState.battleInventory);
+        
+        if (this.state !== BattleState.PLAYER_TURN) {
+            console.log('❌ Not player turn, state is:', this.state);
+            return;
+        }
 
         const potionCount = gameState.battleInventory?.health_potion || 0;
+        console.log('Potion count:', potionCount);
+        
         if (potionCount <= 0) {
             addBattleLog('❌ No potions left!');
+            console.log('❌ No potions in inventory');
             return;
         }
 
