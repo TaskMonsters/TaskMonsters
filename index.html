@@ -6404,6 +6404,15 @@
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
             
+            // Refill battle gauges when completing tasks
+            if (window.battleManager) {
+                // Refill 20 points to attack gauge (max 100)
+                window.battleManager.attackGauge = Math.min(100, window.battleManager.attackGauge + 20);
+                // Refill 15 points to defense gauge (max 100)
+                window.battleManager.defenseGauge = Math.min(100, window.battleManager.defenseGauge + 15);
+                console.log(`⚔️ Battle gauges refilled! Attack: ${window.battleManager.attackGauge}/100, Defense: ${window.battleManager.defenseGauge}/100`);
+            }
+            
             // Add XP (with boost if active)
             let xpToAdd = basePoints * 2;
             if (gameState.xpBoostActive) {
@@ -6588,6 +6597,15 @@
             gameState.taskPoints += multipliedPoints;
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
+            
+            // Refill battle gauges when completing tasks
+            if (window.battleManager) {
+                // Refill 20 points to attack gauge (max 100)
+                window.battleManager.attackGauge = Math.min(100, window.battleManager.attackGauge + 20);
+                // Refill 15 points to defense gauge (max 100)
+                window.battleManager.defenseGauge = Math.min(100, window.battleManager.defenseGauge + 15);
+                console.log(`⚔️ Battle gauges refilled! Attack: ${window.battleManager.attackGauge}/100, Defense: ${window.battleManager.defenseGauge}/100`);
+            }
             
             // Add XP (with boost if active)
             let xpToAdd = basePoints * 2;

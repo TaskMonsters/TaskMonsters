@@ -26,12 +26,14 @@
     const activeTheme = getActiveTheme();
     let backgroundUrl;
     
+    // Always check if it's night time for overlay logic
+    const isNight = isNightTime();
+    
     if (activeTheme) {
       // Use custom theme if active
       backgroundUrl = activeTheme;
     } else {
       // Use default day/night cycle
-      const isNight = isNightTime();
       backgroundUrl = isNight ? backgrounds.night : backgrounds.day;
     }
     
@@ -43,9 +45,9 @@
       petRockHeader.style.setProperty('background-size', 'cover', 'important');
       petRockHeader.style.setProperty('background-position', 'center', 'important');
       
-      // Add or remove dimming overlay for night mode
+      // Add or remove dimming overlay for night mode (only for default backgrounds, not custom themes)
       let overlay = petRockHeader.querySelector('.night-overlay');
-      if (isNight) {
+      if (isNight && !activeTheme) {
         if (!overlay) {
           overlay = document.createElement('div');
           overlay.className = 'night-overlay';
@@ -58,7 +60,8 @@
         }
       }
       
-      console.log(`[BackgroundManager] Pet rock background updated to ${isNight ? 'night' : 'day'} mode (${backgroundUrl})`);
+      const mode = activeTheme ? 'custom theme' : (isNight ? 'night' : 'day');
+      console.log(`[BackgroundManager] Pet rock background updated to ${mode} mode (${backgroundUrl})`);
     } else {
       console.warn('[BackgroundManager] Pet rock header not found, retrying...');
       // Retry after a short delay if element not found yet
