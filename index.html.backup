@@ -489,8 +489,7 @@
             .success-message {
                 padding: 14px 16px;
                 gap: 10px;
-                max-width: calc(100vw - 24px); /* Wider on mobile */
-                min-width: calc(100vw - 24px); /* Force wider */
+                max-width: calc(100vw - 32px);
                 bottom: 16px;
             }
             
@@ -511,8 +510,7 @@
             .success-message {
                 padding: 12px 14px;
                 gap: 8px;
-                max-width: calc(100vw - 20px); /* Even wider on very small screens */
-                min-width: calc(100vw - 20px); /* Force wider */
+                max-width: calc(100vw - 24px);
             }
             
             .success-message-emoji {
@@ -1057,22 +1055,20 @@
 
         /* Task Cards */
         .task-card {
-            /* Apply Quest Card styling structure with current colors */
-            background: linear-gradient(135deg, #0a0f0d 0%, #101712 100%);
-            border: 2px solid #374151;
-            border-radius: 12px;
+            background: var(--task-item-bg);
+            border-radius: var(--radius-lg);
             padding: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(55, 65, 81, 0.2);
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-fast);
             position: relative;
             overflow: hidden;
         }
 
         .task-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(55, 65, 81, 0.4);
-            border-color: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .task-header {
@@ -1122,138 +1118,63 @@
             display: inline-flex;
             align-items: center;
             gap: 3px;
-            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 10px;
+            background: #E3F2FD;
+            color: #007AFF;
+            padding: 3px 6px;
+            border-radius: 6px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 500;
             white-space: nowrap;
         }
 
         .task-due-date.warning {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            color: #fff;
+            background: transparent;
+            color: #FF3B30;
             border: none;
         }
 
         .task-badge {
-            padding: 3px 8px;
-            border-radius: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            font-weight: 500;
             white-space: nowrap;
         }
 
         .task-badge.priority-high {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            color: #fff;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
         }
 
         .task-badge.priority-medium {
-            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-            color: #1a1410;
+            background: rgba(251, 191, 36, 0.1);
+            color: #D97706;
         }
 
         .task-badge.priority-low {
-            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-            color: #fff;
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--success);
         }
 
         .task-badge.difficulty-hard {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            color: #fff;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
         }
 
         .task-badge.difficulty-medium {
-            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-            color: #1a1410;
+            background: rgba(251, 191, 36, 0.1);
+            color: #D97706;
         }
 
         .task-badge.difficulty-easy {
-            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-            color: #fff;
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--success);
         }
 
         .task-actions {
             display: flex;
-            gap: 4px;
+            gap: 8px;
             margin-top: 12px;
-            justify-content: flex-end;
-        }
-
-        /* Edit Button - Purple Pill in Top-Right Corner */
-        .task-edit-button {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            padding: 6px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            z-index: 10;
-            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
-            font-size: 16px;
-        }
-
-        .task-edit-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(124, 58, 237, 0.5);
-        }
-
-        .task-edit-button::before {
-            content: '✏️';
-        }
-
-        /* Delete Button - Style like "Abandon Quest" */
-        .task-delete-button {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .task-delete-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
-        }
-
-        .task-delete-button::before {
-            content: '🗑️';
-        }
-
-        /* Complete Button - Keep at Bottom with Gradient */
-        .task-complete-button {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, #4c1d95 0%, #6366f1 100%);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex: 1;
-        }
-
-        .task-complete-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
         }
 
         .btn-primary {
@@ -1276,14 +1197,13 @@
         .btn-secondary {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
+            border: none;
             border-radius: 8px;
+            padding: 8px 16px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-width: 80px;
         }
 
         .btn-secondary:hover {
@@ -1554,24 +1474,6 @@
         }
 
         /* Shop Items */
-        .owned-badge {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-top: 4px;
-            text-align: center;
-        }
-        
-        .shop-item-desc {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            line-height: 1.3;
-        }
-        
         .shop-grid {
             display: flex;
             overflow-x: auto;
@@ -2021,7 +1923,216 @@
       to { object-position: -256px 0; }
     }
 
-    /* Native datetime-local input styling is handled by browser */
+    /* Modern Date Picker Styles */
+    .modern-datepicker-wrapper {
+        position: relative;
+    }
+
+    .modern-datepicker {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 8px;
+        background: rgba(30, 30, 35, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    .datepicker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .datepicker-month {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .datepicker-nav {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .datepicker-nav:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .datepicker-calendar {
+        margin-bottom: 16px;
+    }
+
+    .datepicker-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+
+    .datepicker-weekdays div {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        padding: 8px 0;
+    }
+
+    .datepicker-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+
+    .day-cell {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #fff;
+    }
+
+    .day-cell:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .day-cell.selected {
+        background: #4A9EFF;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .day-cell.today {
+        border: 2px solid #4A9EFF;
+    }
+
+    .day-cell.other-month {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .datepicker-time {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    .time-selectors {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .time-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .time-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        width: 40px;
+        height: 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .time-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .time-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        width: 50px;
+        height: 40px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .time-separator {
+        font-size: 24px;
+        font-weight: 600;
+        color: #fff;
+        margin: 0 4px;
+    }
+
+    .time-toggle {
+        background: #4A9EFF;
+        border: none;
+        color: #fff;
+        width: 50px;
+        height: 40px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .time-toggle:hover {
+        background: #3A8EEF;
+        transform: scale(1.05);
+    }
+
+    .datepicker-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .datepicker-btn {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .datepicker-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .datepicker-confirm {
+        background: #4A9EFF !important;
+        font-weight: 600;
+    }
+
+    .datepicker-confirm:hover {
+        background: #3A8EEF !important;
+        transform: scale(1.05);
+    }
 
     .btn-secondary {
         background: rgba(255, 255, 255, 0.1);
@@ -2110,7 +2221,7 @@
     }
 
     .shop-item-emoji {
-        font-size: 36px;
+        font-size: 48px;
         margin-bottom: 12px;
     }
 
@@ -2153,67 +2264,12 @@
         border-color: rgba(255, 255, 255, 0.3);
     }
 
-        /* Owned Items Grid */
-        .owned-item-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .owned-item-emoji {
-            font-size: 32px;
-            flex-shrink: 0;
-        }
-        
-        .owned-item-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .owned-item-name {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        
-        .owned-item-quantity {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .use-item-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        
-        .use-item-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        .use-item-btn.equipped {
-            background: #4CAF50;
-        }
-        
-        .owned-items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            padding: 20px;
-        }
+    /* Owned Items Grid */
+    .owned-items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+    }
 
     .owned-item-card {
         background: rgba(255, 255, 255, 0.05);
@@ -2242,7 +2298,7 @@
     }
 
     .owned-item-emoji {
-        font-size: 40px;
+        font-size: 56px;
         margin-bottom: 8px;
     }
 
@@ -2320,567 +2376,10 @@
         font-weight: 500;
     }
 
-
-/* ========================================
-   ONBOARDING SYSTEM STYLES
-   ======================================== */
-
-.onboarding-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.onboarding-overlay.hidden {
-    display: none;
-}
-
-.onboarding-content {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px 0;
-    max-height: 100vh;
-    overflow-y: auto;
-}
-
-.step-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.step-title {
-    font-size: 28px;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 8px;
-}
-
-.step-subtitle {
-    font-size: 16px;
-    color: #aaa;
-    margin-bottom: 20px;
-}
-
-.step-indicators {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
-.step-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #333;
-    transition: all 0.3s ease;
-}
-
-.step-dot.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    width: 30px;
-    border-radius: 6px;
-}
-
-.step-count {
-    font-size: 14px;
-    color: #888;
-}
-
-.onboarding-step {
-    display: none;
-}
-
-.onboarding-step.active {
-    display: block;
-}
-
-.monster-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 80px;
-}
-
-.monster-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.monster-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.monster-card.selected {
-    border-color: #667eea;
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
-}
-
-.monster-card-content {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-.monster-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.monster-avatar.luna {
-    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-}
-
-.monster-avatar.benny {
-    background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
-}
-
-.monster-avatar.nova {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.monster-sprite {
-    width: 32px;
-    height: 32px;
-    object-fit: none;
-    object-position: 0 0;
-    image-rendering: pixelated;
-    transform: scale(2.5);
-}
-
-.monster-info {
-    flex: 1;
-}
-
-.monster-name {
-    font-size: 24px;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 5px;
-}
-
-.monster-title {
-    font-size: 16px;
-    color: #aaa;
-    margin-bottom: 10px;
-}
-
-.monster-description {
-    font-size: 13px;
-    color: #ccc;
-    line-height: 1.4;
-    margin-bottom: 8px;
-}
-
-.monster-tags {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    justify-content: center;
-}
-
-.monster-tag {
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.monster-tag.luna {
-    background: rgba(161, 140, 209, 0.3);
-    color: #d4c5f9;
-}
-
-.monster-tag.benny {
-    background: rgba(255, 167, 81, 0.3);
-    color: #ffd4a3;
-}
-
-.monster-tag.nova {
-    background: rgba(240, 147, 251, 0.3);
-    color: #f5b3fb;
-}
-
-.onboarding-button {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 16px 48px;
-    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
-    z-index: 10001;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.onboarding-button:hover {
-    transform: translateX(-50%) translateY(-2px);
-    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
-}
-
-.onboarding-button:disabled {
-    background: #555;
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-.name-input-container {
-    max-width: 500px;
-    margin: 0 auto 30px;
-}
-
-.name-input {
-    width: 100%;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: white;
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.name-input:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-.name-hint {
-    text-align: center;
-    font-size: 14px;
-    color: #888;
-    margin-bottom: 20px;
-}
-
-.quick-suggestions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.suggestion-chip {
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.suggestion-chip:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.suggestion-chip.selected {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.2);
-}
-
-.selected-monster-display {
-    text-align: center;
-    margin-bottom: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.selected-monster-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin: 0 auto 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.selected-monster-sprite {
-    width: 32px;
-    height: 32px;
-    object-fit: none;
-    object-position: 0 0;
-    image-rendering: pixelated;
-    transform: scale(3.5);
-}
-
-.confirmation-message {
-    text-align: center;
-    font-size: 18px;
-    color: #ccc;
-    line-height: 1.6;
-}
-
-.confirmation-message strong {
-    color: #667eea;
-    font-size: 24px;
-}
-
-.back-button {
-    position: fixed;
-    top: 30px;
-    left: 30px;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
-}
-
-.back-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .onboarding-content {
-        padding-bottom: 120px;
-    }
-    
-    .step-title {
-        font-size: 24px;
-    }
-    
-    .step-subtitle {
-        font-size: 14px;
-    }
-    
-    .monster-card-content {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .monster-avatar {
-        margin: 0 auto;
-    }
-    
-    .selected-monster-avatar {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .monster-name {
-        font-size: 20px;
-    }
-    
-    .monster-description {
-        font-size: 13px;
-    }
-    
-    .quick-suggestions {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .suggestion-chip {
-        padding: 10px;
-        font-size: 13px;
-    }
-    
-    .onboarding-button {
-        bottom: 20px;
-        padding: 14px 32px;
-        font-size: 16px;
-        width: calc(100% - 40px);
-        max-width: 400px;
-    }
-    
-    .name-input {
-        font-size: 16px;
-    }
-}
-
     </style>
 
 </head>
 <body>
-
-<!-- ========================================
-     ONBOARDING SYSTEM
-     ======================================== -->
-<div class="onboarding-overlay hidden" id="onboardingOverlay">
-    <div class="onboarding-content">
-        
-        <!-- Step 1: Choose Your Monster -->
-        <div class="onboarding-step active" id="step1">
-            <div class="step-header">
-                <h1 class="step-title">Choose Your Task Monster</h1>
-                <p class="step-subtitle">Pick your perfect productivity companion</p>
-                <div class="step-indicators">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                </div>
-                <p class="step-count">Step 1 of 3</p>
-            </div>
-            
-            <div class="monster-cards">
-                <!-- Luna Card -->
-                <div class="monster-card" data-monster="luna" id="lunaCard">
-                    <div class="monster-card-content">
-                        <div class="monster-avatar luna">
-                            <img src="assets/heroes/Owlet_Monster_Idle_4.png" alt="Luna" class="monster-sprite" id="lunaSprite">
-                        </div>
-                        <div class="monster-info">
-                            <div class="monster-name">Luna</div>
-                            <div class="monster-title">The Wise Night Owl</div>
-                            <div class="monster-description">Perfect for night owls and deep thinkers. Luna helps you tackle complex tasks with wisdom and patience.</div>
-                            <div class="monster-tags">
-                                <span class="monster-tag luna">Calm</span>
-                                <span class="monster-tag luna">Intelligent</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Benny Card -->
-                <div class="monster-card" data-monster="benny" id="bennyCard">
-                    <div class="monster-card-content">
-                        <div class="monster-avatar benny">
-                            <img src="assets/heroes/Dude_Monster_Idle_4.png" alt="Benny" class="monster-sprite" id="bennySprite">
-                        </div>
-                        <div class="monster-info">
-                            <div class="monster-name">Benny</div>
-                            <div class="monster-title">The Gentle Giant</div>
-                            <div class="monster-description">Strong and dependable. Benny helps you power through big projects with steady determination.</div>
-                            <div class="monster-tags">
-                                <span class="monster-tag benny">Energetic</span>
-                                <span class="monster-tag benny">Loyal</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Nova Card -->
-                <div class="monster-card" data-monster="nova" id="novaCard">
-                    <div class="monster-card-content">
-                        <div class="monster-avatar nova">
-                            <img src="assets/heroes/Pink_Monster_Idle_4.png" alt="Nova" class="monster-sprite" id="novaSprite">
-                        </div>
-                        <div class="monster-info">
-                            <div class="monster-name">Nova</div>
-                            <div class="monster-title">The Fiery Achiever</div>
-                            <div class="monster-description">Energetic and ambitious. Nova motivates you to crush goals and achieve greatness at lightning speed.</div>
-                            <div class="monster-tags">
-                                <span class="monster-tag nova">Curious</span>
-                                <span class="monster-tag nova">Optimistic</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Step 2: Name Your Monster -->
-        <div class="onboarding-step" id="step2">
-            <button class="back-button" id="backToStep1">←</button>
-            
-            <div class="step-header">
-                <h1 class="step-title">Name Your Monster</h1>
-                <div class="step-indicators">
-                    <div class="step-dot"></div>
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                </div>
-                <p class="step-count">Step 2 of 3</p>
-            </div>
-            
-            <div class="selected-monster-display">
-                <div class="selected-monster-avatar" id="selectedAvatar">
-                    <img src="" alt="Selected Monster" class="selected-monster-sprite" id="selectedSprite">
-                </div>
-                <div class="monster-name" id="selectedName"></div>
-                <div class="monster-title" id="selectedTitle"></div>
-                <div class="monster-description" id="selectedDescription"></div>
-                <div class="monster-tags" id="selectedTags"></div>
-            </div>
-            
-            <div class="name-input-container">
-                <p class="step-subtitle">Give your monster a name</p>
-                <input type="text" class="name-input" id="monsterNameInput" maxlength="15" placeholder="Enter a name">
-                <p class="name-hint">Maximum 15 characters</p>
-            </div>
-        </div>
-        
-        <!-- Step 3: Confirmation -->
-        <div class="onboarding-step" id="step3">
-            <button class="back-button" id="backToStep2">←</button>
-            
-            <div class="step-header">
-                <h1 class="step-title">Ready to Start!</h1>
-                <div class="step-indicators">
-                    <div class="step-dot"></div>
-                    <div class="step-dot"></div>
-                    <div class="step-dot active"></div>
-                </div>
-                <p class="step-count">Step 3 of 3</p>
-            </div>
-            
-            <div class="selected-monster-display">
-                <div class="selected-monster-avatar" id="confirmAvatar">
-                    <img src="" alt="Your Monster" class="selected-monster-sprite" id="confirmSprite">
-                </div>
-            </div>
-            
-            <div class="confirmation-message">
-                <p>Your monster will be called</p>
-                <p><strong id="confirmName"></strong></p>
-            </div>
-        </div>
-        
-    </div>
-    
-    <!-- Continue Button (Sticky at bottom) -->
-    <button class="onboarding-button" id="continueButton" disabled>Continue</button>
-</div>
-
 <!-- Confetti Canvas -->
 <canvas id="confetti-canvas" style="position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999;"></canvas>
 
@@ -2949,16 +2448,13 @@
     <!-- Action Buttons -->
     <div class="action-buttons">
         <button id="btnAttack" class="btn-action" onclick="battleManager.playerAttack()">
-            ⚔️ Attack
+            🥊 Attack
         </button>
         <button id="btnDefend" class="btn-action" onclick="battleManager.playerDefend()">
             🪨 Defend
         </button>
         <button id="btnFireball" class="btn-action" onclick="battleManager.playerFireball()">
             🔥 Fireball <span class="item-count" id="fireballCount">(0)</span>
-        </button>
-        <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
-            ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
         </button>
         <button id="btnPotion" class="btn-action" onclick="battleManager.playerPotion()">
             🧪 Potion <span class="item-count" id="potionCount">(2)</span>
@@ -2981,37 +2477,6 @@
 <!-- Explosion Effect -->
 <div id="explosionEffect" class="explosion-effect hidden"></div>
 
-<!-- Quest Giver UI -->
-<div id="questGiverUI" class="quest-giver-overlay hidden">
-    <!-- Forest Scene with Bird -->
-    <div class="quest-scene">
-        <div id="questCrowSprite" class="quest-crow-sprite"></div>
-    </div>
-    
-    <!-- Dialogue Container -->
-    <div class="quest-dialogue-container">
-        <div class="quest-dialogue-header">
-            <span class="quest-dialogue-label">Merlin</span>
-        </div>
-        <div id="questDialogue" class="quest-dialogue-text">
-            <!-- Wise dialogue will be inserted here -->
-        </div>
-    </div>
-    
-    <!-- Quest Actions (Accept/Decline) -->
-    <div id="questActions" class="quest-actions hidden">
-        <button class="quest-btn quest-btn-accept" onclick="questGiver.acceptQuest()">✨ Accept Quest</button>
-        <button class="quest-btn quest-btn-decline" onclick="questGiver.declineQuest()">Pass</button>
-    </div>
-    
-    <!-- Quiz Actions -->
-    <div id="quizActions" class="quest-actions hidden">
-        <div id="quizOptions">
-            <!-- Quiz options will be inserted here -->
-        </div>
-    </div>
-</div>
-
 <!-- Loading Screen -->
 <div class="loading-screen" id="loadingScreen">
     <img alt="Task Monsters" class="loading-brand" src="assets/logo/loading-screen.png"/>
@@ -3027,7 +2492,7 @@
             <div style="width: 140px; height: 140px; margin: 50px auto 0; overflow: visible; position: relative; display: flex; align-items: center; justify-content: center;">
                 <!-- Task Pal Tooltip -->
                 <div id="taskPalTooltip" class="task-pal-tooltip"></div>
-                <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Pink_Monster_Idle_4.png" style="width: 32px; height: 32px; image-rendering: pixelated; object-fit: none; object-position: 0 0; transform: scale(4); transform-origin: center center; animation: hero-idle-anim 0.8s steps(4) infinite; opacity: 0; transition: opacity 0.3s ease;"/>
+                <img alt="Hero" id="mainHeroSprite" src="assets/heroes/hero-idle.png" style="width: 32px; height: 32px; image-rendering: pixelated; object-fit: none; object-position: 0 0; transform: scale(4); transform-origin: center center; animation: hero-idle-anim 0.8s steps(4) infinite;"/>
             </div>
             
             <!-- RPG Stat Gauges -->
@@ -3035,7 +2500,7 @@
                 <!-- Energy Gauge -->
                 <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 16px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);">
                     <div style="font-size: 28px; text-align: center; margin-bottom: 8px;">⚡</div>
-                    <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">HP</div>
+                    <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">ENERGY</div>
                     <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
                         <div id="energyFill" style="height: 100%; background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); width: 75%; transition: width 0.3s ease-in-out;"></div>
                     </div>
@@ -3067,7 +2532,7 @@
             <div style="margin: 16px auto 0; max-width: 500px; padding: 0 10px;">
                 <div style="padding: 16px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);">
                     <!-- Level | Name Header -->
-                    <div id="levelLabel" style="text-align: center; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); margin-bottom: 8px; letter-spacing: 0.3px;">Jerry | Level 1</div>
+                    <div id="levelLabel" style="text-align: center; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); text-shadow: 1px 1px 2px rgba(0,0,0,0.5); margin-bottom: 8px; letter-spacing: 0.3px;">Level 1 | Hero</div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 16px;">
                         <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap;">Experience Points</div>
                         <div id="xpText" style="font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap;">0 / 1,000 XP</div>
@@ -3087,7 +2552,7 @@
         <!-- Expandable Stats Section -->
         <div class="stats-section">
             <div class="stats-header" onclick="toggleStatsExpansion()">
-                <div class="stats-title">🔍 Statistics</div>
+                <div class="stats-title">📊 Statistics</div>
                 <div class="stats-toggle" id="statsToggle">▼</div>
             </div>
             
@@ -3167,31 +2632,6 @@
                     <div class="stat-value" id="achievementsDisplay">0/10</div>
                     <div class="stat-label">Achievements</div>
                 </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">⚔️</div>
-                    <div class="stat-value" id="battlesWonDisplay">0</div>
-                    <div class="stat-label">Battles Won</div>
-                </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">💥</div>
-                    <div class="stat-value" id="battlesLostDisplay">0</div>
-                    <div class="stat-label">Battles Lost</div>
-                </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">🧠</div>
-                    <div class="stat-value" id="quizPassedDisplay">0</div>
-                    <div class="stat-label">Quizzes Passed</div>
-                </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">❌</div>
-                    <div class="stat-value" id="quizFailedDisplay">0</div>
-                    <div class="stat-label">Quizzes Failed</div>
-                </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">📝</div>
-                    <div class="stat-value" id="questAcceptanceDisplay">0%</div>
-                    <div class="stat-label">Quest Acceptance</div>
-                </div>
             </div>
         </div>
 
@@ -3217,17 +2657,6 @@
                     <div id="dailyChallengeDisplay">
                         <!-- Daily challenge will be populated here -->
                     </div>
-                </div>
-            </div>
-
-            <!-- Quest Tasks -->
-            <div class="card quest-tasks-card" id="questTasksCard" style="display: none;">
-                <div class="card-header quest-tasks-header">
-                    <div class="card-title">🏆 Quest Tasks</div>
-                    <div class="quest-tasks-subtitle">Special quests from Merlin</div>
-                </div>
-                <div id="questTasksList">
-                    <!-- Quest tasks will be populated here -->
                 </div>
             </div>
 
@@ -3279,7 +2708,7 @@
             <div id="shopSubTabContent" class="shop-sub-content active">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">🛍️ Shop</div>
+                        <div class="card-title">🛒 Shop</div>
                     </div>
                     <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 20px;">Power up your hero with XP!</p>
@@ -3297,7 +2726,7 @@
                         <div class="card-title">🎒 Battle Items</div>
                         <span id="ownedItemCount" class="item-count-badge">0 items</span>
                     </div>
-                    <div id="ownedItemsGrid" class="owned-items-grid">
+                    <div id="ownedItemsGrid" class="owned-items-grid" style="padding: 20px;">
                         <!-- Owned items will be rendered here -->
                     </div>
                 </div>
@@ -3307,14 +2736,11 @@
             <div id="themesSubTabContent" class="shop-sub-content">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">🎨 Background Themes</div>
-                        <div class="card-subtitle" id="themesCount">5 themes</div>
+                        <div class="card-title">🎨 Themes</div>
                     </div>
-                    <div style="padding: 20px;">
-                        <p style="text-align: center; color: #666; margin-bottom: 20px;">Customize your monster's background!</p>
-                        <div id="themesGrid" class="owned-items-grid">
-                            <!-- Themes will be populated here -->
-                        </div>
+                    <div style="padding: 40px 20px; text-align: center; color: #999;">
+                        <p style="font-size: 16px;">🎨 Themes coming soon!</p>
+                        <p style="font-size: 14px; margin-top: 12px;">Customize your hero's appearance.</p>
                     </div>
                 </div>
             </div>
@@ -3338,7 +2764,7 @@
                     <button class="btn-secondary" onclick="shareEtsyStore()">Share</button>
                 </div>
                 <div class="settings-item">
-                    <div class="settings-label">👾 Change Task Monster's Name</div>
+                    <div class="settings-label">👾 Change Task Pal's Name</div>
                     <button class="btn-secondary" onclick="openChangeNameModal()">Edit</button>
                 </div>
 
@@ -3457,7 +2883,44 @@
                 
                 <div class="form-group">
                     <label class="form-label">Due Date (Optional)</label>
-                    <input class="form-input" id="taskDueDate" type="datetime-local" placeholder="Select date and time"/>
+                    <div class="modern-datepicker-wrapper">
+                        <input class="form-input" id="taskDueDateDisplay" type="text" placeholder="Select date and time" readonly onclick="toggleDatePicker()"/>
+                        <div class="modern-datepicker" id="modernDatePicker" style="display: none;">
+                            <div class="datepicker-header">
+                                <button type="button" class="datepicker-nav" onclick="changeMonth(-1)">◀</button>
+                                <span class="datepicker-month" id="currentMonth">October 2025</span>
+                                <button type="button" class="datepicker-nav" onclick="changeMonth(1)">▶</button>
+                            </div>
+                            <div class="datepicker-calendar">
+                                <div class="datepicker-weekdays">
+                                    <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                                </div>
+                                <div class="datepicker-days" id="calendarDays"></div>
+                            </div>
+                            <div class="datepicker-time">
+                                <div class="time-selectors">
+                                    <div class="time-group">
+                                        <button type="button" class="time-btn" onclick="changeHour(-1)">▲</button>
+                                        <input type="text" id="hourInput" class="time-input" value="09" readonly/>
+                                        <button type="button" class="time-btn" onclick="changeHour(1)">▼</button>
+                                    </div>
+                                    <span class="time-separator">:</span>
+                                    <div class="time-group">
+                                        <button type="button" class="time-btn" onclick="changeMinute(-1)">▲</button>
+                                        <input type="text" id="minuteInput" class="time-input" value="00" readonly/>
+                                        <button type="button" class="time-btn" onclick="changeMinute(1)">▼</button>
+                                    </div>
+                                    <div class="time-group">
+                                        <button type="button" class="time-toggle" id="ampmToggle" onclick="toggleAMPM()">PM</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="datepicker-actions">
+                                <button type="button" class="datepicker-btn" onclick="clearDate()">Clear</button>
+                                <button type="button" class="datepicker-btn datepicker-confirm" onclick="confirmDate()">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -3487,7 +2950,7 @@
 <div class="modal" id="changeNameModal">
     <div class="modal-content">
         <div class="modal-header">
-            <div class="modal-title">Change Task Monster's Name</div>
+            <div class="modal-title">Change Task Pal's Name</div>
             <button class="modal-close" onclick="closeChangeNameModal()">×</button>
         </div>
         <div class="modal-body">
@@ -3531,23 +2994,6 @@
             revivalPoints: 0,
             ownedItems: [],
             funFactsUnlocked: false,
-            // Battle stats
-            battlesWon: 0,
-            battlesLost: 0,
-            // Quest stats
-            questQuizzesPassed: 0,
-            questQuizzesFailed: 0,
-            questTasksAccepted: 0,
-            questTasksOffered: 0,
-            // Achievement tracking
-            achievementProgress: {},
-            quickTaskStartTimes: {},
-            sessionTaskCount: 0,
-            sessionStartTime: null,
-            tasksCompletedToday: [],
-            weekendTasksCompleted: 0,
-            allTasksStreakDays: 0,
-            lastAllTasksDate: null,
             currentOutfit: {
                 hat: null,
                 glasses: null,
@@ -3556,20 +3002,13 @@
             },
             battleInventory: {
                 fireball: 0, // Locked until level 10
-                spark: 0, // Locked until level 7
                 health_potion: 2,
                 attack_refill: 2,
                 defense_refill: 2
             },
             unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'], // Track which items have ever been unlocked (fireball requires level 10)
-            xp: 0,
-            // Theme system
-            ownedThemes: [], // Array of owned theme IDs
-            activeTheme: null // Currently active theme URL
+            xp: 0
         };
-        
-        // Expose gameState to window for external scripts
-        window.gameState = gameState;
 
         // Task creation variables
         let selectedCategory = null;
@@ -3648,16 +3087,32 @@
                 name: 'Mindfulness & Mental Health',
                 emoji: '🧠',
                 tasks: [
-                    { id: 'deep_breaths', title: 'Take 5 deep breaths', emoji: '🫁', points: 2 },
+                    { id: 'deep_breaths', title: 'Take 5 deep breaths', emoji: '🫁🏾', points: 2 },
                     { id: 'gratitude', title: 'Think of 3 things grateful for', emoji: '🙏🏿', points: 3 },
                     { id: 'compliment_self', title: 'Give myself a compliment', emoji: '💝', points: 3 },
-                    { id: 'mindful_moment', title: 'Have a mindful moment', emoji: '🧘🏽', points: 4 },
-                    { id: 'phone_before_bed', title: 'Stay off of phone an hour before bed', emoji: '📵', points: 5 }
+                    { id: 'mindful_moment', title: 'Have a mindful moment', emoji: '🧘🏽', points: 4 }
                 ]
             }
         };
 
-
+        // Shop Items
+        const shopItems = {
+            hats: [
+                { id: 'blue_cap', name: 'Blue Cap', price: 50, emoji: '🧢' },
+                { id: 'top_hat', name: 'Black Top Hat', price: 100, emoji: '🎩' },
+                { id: 'army_helmet', name: 'Army Helmet', price: 200, emoji: '🪖' },
+                { id: 'wizard_hat', name: 'Wizard Hat', price: 400, emoji: '🧙🏾‍♂️' }
+            ],
+            items: [
+                { id: 'mustache', name: 'Mustache', price: 350, emoji: '👨🏻' },
+                { id: 'glasses', name: 'Glasses', price: 300, emoji: '👓' }
+            ],
+            paints: [
+                { id: 'buddy_paint', name: 'Buddy Paint', price: 800, emoji: '🎨' },
+                { id: 'rock_star', name: 'Rock Star', price: 1000, emoji: '⭐' },
+                { id: 'makeup', name: 'Makeup', price: 1100, emoji: '💄' }
+            ]
+        };
 
         // Achievements
         const achievements = [
@@ -3704,7 +3159,6 @@
             if (saved) {
                 const parsedState = JSON.parse(saved);
                 gameState = { ...gameState, ...parsedState };
-                window.gameState = gameState; // Update window reference
                 
                 // Ensure selectedQuickTasks exists
                 if (!gameState.selectedQuickTasks) {
@@ -3725,80 +3179,6 @@
                 if (gameState.totalTasksCreated < gameState.completedTasks) {
                     gameState.totalTasksCreated = gameState.completedTasks;
                 }
-                
-                // Migration: Initialize new stats for existing users
-                if (typeof gameState.battlesWon === 'undefined') {
-                    gameState.battlesWon = 0;
-                }
-                if (typeof gameState.battlesLost === 'undefined') {
-                    gameState.battlesLost = 0;
-                }
-                if (typeof gameState.questQuizzesPassed === 'undefined') {
-                    gameState.questQuizzesPassed = 0;
-                }
-                if (typeof gameState.questQuizzesFailed === 'undefined') {
-                    gameState.questQuizzesFailed = 0;
-                }
-                if (typeof gameState.questTasksAccepted === 'undefined') {
-                    gameState.questTasksAccepted = 0;
-                }
-                if (typeof gameState.questTasksOffered === 'undefined') {
-                    gameState.questTasksOffered = 0;
-                }
-                
-                // Migration: Ensure health is never 0 (fix for existing users)
-                if (!gameState.health || gameState.health === 0) {
-                    gameState.health = 75; // Reset to default
-                }
-                
-                // Migration: Initialize achievement tracking for existing users
-                if (typeof gameState.achievementProgress === 'undefined') {
-                    gameState.achievementProgress = {};
-                }
-                if (typeof gameState.quickTaskStartTimes === 'undefined') {
-                    gameState.quickTaskStartTimes = {};
-                }
-                if (typeof gameState.sessionTaskCount === 'undefined') {
-                    gameState.sessionTaskCount = 0;
-                }
-                if (typeof gameState.sessionStartTime === 'undefined') {
-                    gameState.sessionStartTime = null;
-                }
-                if (typeof gameState.tasksCompletedToday === 'undefined') {
-                    gameState.tasksCompletedToday = [];
-                }
-                if (typeof gameState.weekendTasksCompleted === 'undefined') {
-                    gameState.weekendTasksCompleted = 0;
-                }
-                if (typeof gameState.allTasksStreakDays === 'undefined') {
-                    gameState.allTasksStreakDays = 0;
-                }
-                if (typeof gameState.lastAllTasksDate === 'undefined') {
-                    gameState.lastAllTasksDate = null;
-                }
-            }
-            
-            // Sync monster name from onboarding if it exists
-            const monsterName = localStorage.getItem('monsterName');
-            if (monsterName) {
-                gameState.rockName = monsterName;
-            }
-            
-            // Load and apply monster sprite
-            const spritePrefix = localStorage.getItem('heroSpritePrefix');
-            if (spritePrefix) {
-                const mainHeroSprite = document.getElementById('mainHeroSprite');
-                if (mainHeroSprite) {
-                    mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                    // Show sprite after correct image is loaded
-                    mainHeroSprite.style.opacity = '1';
-                }
-            } else {
-                // If no sprite selected yet, show default (Pink Monster)
-                const mainHeroSprite = document.getElementById('mainHeroSprite');
-                if (mainHeroSprite) {
-                    mainHeroSprite.style.opacity = '1';
-                }
             }
         }
 
@@ -3810,9 +3190,6 @@
         // Check and update energy based on pending/overdue tasks
         function checkAndUpdateEnergy() {
             if (!gameState || !gameState.tasks) return;
-            
-            // Skip if potion was just used to prevent immediate drain
-            if (window.justUsedPotion) return;
             
             const now = Date.now();
             const pendingTasks = gameState.tasks.filter(t => !t.completed && t.dueDate);
@@ -3870,7 +3247,7 @@
             // Update header info (unified level | name)
             const levelLabel = document.getElementById('levelLabel');
             if (levelLabel) {
-                levelLabel.textContent = `${gameState.rockName} | Level ${gameState.jerryLevel || 1}`;
+                levelLabel.textContent = `Level ${gameState.jerryLevel || 1} | ${gameState.rockName}`;
             }
             
             // Update RPG Gauges
@@ -3913,16 +3290,23 @@
             const rockLevel = level;
             const nextLevelXP = xpToNext;
             
-            // Calculate achievements
+            // Count unlocked achievements
             let unlockedAchievements = 0;
-            if (window.achievementTracker) {
-                window.achievementTracker.checkAchievements();
-                achievements.forEach(achievement => {
-                    if (window.achievementTracker.isAchievementUnlocked(achievement.id)) {
-                        unlockedAchievements++;
-                    }
-                });
-            }
+            achievements.forEach(achievement => {
+                let isUnlocked = false;
+                switch (achievement.type) {
+                    case 'streak':
+                        isUnlocked = bestStreak >= achievement.requirement;
+                        break;
+                    case 'tasks':
+                        isUnlocked = completedTasks >= achievement.requirement;
+                        break;
+                    case 'level':
+                        isUnlocked = rockLevel >= achievement.requirement;
+                        break;
+                }
+                if (isUnlocked) unlockedAchievements++;
+            });
             
             // Update collapsed stats
             const quickTasksEl = document.getElementById('quickTasksDisplay');
@@ -3968,24 +3352,6 @@
             if (rockLevelEl) rockLevelEl.textContent = rockLevel;
             if (experienceEl) experienceEl.textContent = `${currentXP}/${nextLevelXP} XP`;
             if (achievementsEl) achievementsEl.textContent = `${unlockedAchievements}/${achievements.length}`;
-            
-            // Update new battle and quest stats
-            const battlesWonEl = document.getElementById('battlesWonDisplay');
-            const battlesLostEl = document.getElementById('battlesLostDisplay');
-            const quizPassedEl = document.getElementById('quizPassedDisplay');
-            const quizFailedEl = document.getElementById('quizFailedDisplay');
-            const questAcceptanceEl = document.getElementById('questAcceptanceDisplay');
-            
-            if (battlesWonEl) battlesWonEl.textContent = gameState.battlesWon || 0;
-            if (battlesLostEl) battlesLostEl.textContent = gameState.battlesLost || 0;
-            if (quizPassedEl) quizPassedEl.textContent = gameState.questQuizzesPassed || 0;
-            if (quizFailedEl) quizFailedEl.textContent = gameState.questQuizzesFailed || 0;
-            if (questAcceptanceEl) {
-                const offered = gameState.questTasksOffered || 0;
-                const accepted = gameState.questTasksAccepted || 0;
-                const acceptanceRate = offered > 0 ? Math.round((accepted / offered) * 100) : 0;
-                questAcceptanceEl.textContent = `${acceptanceRate}%`;
-            }
             
             // Update creature image based on equipped items
             updateCreatureImage();
@@ -4208,15 +3574,9 @@
 // Tooltip remains visible until user selection and is then replaced by mood message
         }
 
-        // Helper function to get current sprite prefix
-        function getCurrentSpritePrefix() {
-            return localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
-        }
-
         window.selectMood = function(moodKey) {
             const tooltip = document.getElementById("taskPalTooltip");
             const hero = document.getElementById("mainHeroSprite");
-            const spritePrefix = getCurrentSpritePrefix();
             
             localStorage.setItem("userMood", moodKey);
             
@@ -4233,13 +3593,13 @@
             if (moodKey === "happy") {
                 // Jump animation for 2 seconds
                 if (hero) {
-                    hero.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
+                    hero.src = "assets/heroes/Pink_Monster_Jump_8.png";
                     hero.style.animation = "hero-jump-anim 0.8s steps(8) infinite";
                     
                     // Return to idle after 2 seconds
                     setTimeout(() => {
                         if (hero) {
-                            hero.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                            hero.src = "assets/heroes/Pink_Monster_Idle_4.png";
                             hero.style.animation = "hero-idle-anim 0.8s steps(4) infinite";
                         }
                     }, 2000);
@@ -4247,13 +3607,13 @@
             } else if (moodKey === "sad" || moodKey === "mad") {
                 // Hurt animation for 2 seconds
                 if (hero) {
-                    hero.src = `assets/heroes/${spritePrefix}_Hurt_4.png`;
+                    hero.src = "assets/heroes/Pink_Monster_Hurt_4.png";
                     hero.style.animation = "hero-hurt-anim 0.4s steps(4) infinite";
                     
                     // Return to idle after 2 seconds
                     setTimeout(() => {
                         if (hero) {
-                            hero.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                            hero.src = "assets/heroes/Pink_Monster_Idle_4.png";
                             hero.style.animation = "hero-idle-anim 0.8s steps(4) infinite";
                         }
                     }, 2000);
@@ -5134,8 +4494,6 @@
                     
                     return `
                         <div class="task-card">
-                            <button class="task-edit-button" onclick="editTask(${gameState.tasks.indexOf(task)})" title="Edit task"></button>
-                            
                             <div class="task-header">
                                 <div class="task-emoji">${categoryInfo.emoji}</div>
                                 <div class="task-content">
@@ -5150,8 +4508,9 @@
                             </div>
                             ${task.description ? `<div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">${task.description}</div>` : ''}
                             <div class="task-actions">
-                                <button class="action-btn action-complete" onclick="completeTask(${gameState.tasks.indexOf(task)})" title="Complete">✓</button>
-                                <button class="action-btn action-remove" onclick="deleteTask(${gameState.tasks.indexOf(task)})" title="Delete">×</button>
+                                <button class="btn-primary" onclick="completeTask(${gameState.tasks.indexOf(task)})">Complete</button>
+                                <button class="btn-secondary" onclick="editTask(${gameState.tasks.indexOf(task)})">Edit</button>
+                                <button class="btn-secondary" onclick="deleteTask(${gameState.tasks.indexOf(task)})">Delete</button>
                             </div>
                         </div>
                     `;
@@ -5161,139 +4520,20 @@
 
         // Challenge Progress Tracking System
         function updateChallengeProgress(task, isQuickTask = false) {
-            console.log('📊 updateChallengeProgress called:', {
-                task,
-                isQuickTask,
-                hasChallenge: !!gameState.dailyChallenge,
-                completed: gameState.dailyChallengeCompleted
-            });
-            
             if (!gameState.dailyChallenge || gameState.dailyChallengeCompleted) {
                 return;
             }
 
             const challenge = gameState.dailyChallenge;
-            const challengeDesc = (challenge.desc || '').toLowerCase();
-            console.log('🎯 Challenge desc:', challengeDesc);
             
-            // Special case: Rest day challenge (no tasks required)
-            if (challengeDesc.includes('take a break') || challengeDesc.includes('no tasks required')) {
-                // This challenge is auto-completed at generation
-                return;
-            }
-            
-            // Check if the completed task matches the challenge criteria
-            let shouldIncrement = false;
-            
-            // 1. Quick Task challenges
-            if (challengeDesc.includes('quick task') && isQuickTask) {
-                shouldIncrement = true;
-            }
-            // 2. Category-specific challenges (work, personal, home, learning, wellness, creative)
-            else if (!isQuickTask && task && task.category) {
-                const taskCategory = task.category.toLowerCase();
-                
-                // Check for specific category mentions
-                if ((challengeDesc.includes('work') && taskCategory.includes('work')) ||
-                    (challengeDesc.includes('personal') && taskCategory.includes('personal')) ||
-                    (challengeDesc.includes('home') && taskCategory.includes('home')) ||
-                    (challengeDesc.includes('learning') && taskCategory.includes('learning')) ||
-                    (challengeDesc.includes('wellness') && taskCategory.includes('wellness')) ||
-                    (challengeDesc.includes('creative') && taskCategory.includes('creative'))) {
-                    shouldIncrement = true;
-                }
-            }
-            // 3. Difficulty-based challenges (easy, medium, hard)
-            else if (!isQuickTask && task && task.difficulty) {
-                const taskDifficulty = task.difficulty.toLowerCase();
-                
-                if ((challengeDesc.includes('easy') && taskDifficulty === 'easy') ||
-                    (challengeDesc.includes('medium') && taskDifficulty === 'medium') ||
-                    (challengeDesc.includes('hard') && taskDifficulty === 'hard')) {
-                    shouldIncrement = true;
-                }
-            }
-            // 4. Priority-based challenges (high-priority, low-priority)
-            else if (!isQuickTask && task && task.priority) {
-                const taskPriority = task.priority.toLowerCase();
-                console.log('🎯 Priority check:', {
-                    challengeDesc,
-                    taskPriority,
-                    hasHighPriority: challengeDesc.includes('high-priority'),
-                    hasLowPriority: challengeDesc.includes('low-priority'),
-                    match: (challengeDesc.includes('high-priority') && taskPriority === 'high') || (challengeDesc.includes('low-priority') && taskPriority === 'low')
-                });
-                
-                if ((challengeDesc.includes('high-priority') && taskPriority === 'high') ||
-                    (challengeDesc.includes('low-priority') && taskPriority === 'low')) {
-                    shouldIncrement = true;
-                }
-            }
-            // 5. Streak-based challenges (handled separately, but count any task)
-            else if (challengeDesc.includes('streak')) {
-                // Streak challenges are verified by checking gameState.streakDays
-                // Any task completion counts toward maintaining the streak
-                shouldIncrement = true;
-            }
-            // 6. XP-based challenges (count any task since all tasks give XP)
-            else if (challengeDesc.includes('xp') || challengeDesc.includes('earn')) {
-                shouldIncrement = true;
-            }
-            // 7. Future self challenges (learning, wellness, or any productive task)
-            else if (challengeDesc.includes('future self') || challengeDesc.includes('future')) {
-                // Count learning, wellness, work, or personal tasks as "future self" tasks
-                if (!isQuickTask && task && task.category) {
-                    const taskCategory = task.category.toLowerCase();
-                    if (taskCategory.includes('learning') || 
-                        taskCategory.includes('wellness') ||
-                        taskCategory.includes('work') ||
-                        taskCategory.includes('personal')) {
-                        shouldIncrement = true;
-                    }
-                } else if (!isQuickTask) {
-                    // If no category, count any regular task
-                    shouldIncrement = true;
-                }
-            }
-            // 8. Generic "complete X tasks" challenges (count any task)
-            else if (challengeDesc.match(/complete \d+ task/) && 
-                     !challengeDesc.includes('work') && 
-                     !challengeDesc.includes('personal') && 
-                     !challengeDesc.includes('home') && 
-                     !challengeDesc.includes('learning') &&
-                     !challengeDesc.includes('wellness') &&
-                     !challengeDesc.includes('creative') &&
-                     !challengeDesc.includes('quick') &&
-                     !challengeDesc.includes('high-priority') &&
-                     !challengeDesc.includes('low-priority') &&
-                     !challengeDesc.includes('easy') &&
-                     !challengeDesc.includes('medium') &&
-                     !challengeDesc.includes('hard')) {
-                // Generic task completion - count any task
-                shouldIncrement = true;
-            }
-            
-            // Only increment if criteria is met
-            if (shouldIncrement) {
-                challenge.progress++;
-                console.log('✅ Challenge progress incremented!', {
-                    progress: challenge.progress,
-                    target: challenge.target,
-                    challengeDesc
-                });
-            } else {
-                console.log('❌ Challenge criteria not met for this task');
-            }
+            // For the new 100-challenge system, increment progress on any task completion
+            // Since challenges are self-directed text descriptions, users complete them manually
+            challenge.progress++;
             
             // Check if challenge is completed
             if (challenge.progress >= challenge.target && !gameState.dailyChallengeCompleted) {
                 gameState.dailyChallengeCompleted = true;
                 gameState.taskPoints += challenge.reward;
-                
-                // Track challenge completion for achievements
-                if (window.achievementTracker) {
-                    window.achievementTracker.trackChallengeComplete();
-                }
                 
                 // Fire confetti first
                 if (window.fireConfetti) {
@@ -5364,14 +4604,24 @@
             const achievementsList = document.getElementById('achievementsList');
             if (!achievementsList) return;
             
-            // Check achievements before displaying
-            if (window.achievementTracker) {
-                window.achievementTracker.checkAchievements();
-            }
-            
             achievementsList.innerHTML = achievements.map(achievement => {
-                const isUnlocked = window.achievementTracker ? 
-                    window.achievementTracker.isAchievementUnlocked(achievement.id) : false;
+                let isUnlocked = false;
+                let progress = 0;
+                
+                switch (achievement.type) {
+                    case 'streak':
+                        progress = gameState.bestStreak || 0;
+                        isUnlocked = progress >= achievement.requirement;
+                        break;
+                    case 'tasks':
+                        progress = gameState.completedTasks || 0;
+                        isUnlocked = progress >= achievement.requirement;
+                        break;
+                    case 'level':
+                        progress = gameState.jerryLevel || 1;
+                        isUnlocked = progress >= achievement.requirement;
+                        break;
+                }
                 
                 return `
                     <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
@@ -5388,62 +4638,54 @@
             }).join('');
         }
 
-        // Update shop items display
+        // Update shop display
         function updateShopDisplay() {
-            const grid = document.getElementById('shopItemsGrid');
-            if (!grid) return;
-            
-            grid.innerHTML = '';
-            
-            // Render each battle item as a shop card
-            Object.values(battleItems).forEach(item => {
-                const currentQuantity = gameState.battleInventory[item.id] || 0;
-                const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
-                const isMaxed = item.maxQuantity && currentQuantity >= item.maxQuantity;
-                const canAfford = (gameState.jerryXP || 0) >= item.cost;
-                
-                const card = document.createElement('div');
-                card.className = 'shop-item-card';
-                
-                // Add locked or maxed styling
-                if (isLocked) {
-                    card.style.opacity = '0.5';
-                    card.style.cursor = 'not-allowed';
-                } else if (isMaxed) {
-                    card.style.opacity = '0.7';
-                }
-                
-                let buttonText = 'Buy Now';
-                let buttonDisabled = '';
-                
-                if (isLocked) {
-                    buttonText = `🔒 Level ${item.levelRequired}`;
-                    buttonDisabled = 'disabled style="opacity: 0.5; cursor: not-allowed;"';
-                } else if (isMaxed) {
-                    buttonText = '✅ Maxed Out';
-                    buttonDisabled = 'disabled style="opacity: 0.5; cursor: not-allowed;"';
-                } else if (!canAfford) {
-                    buttonText = 'Not Enough XP';
-                    buttonDisabled = 'disabled style="opacity: 0.7;"';
-                }
-                
-                const maxQuantityText = item.maxQuantity ? `<div style="font-size: 11px; color: #999; margin-top: 4px;">Max: ${item.maxQuantity}</div>` : '';
-                
-                card.innerHTML = `
-                    <div class="shop-item-emoji">${item.emoji}</div>
-                    <div class="shop-item-name">${item.name}</div>
-                    <div class="shop-item-desc">${item.description}</div>
-                    <div class="shop-item-quantity">Owned: ${currentQuantity}</div>
-                    ${maxQuantityText}
-                    <div class="shop-item-cost">${item.cost} XP</div>
-                    <button class="shop-buy-btn" onclick="buyItem('${item.id}')" ${buttonDisabled}>${buttonText}</button>
-                `;
-                
-                grid.appendChild(card);
-            });
+            updateShopSection('hatsShop', shopItems.hats);
+            updateShopSection('itemsShop', shopItems.items);
+            updateShopSection('paintShop', shopItems.paints);
         }
 
-
+        function updateShopSection(containerId, items) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = items.map(item => {
+                const canAfford = gameState.taskPoints >= item.price;
+                const isOwned = gameState.ownedItems.includes(item.id);
+                const isEquipped = (containerId === 'hatsShop' && gameState.currentOutfit.hat === item.id) ||
+                                 (containerId === 'paintShop' && gameState.currentOutfit.paint === item.id);
+                
+                let cssClasses = 'shop-item';
+                if (isOwned) {
+                    cssClasses += isEquipped ? ' equipped' : ' owned';
+                } else if (canAfford) {
+                    cssClasses += ' affordable';
+                } else {
+                    cssClasses += ' expensive';
+                }
+                
+                let buttonText;
+                if (isOwned) {
+                    if (isEquipped) {
+                        buttonText = 'Unequip';
+                    } else if (containerId === 'hatsShop' || containerId === 'paintShop') {
+                        buttonText = 'Equip';
+                    } else {
+                        buttonText = 'Owned';
+                    }
+                } else {
+                    buttonText = `${item.price} Points`;
+                }
+                
+                return `
+                    <div class="${cssClasses}" onclick="buyItem('${item.id}', ${item.price})">
+                        ${item.image ? `<img src="${item.image}" class="shop-item-image" alt="${item.name}">` : `<div class="shop-item-emoji">${item.emoji || '❓'}</div>`}
+                        <div class="shop-item-name">${item.name}</div>
+                        <div class="shop-item-price">${buttonText}</div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         // Update settings display
         function updateSettingsDisplay() {
@@ -5460,102 +4702,108 @@
         }
 
         // Daily Challenge System
-        // Daily Challenge System - Simplified & Trackable
-        // All challenges have clear, automatically verifiable acceptance criteria
+        // Daily Challenge System - 100 Challenges
         const DAILY_CHALLENGES = [
-            // Basic Task Completion (Any Type)
-            "Complete 1 task today",
-            "Complete 2 tasks today",
-            "Complete 3 tasks today",
-            "Complete 4 tasks today",
-            "Complete 5 tasks today",
-            "Complete 6 tasks today",
-            "Complete 7 tasks today",
-            "Complete 8 tasks today",
-            "Complete 10 tasks today",
-            
-            // Work Category
-            "Complete 1 work task",
-            "Complete 2 work tasks",
-            "Complete 3 work tasks",
-            "Complete 4 work tasks",
-            
-            // Personal Category
-            "Complete 1 personal task",
+            "Complete 3 work tasks today",
+            "Finish all quick tasks before lunch",
+            "Add a new task with a deadline",
             "Complete 2 personal tasks",
-            "Complete 3 personal tasks",
-            
-            // Home Category
-            "Complete 1 home task",
-            "Complete 2 home tasks",
-            "Complete 3 home tasks",
-            
-            // Learning Category
-            "Complete 1 learning task",
-            "Complete 2 learning tasks",
-            
-            // Wellness Category
-            "Complete 1 wellness task",
-            "Complete 2 wellness tasks",
-            
-            // Creative Category
-            "Complete 1 creative task",
-            "Complete 2 creative tasks",
-            
-            // Quick Tasks
-            "Complete 1 quick task",
-            "Complete 2 quick tasks",
-            "Complete 3 quick tasks",
-            "Complete 4 quick tasks",
-            "Complete 5 quick tasks",
-            "Complete 6 quick tasks",
-            "Complete 8 quick tasks",
-            "Complete 10 quick tasks",
-            
-            // Priority-Based
-            "Complete 1 high-priority task",
-            "Complete 2 high-priority tasks",
-            "Complete 3 high-priority tasks",
-            "Complete 1 low-priority task",
-            "Complete 2 low-priority tasks",
-            
-            // Difficulty-Based
-            "Complete 1 easy task",
-            "Complete 2 easy tasks",
-            "Complete 3 easy tasks",
-            "Complete 1 medium task",
-            "Complete 2 medium tasks",
-            "Complete 1 hard task",
-            "Complete 2 hard tasks",
-            
-            // Mixed Combinations
-            "Complete 1 work and 1 personal task",
-            "Complete 1 work and 1 wellness task",
-            "Complete 2 work and 1 wellness task",
-            "Complete 1 hard and 1 easy task",
-            "Complete 1 high-priority and 1 low-priority task",
-            
-            // XP-Based (tracks XP accumulation)
+            "Check off one high-priority task",
+            "Add one 'Wellness' task and complete it",
+            "Finish a task that's been pending for over a day",
+            "Complete one creative or hobby task",
+            "Do one Quick Task before 10 AM",
+            "Reach a 2-day streak!",
+            "Complete 4 quick tasks today",
+            "Finish one task marked as 'hard'",
+            "Add a new 'Work' task and complete it today",
+            "Do one cleanup or organization task",
+            "Finish all due tasks for today",
+            "Add 2 new tasks for tomorrow",
+            "Complete one 'Learning' category task",
+            "Finish a medium-priority task",
+            "End the day with no pending tasks",
+            "Check off a task before 9 AM",
+            "Create a new Quick Task and complete it instantly",
+            "Reach 5 completed tasks today",
+            "Complete one 'Home' category task",
+            "Take on a wellness challenge—stretch or meditate",
             "Earn 50 XP today",
-            "Earn 75 XP today",
-            "Earn 100 XP today",
-            "Earn 150 XP today",
-            "Earn 200 XP today",
-            
-            // Streak-Based (tracks streak days)
-            "Reach a 2-day streak",
-            "Reach a 3-day streak",
-            "Reach a 4-day streak",
-            "Reach a 5-day streak",
-            "Reach a 7-day streak",
-            
-            // Future Self Challenges (Learning, Wellness, Planning)
+            "Add a fun task and complete it",
             "Finish a task that helps your future self",
-            "Complete 1 learning or wellness task",
-            "Complete 1 task for your future",
-            
-            // Rest Day
-            "Take a break! No tasks required today—you've earned it"
+            "Create a task reminder for tomorrow",
+            "Complete at least one group or teamwork task",
+            "Clear all low-priority tasks",
+            "Add a new task with a positive emoji",
+            "Do one creative Quick Task",
+            "Complete all overdue tasks",
+            "Add a goal for the week",
+            "Complete 2 tasks in under an hour",
+            "Log your best streak today",
+            "Add and finish one learning-related task",
+            "Complete all 'Medium' difficulty tasks",
+            "Finish a 'Wellness' and 'Work' task combo",
+            "Do one reflective journaling task",
+            "Complete a long task without breaks",
+            "Add a new 'Personal Growth' task",
+            "Finish 3 tasks of any type",
+            "Do one high-priority and one easy task",
+            "Add a new Quick Task list",
+            "Earn 100 XP in one day",
+            "Finish a task after your usual work hours",
+            "Try completing 5 small Quick Tasks",
+            "Add and complete one 'Errand' task",
+            "Finish one creative or design task",
+            "Take 10 minutes to plan tomorrow's tasks",
+            "Add a motivational Quick Task",
+            "Complete 2 'Work' and 1 'Wellness' task",
+            "Add a task with an emoji title",
+            "Create a recurring daily task",
+            "Finish one of your oldest tasks",
+            "Clear all Quick Tasks from the list",
+            "Add one 'Focus' task and complete it",
+            "Do one hard Quick Task",
+            "Earn a new achievement badge",
+            "Add a high-difficulty task",
+            "Create a 'challenge yourself' task",
+            "Complete all tasks in one category",
+            "Check off 3 tasks back-to-back",
+            "Complete a task using the fab (+) button",
+            "Create and finish a new goal today",
+            "Finish a creative task before 5 PM",
+            "Hit a personal best streak",
+            "Complete all Quick Tasks before noon",
+            "Earn XP twice in one session",
+            "Add one 'Mindfulness' task",
+            "Complete 4 small tasks in a row",
+            "Create and complete a task from every category",
+            "Add a daily habit task",
+            "Finish one hard and one easy task",
+            "Clear all 'Pending' tasks",
+            "Add and finish 3 Quick Tasks",
+            "Earn 75 XP or more today",
+            "Add a 'Fun' category task",
+            "Complete all tasks with emoji icons",
+            "Start a new 3-day streak",
+            "Complete 1 work and 1 personal task",
+            "Add 5 new Quick Tasks",
+            "Finish everything on your list today",
+            "Complete 2 high-priority tasks",
+            "Add a new achievement-worthy task",
+            "Create and complete a learning challenge",
+            "Finish a long-term goal",
+            "Do all Quick Tasks within 30 minutes",
+            "End your day with no pending tasks",
+            "Complete a task you've delayed most",
+            "Add one 'Fitness' task",
+            "Create a short gratitude task",
+            "Complete a new Quick Task before 8 AM",
+            "Earn a new level today",
+            "Add and complete one 'Focus' task",
+            "Hit 10 total completed tasks today",
+            "Create one task that improves your space",
+            "Check off every due task today",
+            "Rest! No tasks today—reward yourself"
         ];
 
         const CARD_COLORS = [
@@ -5568,76 +4816,6 @@
             'var(--daily-card-red)',
             'var(--daily-card-yellow)'
         ];
-
-        // Parse the target number from challenge description
-        function parseChallengeTarget(challengeDesc) {
-            // Convert to lowercase for easier matching
-            const desc = challengeDesc.toLowerCase();
-            
-            // Look for numeric patterns in the description
-            // Patterns: "complete 3", "finish 2", "reach 5", "earn 50", "add 2", etc.
-            const patterns = [
-                /complete (\d+)/,
-                /finish (\d+)/,
-                /reach (\d+)/,
-                /earn (\d+)/,
-                /add (\d+)/,
-                /do (\d+)/,
-                /check off (\d+)/,
-                /clear (\d+)/,
-                /create (\d+)/,
-                /hit (\d+)/,
-                /(\d+)[- ]day/,  // for "2-day streak" or "3 day streak"
-                /at least (\d+)/,
-                /(\d+) tasks?/,
-                /(\d+) quick/,
-                /(\d+) work/,
-                /(\d+) personal/,
-                /(\d+) home/,
-                /(\d+) learning/,
-                /(\d+) wellness/,
-                /(\d+) creative/,
-                /(\d+) easy/,
-                /(\d+) medium/,
-                /(\d+) hard/,
-                /(\d+) high-priority/,
-                /(\d+) low-priority/,
-                /(\d+) small/,
-                /(\d+) high/,
-                /(\d+) low/,
-                /(\d+) new/
-            ];
-            
-            // Try each pattern
-            for (const pattern of patterns) {
-                const match = desc.match(pattern);
-                if (match && match[1]) {
-                    const num = parseInt(match[1]);
-                    // For XP challenges, the number is the XP amount, not the task count
-                    // So we keep target as 1 for XP challenges
-                    // Use word boundary to avoid matching 'learning' as 'earn'
-                    if (desc.includes('xp') || /\bearn\b/.test(desc)) {
-                        return 1;
-                    }
-                    return num;
-                }
-            }
-            
-            // Special cases
-            if (desc.includes('all quick tasks') || desc.includes('every quick task')) {
-                // This requires completing all selected quick tasks
-                // We'll set a reasonable default, but the logic should check against actual count
-                return 1;  // Will be handled specially in the progress tracking
-            }
-            
-            if (desc.includes('all tasks') || desc.includes('every task') || desc.includes('everything')) {
-                // Similar to above - requires all tasks to be completed
-                return 1;  // Will be handled specially
-            }
-            
-            // Default to 1 if no number found
-            return 1;
-        }
 
         function generateDailyChallenge() {
             const today = new Date().toDateString();
@@ -5677,12 +4855,11 @@
                 localStorage.setItem('dailyCardColorIndex', cardColorIndex);
                 
                 // Update game state
-                const challengeDesc = DAILY_CHALLENGES[challengeIndex];
                 gameState.dailyChallenge = {
                     id: 'daily_' + challengeIndex,
                     name: 'Daily Challenge',
-                    desc: challengeDesc,
-                    target: parseChallengeTarget(challengeDesc),
+                    desc: DAILY_CHALLENGES[challengeIndex],
+                    target: 1,
                     progress: 0,
                     reward: 50,
                     color: CARD_COLORS[cardColorIndex]
@@ -5691,12 +4868,11 @@
                 gameState.lastDailyChallengeDate = today;
             } else if (!gameState.dailyChallenge) {
                 // Load existing challenge from localStorage
-                const challengeDesc = DAILY_CHALLENGES[challengeIndex];
                 gameState.dailyChallenge = {
                     id: 'daily_' + challengeIndex,
                     name: 'Daily Challenge',
-                    desc: challengeDesc,
-                    target: parseChallengeTarget(challengeDesc),
+                    desc: DAILY_CHALLENGES[challengeIndex],
+                    target: 1,
                     progress: 0,
                     reward: 50,
                     color: CARD_COLORS[cardColorIndex]
@@ -5843,8 +5019,6 @@
                 updateShopDisplay();
             } else if (subTabName === 'owned') {
                 updateOwnedItemsDisplay();
-            } else if (subTabName === 'themes') {
-                updateThemesDisplay();
             }
         }
 
@@ -5870,30 +5044,19 @@
                 levelRequired: 10,
                 maxQuantity: 10
             },
-            spark: {
-                id: 'spark',
-                name: 'Spark',
-                emoji: '⚡',
-                description: 'Electric ranged attack, slightly weaker than fireball (Max: 10)',
-                cost: 80,
-                effect: 'attack',
-                value: 25,
-                levelRequired: 7,
-                maxQuantity: 10
-            },
             health_potion: {
                 id: 'health_potion',
                 name: 'Potion',
                 emoji: '🧪',
                 description: 'Instantly restores 20 HP in battle',
-                cost: 20,
+                cost: 40,
                 effect: 'heal',
                 value: 20
             },
             attack_refill: {
                 id: 'attack_refill',
                 name: 'Power Boost',
-                emoji: '⚡',
+                emoji: '💥',
                 description: 'Refills +30 Attack for your gauge',
                 cost: 50,
                 effect: 'attack_gauge',
@@ -5913,7 +5076,7 @@
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
                 const isMaxed = item.maxQuantity && currentQuantity >= item.maxQuantity;
-                const canAfford = (gameState.jerryXP || 0) >= item.cost;
+                const canAfford = gameState.xp >= item.cost;
                 
                 const card = document.createElement('div');
                 card.className = 'shop-item-card';
@@ -5949,26 +5112,15 @@
                     <div class="shop-item-description">${item.description}</div>
                     ${quantityDisplay}
                     <div class="shop-item-cost">${item.cost} XP</div>
-                    <button class="buy-now-btn" data-item-id="${item.id}" ${buttonDisabled}>
+                    <button class="buy-now-btn" onclick="buyItem('${item.id}')" ${buttonDisabled}>
                         ${buttonText}
                     </button>
                 `;
-                
-                // Add event listener to button
-                const button = card.querySelector('.buy-now-btn');
-                if (button && !button.disabled) {
-                    button.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        buyItem(item.id);
-                    });
-                }
-                
                 grid.appendChild(card);
             });
         }
 
-        // Update owned items display (synced with battleInventory) - matches shop styling
+        // Update owned items display (synced with battleInventory)
         function updateOwnedItemsDisplay() {
             const grid = document.getElementById('ownedItemsGrid');
             const countBadge = document.getElementById('ownedItemCount');
@@ -5986,7 +5138,7 @@
                 countBadge.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
             }
             
-            // Render each owned battle item using same style as shop
+            // Render each owned battle item
             Object.keys(gameState.battleInventory).forEach(itemId => {
                 const count = gameState.battleInventory[itemId];
                 if (count > 0) {
@@ -5994,17 +5146,19 @@
                     if (!item) return;
                     
                     const card = document.createElement('div');
-                    card.className = 'shop-item-card'; // Use same class as shop items
-                    
-                    // Show quantity display
-                    const quantityDisplay = item.maxQuantity ? `<div style="font-size: 12px; color: #999; margin-top: 4px;">${count}/${item.maxQuantity} owned</div>` : `<div style="font-size: 12px; color: #999; margin-top: 4px;">${count} owned</div>`;
-                    
+                    card.className = 'owned-item-card';
                     card.innerHTML = `
-                        <div class="shop-item-emoji">${item.emoji}</div>
-                        <div class="shop-item-name">${item.name}</div>
-                        <div class="shop-item-description">${item.description}</div>
-                        ${quantityDisplay}
-                        <button class="buy-now-btn" onclick="useItemFromShop('${itemId}')">
+                        <div class="owned-item-header">
+                            <div class="owned-item-emoji">${item.emoji}</div>
+                            <div class="owned-item-badge">${count}</div>
+                        </div>
+                        <div class="owned-item-name">${item.name}</div>
+                        <div class="status-badge ready">Ready</div>
+                        <div class="owned-item-effect">${item.effect === 'heal' ? '+' + item.value + ' HP' : 
+                                                          item.effect === 'attack' ? 'Ranged Attack' :
+                                                          item.effect === 'defense' ? '+' + item.value + ' Defense' :
+                                                          item.effect === 'attack_gauge' ? '+' + item.value + ' Attack' : ''}</div>
+                        <button class="use-now-btn" onclick="useItemFromShop('${itemId}')">
                             Use Now
                         </button>
                     `;
@@ -6015,7 +5169,7 @@
             // Show empty state if no items
             if (totalItems === 0) {
                 grid.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; color: #999;">
+                    <div style="text-align: center; padding: 40px 20px; color: #999; grid-column: 1 / -1;">
                         <p style="font-size: 16px;">🎒 No items yet!</p>
                         <p style="font-size: 14px; margin-top: 12px;">Buy items from the Shop tab to use in battles.</p>
                     </div>
@@ -6042,13 +5196,13 @@
             }
             
             // Check if player has enough XP
-            if ((gameState.jerryXP || 0) < item.cost) {
+            if (gameState.xp < item.cost) {
                 alert(`Not enough XP! You need ${item.cost} XP to buy ${item.name}.`);
                 return;
             }
             
             // Deduct XP
-            gameState.jerryXP = (gameState.jerryXP || 0) - item.cost;
+            gameState.xp -= item.cost;
             
             // Add item to battle inventory
             if (!gameState.battleInventory[itemId]) {
@@ -6066,7 +5220,7 @@
             
             // Save and update displays
             saveGameState();
-            updateUI(); // Update all UI elements including XP
+            updateHeroCard();
             updateShopDisplay(); // Refresh shop to show updated quantities
             updateOwnedItemsDisplay();
             
@@ -6079,92 +5233,11 @@
         function useItemFromShop(itemId) {
             const item = battleItems[itemId];
             if (!item || !gameState.battleInventory[itemId] || gameState.battleInventory[itemId] <= 0) {
-                alert('⚠️ Item not available!');
+                alert('Item not available!');
                 return;
             }
             
-            // Handle healing items (can be used outside of battle)
-            if (item.effect === 'heal') {
-                // Check if monster needs healing
-                const maxHP = 100;
-                
-                // Use the SAME logic as updateUI display: gameState.health || 75
-                // This ensures we read the same HP value that's shown to the user
-                const currentHP = gameState.health || 75;
-                
-                console.log('Potion Debug - Before:', {
-                    currentHP: currentHP,
-                    healthType: typeof gameState.health,
-                    healthValue: gameState.health
-                });
-                
-                if (currentHP >= maxHP) {
-                    alert('💚 Your monster is already at full health!');
-                    return;
-                }
-                
-                // Use healing item
-                gameState.battleInventory[itemId]--;
-                const healAmount = Number(item.value);
-                const newHP = Math.min(maxHP, currentHP + healAmount);
-                const actualHealed = newHP - currentHP;
-                
-                console.log('Potion Debug - Calculation:', {
-                    healAmount: healAmount,
-                    currentHP: currentHP,
-                    newHP: newHP,
-                    actualHealed: actualHealed
-                });
-                
-                // Set new health as a number (ensure it's never 0 unless actually dead)
-                gameState.health = Number(newHP);
-                
-                // If gameState.health was 0 before, make sure it's now properly set
-                if (gameState.health === 0) {
-                    gameState.health = newHP;
-                }
-                
-                console.log('Potion Debug - After:', {
-                    newHealth: gameState.health,
-                    healthType: typeof gameState.health
-                });
-                
-                // Save immediately to persist the heal
-                saveGameState();
-                
-                // Prevent energy drain from running for 2 seconds after healing
-                window.justUsedPotion = true;
-                setTimeout(() => {
-                    window.justUsedPotion = false;
-                }, 2000);
-                
-                // Update all displays
-                updateOwnedItemsDisplay();
-                updateShopDisplay();
-                updateUI();
-                
-                // Force update the health display
-                const healthFill = document.querySelector('.health-fill');
-                const healthText = document.querySelector('.health-text');
-                if (healthFill) {
-                    healthFill.style.width = `${gameState.health}%`;
-                }
-                if (healthText) {
-                    healthText.textContent = `${Math.round(gameState.health)}/100`;
-                }
-                
-                alert(`${item.emoji} ${item.name} used! Healed ${actualHealed} HP.\n\nBefore: ${currentHP} HP\nAfter: ${gameState.health} HP`);
-                return;
-            }
-            
-            // Handle battle items (attack, defense, etc.)
-            if (item.effect === 'attack' || item.effect === 'defense' || item.effect === 'attack_gauge') {
-                alert(`🎮 ${item.name} is ready!\n\nThis item will be automatically available in your next battle.\n\nComplete a task to trigger a battle and use it!`);
-                return;
-            }
-            
-            // Default message for other items
-            alert(`🎮 ${item.name} will be available in your next battle!`);
+            alert(`🎮 ${item.name} will be available in your next battle!\n\nComplete a task to trigger a battle.`);
         }
 
         // Modal functions
@@ -6264,29 +5337,20 @@
         // Task management functions
         function selectCategory(category) {
             document.querySelectorAll('[data-category]').forEach(el => el.classList.remove('selected'));
-            const element = document.querySelector(`[data-category="${category}"]`);
-            if (element) {
-                element.classList.add('selected');
-                selectedCategory = category;
-            }
+            document.querySelector(`[data-category="${category}"]`).classList.add('selected');
+            selectedCategory = category;
         }
 
         function selectDifficulty(difficulty) {
             document.querySelectorAll('[data-difficulty]').forEach(el => el.classList.remove('selected'));
-            const element = document.querySelector(`[data-difficulty="${difficulty}"]`);
-            if (element) {
-                element.classList.add('selected');
-                selectedDifficulty = difficulty;
-            }
+            document.querySelector(`[data-difficulty="${difficulty}"]`).classList.add('selected');
+            selectedDifficulty = difficulty;
         }
 
         function selectPriority(priority) {
             document.querySelectorAll('[data-priority]').forEach(el => el.classList.remove('selected'));
-            const element = document.querySelector(`[data-priority="${priority}"]`);
-            if (element) {
-                element.classList.add('selected');
-                selectedPriority = priority;
-            }
+            document.querySelector(`[data-priority="${priority}"]`).classList.add('selected');
+            selectedPriority = priority;
         }
 
         function resetForm() {
@@ -6297,21 +5361,177 @@
             selectedPriority = null;
             editingTaskIndex = null;
             document.querySelector('.modal-title').textContent = 'Create Task';
-            // Reset native datetime-local input
-            document.getElementById('taskDueDate').value = '';
+            // Reset datepicker
+            document.getElementById('taskDueDateDisplay').value = '';
+            selectedDate = null;
+            document.getElementById('modernDatePicker').style.display = 'none';
         }
 
-        // Date picker now uses native HTML5 datetime-local input
+        // Modern DatePicker Variables
+        let selectedDate = null;
+        let currentPickerMonth = new Date().getMonth();
+        let currentPickerYear = new Date().getFullYear();
+        let pickerHour = 9;
+        let pickerMinute = 0;
+        let pickerAMPM = 'PM';
+
+        function toggleDatePicker() {
+            const picker = document.getElementById('modernDatePicker');
+            if (picker.style.display === 'none') {
+                picker.style.display = 'block';
+                renderCalendar();
+            } else {
+                picker.style.display = 'none';
+            }
+        }
+
+        function renderCalendar() {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('currentMonth').textContent = `${monthNames[currentPickerMonth]} ${currentPickerYear}`;
+            
+            const daysContainer = document.getElementById('calendarDays');
+            daysContainer.innerHTML = '';
+            
+            const firstDay = new Date(currentPickerYear, currentPickerMonth, 1).getDay();
+            const daysInMonth = new Date(currentPickerYear, currentPickerMonth + 1, 0).getDate();
+            const today = new Date();
+            
+            // Previous month days
+            const prevMonthDays = new Date(currentPickerYear, currentPickerMonth, 0).getDate();
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell other-month';
+                dayCell.textContent = prevMonthDays - i;
+                daysContainer.appendChild(dayCell);
+            }
+            
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell';
+                dayCell.textContent = day;
+                
+                const cellDate = new Date(currentPickerYear, currentPickerMonth, day);
+                if (cellDate.toDateString() === today.toDateString()) {
+                    dayCell.classList.add('today');
+                }
+                
+                if (selectedDate && cellDate.toDateString() === selectedDate.toDateString()) {
+                    dayCell.classList.add('selected');
+                }
+                
+                dayCell.onclick = () => selectDay(day);
+                daysContainer.appendChild(dayCell);
+            }
+            
+            // Next month days
+            const totalCells = daysContainer.children.length;
+            const remainingCells = 42 - totalCells;
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'day-cell other-month';
+                dayCell.textContent = i;
+                daysContainer.appendChild(dayCell);
+            }
+        }
+
+        function changeMonth(delta) {
+            currentPickerMonth += delta;
+            if (currentPickerMonth > 11) {
+                currentPickerMonth = 0;
+                currentPickerYear++;
+            } else if (currentPickerMonth < 0) {
+                currentPickerMonth = 11;
+                currentPickerYear--;
+            }
+            renderCalendar();
+        }
+
+        function selectDay(day) {
+            selectedDate = new Date(currentPickerYear, currentPickerMonth, day);
+            renderCalendar();
+            updateDisplayValue();
+        }
+
+        function changeHour(delta) {
+            pickerHour += delta;
+            if (pickerHour > 12) pickerHour = 1;
+            if (pickerHour < 1) pickerHour = 12;
+            document.getElementById('hourInput').value = String(pickerHour).padStart(2, '0');
+            updateDisplayValue();
+        }
+
+        function changeMinute(delta) {
+            pickerMinute += delta;
+            if (pickerMinute > 59) pickerMinute = 0;
+            if (pickerMinute < 0) pickerMinute = 59;
+            document.getElementById('minuteInput').value = String(pickerMinute).padStart(2, '0');
+            updateDisplayValue();
+        }
+
+        function toggleAMPM() {
+            pickerAMPM = pickerAMPM === 'AM' ? 'PM' : 'AM';
+            document.getElementById('ampmToggle').textContent = pickerAMPM;
+            updateDisplayValue();
+        }
+
+        function updateDisplayValue() {
+            if (!selectedDate) return;
+            
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            const year = selectedDate.getFullYear();
+            const hour = String(pickerHour).padStart(2, '0');
+            const minute = String(pickerMinute).padStart(2, '0');
+            
+            document.getElementById('taskDueDateDisplay').value = `${month}/${day}/${year}, ${hour}:${minute} ${pickerAMPM}`;
+        }
+
+        function clearDate() {
+            selectedDate = null;
+            document.getElementById('taskDueDateDisplay').value = '';
+            document.getElementById('modernDatePicker').style.display = 'none';
+        }
+
+        function setToday() {
+            const now = new Date();
+            selectedDate = now;
+            currentPickerMonth = now.getMonth();
+            currentPickerYear = now.getFullYear();
+            pickerHour = now.getHours() % 12 || 12;
+            pickerMinute = now.getMinutes();
+            pickerAMPM = now.getHours() >= 12 ? 'PM' : 'AM';
+            
+            document.getElementById('hourInput').value = String(pickerHour).padStart(2, '0');
+            document.getElementById('minuteInput').value = String(pickerMinute).padStart(2, '0');
+            document.getElementById('ampmToggle').textContent = pickerAMPM;
+            
+            renderCalendar();
+            updateDisplayValue();
+        }
+
+        function confirmDate() {
+            if (selectedDate) {
+                updateDisplayValue();
+                document.getElementById('modernDatePicker').style.display = 'none';
+            } else {
+                alert('Please select a date first');
+            }
+        }
 
         function createTask() {
             const title = document.getElementById('taskTitle').value.trim();
             const description = document.getElementById('taskDescription').value.trim();
-            const dueDateInput = document.getElementById('taskDueDate').value;
             
-            // Convert native datetime-local value to ISO format
+            // Convert custom datepicker value to ISO format
             let dueDate = null;
-            if (dueDateInput) {
-                dueDate = new Date(dueDateInput).toISOString();
+            if (selectedDate) {
+                let hour24 = pickerHour;
+                if (pickerAMPM === 'PM' && hour24 !== 12) hour24 += 12;
+                if (pickerAMPM === 'AM' && hour24 === 12) hour24 = 0;
+                
+                selectedDate.setHours(hour24, pickerMinute, 0, 0);
+                dueDate = selectedDate.toISOString();
             }
             
             if (!title) {
@@ -6365,12 +5585,6 @@
             // Check energy after creating task
             checkAndUpdateEnergy();
             
-            // Schedule notifications for the new/updated task
-            if (window.notificationManager && task.dueDate) {
-                const taskIndex = editingTaskIndex !== null ? editingTaskIndex : gameState.tasks.length - 1;
-                window.notificationManager.scheduleTaskNotifications(task, taskIndex);
-            }
-            
             updateUI();
             updateTasksDisplay();
             closeModal();
@@ -6379,11 +5593,6 @@
         function completeTask(index) {
             const task = gameState.tasks[index];
             if (!task) return;
-            
-            // Clear notifications for this task
-            if (window.notificationManager) {
-                window.notificationManager.clearTaskNotifications(index);
-            }
             
             // Store old level for level up detection
             const oldLevel = gameState.level;
@@ -6408,21 +5617,8 @@
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
             
-            // Add XP (with boost if active)
-            let xpToAdd = basePoints * 2;
-            if (gameState.xpBoostActive) {
-                xpToAdd *= 2;
-                gameState.xpBoostActive = false;  // Consume boost
-                delete gameState.xpBoostExpiry;
-                showSuccessMessage('⭐ XP Boost consumed! 2x XP earned!');
-            }
-            addJerryXP(xpToAdd);
-            
-            // Track achievement progress before removing task
-            if (window.achievementTracker) {
-                window.achievementTracker.trackTaskCompletion(task, false);
-                window.achievementTracker.trackOnTimeTask(task);
-            }
+            // Add XP
+            addJerryXP(basePoints * 2);
             
             // Remove task
             gameState.tasks.splice(index, 1);
@@ -6452,8 +5648,8 @@
                 console.warn('Confetti function not available');
             }
             
-            // 30% chance to trigger battle
-            if (Math.random() < 0.3) {
+            // 40% chance to trigger battle
+            if (Math.random() < 0.4) {
                 setTimeout(() => {
                     if (typeof window.startTestBattle === 'function') {
                         console.log('⚔️ Battle triggered after task completion!');
@@ -6492,19 +5688,7 @@
             // Populate form
             document.getElementById('taskTitle').value = task.title || '';
             document.getElementById('taskDescription').value = task.description || '';
-            
-            // Format dueDate for datetime-local input (requires YYYY-MM-DDTHH:MM format)
-            if (task.dueDate) {
-                const date = new Date(task.dueDate);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                document.getElementById('taskDueDate').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-            } else {
-                document.getElementById('taskDueDate').value = '';
-            }
+            document.getElementById('taskDueDate').value = task.dueDate || '';
             
             // Select options
             if (task.category) selectCategory(task.category);
@@ -6520,11 +5704,6 @@
 
         function deleteTask(index) {
             if (confirm('Are you sure you want to delete this task?')) {
-                // Clear notifications for this task
-                if (window.notificationManager) {
-                    window.notificationManager.clearTaskNotifications(index);
-                }
-                
                 gameState.tasks.splice(index, 1);
                 saveGameState();
                 updateUI();
@@ -6554,12 +5733,6 @@
             
             gameState.selectedQuickTasks.push(quickTask);
             gameState.totalTasksCreated += 1;
-            
-            // Track start time for quick task achievement
-            if (window.achievementTracker) {
-                window.achievementTracker.trackQuickTaskStart(taskId);
-            }
-            
             saveGameState();
             updateUI();
             updateQuickTasksDisplay();
@@ -6593,15 +5766,8 @@
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
             
-            // Add XP (with boost if active)
-            let xpToAdd = basePoints * 2;
-            if (gameState.xpBoostActive) {
-                xpToAdd *= 2;
-                gameState.xpBoostActive = false;  // Consume boost
-                delete gameState.xpBoostExpiry;
-                showSuccessMessage('⭐ XP Boost consumed! 2x XP earned!');
-            }
-            addJerryXP(xpToAdd);
+            // Add XP
+            addJerryXP(basePoints * 2);
             
             // Show completion message with random variation
             const randomMsg = getRandomCompletionMessage(true);
@@ -6616,12 +5782,6 @@
                 ...task,
                 completedAt: new Date().toISOString()
             });
-            
-            // Track achievement progress
-            if (window.achievementTracker) {
-                window.achievementTracker.trackQuickTaskComplete(taskId);
-                window.achievementTracker.trackTaskCompletion(task, true);
-            }
             
             // Remove task from pending
             gameState.selectedQuickTasks.splice(taskIndex, 1);
@@ -6646,8 +5806,8 @@
                 console.warn('Confetti function not available');
             }
             
-            // 30% chance to trigger battle
-            if (Math.random() < 0.3) {
+            // 40% chance to trigger battle
+            if (Math.random() < 0.4) {
                 setTimeout(() => {
                     if (typeof window.startTestBattle === 'function') {
                         console.log('⚔️ Battle triggered after quick task completion!');
@@ -6721,11 +5881,6 @@
             while (gameState.jerryXP >= gameState.jerryXPToNext) {
                 levelUpJerry();
             }
-            
-            // Refresh shop display to update affordability
-            if (typeof updateShopDisplay === 'function') {
-                updateShopDisplay();
-            }
         }
 
         function levelUpJerry() {
@@ -6741,66 +5896,110 @@
             }
         }
 
-        // Buy item from shop
-        function buyItem(itemId) {
-            const item = battleItems[itemId];
-            if (!item) return;
+        // Shop functions
+        function buyItem(itemId, price) {
+            const isAlreadyOwned = gameState.ownedItems.includes(itemId);
+            const itemName = itemId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             
-            // Check level requirement
-            if (item.levelRequired && gameState.jerryLevel < item.levelRequired) {
-                alert(`🔒 ${item.name} unlocks at Level ${item.levelRequired}! Current level: ${gameState.jerryLevel}`);
+            if (isAlreadyOwned && isHat(itemId)) {
+                const currentlyEquipped = gameState.currentOutfit.hat === itemId;
+                gameState.currentOutfit.hat = currentlyEquipped ? '' : itemId;
+                saveGameState();
+                updateUI();
+                
+                const verb = currentlyEquipped ? 'Unequipped' : 'Equipped';
+                showSuccessMessage(`${verb} ${itemName}!`);
+                
+                // Scroll to pet rock when equipping (not unequipping)
+                if (!currentlyEquipped) {
+                    scrollToPetRock();
+                }
+                
+                // Show dialogue
+                setTimeout(() => {
+                    const dialogue = getDialogueForContext('equipment', { 
+                        action: currentlyEquipped ? 'unequip' : 'equip', 
+                        itemName: itemName 
+                    });
+                    showSpeechBubble(dialogue);
+                }, 300);
                 return;
             }
             
-            // Check max quantity (removed - allow unlimited purchases)
-            // if (item.maxQuantity) {
-            //     const currentQuantity = gameState.battleInventory[item.id] || 0;
-            //     if (currentQuantity >= item.maxQuantity) {
-            //         alert(`⚠️ You already have the maximum quantity of ${item.name} (${item.maxQuantity})`);
-            //         return;
-            //     }
-            // }
-            
-            // Check if user has enough XP
-            if ((gameState.jerryXP || 0) < item.cost) {
-                alert(`⚠️ Not enough XP! You need ${item.cost} XP but only have ${gameState.jerryXP || 0} XP.`);
+            if (isAlreadyOwned && isPaint(itemId)) {
+                const currentlyEquipped = gameState.currentOutfit.paint === itemId;
+                gameState.currentOutfit.paint = currentlyEquipped ? '' : itemId;
+                saveGameState();
+                updateUI();
+                
+                const verb = currentlyEquipped ? 'Unequipped' : 'Equipped';
+                showSuccessMessage(`${verb} ${itemName}!`);
+                
+                // Scroll to pet rock when equipping (not unequipping)
+                if (!currentlyEquipped) {
+                    scrollToPetRock();
+                }
+                
+                // Show dialogue
+                setTimeout(() => {
+                    const dialogue = getDialogueForContext('equipment', { 
+                        action: currentlyEquipped ? 'unequip' : 'equip', 
+                        itemName: itemName 
+                    });
+                    showSpeechBubble(dialogue);
+                }, 300);
+                return;
+            }
+
+            if (isAlreadyOwned) {
+                showSuccessMessage(`You already own the ${itemName}!`);
                 return;
             }
             
-            // Deduct XP
-            gameState.jerryXP -= item.cost;
-            
-            // Add item to battle inventory
-            if (!gameState.battleInventory) {
-                gameState.battleInventory = {};
-            }
-            if (!gameState.battleInventory[itemId]) {
-                gameState.battleInventory[itemId] = 0;
+            if (gameState.taskPoints < price) {
+                const needed = price - gameState.taskPoints;
+                showSuccessMessage(`Need ${needed} more points to purchase this item!`);
+                return;
             }
             
-            const currentQuantity = gameState.battleInventory[itemId];
-            gameState.battleInventory[itemId]++;
+            gameState.taskPoints -= price;
+            gameState.ownedItems.push(itemId);
             
-            // Track that this item has been unlocked (for battle button visibility)
-            if (!gameState.unlockedBattleItems) {
-                gameState.unlockedBattleItems = [];
-            }
-            if (!gameState.unlockedBattleItems.includes(itemId)) {
-                gameState.unlockedBattleItems.push(itemId);
+            // Auto-equip hats
+            if (isHat(itemId)) {
+                gameState.currentOutfit.hat = itemId;
             }
             
-            // Save and update displays
+            // Auto-equip paints
+            if (isPaint(itemId)) {
+                gameState.currentOutfit.paint = itemId;
+            }
+            
+            showSuccessMessage(`Purchased and equipped ${itemName}!`);
+            
             saveGameState();
-            updateUI(); // Update all UI elements including XP
-            updateShopDisplay(); // Refresh shop to show updated quantities
-            updateOwnedItemsDisplay();
+            updateUI();
             
-            // Show success message
-            const remaining = item.maxQuantity ? ` (${currentQuantity + 1}/${item.maxQuantity})` : '';
-            alert(`✅ ${item.name} purchased!${remaining} Check the Owned tab to use it.`);
+            // Scroll to pet rock to show the new item
+            scrollToPetRock();
+            
+            // Show dialogue for new purchase
+            setTimeout(() => {
+                const dialogue = getDialogueForContext('equipment', { 
+                    action: 'equip', 
+                    itemName: itemName 
+                });
+                showSpeechBubble(dialogue);
+            }, 300);
         }
 
+        function isHat(itemId) {
+            return shopItems.hats.some(h => h.id === itemId);
+        }
 
+        function isPaint(itemId) {
+            return shopItems.paints.some(p => p.id === itemId);
+        }
 
         // Smooth scroll to pet rock function
         function scrollToPetRock() {
@@ -6827,30 +6026,8 @@
             updateSettingsDisplay();
         }
 
-        async function toggleNotifications() {
+        function toggleNotifications() {
             gameState.notifications = !gameState.notifications;
-            
-            if (gameState.notifications) {
-                // Request permission when enabling
-                if (window.notificationManager) {
-                    const granted = await window.notificationManager.requestPermission();
-                    if (!granted) {
-                        gameState.notifications = false;
-                        showSuccessMessage('Notification permission denied. Please enable in browser settings.');
-                        saveGameState();
-                        updateSettingsDisplay();
-                        return;
-                    }
-                    // Reschedule all notifications
-                    window.notificationManager.rescheduleAllNotifications();
-                }
-            } else {
-                // Clear all notifications when disabling
-                if (window.notificationManager) {
-                    window.notificationManager.clearAllNotifications();
-                }
-            }
-            
             saveGameState();
             updateSettingsDisplay();
             showSuccessMessage(`Notifications ${gameState.notifications ? 'enabled' : 'disabled'}!`);
@@ -6862,8 +6039,7 @@
 
         function showResetOptions() {
             if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-                // Clear all localStorage including onboarding
-                localStorage.clear();
+                localStorage.removeItem('taskRockGameState');
                 location.reload();
             }
         }
@@ -6895,11 +6071,6 @@
             const activeTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
             if (activeTab) {
                 activeTab.classList.add('active');
-            }
-            
-            // Refresh shop display when opening shop tab to show current XP
-            if (tabName === 'rockshop' && typeof updateShopDisplay === 'function') {
-                updateShopDisplay();
             }
         }
 
@@ -7098,30 +6269,6 @@
                 
                 // Initialize the complete app with dialogue system
                 initializeApp();
-                
-                // Reschedule notifications for all tasks on app load
-                if (window.notificationManager && gameState.notifications) {
-                    setTimeout(() => {
-                        window.notificationManager.rescheduleAllNotifications();
-                    }, 1500);
-                }
-                
-                // Ensure sprite is loaded after initialization
-                setTimeout(() => {
-                    const spritePrefix = localStorage.getItem('heroSpritePrefix');
-                    if (spritePrefix) {
-                        const mainHeroSprite = document.getElementById('mainHeroSprite');
-                        if (mainHeroSprite) {
-                            mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                            mainHeroSprite.style.opacity = '1';
-                        }
-                    } else {
-                        const mainHeroSprite = document.getElementById('mainHeroSprite');
-                        if (mainHeroSprite) {
-                            mainHeroSprite.style.opacity = '1';
-                        }
-                    }
-                }, 100);
             } catch (error) {
                 console.error('Initialization error:', error);
             }
@@ -7193,31 +6340,19 @@
     
     
     <!-- Dark Theme CSS -->
-    <link rel="stylesheet" href="css/dark-theme.css?v=2">
+    <link rel="stylesheet" href="css/dark-theme.css">
     
     <!-- Battle System CSS -->
-    <link rel="stylesheet" href="css/battle.css?v=2">
-    
-    <!-- Quest Giver CSS -->
-    <link rel="stylesheet" href="css/questGiver.css?v=1">
-    
-    <!-- Quest Tasks CSS -->
-    <link rel="stylesheet" href="css/questTasks.css">
+    <link rel="stylesheet" href="css/battle.css">
     
     <!-- Background Manager for time-based backgrounds -->
     <script src="js/backgroundManager.js"></script>
-    <script src="js/themeManager.js"></script>
     
     <!-- Battle System Modules -->
     <script src="js/enemy.js"></script>
-    <script src="js/enemy-init.js"></script>
     <script src="js/battleUI.js"></script>
     <script src="js/battleManager.js"></script>
     <script src="js/battleInit.js"></script>
-    <script src="js/questTaskManager.js"></script>
-    <script src="js/questGiver.js?v=2"></script>
-    <script src="js/notificationManager.js"></script>
-    <script src="js/achievementTracker.js"></script>
     
     <!-- Hide loading screen after page loads -->
     <script>
@@ -7227,293 +6362,8 @@
                 if (loadingScreen) {
                     loadingScreen.classList.add('hidden');
                 }
-                // Onboarding check is handled by checkOnboardingStatus() function
             }, 3000);
         });
-
-// ========================================
-// ONBOARDING SYSTEM
-// ========================================
-
-(function() {
-    let selectedMonster = null;
-    let monsterName = '';
-    
-    const monsters = {
-        luna: {
-            name: 'Luna',
-            title: 'The Wise Night Owl',
-            description: 'Perfect for night owls and deep thinkers. Luna helps you tackle complex tasks with wisdom and patience.',
-            tags: ['Calm', 'Intelligent'],
-            sprite: 'assets/heroes/Owlet_Monster_Idle_4.png',
-            suggestions: ['Luna', 'Sage', 'Wisdom', 'Nova', 'Athena', 'Echo']
-        },
-        benny: {
-            name: 'Benny',
-            title: 'The Gentle Giant',
-            description: 'Strong and dependable. Benny helps you power through big projects with steady determination.',
-            tags: ['Energetic', 'Loyal'],
-            sprite: 'assets/heroes/Dude_Monster_Idle_4.png',
-            suggestions: ['Benny', 'Titan', 'Boulder', 'Atlas', 'Rocky', 'Tank']
-        },
-        nova: {
-            name: 'Nova',
-            title: 'The Fiery Achiever',
-            description: 'Energetic and ambitious. Nova motivates you to crush goals and achieve greatness at lightning speed.',
-            tags: ['Curious', 'Optimistic'],
-            sprite: 'assets/heroes/Pink_Monster_Idle_4.png',
-            suggestions: ['Nova', 'Blaze', 'Jet', 'Aster', 'Rayne', 'Ember']
-        }
-    };
-    
-    function checkOnboardingStatus() {
-        const hasChosen = localStorage.getItem('hasChosenMonster');
-        console.log('Checking onboarding status. hasChosenMonster:', hasChosen);
-        
-        const overlay = document.getElementById('onboardingOverlay');
-        
-        if (!overlay) {
-            console.error('Onboarding overlay not found!');
-            return;
-        }
-        
-        if (!hasChosen || hasChosen !== 'true') {
-            console.log('Onboarding needed. Waiting for page load...');
-            
-            // Function to show onboarding
-            const showOnboarding = () => {
-                console.log('Attempting to show onboarding...');
-                setTimeout(() => {
-                    overlay.classList.remove('hidden');
-                    console.log('Onboarding overlay displayed!');
-                    console.log('Overlay classes:', overlay.className);
-                }, 3100); // Wait for loading screen to finish (3000ms + 100ms buffer)
-            };
-            
-            // Try multiple approaches to ensure it works
-            if (document.readyState === 'complete') {
-                console.log('Document already loaded, showing onboarding immediately');
-                showOnboarding();
-            } else {
-                console.log('Waiting for window load event...');
-                window.addEventListener('load', showOnboarding);
-            }
-        } else {
-            console.log('User has already chosen a monster. Skipping onboarding.');
-        }
-    }
-    
-    function selectMonster(monsterId) {
-        selectedMonster = monsterId;
-        
-        // Remove selected class from all cards
-        document.querySelectorAll('.monster-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        
-        // Add selected class to chosen card
-        const card = document.getElementById(monsterId + 'Card');
-        if (card) {
-            card.classList.add('selected');
-        }
-        
-        // Enable continue button
-        const continueBtn = document.getElementById('continueButton');
-        if (continueBtn) {
-            continueBtn.disabled = false;
-            continueBtn.textContent = 'Continue';
-        }
-    }
-    
-    function goToStep2() {
-        if (!selectedMonster) return;
-        
-        const monster = monsters[selectedMonster];
-        
-        // Hide step 1, show step 2
-        document.getElementById('step1').classList.remove('active');
-        document.getElementById('step2').classList.add('active');
-        
-        // Update step 2 content
-        document.getElementById('selectedAvatar').className = 'selected-monster-avatar ' + selectedMonster;
-        document.getElementById('selectedSprite').src = monster.sprite;
-        document.getElementById('selectedName').textContent = monster.name;
-        document.getElementById('selectedTitle').textContent = monster.title;
-        document.getElementById('selectedDescription').textContent = monster.description;
-        
-        const tagsContainer = document.getElementById('selectedTags');
-        tagsContainer.innerHTML = '';
-        monster.tags.forEach(tag => {
-            const tagSpan = document.createElement('span');
-            tagSpan.className = 'monster-tag ' + selectedMonster;
-            tagSpan.textContent = tag;
-            tagsContainer.appendChild(tagSpan);
-        });
-        
-        // Set default name
-        monsterName = monster.name;
-        document.getElementById('monsterNameInput').value = monsterName;
-        
-        // Update continue button
-        const continueBtn = document.getElementById('continueButton');
-        continueBtn.disabled = false;
-        continueBtn.textContent = 'Continue';
-    }
-    
-    function selectSuggestion(suggestion) {
-        monsterName = suggestion;
-        document.getElementById('monsterNameInput').value = suggestion;
-        
-        // Highlight selected chip
-        document.querySelectorAll('.suggestion-chip').forEach(chip => {
-            chip.classList.remove('selected');
-            if (chip.textContent === suggestion) {
-                chip.classList.add('selected');
-            }
-        });
-    }
-    
-    function goToStep3() {
-        monsterName = document.getElementById('monsterNameInput').value.trim();
-        if (!monsterName) {
-            monsterName = monsters[selectedMonster].name;
-        }
-        
-        // Hide step 2, show step 3
-        document.getElementById('step2').classList.remove('active');
-        document.getElementById('step3').classList.add('active');
-        
-        // Update step 3 content
-        const monster = monsters[selectedMonster];
-        document.getElementById('confirmAvatar').className = 'selected-monster-avatar ' + selectedMonster;
-        document.getElementById('confirmSprite').src = monster.sprite;
-        document.getElementById('confirmName').textContent = monsterName;
-        
-        // Update continue button
-        const continueBtn = document.getElementById('continueButton');
-        continueBtn.textContent = "Let's Go!";
-        continueBtn.disabled = false;
-    }
-    
-    function completeOnboarding() {
-        // Save to localStorage
-        localStorage.setItem('hasChosenMonster', 'true');
-        localStorage.setItem('selectedMonster', selectedMonster);
-        localStorage.setItem('monsterName', monsterName);
-        localStorage.setItem('rockName', monsterName);
-        
-        // Update hero sprites based on selection
-        updateHeroSprites();
-        
-        // Hide onboarding
-        document.getElementById('onboardingOverlay').classList.add('hidden');
-        
-        // Update hero name in the UI
-        updateHeroName();
-        
-        // Reload to apply changes
-        window.location.reload();
-    }
-    
-    function updateHeroSprites() {
-        const spriteMap = {
-            luna: 'Owlet_Monster',
-            benny: 'Dude_Monster',
-            nova: 'Pink_Monster'
-        };
-        
-        const prefix = spriteMap[selectedMonster];
-        localStorage.setItem('heroSpritePrefix', prefix);
-    }
-    
-    function updateHeroName() {
-        const levelLabel = document.getElementById('levelLabel');
-        if (levelLabel) {
-            const level = gameState.level || 1;
-            levelLabel.textContent = `${monsterName} | Level ${level}`;
-        }
-    }
-    
-    function loadSavedMonster() {
-        const savedMonster = localStorage.getItem('selectedMonster');
-        const savedName = localStorage.getItem('monsterName');
-        const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
-        
-        if (savedMonster && savedName) {
-            // Update all hero sprites
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (mainHeroSprite) {
-                mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                mainHeroSprite.style.opacity = '1';
-            }
-            
-            const heroSprite = document.getElementById('heroSprite');
-            if (heroSprite) {
-                heroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-            }
-            
-            // Update name
-            const levelLabel = document.getElementById('levelLabel');
-            if (levelLabel) {
-                const level = gameState.level || 1;
-                levelLabel.textContent = `${savedName} | Level ${level}`;
-            }
-        }
-    }
-    
-    // Initialize onboarding
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check if onboarding should be shown
-        checkOnboardingStatus();
-        
-        // Load saved monster if exists
-        loadSavedMonster();
-        
-        // Monster card click handlers
-        document.getElementById('lunaCard').addEventListener('click', () => selectMonster('luna'));
-        document.getElementById('bennyCard').addEventListener('click', () => selectMonster('benny'));
-        document.getElementById('novaCard').addEventListener('click', () => selectMonster('nova'));
-        
-        // Continue button handler
-        const continueBtn = document.getElementById('continueButton');
-        continueBtn.addEventListener('click', function() {
-            const step1 = document.getElementById('step1');
-            const step2 = document.getElementById('step2');
-            const step3 = document.getElementById('step3');
-            
-            if (step1.classList.contains('active')) {
-                goToStep2();
-            } else if (step2.classList.contains('active')) {
-                goToStep3();
-            } else if (step3.classList.contains('active')) {
-                completeOnboarding();
-            }
-        });
-        
-        // Back button handlers
-        document.getElementById('backToStep1').addEventListener('click', function() {
-            document.getElementById('step2').classList.remove('active');
-            document.getElementById('step1').classList.add('active');
-            const continueBtn = document.getElementById('continueButton');
-            continueBtn.textContent = 'Continue';
-            continueBtn.disabled = !selectedMonster;
-        });
-        
-        document.getElementById('backToStep2').addEventListener('click', function() {
-            document.getElementById('step3').classList.remove('active');
-            document.getElementById('step2').classList.add('active');
-            const continueBtn = document.getElementById('continueButton');
-            continueBtn.textContent = 'Continue';
-            continueBtn.disabled = false;
-        });
-        
-        // Name input handler
-        document.getElementById('monsterNameInput').addEventListener('input', function(e) {
-            monsterName = e.target.value.trim();
-        });
-    });
-})();
-
     </script>
 
 </body>
