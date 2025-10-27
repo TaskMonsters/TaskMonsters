@@ -2958,13 +2958,13 @@
             🔥 Fireball <span class="item-count" id="fireballCount">(0)</span>
         </button>
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
-            💥 Spark <span class="item-count" id="sparkCount">(0)</span>
+            ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
         </button>
         <button id="btnPotion" class="btn-action" onclick="battleManager.playerPotion()">
             🧪 Potion <span class="item-count" id="potionCount">(2)</span>
         </button>
         <button id="btnAttackRefill" class="btn-action" onclick="battleManager.playerAttackRefill()">
-            ⚔️ Attack+ <span class="item-count" id="attackRefillCount">(0)</span>
+            ⚡ Attack+ <span class="item-count" id="attackRefillCount">(0)</span>
         </button>
         <button id="btnDefenseRefill" class="btn-action" onclick="battleManager.playerDefenseRefill()">
             🛡️ Defense+ <span class="item-count" id="defenseRefillCount">(0)</span>
@@ -3308,7 +3308,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">🎨 Background Themes</div>
-                        <div class="card-subtitle" id="themesCount">5 themes</div>
+                        <span id="themesCount" class="item-count-badge">5 themes</span>
                     </div>
                     <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 20px;">Customize your monster's background!</p>
@@ -5869,7 +5869,7 @@
             spark: {
                 id: 'spark',
                 name: 'Spark',
-                emoji: '💥',
+                emoji: '⚡',
                 description: 'Electric ranged attack, slightly weaker than fireball (Max: 10)',
                 cost: 80,
                 effect: 'attack',
@@ -5889,7 +5889,7 @@
             attack_refill: {
                 id: 'attack_refill',
                 name: 'Power Boost',
-                emoji: '⚔️',
+                emoji: '⚡',
                 description: 'Refills +30 Attack for your gauge',
                 cost: 50,
                 effect: 'attack_gauge',
