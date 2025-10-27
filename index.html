@@ -2958,7 +2958,7 @@
             🔥 Fireball <span class="item-count" id="fireballCount">(0)</span>
         </button>
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
-            💥 Spark <span class="item-count" id="sparkCount">(0)</span>
+            ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
         </button>
         <button id="btnPotion" class="btn-action" onclick="battleManager.playerPotion()">
             🧪 Potion <span class="item-count" id="potionCount">(2)</span>
@@ -5188,33 +5188,8 @@
             // 1. Quick Task challenges
             if (challengeDesc.includes('quick task') && isQuickTask) {
                 shouldIncrement = true;
-                console.log('✅ Matched: Quick task challenge');
             }
-            // 2. Future self challenges (learning, wellness, or any productive task) - CHECK FIRST!
-            else if (challengeDesc.includes('future self') || challengeDesc.includes('future')) {
-                console.log('🔍 Future self challenge detected');
-                console.log('Task category:', task?.category);
-                console.log('Is quick task:', isQuickTask);
-                
-                // Count learning, wellness, work, or personal tasks as "future self" tasks
-                if (!isQuickTask && task && task.category) {
-                    const taskCategory = task.category.toLowerCase();
-                    console.log('Task category (lowercase):', taskCategory);
-                    
-                    if (taskCategory.includes('learning') || 
-                        taskCategory.includes('wellness') ||
-                        taskCategory.includes('work') ||
-                        taskCategory.includes('personal')) {
-                        shouldIncrement = true;
-                        console.log('✅ Matched: Future self task with matching category');
-                    }
-                } else if (!isQuickTask) {
-                    // If no category, count any regular task
-                    shouldIncrement = true;
-                    console.log('✅ Matched: Future self task (no category)');
-                }
-            }
-            // 3. Category-specific challenges (work, personal, home, learning, wellness, creative)
+            // 2. Category-specific challenges (work, personal, home, learning, wellness, creative)
             else if (!isQuickTask && task && task.category) {
                 const taskCategory = task.category.toLowerCase();
                 
@@ -5264,7 +5239,22 @@
             else if (challengeDesc.includes('xp') || challengeDesc.includes('earn')) {
                 shouldIncrement = true;
             }
-            // (Future self challenges moved to position #2 above)
+            // 7. Future self challenges (learning, wellness, or any productive task)
+            else if (challengeDesc.includes('future self') || challengeDesc.includes('future')) {
+                // Count learning, wellness, work, or personal tasks as "future self" tasks
+                if (!isQuickTask && task && task.category) {
+                    const taskCategory = task.category.toLowerCase();
+                    if (taskCategory.includes('learning') || 
+                        taskCategory.includes('wellness') ||
+                        taskCategory.includes('work') ||
+                        taskCategory.includes('personal')) {
+                        shouldIncrement = true;
+                    }
+                } else if (!isQuickTask) {
+                    // If no category, count any regular task
+                    shouldIncrement = true;
+                }
+            }
             // 8. Generic "complete X tasks" challenges (count any task)
             else if (challengeDesc.match(/complete \d+ task/) && 
                      !challengeDesc.includes('work') && 
@@ -5879,7 +5869,7 @@
             spark: {
                 id: 'spark',
                 name: 'Spark',
-                emoji: '💥',
+                emoji: '⚡',
                 description: 'Electric ranged attack, slightly weaker than fireball (Max: 10)',
                 cost: 80,
                 effect: 'attack',
