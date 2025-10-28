@@ -79,13 +79,13 @@ function updateBattleUI(hero, enemy) {
     // Update gauges
     const attackGaugeBar = document.getElementById('attackGaugeBar');
     const attackGaugeText = document.getElementById('attackGaugeText');
-    attackGaugeBar.style.width = battleManager.attackGauge + '%';
-    attackGaugeText.textContent = `${battleManager.attackGauge}/100`;
+    attackGaugeBar.style.width = hero.attackGauge + '%';
+    attackGaugeText.textContent = `${hero.attackGauge}/100`;
 
     const defenseGaugeBar = document.getElementById('defenseGaugeBar');
     const defenseGaugeText = document.getElementById('defenseGaugeText');
-    defenseGaugeBar.style.width = battleManager.defenseGauge + '%';
-    defenseGaugeText.textContent = `${battleManager.defenseGauge}/100`;
+    defenseGaugeBar.style.width = hero.defenseGauge + '%';
+    defenseGaugeText.textContent = `${hero.defenseGauge}/100`;
 }
 
 // Update action button availability
@@ -93,22 +93,15 @@ function updateActionButtons(hero) {
     const btnAttack = document.getElementById('btnAttack');
     const btnDefend = document.getElementById('btnDefend');
     const btnFireball = document.getElementById('btnFireball');
-    const btnPotion = document.getElementById('btnPotion');
-
-    // Attack requires 10 attack gauge
-    btnAttack.disabled = battleManager.attackGauge < 10;
-
-    // Defend requires 20 defense gauge
-    btnDefend.disabled = battleManager.defenseGauge < 20;
-
-    // Fireball requires 20 attack gauge AND inventory
+    const btnPotion = document.getElementById('btnPot    // Attack requires 10 attack gauge
+    btnAttack.disabled = hero.attackGauge <    // Defend requires 20 defense gauge
+    btnDefend.disabled = hero.defenseGauge < 20    // Fireball requires 20 attack gauge AND inventory
     const fireballCount = gameState.battleInventory?.fireball || 0;
     const fireballCountSpan = btnFireball.querySelector('.item-count');
     if (fireballCountSpan) {
         fireballCountSpan.textContent = `(${fireballCount})`;
     }
-    btnFireball.disabled = battleManager.attackGauge < 20 || fireballCount === 0;
-    
+    btnFireball.disabled = hero.attackGauge < 20 || fireballCount === 0;    
     // Spark requires 25 attack gauge AND inventory (unlocked at level 7)
     const btnSpark = document.getElementById('btnSpark');
     if (btnSpark) {
@@ -119,7 +112,7 @@ function updateActionButtons(hero) {
             if (sparkCountSpan) {
                 sparkCountSpan.textContent = `(${sparkCount})`;
             }
-            btnSpark.disabled = battleManager.attackGauge < 25 || sparkCount === 0;
+            btnSpark.disabled = hero.attackGauge < 25 || sparkCount === 0;
         } else {
             btnSpark.style.display = 'none';
         }
@@ -157,10 +150,16 @@ function updateActionButtons(hero) {
 }
 
 // Add message to battle log
+let lastBattleLogMessage = "";
+
 function addBattleLog(message) {
-    const log = document.getElementById('battleLog');
+    if (message === lastBattleLogMessage) {
+        return; // Don't add duplicate consecutive messages
+    }
+    const log = document.getElementById("battleLog");
     log.innerHTML += `<div>${message}</div>`;
     log.scrollTop = log.scrollHeight;
+    lastBattleLogMessage = message;
 }
 
 // Fireball Projectile Animation

@@ -1,4 +1,5 @@
 // Battle Manager - State Machine and Combat Logic
+import { audioManager } from './audioManager.js';
 
 const BattleState = {
     INITIALIZING: 'initializing',
@@ -25,8 +26,9 @@ class BattleManager {
         this.state = BattleState.INITIALIZING;
         this.hero = heroData;
         this.enemy = enemyData;
-        this.attackGauge = 100;  // Start with full attack gauge
-        this.defenseGauge = 100; // Start with full defense gauge
+        // Use hero's persistent gauges
+        this.attackGauge = this.hero.attackGauge;
+        this.defenseGauge = this.hero.defenseGauge;
         this.battleLog = [];
         this.attackCount = 0;    // Track attack count for walk+attack animation
 
@@ -41,6 +43,7 @@ class BattleManager {
         
         // Show battle arena
         showBattle(this.hero, this.enemy);
+        audioManager.playMusic('battleMusic');
 
         // Initialize enemy sprite with correct size class
         if (typeof initEnemySprite === 'function') {
@@ -66,8 +69,11 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 10;
+        this.hero.attackGauge = this.attackGauge; // Update hero's persistent gauge
         this.attackCount++;
         updateBattleUI(this.hero, this.enemy);
+
+        audioManager.playSound("fireball");
 
         // Play hero attack animation
         // Every 3rd attack uses walk+attack animation with movement
@@ -150,6 +156,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 25;  // Spark costs 25 attack gauge
+        this.hero.attackGauge = this.attackGauge; // Update hero's persistent gauge
         gameState.battleInventory.spark--;
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -158,7 +165,9 @@ class BattleManager {
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
 
-        // Play spark animation
+        audioManager.playSound("useItem");
+
+        // Play heal animationn
         const heroSprite = document.getElementById('heroSprite');
         const enemySprite = document.getElementById('enemySprite');
         await playSparkAnimation(heroSprite, enemySprite);
@@ -231,6 +240,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 30;  // Fireball costs 30 attack gauge
+        this.hero.attackGauge = this.attackGauge; // Update hero's persistent gauge
         gameState.battleInventory.fireball--;
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -238,6 +248,8 @@ class BattleManager {
         // Play hero throw animation for fireball
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
+
+        audioManager.playSound("fireball");
 
         // Play fireball animation
         await playFireballAnimation(
@@ -338,11 +350,11 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.attack_refill--;
-        
-        const refillAmount = 50;
+              const refillAmount = 50;
         this.attackGauge = Math.min(100, this.attackGauge + refillAmount);
+        this.hero.attackGauge = this.attackGauge; // Update hero's persistent gauge
         
-        addBattleLog(`⚡ Restored ${refillAmount} attack gauge!`);
+        audioManager.playSound('useItemBattle');      addBattleLog(`⚡ Restored ${refillAmount} attack gauge!`);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -368,7 +380,9 @@ class BattleManager {
         
         const refillAmount = 50;
         this.defenseGauge = Math.min(100, this.defenseGauge + refillAmount);
+        this.hero.defenseGauge = this.defenseGauge; // Update hero's persistent gauge
         
+        audioManager.playSound('useItemBattle');
         addBattleLog(`🛡️ Restored ${refillAmount} defense gauge!`);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -422,6 +436,10 @@ class BattleManager {
             await playWaveformAnimation(enemySprite, heroSprite);
         }
 
+        // Play enemy attack sound
+        const attackSound = (this.enemy.name.toLowerCase().includes('monster')) ? 'monsterAttack' : 'enemyAttack';
+        audioManager.playSound(attackSound);
+
         // Calculate damage
         const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
         
@@ -429,6 +447,7 @@ class BattleManager {
         if (this.defendActive && this.defenseGauge > 0) {
             const gaugeUsed = Math.min(damage, this.defenseGauge);
             this.defenseGauge -= gaugeUsed;
+            this.hero.defenseGauge = this.defenseGauge; // Update hero's persistent gauge
             const remainingDamage = damage - gaugeUsed;
             if (remainingDamage > 0) {
                 this.hero.hp = Math.max(0, this.hero.hp - remainingDamage);
@@ -526,11 +545,10 @@ class BattleManager {
             addBattleLog('🏃 You fled from battle!');
         }
 
-        // Refill gauges after battle
-        if (result === 'victory' || result === 'fled') {
-            this.hero.attackGauge = 100;
-            this.hero.defenseGauge = 100;
-            updateBattleUI(this.hero, this.enemy);
+        // No automatic gauge refill after battle.
+        // Hero's persistent gauges are already updated throughout the battle.
+        // HP is updated in hero.js and battleManager.js.
+        if (typeof saveGameState === 'function') {
             saveGameState();
         }
 
@@ -539,6 +557,7 @@ class BattleManager {
             document.getElementById('battleLog').innerHTML = '';
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
+            audioManager.stopMusic();
         }, 2000);
     }
 }
