@@ -4346,7 +4346,27 @@
             else if (dueSoon) message = "⏰ You've got tasks due soon — let's handle them!";
             else if (energy <= 25) message = "🥱 I need a boost — finish a task to help me recover!";
             else if (energy < 60) message = "🙂 I'm doing okay, but a few wins would help!";
-            else message = "💪 I'm feeling strong — keep the streak going!";
+            else {
+                // Random motivational messages for high energy
+                const highEnergyMessages = [
+                    "💪 I'm feeling strong — keep the streak going!",
+                    "✨ You're on fire! Let's keep this momentum!",
+                    "🚀 Crushing it! Your productivity is amazing!",
+                    "🌟 You're unstoppable! Keep up the great work!",
+                    "⚡ Energy levels maxed! You're doing fantastic!",
+                    "🎯 Focused and fierce! Nothing can stop us now!",
+                    "🔥 On a roll! Your dedication is inspiring!",
+                    "💎 Shining bright! Your progress is incredible!",
+                    "🏆 Champion mode activated! You're crushing your goals!",
+                    "🌈 Feeling amazing! Your consistency is paying off!",
+                    "⭐ Stellar work! We make an awesome team!",
+                    "🎊 Thriving together! Your energy is contagious!",
+                    "💫 Radiating success! Keep this energy flowing!",
+                    "🦸 Superhero status! You're absolutely crushing it!",
+                    "🎨 Creating magic! Your effort is truly inspiring!"
+                ];
+                message = highEnergyMessages[Math.floor(Math.random() * highEnergyMessages.length)];
+            }
 
             tooltip.textContent = message;
             tooltip.classList.add("visible");
