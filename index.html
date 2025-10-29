@@ -3303,6 +3303,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">🛍️ Shop</div>
+                        <span id="shopItemCount" class="item-count-badge">0 items</span>
                     </div>
                     <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Power up your hero with XP!</p>
@@ -5482,6 +5483,13 @@
                 xpCoinsDisplay.textContent = gameState.jerryXP || 0;
             }
             
+            // Update item count badge
+            const shopItemCount = document.getElementById('shopItemCount');
+            if (shopItemCount) {
+                const totalItems = Object.keys(battleItems).length;
+                shopItemCount.textContent = `${totalItems} items`;
+            }
+            
             grid.innerHTML = '';
             
             // Render each battle item as a shop card
@@ -6258,6 +6266,13 @@
                 xpCoinsDisplay.textContent = gameState.jerryXP || 0;
             }
             
+            // Update item count badge
+            const shopItemCount = document.getElementById('shopItemCount');
+            if (shopItemCount) {
+                const totalItems = Object.keys(battleItems).length;
+                shopItemCount.textContent = `${totalItems} items`;
+            }
+            
             grid.innerHTML = '';
             
             // Render each battle item as a shop card
@@ -6785,8 +6800,8 @@
             }
             
             // Add XP (with boost if active)
-            // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio)
-            let xpToAdd = basePoints * 0.8;
+            // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio, rounded up)
+            let xpToAdd = Math.ceil(basePoints * 0.8);
             if (gameState.xpBoostActive) {
                 xpToAdd *= 2;
                 gameState.xpBoostActive = false;  // Consume boost
@@ -6992,8 +7007,8 @@
             }
             
             // Add XP (with boost if active)
-            // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio)
-            let xpToAdd = basePoints * 0.8;
+            // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio, rounded up)
+            let xpToAdd = Math.ceil(basePoints * 0.8);
             if (gameState.xpBoostActive) {
                 xpToAdd *= 2;
                 gameState.xpBoostActive = false;  // Consume boost
@@ -7601,9 +7616,11 @@
     
     <!-- Battle System Modules -->
     <script src="js/enemy.js"></script>
+    <script src="js/boss-enemies.js"></script>
     <script src="js/enemy-init.js"></script>
     <script src="js/battleUI.js"></script>
     <script src="js/medusaProjectile.js"></script>
+    <script src="js/bossProjectiles.js"></script>
     <script src="js/battleManager.js"></script>
     <script src="js/battleInit.js"></script>
     <script src="js/questTaskManager.js"></script>

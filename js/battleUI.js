@@ -69,6 +69,61 @@ function updateBattleButtonsVisibility() {
     } else {
         invisibilityCloakBtn.style.display = 'none';
     }
+    
+    // Bomb button - only show if ever unlocked
+    const bombBtn = document.getElementById('btnBomb');
+    const bombCount = document.getElementById('bombCount');
+    const bombQty = inventory.bomb || 0;
+    if (unlockedItems.includes('bomb')) {
+        bombBtn.style.display = '';
+        bombCount.textContent = `(${bombQty})`;
+    } else {
+        bombBtn.style.display = 'none';
+    }
+    
+    // Spark button - only show if ever unlocked
+    const sparkBtn = document.getElementById('btnSpark');
+    const sparkCount = document.getElementById('sparkCount');
+    const sparkQty = inventory.spark || 0;
+    if (unlockedItems.includes('spark')) {
+        sparkBtn.style.display = '';
+        sparkCount.textContent = `(${sparkQty})`;
+    } else {
+        sparkBtn.style.display = 'none';
+    }
+    
+    // Freeze button - only show if ever unlocked
+    const freezeBtn = document.getElementById('btnFreeze');
+    const freezeCount = document.getElementById('freezeCount');
+    const freezeQty = inventory.freeze || 0;
+    if (unlockedItems.includes('freeze')) {
+        freezeBtn.style.display = '';
+        freezeCount.textContent = `(${freezeQty})`;
+    } else {
+        freezeBtn.style.display = 'none';
+    }
+    
+    // Blue Flame button - only show if ever unlocked
+    const blueFlameBtn = document.getElementById('btnBlueFlame');
+    const blueFlameCount = document.getElementById('blueFlameCount');
+    const blueFlameQty = inventory.blue_flame || 0;
+    if (unlockedItems.includes('blue_flame')) {
+        blueFlameBtn.style.display = '';
+        blueFlameCount.textContent = `(${blueFlameQty})`;
+    } else {
+        blueFlameBtn.style.display = 'none';
+    }
+    
+    // Procrastination Ghost button - only show if ever unlocked
+    const ghostBtn = document.getElementById('btnProcrastinationGhost');
+    const ghostCount = document.getElementById('procrastinationGhostCount');
+    const ghostQty = inventory.procrastination_ghost || 0;
+    if (unlockedItems.includes('procrastination_ghost')) {
+        ghostBtn.style.display = '';
+        ghostCount.textContent = `(${ghostQty})`;
+    } else {
+        ghostBtn.style.display = 'none';
+    }
 }
 
 // Update battle UI elements (HP, gauges, sprites)

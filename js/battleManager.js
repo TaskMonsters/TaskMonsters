@@ -30,6 +30,15 @@ class BattleManager {
         this.defenseGauge = 100; // Start with full defense gauge
         this.battleLog = [];
         this.attackCount = 0;    // Track attack count for walk+attack animation
+        
+        // Boss status effects
+        this.poisonTurns = 0;
+        this.poisonDamage = 0;
+        this.poisonGaugeDrain = 0;
+        this.mushroomTurns = 0;
+        this.mushroomMissChance = 0;
+        this.mushroomSkipChance = 0;
+        this.mushroomGaugeDrain = 0;
 
         // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');
@@ -74,6 +83,40 @@ class BattleManager {
     // Player attacks
     async playerAttack() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // Process poison effect
+        if (this.poisonTurns > 0) {
+            this.hero.hp = Math.max(0, this.hero.hp - this.poisonDamage);
+            this.attackGauge = Math.max(0, this.attackGauge - this.poisonGaugeDrain);
+            this.defenseGauge = Math.max(0, this.defenseGauge - this.poisonGaugeDrain);
+            addBattleLog(`☠️ Poison drained ${this.poisonDamage} HP and ${this.poisonGaugeDrain} from each gauge!`);
+            this.poisonTurns--;
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+                return;
+            }
+        }
+        
+        // Process mushroom effect
+        if (this.mushroomTurns > 0) {
+            this.attackGauge = Math.max(0, this.attackGauge - this.mushroomGaugeDrain);
+            this.defenseGauge = Math.max(0, this.defenseGauge - this.mushroomGaugeDrain);
+            addBattleLog(`🍄 Mushroom effect drained ${this.mushroomGaugeDrain} from each gauge!`);
+            
+            // Check for skip turn
+            if (Math.random() < this.mushroomSkipChance) {
+                addBattleLog(`😵 Mushroom effect made you skip your turn!`);
+                this.mushroomTurns--;
+                updateBattleUI(this.hero, this.enemy);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                await this.enemyTurn();
+                return;
+            }
+        }
+        
         if (this.attackGauge < 10) {
             addBattleLog('❌ Not enough attack gauge!');
             return;
@@ -111,7 +154,21 @@ class BattleManager {
             await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
         }
 
-        // Check if enemy evades (Ghost ability)
+        // Check for mushroom miss effect
+        if (this.mushroomTurns > 0 && Math.random() < this.mushroomMissChance) {
+            addBattleLog(`😵 Mushroom effect made you miss!`);
+            this.mushroomTurns--;
+            updateBattleUI(this.hero, this.enemy);
+            
+            // Reset hero sprite to idle
+            startHeroAnimation('idle');
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+            return;
+        }
+        
+        // Check if enemy evades (Ghost ability or Sunny Dragon)
         if (this.enemy.canEvade && Math.random() < this.enemy.evasionChance) {
             addBattleLog(`👻 ${this.enemy.name} evaded your attack!`);
             updateBattleUI(this.hero, this.enemy);
@@ -772,6 +829,115 @@ class BattleManager {
             return;
         }
         
+        // Boss special attacks
+        if (this.enemy.isBoss) {
+            // Treant poison attack
+            if (this.enemy.poisonAttack) {
+                await playEnemyAnimation(this.enemy, 'attack1', 600);
+                
+                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                // Apply poison effect for 2 turns
+                this.poisonTurns = this.enemy.poisonDuration;
+                this.poisonDamage = 5; // HP drain per turn
+                this.poisonGaugeDrain = 10; // Gauge drain per turn
+                
+                addBattleLog(`🌳 ${this.enemy.name} dealt ${damage} damage and poisoned you!`);
+                addBattleLog(`☠️ Poison will drain HP and gauges for ${this.poisonTurns} turns!`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                } else {
+                    this.state = BattleState.PLAYER_TURN;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    addBattleLog('⚔️ Your turn!');
+                }
+                return;
+            }
+            
+            // Sunny Dragon attack gauge drain
+            if (this.enemy.drainAttackGauge) {
+                await playEnemyAnimation(this.enemy, 'attack1', 600);
+                
+                // Show dragon bolt projectile
+                const enemySprite = document.getElementById('enemySprite');
+                const heroSprite = document.getElementById('heroSprite');
+                await playDragonBoltProjectile(enemySprite, heroSprite);
+                
+                // Variable damage 18-40
+                const damage = Math.floor(Math.random() * 23) + 18;
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                // Drain attack gauge to 5%
+                this.attackGauge = 5;
+                
+                addBattleLog(`🐉 ${this.enemy.name} dealt ${damage} damage!`);
+                addBattleLog(`⚡ Your attack gauge was drained to 5%!`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                } else {
+                    this.state = BattleState.PLAYER_TURN;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    addBattleLog('⚔️ Your turn!');
+                }
+                return;
+            }
+            
+            // Mushroom special attack
+            if (this.enemy.mushroomAttack) {
+                await playEnemyAnimation(this.enemy, 'attack2', 600);
+                
+                // Show mushroom emoji projectiles
+                const enemySprite = document.getElementById('enemySprite');
+                const heroSprite = document.getElementById('heroSprite');
+                await playMushroomProjectile(enemySprite, heroSprite);
+                
+                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                // Apply mushroom effect for 2 turns
+                this.mushroomTurns = this.enemy.mushroomEffectDuration;
+                this.mushroomMissChance = this.enemy.mushroomMissChance;
+                this.mushroomSkipChance = this.enemy.mushroomSkipChance;
+                this.mushroomGaugeDrain = 8; // Gauge drain per turn
+                
+                addBattleLog(`🍄 ${this.enemy.name} threw mushrooms dealing ${damage} damage!`);
+                addBattleLog(`😵 Mushroom effect: attacks may miss or skip turns for ${this.mushroomTurns} turns!`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                } else {
+                    this.state = BattleState.PLAYER_TURN;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    addBattleLog('⚔️ Your turn!');
+                }
+                return;
+            }
+        }
+        
         // Normal attack
         await playEnemyAnimation(this.enemy, 'attack1', 600);
         
@@ -957,11 +1123,37 @@ class BattleManager {
             addBattleLog('🏃 You fled from battle!');
         }
 
-        // Refill gauges after battle
+        // Handle stat preservation based on battle result
         if (result === 'victory' || result === 'fled') {
+            // Victory or fled: preserve current HP/attack/defense, refill gauges
+            if (window.gameState) {
+                window.gameState.health = this.hero.hp;
+                window.gameState.attack = this.hero.attack;
+                window.gameState.defense = this.hero.defense;
+            }
             this.hero.attackGauge = 100;
             this.hero.defenseGauge = 100;
             updateBattleUI(this.hero, this.enemy);
+            saveGameState();
+        } else if (result === 'defeat') {
+            // Defeat: restore HP/attack/defense to full
+            if (window.gameState) {
+                window.gameState.health = 100;
+                const level = window.gameState.jerryLevel || 1;
+                // Restore attack based on level
+                let baseDamage;
+                if (level >= 15) {
+                    baseDamage = 13;
+                } else if (level >= 10) {
+                    baseDamage = 10;
+                } else {
+                    baseDamage = 6;
+                }
+                window.gameState.attack = baseDamage;
+                window.gameState.defense = 5 + level;
+            }
+            this.hero.attackGauge = 100;
+            this.hero.defenseGauge = 100;
             saveGameState();
         }
 

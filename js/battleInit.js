@@ -81,28 +81,60 @@ function startTestBattle() {
     // Create hero data from gameState
     const level = gameState.jerryLevel || 1;
     
-    // Level-based attack damage scaling
+    // Level-based attack damage scaling (grows with level)
     let baseDamage;
     if (level >= 15) {
-        baseDamage = 13; // Level 15-20
+        baseDamage = 13 + Math.floor((level - 15) / 5); // Grows every 5 levels after 15
     } else if (level >= 10) {
-        baseDamage = 10; // Level 10-14
+        baseDamage = 10 + Math.floor((level - 10) / 3); // Grows every 3 levels after 10
     } else {
-        baseDamage = 6;  // Level 1-9
+        baseDamage = 6 + Math.floor(level / 3);  // Grows every 3 levels
     }
     
     const heroData = {
         hp: gameState.health || 100,
         maxHP: 100,
-        attack: baseDamage,
-        defense: 5 + level,
+        attack: gameState.attack || baseDamage,  // Use saved attack if available
+        defense: gameState.defense || (5 + level),  // Use saved defense if available
         level: level,
         attackGauge: gameState.battleInventory?.attackGauge || 100,
         defenseGauge: gameState.battleInventory?.defenseGauge || 100
     };
 
-    // Create enemy
-    const enemyData = createRandomEnemy(gameState.jerryLevel || 1);
+    // Check if this is a boss level
+    const playerLevel = gameState.jerryLevel || 1;
+    let enemyData;
+    
+    if (isBossLevel(playerLevel)) {
+        // Create boss enemy
+        enemyData = createBossEnemy(playerLevel);
+        
+        // Track boss count for arena alternation
+        if (!gameState.bossCount) {
+            gameState.bossCount = 0;
+        }
+        gameState.bossCount++;
+        
+        // Set boss arena background
+        const arenaBackground = getBossArenaBackground(gameState.bossCount);
+        const battleArena = document.getElementById('battleArena');
+        if (battleArena) {
+            battleArena.style.backgroundImage = `url('${arenaBackground}')`;
+            battleArena.style.backgroundSize = 'cover';
+            battleArena.style.backgroundPosition = 'center';
+        }
+        
+        saveGameState();
+    } else {
+        // Create regular enemy
+        enemyData = createRandomEnemy(playerLevel);
+        
+        // Reset to default arena for regular battles
+        const battleArena = document.getElementById('battleArena');
+        if (battleArena) {
+            battleArena.style.backgroundImage = '';
+        }
+    }
 
     // Start battle
     battleManager.startBattle(heroData, enemyData);

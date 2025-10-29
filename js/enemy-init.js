@@ -73,6 +73,28 @@ function initEnemySprite(enemyData) {
         spriteElement.style.backgroundSize = '664px 64px'; // 8 frames × 83px = 664px
         spriteElement.style.transform = 'scale(1.5)';
         spriteElement.classList.add('alien-idle-animated');
+    } else if (enemyData.name === 'Treant') {
+        // Treant Boss: single animated sprite
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(3.5)';
+        spriteElement.classList.add('procedural-idle');
+    } else if (enemyData.name === 'Sunny Dragon') {
+        // Sunny Dragon Boss: GIF animation
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(3)';
+        spriteElement.style.imageRendering = 'pixelated';
+        spriteElement.classList.add('boss-animated');
+    } else if (enemyData.name === 'Mushroom') {
+        // Mushroom Boss: single animated sprite
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(3.5)';
+        spriteElement.classList.add('procedural-idle');
     } else {
         // Default fallback with procedural animation
         spriteElement.classList.add('enemy-sprite-large');
