@@ -920,6 +920,9 @@ class BattleManager {
             // Play enemy die animation
             await playEnemyAnimation(this.enemy, 'die', 1000);
             
+            // Play dust animation and hide enemy
+            await this.playDustAnimation();
+            
             // Show friendly victory message
             await new Promise(resolve => setTimeout(resolve, 500));
             alert(`🎉 Victory!\n\nYou defeated the ${this.enemy.name}!\n\n✨ +${xpGained} XP earned!\n\nGreat job, keep it up! 💪`);
@@ -973,6 +976,54 @@ class BattleManager {
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
         }, 2000);
+    }
+    
+    // Play dust animation when enemy is defeated
+    async playDustAnimation() {
+        const enemySprite = document.getElementById('enemySprite');
+        if (!enemySprite) return;
+        
+        // Get enemy position
+        const enemyRect = enemySprite.getBoundingClientRect();
+        const container = enemySprite.parentElement;
+        const containerRect = container.getBoundingClientRect();
+        
+        // Hide enemy sprite
+        enemySprite.style.opacity = '0';
+        
+        // Create dust sprite element
+        const dustSprite = document.createElement('div');
+        dustSprite.style.position = 'absolute';
+        dustSprite.style.left = enemySprite.style.left || '0px';
+        dustSprite.style.bottom = '0px';
+        dustSprite.style.width = '32px';
+        dustSprite.style.height = '32px';
+        dustSprite.style.backgroundImage = 'url(assets/dust-spritesheet.png)';
+        dustSprite.style.backgroundSize = '192px 32px'; // 6 frames * 32px width
+        dustSprite.style.backgroundRepeat = 'no-repeat';
+        dustSprite.style.imageRendering = 'pixelated';
+        container.appendChild(dustSprite);
+        
+        // Animate through 6 frames (192px / 32px = 6 frames)
+        let frame = 0;
+        const frameCount = 6;
+        const frameDuration = 100; // 100ms per frame
+        
+        const animateFrame = () => {
+            if (frame < frameCount) {
+                dustSprite.style.backgroundPosition = `-${frame * 32}px 0px`;
+                frame++;
+                setTimeout(animateFrame, frameDuration);
+            } else {
+                // Remove dust sprite after animation completes
+                dustSprite.remove();
+            }
+        };
+        
+        animateFrame();
+        
+        // Wait for animation to complete
+        await new Promise(resolve => setTimeout(resolve, frameCount * frameDuration));
     }
 }
 
