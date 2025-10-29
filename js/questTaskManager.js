@@ -1,6 +1,5 @@
 // ===================================
 // QUEST TASK MANAGER
-import { audioManager } from './audioManager.js';
 // Manages quest tasks separately from regular tasks
 // ===================================
 
@@ -50,7 +49,6 @@ class QuestTaskManager {
 
     // Complete a quest task
     completeQuestTask(taskId) {
-        audioManager.playSound('taskComplete');
         const task = this.questTasks.find(t => t.id === taskId);
         if (!task) return;
 

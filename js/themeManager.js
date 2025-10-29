@@ -15,7 +15,7 @@ const availableThemes = {
         emoji: '🌃',
         description: 'Futuristic cityscape at night',
         price: 120,
-        preview: 'assets/NeonCity.png'
+        preview: 'assets/backgrounds/themes/city.png'
     },
     forest: {
         id: 'forest',
@@ -23,7 +23,7 @@ const availableThemes = {
         emoji: '🌲',
         description: 'Enchanted forest with mist',
         price: 80,
-        preview: 'assets/MistyForest.png'
+        preview: 'assets/backgrounds/themes/forest.png'
     },
     underwater: {
         id: 'underwater',
@@ -31,7 +31,7 @@ const availableThemes = {
         emoji: '🌊',
         description: 'Deep ocean wonderland',
         price: 150,
-        preview: 'assets/UnderwaterFantasy.png'
+        preview: 'assets/backgrounds/themes/underwater.png'
     },
     graveyard: {
         id: 'graveyard',
@@ -54,9 +54,7 @@ function updateThemesDisplay() {
     Object.values(availableThemes).forEach(theme => {
         const isOwned = window.gameState && window.gameState.ownedThemes && window.gameState.ownedThemes.includes(theme.id);
         const isActive = window.gameState && window.gameState.activeTheme === theme.preview;
-        // FIX: The hero's XP is stored in window.gameState.hero.xp, not window.gameState.jerryXP
-        const currentXP = window.gameState && window.gameState.hero ? (window.gameState.hero.xp || 0) : 0;
-        const canAfford = currentXP >= theme.price;
+        const canAfford = window.gameState && (window.gameState.jerryXP || 0) >= theme.price;
         
         const card = document.createElement('div');
         card.className = 'shop-item-card';
@@ -110,15 +108,14 @@ function buyTheme(themeId) {
     }
     
     // Check if player has enough XP
-    // FIX: The hero's XP is stored in window.gameState.hero.xp, not window.gameState.jerryXP
-    const currentXP = window.gameState.hero ? (window.gameState.hero.xp || 0) : 0;
+    const currentXP = window.gameState.jerryXP || 0;
     if (currentXP < theme.price) {
         alert(`⚠️ Not enough XP! You need ${theme.price} XP but only have ${currentXP} XP.`);
         return;
     }
     
     // Deduct XP
-    window.gameState.hero.xp -= theme.price;
+    window.gameState.jerryXP -= theme.price;
     
     // Add to owned themes
     if (!window.gameState.ownedThemes) {

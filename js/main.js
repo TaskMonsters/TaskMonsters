@@ -4,7 +4,6 @@ import { createRandomEnemy } from './enemy.js';
 import { BattleManager } from './battleManager.js';
 import { uiManager } from './uiManager.js';
 import { preloadAllAssets } from './assetLoader.js';
-import { audioManager } from './audioManager.js';
 
 // Global game state
 let hero;
@@ -29,9 +28,6 @@ async function initGame() {
   // Preload all assets
   await preloadAllAssets();
   
-  // Load all sounds
-  await audioManager.loadAllSounds();
-  
   // Hide loading message
   if (loadingEl) loadingEl.style.display = 'none';
   
@@ -45,9 +41,6 @@ async function initGame() {
     hero.atk = heroData.atk;
     hero.xp = heroData.xp;
     hero.level = heroData.level;
-    // Load new gauge stats, defaulting to 100 if not present (for old saves)
-    hero.attackGauge = heroData.attackGauge !== undefined ? heroData.attackGauge : 100;
-    hero.defenseGauge = heroData.defenseGauge !== undefined ? heroData.defenseGauge : 100;
   } else {
     hero = new Hero('Hero', heroSprites);
   }
@@ -155,15 +148,8 @@ function updateHeroStats() {
   }
   
   if (experienceDisplay) {
-    const xpNeeded = hero.xpNeededForNextLevel();
+    const xpNeeded = hero.level * 100;
     experienceDisplay.innerText = `${hero.xp}/${xpNeeded} XP`;
-    
-    // Update XP bar
-    const xpFill = document.getElementById('xpFill');
-    if (xpFill) {
-      const xpPercent = (hero.xp / xpNeeded) * 100;
-      xpFill.style.width = `${xpPercent}%`;
-    }
   }
   
   // Update health bar
@@ -182,9 +168,7 @@ function saveHero() {
     maxHp: hero.maxHp,
     atk: hero.atk,
     xp: hero.xp,
-    level: hero.level,
-    attackGauge: hero.attackGauge,
-    defenseGauge: hero.defenseGauge
+    level: hero.level
   };
   localStorage.setItem('dailyquest_hero', JSON.stringify(heroData));
 }

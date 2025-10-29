@@ -1,6 +1,5 @@
 // ===================================
 // QUEST GIVER SYSTEM
-import { audioManager } from './audioManager.js';
 // NPC Bird that gives quests and quizzes
 // ===================================
 
@@ -477,8 +476,6 @@ class QuestGiver {
 
     // Close quest giver UI
     close() {
-        // Clear animation in    // Close quest giver UI
-    close() {
         // Clear animation intervals
         if (this.questHeroAnimationInterval) {
             clearInterval(this.questHeroAnimationInterval);
@@ -494,7 +491,6 @@ class QuestGiver {
             questGiverUI.classList.add('hidden');
         }
         this.activeQuest = null;
-        audioManager.stopMusic();
     }
 }
 

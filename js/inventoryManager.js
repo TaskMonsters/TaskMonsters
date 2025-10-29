@@ -1,6 +1,5 @@
 // ===================================
 // INVENTORY MANAGER
-import { audioManager } from './audioManager.js';
 // Consumable inventory and usage system
 // ===================================
 
@@ -128,9 +127,6 @@ class InventoryManager {
         }
 
         if (success) {
-            // Play sound for using item outside battle
-            audioManager.playSound('useItemOutsideBattle');
-            
             // Consume the item
             this.removeItem(itemId, 1);
             

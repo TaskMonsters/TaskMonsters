@@ -2085,6 +2085,7 @@
 
     .shop-sub-content.active {
         display: block;
+        padding-top: 16px; /* Match the vertical spacing from pill buttons to divider */
     }
 
     /* Shop Items Grid */
@@ -2678,8 +2679,15 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+    /* Responsive padding for shop sub-content on mobile */
+    @media (max-width: 480px) {
+        .shop-sub-content.active {
+            padding-top: 12px;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
     .onboarding-content {
         padding-bottom: 120px;
     }
@@ -2960,6 +2968,12 @@
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
             ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
         </button>
+        <button id="btnBomb" class="btn-action" onclick="battleManager.playerBomb()" style="display: none;">
+            💣 Bomb <span class="item-count" id="bombCount">(0)</span>
+        </button>
+        <button id="btnFreeze" class="btn-action" onclick="battleManager.playerFreeze()" style="display: none;">
+            ❄️ Freeze <span class="item-count" id="freezeCount">(0)</span>
+        </button>
         <button id="btnPotion" class="btn-action" onclick="battleManager.playerPotion()">
             🧪 Potion <span class="item-count" id="potionCount">(2)</span>
         </button>
@@ -2968,6 +2982,9 @@
         </button>
         <button id="btnDefenseRefill" class="btn-action" onclick="battleManager.playerDefenseRefill()">
             🛡️ Defense+ <span class="item-count" id="defenseRefillCount">(0)</span>
+        </button>
+        <button id="btnInvisibilityCloak" class="btn-action" onclick="battleManager.playerInvisibilityCloak()">
+            🥷🏼 Cloak <span class="item-count" id="invisibilityCloakCount">(0)</span>
         </button>
         <button id="btnFlee" class="btn-flee" onclick="battleManager.playerFlee()">
             🏃 Flee
@@ -3559,7 +3576,8 @@
                 spark: 0, // Locked until level 7
                 health_potion: 2,
                 attack_refill: 2,
-                defense_refill: 2
+                defense_refill: 2,
+                invisibility_cloak: 0
             },
             unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'], // Track which items have ever been unlocked (fireball requires level 10)
             xp: 0,
@@ -3693,7 +3711,7 @@
             { id: 'quickstorm', name: 'Quickstorm', desc: '25 quick tasks', icon: '⚡', requirement: 25, type: 'quick_total', tier: 'advanced' },
             { id: 'planner_legend', name: 'Planner Legend', desc: '7-day streak', icon: '🔥', requirement: 7, type: 'streak', tier: 'advanced' },
             { id: 'efficiency_expert', name: 'Efficiency Expert', desc: '5 high-priority tasks in a day', icon: '⭐', requirement: 5, type: 'high_priority_day', tier: 'advanced' },
-            { id: 'xp_collector', name: 'XP Collector', desc: '1000 XP total', icon: '💎', requirement: 1000, type: 'xp', tier: 'advanced' },
+            { id: 'xp_collector', name: 'XP Collector', desc: '100 XP total', icon: '💎', requirement: 100, type: 'xp', tier: 'advanced' },
             { id: 'unstoppable_force', name: 'Unstoppable Force', desc: '100 total tasks', icon: '🚀', requirement: 100, type: 'tasks', tier: 'advanced' },
             { id: 'legend_of_focus', name: 'Legend of Focus', desc: '30-day streak', icon: '🔥', requirement: 30, type: 'streak', tier: 'advanced' }
         ];
@@ -3879,7 +3897,7 @@
             const currentStreak = gameState.currentStreak || 0;
             const level = gameState.jerryLevel || 1;
             const currentXP = gameState.jerryXP || 0;
-            const xpToNext = 1000 * level;
+            const xpToNext = 100 * level; // Updated to 100s scale
             
             // Energy (Health)
             document.getElementById('energyFill').style.width = `${health}%`;
@@ -5898,37 +5916,6 @@
 
         // Battle items definition (synced with battle system)
         const battleItems = {
-            defense_refill: {
-                id: 'defense_refill',
-                name: 'Shield',
-                emoji: '🛡️',
-                description: 'Adds +20 Defense in next battle',
-                cost: 60,
-                effect: 'defense',
-                value: 20
-            },
-            fireball: {
-                id: 'fireball',
-                name: 'Fireball',
-                emoji: '🔥',
-                description: 'Powerful ranged attack (Max: 10)',
-                cost: 100,
-                effect: 'attack',
-                value: 30,
-                levelRequired: 10,
-                maxQuantity: 10
-            },
-            spark: {
-                id: 'spark',
-                name: 'Spark',
-                emoji: '⚡',
-                description: 'Electric ranged attack, slightly weaker than fireball (Max: 10)',
-                cost: 80,
-                effect: 'attack',
-                value: 25,
-                levelRequired: 7,
-                maxQuantity: 10
-            },
             health_potion: {
                 id: 'health_potion',
                 name: 'Potion',
@@ -5938,14 +5925,67 @@
                 effect: 'heal',
                 value: 20
             },
+            defense_refill: {
+                id: 'defense_refill',
+                name: 'Shield',
+                emoji: '🛡️',
+                description: 'Adds +20 Defense in next battle',
+                cost: 25,
+                effect: 'defense',
+                value: 20
+            },
             attack_refill: {
                 id: 'attack_refill',
                 name: 'Power Boost',
                 emoji: '⚡',
                 description: 'Refills +30 Attack for your gauge',
-                cost: 50,
+                cost: 25,
                 effect: 'attack_gauge',
                 value: 30
+            },
+            bomb: {
+                id: 'bomb',
+                name: 'Bomb',
+                emoji: '💣',
+                description: 'Explosive attack dealing 20 damage (Max: 15)',
+                cost: 35,
+                effect: 'attack',
+                value: 20,
+                levelRequired: 3,
+                maxQuantity: 15
+            },
+            fireball: {
+                id: 'fireball',
+                name: 'Fireball',
+                emoji: '🔥',
+                description: 'Powerful ranged attack dealing 30 damage (Max: 10)',
+                cost: 45,
+                effect: 'attack',
+                value: 30,
+                levelRequired: 4,
+                maxQuantity: 10
+            },
+            spark: {
+                id: 'spark',
+                name: 'Spark',
+                emoji: '⚡',
+                description: 'Electric ranged attack dealing 25 damage (Max: 10)',
+                cost: 50,
+                effect: 'attack',
+                value: 25,
+                levelRequired: 7,
+                maxQuantity: 10
+            },
+            freeze: {
+                id: 'freeze',
+                name: 'Freeze',
+                emoji: '❄️',
+                description: 'Ice attack that deals damage and skips enemy turn (Max: 8)',
+                cost: 65,
+                effect: 'freeze',
+                value: 20,
+                levelRequired: 8,
+                maxQuantity: 8
             }
         };
 
@@ -6501,6 +6541,11 @@
             updateTasksDisplay();
             updateQuickTasksDisplay();
             
+            // Play task completion sound
+            if (window.audioManager) {
+                window.audioManager.playSound('taskComplete', 0.7);
+            }
+            
             // Fire confetti
             console.log('🎯 Regular task completed, firing confetti...');
             if (window.fireConfetti) {
@@ -6704,6 +6749,11 @@
             updateTasksDisplay();
             updateQuickTasksDisplay();
             
+            // Play task completion sound
+            if (window.audioManager) {
+                window.audioManager.playSound('taskComplete', 0.7);
+            }
+            
             // Fire confetti
             console.log('⚡ Quick task completed, firing confetti...');
             if (window.fireConfetti) {
@@ -6798,7 +6848,8 @@
             gameState.jerryXP -= gameState.jerryXPToNext;
             gameState.jerryLevel++;
             
-            gameState.jerryXPToNext = Math.floor(100 * Math.pow(1.2, gameState.jerryLevel - 1));
+            // Updated to 100s scale: level * 100
+            gameState.jerryXPToNext = gameState.jerryLevel * 100;
             
             showSuccessMessage(`🎉 ${gameState.rockName} leveled up!`, `Now Level ${gameState.jerryLevel}!`);
             
@@ -7156,6 +7207,15 @@
                 }
                 
 
+                // Initialize audio manager
+                if (window.audioManager) {
+                    window.audioManager.loadAllSounds().then(() => {
+                        console.log('🔊 Audio system initialized');
+                    }).catch(err => {
+                        console.warn('Audio loading failed:', err);
+                    });
+                }
+                
                 // Initialize confetti system
                 initializeConfetti();
                 
@@ -7274,10 +7334,14 @@
     <script src="js/backgroundManager.js"></script>
     <script src="js/themeManager.js"></script>
     
+    <!-- Audio Manager -->
+    <script src="js/audioManager.js"></script>
+    
     <!-- Battle System Modules -->
     <script src="js/enemy.js"></script>
     <script src="js/enemy-init.js"></script>
     <script src="js/battleUI.js"></script>
+    <script src="js/medusaProjectile.js"></script>
     <script src="js/battleManager.js"></script>
     <script src="js/battleInit.js"></script>
     <script src="js/questTaskManager.js"></script>

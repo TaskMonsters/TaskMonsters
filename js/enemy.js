@@ -58,6 +58,48 @@ const LAZY_BAT_DATA = {
     }
 };
 
+// Lazy Bat II enemy data (appears at level 3+)
+const LAZY_BAT_II_DATA = {
+    name: 'Lazy Bat II',
+    baseHP: 50,
+    baseAttack: 15,
+    baseDefense: 10,
+    minLevel: 3,
+    sprites: {
+        idle: 'assets/enemies/LazyBat2-IdleFly.png',
+        attack1: 'assets/enemies/LazyBat2-IdleFly.png',
+        attack2: 'assets/enemies/LazyBat2-IdleFly.png',
+        hurt: 'assets/enemies/LazyBat2-IdleFly.png',
+        die: 'assets/enemies/LazyBat2-IdleFly.png',
+        run: 'assets/enemies/LazyBat2-IdleFly.png',
+        sleep: 'assets/enemies/LazyBat2-IdleFly.png',
+        wakeup: 'assets/enemies/LazyBat2-IdleFly.png'
+    }
+};
+
+// Slime enemy data (appears at level 5+)
+const SLIME_DATA = {
+    name: 'Slime',
+    baseHP: 40,
+    baseAttack: 8,
+    baseDefense: 5,
+    minLevel: 5,
+    maxDamage: 10, // Cap damage at 10
+    drainEnergy: true, // Drains energy on hit
+    drainDefense: true, // Drains defense on hit
+    projectileType: 'slime',
+    sprites: {
+        idle: 'assets/enemies/slime-sheet.png',
+        attack1: 'assets/enemies/slime-sheet.png',
+        attack2: 'assets/enemies/slime-sheet.png',
+        hurt: 'assets/enemies/slime-sheet.png',
+        die: 'assets/enemies/slime-sheet.png',
+        run: 'assets/enemies/slime-sheet.png',
+        sleep: 'assets/enemies/slime-sheet.png',
+        wakeup: 'assets/enemies/slime-sheet.png'
+    }
+};
+
 // Ghost Task Stopper enemy data (appears at level 7+)
 const GHOST_TASK_STOPPER_DATA = {
     name: 'Ghost Task Stopper',
@@ -77,6 +119,29 @@ const GHOST_TASK_STOPPER_DATA = {
         run: 'assets/enemies/ghost/ghost-idle.png',
         sleep: 'assets/enemies/ghost/ghost-idle.png',
         wakeup: 'assets/enemies/ghost/ghost-idle.png'
+    }
+};
+
+// Medusa enemy data (appears at level 8+)
+const MEDUSA_DATA = {
+    name: 'Medusa',
+    baseHP: 60,
+    baseAttack: 15,
+    baseDefense: 12,
+    minLevel: 8,
+    maxDamage: 15, // Cap damage at 15
+    canPetrify: true, // Can use petrify attack
+    petrifyChance: 0.3, // 30% chance to petrify (skip player turn)
+    projectileType: 'medusa',
+    sprites: {
+        idle: 'assets/enemies/medusa-idle.png',
+        attack1: 'assets/enemies/medusa-idle.png',
+        attack2: 'assets/enemies/medusa-idle.png',
+        hurt: 'assets/enemies/medusa-idle.png',
+        die: 'assets/enemies/medusa-idle.png',
+        run: 'assets/enemies/medusa-idle.png',
+        sleep: 'assets/enemies/medusa-idle.png',
+        wakeup: 'assets/enemies/medusa-idle.png'
     }
 };
 
@@ -100,7 +165,7 @@ const LAZY_EYE_DATA = {
     }
 };
 
-const ENEMY_TYPES = [LAZY_BAT_DATA, GHOST_TASK_STOPPER_DATA, LAZY_EYE_DATA];
+const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA];
 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
@@ -126,6 +191,19 @@ function createRandomEnemy(playerLevel) {
         enemy.canEvade = true;
         enemy.evasionChance = enemyData.evasionChance;
     }
+    if (enemyData.canPetrify) {
+        enemy.canPetrify = true;
+        enemy.petrifyChance = enemyData.petrifyChance;
+    }
+    if (enemyData.drainEnergy) {
+        enemy.drainEnergy = true;
+    }
+    if (enemyData.drainDefense) {
+        enemy.drainDefense = true;
+    }
+    if (enemyData.maxDamage) {
+        enemy.maxDamage = enemyData.maxDamage;
+    }
     if (enemyData.projectileType) {
         enemy.projectileType = enemyData.projectileType;
     }
@@ -145,36 +223,54 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
         spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
         
         // Remove all animation classes
-        spriteElement.classList.remove('bat-idle', 'bat-attack', 'bat-hurt', 'eye-idle');
+        spriteElement.classList.remove('bat-idle', 'bat-attack', 'bat-hurt', 'bat2-idle', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle');
         
         // Add appropriate animation class based on enemy type
         const isBat = enemy.name === 'Lazy Bat';
-        const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
+        const isBat2 = enemy.name === 'Lazy Bat II';
+        const isSlime = enemy.name === 'Slime';
         const isGhost = enemy.name === 'Ghost Task Stopper';
+        const isMedusa = enemy.name === 'Medusa';
+        const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
         
         if (animationKey === 'attack1' || animationKey === 'attack2') {
             if (isBat) spriteElement.classList.add('bat-attack');
+            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
+            else if (isMedusa) spriteElement.classList.add('medusa-idle');
         } else if (animationKey === 'hurt') {
             if (isBat) spriteElement.classList.add('bat-hurt');
+            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
+            else if (isMedusa) spriteElement.classList.add('medusa-idle');
         } else {
             if (isBat) spriteElement.classList.add('bat-idle');
+            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isEye) spriteElement.classList.add('eye-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
+            else if (isMedusa) spriteElement.classList.add('medusa-idle');
         }
 
         setTimeout(() => {
             enemy.setSprite('idle');
             spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-            spriteElement.classList.remove('bat-attack', 'bat-hurt', 'eye-idle', 'ghost-idle');
+            spriteElement.classList.remove('bat-attack', 'bat-hurt', 'bat2-idle', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle');
             
             const isBat = enemy.name === 'Lazy Bat';
-            const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
+            const isBat2 = enemy.name === 'Lazy Bat II';
+            const isSlime = enemy.name === 'Slime';
             const isGhost = enemy.name === 'Ghost Task Stopper';
+            const isMedusa = enemy.name === 'Medusa';
+            const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
             if (isBat) spriteElement.classList.add('bat-idle');
+            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isEye) spriteElement.classList.add('eye-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
+            else if (isMedusa) spriteElement.classList.add('medusa-idle');
             
             resolve();
         }, duration);

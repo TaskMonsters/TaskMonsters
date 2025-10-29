@@ -58,6 +58,17 @@ function updateBattleButtonsVisibility() {
     } else {
         defenseRefillBtn.style.display = 'none';
     }
+    
+    // Invisibility Cloak button - only show if ever unlocked
+    const invisibilityCloakBtn = document.getElementById('btnInvisibilityCloak');
+    const invisibilityCloakCount = document.getElementById('invisibilityCloakCount');
+    const invisibilityCloakQty = inventory.invisibility_cloak || 0;
+    if (unlockedItems.includes('invisibility_cloak')) {
+        invisibilityCloakBtn.style.display = '';
+        invisibilityCloakCount.textContent = `(${invisibilityCloakQty})`;
+    } else {
+        invisibilityCloakBtn.style.display = 'none';
+    }
 }
 
 // Update battle UI elements (HP, gauges, sprites)
@@ -79,13 +90,13 @@ function updateBattleUI(hero, enemy) {
     // Update gauges
     const attackGaugeBar = document.getElementById('attackGaugeBar');
     const attackGaugeText = document.getElementById('attackGaugeText');
-    attackGaugeBar.style.width = hero.attackGauge + '%';
-    attackGaugeText.textContent = `${hero.attackGauge}/100`;
+    attackGaugeBar.style.width = battleManager.attackGauge + '%';
+    attackGaugeText.textContent = `${battleManager.attackGauge}/100`;
 
     const defenseGaugeBar = document.getElementById('defenseGaugeBar');
     const defenseGaugeText = document.getElementById('defenseGaugeText');
-    defenseGaugeBar.style.width = hero.defenseGauge + '%';
-    defenseGaugeText.textContent = `${hero.defenseGauge}/100`;
+    defenseGaugeBar.style.width = battleManager.defenseGauge + '%';
+    defenseGaugeText.textContent = `${battleManager.defenseGauge}/100`;
 }
 
 // Update action button availability
@@ -93,15 +104,22 @@ function updateActionButtons(hero) {
     const btnAttack = document.getElementById('btnAttack');
     const btnDefend = document.getElementById('btnDefend');
     const btnFireball = document.getElementById('btnFireball');
-    const btnPotion = document.getElementById('btnPot    // Attack requires 10 attack gauge
-    btnAttack.disabled = hero.attackGauge <    // Defend requires 20 defense gauge
-    btnDefend.disabled = hero.defenseGauge < 20    // Fireball requires 20 attack gauge AND inventory
+    const btnPotion = document.getElementById('btnPotion');
+
+    // Attack requires 10 attack gauge
+    btnAttack.disabled = battleManager.attackGauge < 10;
+
+    // Defend requires 20 defense gauge
+    btnDefend.disabled = battleManager.defenseGauge < 20;
+
+    // Fireball requires 20 attack gauge AND inventory
     const fireballCount = gameState.battleInventory?.fireball || 0;
     const fireballCountSpan = btnFireball.querySelector('.item-count');
     if (fireballCountSpan) {
         fireballCountSpan.textContent = `(${fireballCount})`;
     }
-    btnFireball.disabled = hero.attackGauge < 20 || fireballCount === 0;    
+    btnFireball.disabled = battleManager.attackGauge < 20 || fireballCount === 0;
+    
     // Spark requires 25 attack gauge AND inventory (unlocked at level 7)
     const btnSpark = document.getElementById('btnSpark');
     if (btnSpark) {
@@ -112,9 +130,41 @@ function updateActionButtons(hero) {
             if (sparkCountSpan) {
                 sparkCountSpan.textContent = `(${sparkCount})`;
             }
-            btnSpark.disabled = hero.attackGauge < 25 || sparkCount === 0;
+            btnSpark.disabled = battleManager.attackGauge < 25 || sparkCount === 0;
         } else {
             btnSpark.style.display = 'none';
+        }
+    }
+
+    // Bomb requires 20 attack gauge AND inventory (unlocked at level 3)
+    const btnBomb = document.getElementById('btnBomb');
+    if (btnBomb) {
+        if (hero.level >= 3) {
+            btnBomb.style.display = '';
+            const bombCount = gameState.battleInventory?.bomb || 0;
+            const bombCountSpan = btnBomb.querySelector('.item-count');
+            if (bombCountSpan) {
+                bombCountSpan.textContent = `(${bombCount})`;
+            }
+            btnBomb.disabled = battleManager.attackGauge < 20 || bombCount === 0;
+        } else {
+            btnBomb.style.display = 'none';
+        }
+    }
+
+    // Freeze requires 35 attack gauge AND inventory (unlocked at level 8)
+    const btnFreeze = document.getElementById('btnFreeze');
+    if (btnFreeze) {
+        if (hero.level >= 8) {
+            btnFreeze.style.display = '';
+            const freezeCount = gameState.battleInventory?.freeze || 0;
+            const freezeCountSpan = btnFreeze.querySelector('.item-count');
+            if (freezeCountSpan) {
+                freezeCountSpan.textContent = `(${freezeCount})`;
+            }
+            btnFreeze.disabled = battleManager.attackGauge < 35 || freezeCount === 0;
+        } else {
+            btnFreeze.style.display = 'none';
         }
     }
 
@@ -147,19 +197,24 @@ function updateActionButtons(hero) {
         }
         btnDefenseRefill.disabled = defenseRefillCount === 0;
     }
+    
+    // Invisibility Cloak
+    const btnInvisibilityCloak = document.getElementById('btnInvisibilityCloak');
+    if (btnInvisibilityCloak) {
+        const invisibilityCloakCount = gameState.battleInventory?.invisibility_cloak || 0;
+        const invisibilityCloakCountSpan = btnInvisibilityCloak.querySelector('.item-count');
+        if (invisibilityCloakCountSpan) {
+            invisibilityCloakCountSpan.textContent = `(${invisibilityCloakCount})`;
+        }
+        btnInvisibilityCloak.disabled = invisibilityCloakCount === 0;
+    }
 }
 
 // Add message to battle log
-let lastBattleLogMessage = "";
-
 function addBattleLog(message) {
-    if (message === lastBattleLogMessage) {
-        return; // Don't add duplicate consecutive messages
-    }
-    const log = document.getElementById("battleLog");
+    const log = document.getElementById('battleLog');
     log.innerHTML += `<div>${message}</div>`;
     log.scrollTop = log.scrollHeight;
-    lastBattleLogMessage = message;
 }
 
 // Fireball Projectile Animation
@@ -320,6 +375,196 @@ async function playSparkAnimation(startElement, targetElement) {
     });
 }
 
+// Bomb Projectile Animation
+async function playBombAnimation(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'bomb-projectile';
+    projectile.style.width = '40px';
+    projectile.style.height = '40px';
+    projectile.style.position = 'fixed';
+    projectile.style.backgroundImage = 'url("assets/battle-items/bomb/bomb1.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.zIndex = '1000';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.left = startRect.left + startRect.width / 2 - 20 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 20 + 'px';
+
+    // Animate projectile movement with arc
+    const duration = 800;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Easing function (ease-in-out)
+            const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+            // Calculate position with arc
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 20;
+            const arc = Math.sin(progress * Math.PI) * 100; // Arc height
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 20 - arc;
+
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            // Rotate bomb
+            projectile.style.transform = `rotate(${progress * 360}deg)`;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Remove projectile and show explosion
+                projectile.remove();
+                playBombExplosion(targetRect).then(resolve);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    });
+}
+
+// Bomb Explosion Animation
+async function playBombExplosion(targetRect) {
+    const explosion = document.createElement('div');
+    explosion.style.width = '120px';
+    explosion.style.height = '120px';
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 60 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 60 + 'px';
+    explosion.style.backgroundSize = 'contain';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    explosion.style.zIndex = '1001';
+    document.body.appendChild(explosion);
+
+    // Explosion frames from the Bomb folder
+    const explosionFrames = [
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d1.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d2.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d3.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d4.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d5.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d6.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d7.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d8.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d9.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d10.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d11.png',
+        'assets/battle-items/bomb/Bomb Explosion/explosion-d12.png'
+    ];
+
+    // Play each frame
+    for (let i = 0; i < explosionFrames.length; i++) {
+        explosion.style.backgroundImage = `url('${explosionFrames[i]}')`;
+        await new Promise(resolve => setTimeout(resolve, 60));
+    }
+
+    explosion.remove();
+}
+
+// Freeze Projectile Animation
+async function playFreezeAnimation(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'freeze-projectile';
+    projectile.style.width = '50px';
+    projectile.style.height = '50px';
+    projectile.style.position = 'fixed';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.zIndex = '1000';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
+
+    // Ice shot frames
+    const shotFrames = [
+        'assets/battle-items/freeze/shot-1.png',
+        'assets/battle-items/freeze/shot-2.png',
+        'assets/battle-items/freeze/shot-3.png'
+    ];
+    let frameIndex = 0;
+
+    // Animate projectile movement
+    const duration = 700;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Easing function (ease-out)
+            const eased = 1 - Math.pow(1 - progress, 3);
+
+            // Calculate position
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 25;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 25;
+
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            // Cycle through animation frames
+            frameIndex = Math.floor((elapsed / 100) % shotFrames.length);
+            projectile.style.backgroundImage = `url('${shotFrames[frameIndex]}')`;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Remove projectile and show freeze impact
+                projectile.remove();
+                playFreezeImpact(targetRect).then(resolve);
+            }
+        }
+
+        requestAnimationFrame(animate);
+    });
+}
+
+// Freeze Impact Animation
+async function playFreezeImpact(targetRect) {
+    const impact = document.createElement('div');
+    impact.style.width = '100px';
+    impact.style.height = '100px';
+    impact.style.position = 'fixed';
+    impact.style.left = targetRect.left + targetRect.width / 2 - 50 + 'px';
+    impact.style.top = targetRect.top + targetRect.height / 2 - 50 + 'px';
+    impact.style.backgroundSize = 'contain';
+    impact.style.backgroundRepeat = 'no-repeat';
+    impact.style.zIndex = '1001';
+    document.body.appendChild(impact);
+
+    // Impact frames from the freeze folder
+    const impactFrames = [
+        'assets/battle-items/freeze/shot-hit copy/shot-hit-1.png',
+        'assets/battle-items/freeze/shot-hit copy/shot-hit-2.png',
+        'assets/battle-items/freeze/shot-hit copy/shot-hit-3.png'
+    ];
+
+    // Play each frame multiple times for freeze effect
+    for (let loop = 0; loop < 2; loop++) {
+        for (let i = 0; i < impactFrames.length; i++) {
+            impact.style.backgroundImage = `url('${impactFrames[i]}')`;
+            await new Promise(resolve => setTimeout(resolve, 80));
+        }
+    }
+
+    impact.remove();
+}
+
 // Explosion Animation
 async function playExplosionAnimation(targetRect) {
     const explosion = document.getElementById('explosionEffect');
@@ -355,7 +600,8 @@ function updateBattleShopDisplay() {
 
     const items = [
         { name: 'Fireball', cost: 20, emoji: '🔥', key: 'fireball' },
-        { name: 'Health Potion', cost: 15, emoji: '💚', key: 'health_potion' }
+        { name: 'Health Potion', cost: 15, emoji: '💚', key: 'health_potion' },
+        { name: 'Invisibility Cloak', cost: 40, emoji: '🥷🏼', key: 'invisibility_cloak', levelRequired: 3 }
     ];
 
     shopContainer.innerHTML = items.map(item => `
@@ -375,7 +621,7 @@ function updateBattleInventoryDisplay() {
     const inventoryContainer = document.getElementById('battleInventoryContainer');
     if (!inventoryContainer) return;
 
-    const inventory = gameState.battleInventory || { fireball: 0, health_potion: 0 };
+    const inventory = gameState.battleInventory || { fireball: 0, health_potion: 0, invisibility_cloak: 0 };
 
     inventoryContainer.innerHTML = `
         <div class="inventory-grid">
@@ -389,12 +635,21 @@ function updateBattleInventoryDisplay() {
                 <div class="inventory-slot-name">Health Potion</div>
                 <div class="inventory-slot-count">${inventory.health_potion}</div>
             </div>
+            <div class="inventory-slot">
+                <div class="inventory-slot-icon">🥷🏼</div>
+                <div class="inventory-slot-name">Invisibility Cloak</div>
+                <div class="inventory-slot-count">${inventory.invisibility_cloak}</div>
+            </div>
         </div>
     `;
 }
 
 // Buy battle item
 function buyBattleItem(itemKey, cost) {
+    if (itemKey === 'invisibility_cloak' && gameState.level < 3) {
+        alert('You need Level 3 to buy the Invisibility Cloak!');
+        return;
+    }
     if (gameState.xp < cost) {
         alert('Not enough XP!');
         return;
@@ -402,6 +657,10 @@ function buyBattleItem(itemKey, cost) {
 
     gameState.xp -= cost;
     gameState.battleInventory[itemKey]++;
+    
+    if (!gameState.unlockedBattleItems.includes(itemKey)) {
+        gameState.unlockedBattleItems.push(itemKey);
+    }
     
     saveGameState();
     updateBattleShopDisplay();
@@ -425,6 +684,8 @@ window.animateFireball = animateFireball;
 window.playFireballAnimation = playFireballAnimation;
 window.playWaveformAnimation = playWaveformAnimation;
 window.playSparkAnimation = playSparkAnimation;
+window.playBombAnimation = playBombAnimation;
+window.playFreezeAnimation = playFreezeAnimation;
 window.updateBattleButtons = updateBattleButtons;
 window.updateBattleShopDisplay = updateBattleShopDisplay;
 window.updateBattleInventoryDisplay = updateBattleInventoryDisplay;

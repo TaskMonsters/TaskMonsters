@@ -7,8 +7,6 @@ export class Hero {
     this.atk = 15;
     this.xp = 0;
     this.level = 1;
-    this.attackGauge = 100; // New: Attack gauge
-    this.defenseGauge = 100; // New: Defense gauge
     this.state = 'idle';
     this.sprites = sprites;
   }
@@ -57,20 +55,15 @@ export class Hero {
 
   gainXP(amount) {
     this.xp += amount;
-    
-    // Reworked XP gain to handle carry-over XP and new level-up logic
-    let leveledUp = false;
-    while (this.xp >= this.xpNeededForNextLevel()) {
-      leveledUp = true;
-      const xpNeeded = this.xpNeededForNextLevel();
+    const xpNeeded = this.level * 100;
+    if (this.xp >= xpNeeded) {
       this.level++;
-      this.xp -= xpNeeded; // Carry over excess XP
+      this.xp = 0;
       this.maxHp += 20;
-      this.hp = this.maxHp; // Full heal on level up
+      this.hp = this.maxHp;
       this.atk += 5;
+      return true; // Level up occurred
     }
-    return leveledUp; // Level up occurred
-  }
     return false;
   }
 
@@ -103,12 +96,9 @@ export class Hero {
     this.hp = Math.min(this.maxHp, this.hp + amount);
   }
 
-  xpNeededForNextLevel() {
-    // New XP scale: 100 * current level
-    return this.level * 100;
+  reset() {
+    this.hp = this.maxHp;
+    this.setState('idle');
   }
-
-  // Removed reset() to maintain post-battle HP/Gauges.
-  // HP recovery must be done explicitly via items/actions.
 }
 

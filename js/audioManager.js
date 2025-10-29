@@ -10,7 +10,7 @@ class AudioManager {
         this.music = {};
         this.currentMusicSource = null;
         this.isMusicPlaying = false;
-        this.basePath = '../upload/'; // Path to the uploaded audio files
+        this.basePath = 'assets/audio/'; // Path to the audio files
     }
 
     async loadSound(name, filename) {
@@ -84,17 +84,17 @@ class AudioManager {
     async loadAllSounds() {
         const soundMap = {
             // Sound Effects
-            'monsterAttack': 'MonsterAttack.mp3',
+            'monsterAttack': 'Monster Attack.mp3',
             'fireball': 'Fireball.mp3',
-            'useItemBattle': 'Whenusersuseanyitemduringabattleoruseitemsoutsideofbattle.mp3',
-            'useItemOutsideBattle': 'Whenusersuseanyitemoutsideofbattlemode.mp3',
-            'shopPurchase': 'Whenusersbuyanyitemfromtheshoporthemespages.mp3',
-            'enemyAttack': 'EnemyAttack.mp3',
-            'taskComplete': 'QuickTask&RegularTaskCompletion.mp3',
+            'useItemBattle': 'When users use any item during a battle or use items outside of battle.mp3',
+            'useItemOutsideBattle': 'When users use any item outside of battle mode.mp3',
+            'shopPurchase': 'When users buy any item from the shop or themes pages.mp3',
+            'enemyAttack': 'Enemy Attack.mp3',
+            'taskComplete': 'Quick Task & Regular Task Completion.mp3',
             
             // Music
-            'battleMusic': 'BattleModeMusic.mp3',
-            'questGiverMusic': 'QuestGiverMode.mp3'
+            'battleMusic': 'Battle Mode Music.mp3',
+            'questGiverMusic': 'Quest Giver Mode.mp3'
         };
 
         const loadPromises = Object.keys(soundMap).map(name => 
@@ -105,5 +105,7 @@ class AudioManager {
     }
 }
 
-export const audioManager = new AudioManager();
+// Create global audioManager instance
+const audioManager = new AudioManager();
+window.audioManager = audioManager;
 
