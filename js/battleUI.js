@@ -208,6 +208,38 @@ function updateActionButtons(hero) {
         }
         btnInvisibilityCloak.disabled = invisibilityCloakCount === 0;
     }
+    
+    // Blue Flame (unlocked at level 12)
+    const btnBlueFlame = document.getElementById('btnBlueFlame');
+    if (btnBlueFlame) {
+        if (hero.level >= 12) {
+            btnBlueFlame.style.display = '';
+            const blueFlameCount = gameState.battleInventory?.blue_flame || 0;
+            const blueFlameCountSpan = btnBlueFlame.querySelector('.item-count');
+            if (blueFlameCountSpan) {
+                blueFlameCountSpan.textContent = `(${blueFlameCount})`;
+            }
+            btnBlueFlame.disabled = battleManager.attackGauge < 20 || blueFlameCount === 0;
+        } else {
+            btnBlueFlame.style.display = 'none';
+        }
+    }
+    
+    // Procrastination Ghost (unlocked at level 15)
+    const btnProcrastinationGhost = document.getElementById('btnProcrastinationGhost');
+    if (btnProcrastinationGhost) {
+        if (hero.level >= 15) {
+            btnProcrastinationGhost.style.display = '';
+            const procrastinationGhostCount = gameState.battleInventory?.procrastination_ghost || 0;
+            const procrastinationGhostCountSpan = btnProcrastinationGhost.querySelector('.item-count');
+            if (procrastinationGhostCountSpan) {
+                procrastinationGhostCountSpan.textContent = `(${procrastinationGhostCount})`;
+            }
+            btnProcrastinationGhost.disabled = battleManager.attackGauge < 25 || procrastinationGhostCount === 0;
+        } else {
+            btnProcrastinationGhost.style.display = 'none';
+        }
+    }
 }
 
 // Add message to battle log
@@ -650,12 +682,12 @@ function buyBattleItem(itemKey, cost) {
         alert('You need Level 3 to buy the Invisibility Cloak!');
         return;
     }
-    if (gameState.xpBalance < cost) {
-        alert('Not enough XP Balance!');
+    if (gameState.xpCoins < cost) {
+        alert('Not enough XP Coins!');
         return;
     }
 
-    gameState.xpBalance -= cost;
+    gameState.xpCoins -= cost;
     gameState.xp = Math.max(0, (gameState.xp || 0) - cost);
     gameState.battleInventory[itemKey]++;
     
@@ -692,3 +724,280 @@ window.updateBattleShopDisplay = updateBattleShopDisplay;
 window.updateBattleInventoryDisplay = updateBattleInventoryDisplay;
 window.buyBattleItem = buyBattleItem;
 
+
+// Splash Projectile Animation (Octopus drench attack)
+async function playSplashAnimation(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'splash-projectile';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.left + startRect.width / 2 - 32 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 32 + 'px';
+    projectile.style.width = '64px';
+    projectile.style.height = '64px';
+    projectile.style.backgroundImage = 'url("assets/splash-attack.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.imageRendering = 'pixelated';
+    projectile.style.zIndex = '10000';
+
+    // Animate projectile movement
+    const duration = 600;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const currentX = startRect.left + (targetRect.left - startRect.left) * progress;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * progress;
+
+            projectile.style.left = currentX + startRect.width / 2 - 32 + 'px';
+            projectile.style.top = currentY + startRect.height / 2 - 32 + 'px';
+            projectile.style.opacity = 1 - progress * 0.3;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.style.opacity = '0';
+                setTimeout(() => {
+                    projectile.remove();
+                    resolve();
+                }, 200);
+            }
+        }
+        animate();
+    });
+}
+
+// Alien Projectile Animation
+async function playAlienProjectile(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'alien-projectile';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.left + startRect.width / 2 - 24 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 24 + 'px';
+    projectile.style.width = '48px';
+    projectile.style.height = '48px';
+    projectile.style.backgroundImage = 'url("assets/alien-projectile.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.imageRendering = 'pixelated';
+    projectile.style.zIndex = '10000';
+
+    // Animate projectile movement
+    const duration = 500;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const currentX = startRect.left + (targetRect.left - startRect.left) * progress;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * progress;
+
+            projectile.style.left = currentX + startRect.width / 2 - 24 + 'px';
+            projectile.style.top = currentY + startRect.height / 2 - 24 + 'px';
+            projectile.style.transform = `rotate(${progress * 360}deg)`;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.style.opacity = '0';
+                setTimeout(() => {
+                    projectile.remove();
+                    resolve();
+                }, 200);
+            }
+        }
+        animate();
+    });
+}
+
+// Export functions
+window.playSplashAnimation = playSplashAnimation;
+window.playAlienProjectile = playAlienProjectile;
+
+// Lazy Bat Rock Projectile Animation
+async function playBatRockProjectile(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'bat-rock-projectile';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.left + startRect.width / 2 - 16 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 16 + 'px';
+    projectile.style.width = '32px';
+    projectile.style.height = '32px';
+    projectile.style.backgroundImage = 'url("assets/bat-rock-projectile.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.imageRendering = 'pixelated';
+    projectile.style.zIndex = '10000';
+
+    // Animate projectile movement
+    const duration = 500;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const currentX = startRect.left + (targetRect.left - startRect.left) * progress;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * progress;
+
+            projectile.style.left = currentX + startRect.width / 2 - 16 + 'px';
+            projectile.style.top = currentY + startRect.height / 2 - 16 + 'px';
+            projectile.style.transform = `rotate(${progress * 720}deg)`; // Two full rotations
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.style.opacity = '0';
+                setTimeout(() => {
+                    projectile.remove();
+                    resolve();
+                }, 100);
+            }
+        }
+        animate();
+    });
+}
+
+// Export function
+window.playBatRockProjectile = playBatRockProjectile;
+
+// Fire Skull Explosion Animation
+async function playFireExplosion(startElement, targetElement) {
+    const explosion = document.createElement('div');
+    explosion.className = 'fire-explosion';
+    document.body.appendChild(explosion);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position explosion at target
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 32 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 32 + 'px';
+    explosion.style.width = '64px';
+    explosion.style.height = '64px';
+    explosion.style.backgroundImage = 'url("assets/enemies/fire-skull/fire-skull-explosion.png")';
+    explosion.style.backgroundSize = 'contain';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    explosion.style.imageRendering = 'pixelated';
+    explosion.style.zIndex = '10000';
+    explosion.style.animation = 'explosionFlash 0.5s ease-out';
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            explosion.style.opacity = '0';
+            setTimeout(() => {
+                explosion.remove();
+                resolve();
+            }, 200);
+        }, 500);
+    });
+}
+
+// Export function
+window.playFireExplosion = playFireExplosion;
+
+// Blue Flame Animation
+async function playBlueFlameAnimation(startElement, targetElement) {
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+
+    const projectile = document.createElement('div');
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.right + 'px';
+    projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
+    projectile.style.width = '32px';
+    projectile.style.height = '32px';
+    projectile.style.backgroundImage = 'url(assets/blue-flame-spritesheet.png)';
+    projectile.style.backgroundSize = '128px 32px'; // 4 frames
+    projectile.style.imageRendering = 'pixelated';
+    projectile.style.zIndex = '1000';
+    projectile.style.pointerEvents = 'none';
+    projectile.style.animation = 'blueFlameMove 0.5s linear, blueFlameAnimate 0.2s steps(4) infinite';
+    
+    document.body.appendChild(projectile);
+
+    // Animate to target
+    const deltaX = targetRect.left - startRect.right;
+    const deltaY = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+    
+    projectile.style.setProperty('--deltaX', deltaX + 'px');
+    projectile.style.setProperty('--deltaY', deltaY + 'px');
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Flash effect on impact
+    targetElement.style.filter = 'brightness(1.5) hue-rotate(200deg)';
+    setTimeout(() => {
+        targetElement.style.filter = '';
+    }, 200);
+
+    projectile.remove();
+}
+
+// Procrastination Ghost Animation
+async function playProcrastinationGhostAnimation(startElement, targetElement) {
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+
+    const projectile = document.createElement('div');
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.right + 'px';
+    projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
+    projectile.style.width = '32px';
+    projectile.style.height = '32px';
+    projectile.style.backgroundImage = 'url(assets/procrastination-ghost.png)';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.imageRendering = 'pixelated';
+    projectile.style.zIndex = '1000';
+    projectile.style.pointerEvents = 'none';
+    projectile.style.opacity = '0.8';
+    projectile.style.animation = 'ghostFloat 0.6s ease-in-out';
+    
+    document.body.appendChild(projectile);
+
+    // Animate to target with floating motion
+    const deltaX = targetRect.left - startRect.right;
+    const deltaY = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+    
+    projectile.style.setProperty('--deltaX', deltaX + 'px');
+    projectile.style.setProperty('--deltaY', deltaY + 'px');
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Ghost effect on impact
+    targetElement.style.filter = 'brightness(0.7) grayscale(0.5)';
+    setTimeout(() => {
+        targetElement.style.filter = '';
+    }, 300);
+
+    projectile.remove();
+}

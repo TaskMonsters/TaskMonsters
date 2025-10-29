@@ -2986,6 +2986,12 @@
         <button id="btnInvisibilityCloak" class="btn-action" onclick="battleManager.playerInvisibilityCloak()">
             🥷🏼 Cloak <span class="item-count" id="invisibilityCloakCount">(0)</span>
         </button>
+        <button id="btnBlueFlame" class="btn-action" onclick="battleManager.playerBlueFlame()" style="display: none;">
+            🔵🔥 Blue Flame <span class="item-count" id="blueFlameCount">(0)</span>
+        </button>
+        <button id="btnProcrastinationGhost" class="btn-action" onclick="battleManager.playerProcrastinationGhost()" style="display: none;">
+            👻 Ghost <span class="item-count" id="procrastinationGhostCount">(0)</span>
+        </button>
         <button id="btnFlee" class="btn-flee" onclick="battleManager.playerFlee()">
             🏃 Flee
         </button>
@@ -3300,7 +3306,7 @@
                     </div>
                     <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Power up your hero with XP!</p>
-                        <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Balance: <span id="xpBalanceShop">0</span></p>
+                        <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsShop">0</span></p>
                         <div id="shopItemsGrid" class="shop-items-grid">
                             <!-- Shop items will be rendered here -->
                         </div>
@@ -3315,7 +3321,10 @@
                         <div class="card-title">🎒 Battle Items</div>
                         <span id="ownedItemCount" class="item-count-badge">0 items</span>
                     </div>
-                    <p style="text-align: center; color: #4CAF50; font-weight: bold; margin: 15px 0;">XP Balance: <span id="xpBalanceOwned">0</span></p>
+                    <div style="padding: 20px;">
+                        <p style="text-align: center; color: #666; margin-bottom: 10px;">Use your items in battle!</p>
+                        <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsOwned">0</span></p>
+                    </div>
                     <div id="ownedItemsGrid" class="owned-items-grid">
                         <!-- Owned items will be rendered here -->
                     </div>
@@ -3331,7 +3340,7 @@
                     </div>
                     <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Customize your monster's background!</p>
-                        <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Balance: <span id="xpBalanceThemes">0</span></p>
+                        <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsThemes">0</span></p>
                         <div id="themesGrid" class="owned-items-grid">
                             <!-- Themes will be populated here -->
                         </div>
@@ -3580,11 +3589,13 @@
                 health_potion: 2,
                 attack_refill: 2,
                 defense_refill: 2,
-                invisibility_cloak: 0
+                invisibility_cloak: 0,
+                blue_flame: 0,
+                procrastination_ghost: 0
             },
             unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'], // Track which items have ever been unlocked (fireball requires level 10)
             xp: 0,
-            xpBalance: 0,
+            xpCoins: 0,
             // Theme system
             ownedThemes: [], // Array of owned theme IDs
             activeTheme: null // Currently active theme URL
@@ -3799,9 +3810,9 @@
                     gameState.lastAllTasksDate = null;
                 }
                 
-                // Migration: Initialize xpBalance for existing users
-                if (typeof gameState.xpBalance === 'undefined') {
-                    gameState.xpBalance = gameState.jerryXP || 0;
+                // Migration: Initialize xpCoins for existing users
+                if (typeof gameState.xpCoins === 'undefined') {
+                    gameState.xpCoins = gameState.jerryXP || 0;
                 }
             }
             
@@ -5238,7 +5249,7 @@
             }
             // 2. Category-based challenges (all 10 categories) - only for regular tasks
             else if (!isQuickTask && task && task.category) {
-                const taskCategory = task.category.toLowerCase();
+                const taskCategory = (task.category || '').toLowerCase().trim();
                 
                 if ((challengeDesc.includes('work') && taskCategory.includes('work')) ||
                     (challengeDesc.includes('goals') && taskCategory.includes('goals')) ||
@@ -5256,7 +5267,7 @@
             }
             // 3. Difficulty-based challenges (easy, medium, hard)
             else if (!isQuickTask && task && task.difficulty) {
-                const taskDifficulty = task.difficulty.toLowerCase();
+                const taskDifficulty = (task.difficulty || '').toLowerCase().trim();
                 
                 if ((challengeDesc.includes('easy') && taskDifficulty === 'easy') ||
                     (challengeDesc.includes('medium') && taskDifficulty === 'medium') ||
@@ -5266,17 +5277,22 @@
             }
             // 4. Priority-based challenges (high-priority, low-priority)
             else if (!isQuickTask && task && task.priority) {
-                const taskPriority = task.priority.toLowerCase();
+                // Normalize priority value (could be 'High', 'high', 'HIGH', etc.)
+                const taskPriority = (task.priority || '').toLowerCase().trim();
+                const isHighPriorityChallenge = challengeDesc.includes('high-priority') || challengeDesc.includes('high priority');
+                const isLowPriorityChallenge = challengeDesc.includes('low-priority') || challengeDesc.includes('low priority');
+                
                 console.log('🎯 Priority check:', {
                     challengeDesc,
+                    rawPriority: task.priority,
                     taskPriority,
-                    hasHighPriority: challengeDesc.includes('high-priority') || challengeDesc.includes('high priority'),
-                    hasLowPriority: challengeDesc.includes('low-priority') || challengeDesc.includes('low priority'),
-                    match: ((challengeDesc.includes('high-priority') || challengeDesc.includes('high priority')) && taskPriority === 'high') || ((challengeDesc.includes('low-priority') || challengeDesc.includes('low priority')) && taskPriority === 'low')
+                    isHighPriorityChallenge,
+                    isLowPriorityChallenge,
+                    willMatch: (isHighPriorityChallenge && taskPriority === 'high') || (isLowPriorityChallenge && taskPriority === 'low')
                 });
                 
-                if (((challengeDesc.includes('high-priority') || challengeDesc.includes('high priority')) && taskPriority === 'high') ||
-                    ((challengeDesc.includes('low-priority') || challengeDesc.includes('low priority')) && taskPriority === 'low')) {
+                if ((isHighPriorityChallenge && taskPriority === 'high') ||
+                    (isLowPriorityChallenge && taskPriority === 'low')) {
                     shouldIncrement = true;
                 }
             }
@@ -5452,10 +5468,10 @@
             const grid = document.getElementById('shopItemsGrid');
             if (!grid) return;
             
-            // Update XP Balance display
-            const xpBalanceDisplay = document.getElementById('xpBalanceShop');
-            if (xpBalanceDisplay) {
-                xpBalanceDisplay.textContent = gameState.xpBalance || 0;
+            // Update XP Coins display
+            const xpCoinsDisplay = document.getElementById('xpCoinsShop');
+            if (xpCoinsDisplay) {
+                xpCoinsDisplay.textContent = gameState.xpCoins || 0;
             }
             
             grid.innerHTML = '';
@@ -5465,7 +5481,7 @@
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
                 const isMaxed = item.maxQuantity && currentQuantity >= item.maxQuantity;
-                const canAfford = (gameState.xpBalance || 0) >= item.cost;
+                const canAfford = (gameState.xpCoins || 0) >= item.cost;
                 
                 const card = document.createElement('div');
                 card.className = 'shop-item-card';
@@ -5771,6 +5787,10 @@
                 };
                 gameState.dailyChallengeCompleted = false;
                 gameState.lastDailyChallengeDate = today;
+                
+                // Save gameState to persist color change
+                saveGameState();
+                console.log('🎨 New daily challenge generated with color:', CARD_COLORS[cardColorIndex]);
             } else if (!gameState.dailyChallenge || !gameState.dailyChallenge.color) {
                 // Load existing challenge from localStorage or fix missing color
                 const challengeDesc = DAILY_CHALLENGES[challengeIndex];
@@ -5933,10 +5953,10 @@
         
         // Update themes display
         function updateThemesDisplay() {
-            // Update XP Balance display
-            const xpBalanceDisplay = document.getElementById('xpBalanceThemes');
-            if (xpBalanceDisplay) {
-                xpBalanceDisplay.textContent = gameState.xpBalance || 0;
+            // Update XP Coins display
+            const xpCoinsDisplay = document.getElementById('xpCoinsThemes');
+            if (xpCoinsDisplay) {
+                xpCoinsDisplay.textContent = gameState.xpCoins || 0;
             }
         }
 
@@ -6012,6 +6032,37 @@
                 value: 20,
                 levelRequired: 8,
                 maxQuantity: 8
+            },
+            invisibility_cloak: {
+                id: 'invisibility_cloak',
+                name: 'Invisibility Cloak',
+                emoji: '🥷🏼',
+                description: 'Allows your monster to evade the next enemy attack',
+                cost: 40,
+                effect: 'evade',
+                levelRequired: 3
+            },
+            blue_flame: {
+                id: 'blue_flame',
+                name: 'Blue Flame',
+                emoji: '<img src="assets/blue-flame.png" alt="Blue Flame" style="width: 36px; height: 36px; vertical-align: middle;">',
+                description: 'Fire-type attack dealing 20 damage (Max: 12)',
+                cost: 50,
+                effect: 'attack',
+                value: 20,
+                levelRequired: 12,
+                maxQuantity: 12
+            },
+            procrastination_ghost: {
+                id: 'procrastination_ghost',
+                name: 'Procrastination Ghost',
+                emoji: '👻',
+                description: '10-16 damage + skips enemy turn (Max: 8)',
+                cost: 70,
+                effect: 'ghost_attack',
+                value: 13,
+                levelRequired: 15,
+                maxQuantity: 8
             }
         };
 
@@ -6020,10 +6071,10 @@
             const grid = document.getElementById('shopItemsGrid');
             if (!grid) return;
             
-            // Update XP Balance display
-            const xpBalanceDisplay = document.getElementById('xpBalanceShop');
-            if (xpBalanceDisplay) {
-                xpBalanceDisplay.textContent = gameState.xpBalance || 0;
+            // Update XP Coins display
+            const xpCoinsDisplay = document.getElementById('xpCoinsShop');
+            if (xpCoinsDisplay) {
+                xpCoinsDisplay.textContent = gameState.xpCoins || 0;
             }
             
             grid.innerHTML = '';
@@ -6033,7 +6084,7 @@
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
                 const isMaxed = item.maxQuantity && currentQuantity >= item.maxQuantity;
-                const canAfford = (gameState.xpBalance || 0) >= item.cost;
+                const canAfford = (gameState.xpCoins || 0) >= item.cost;
                 
                 const card = document.createElement('div');
                 card.className = 'shop-item-card';
@@ -6094,10 +6145,10 @@
             const countBadge = document.getElementById('ownedItemCount');
             if (!grid) return;
             
-            // Update XP Balance display
-            const xpBalanceDisplay = document.getElementById('xpBalanceOwned');
-            if (xpBalanceDisplay) {
-                xpBalanceDisplay.textContent = gameState.xpBalance || 0;
+            // Update XP Coins display
+            const xpCoinsDisplay = document.getElementById('xpCoinsOwned');
+            if (xpCoinsDisplay) {
+                xpCoinsDisplay.textContent = gameState.xpCoins || 0;
             }
             
             grid.innerHTML = '';
@@ -6563,6 +6614,13 @@
             gameState.tasks.splice(index, 1);
             
             // Update daily challenge progress
+            console.log('🎯 Calling updateChallengeProgress with task:', {
+                title: task.title,
+                category: task.category,
+                difficulty: task.difficulty,
+                priority: task.priority,
+                isQuickTask: false
+            });
             updateChallengeProgress(task, false);
             
             // Show completion message with random variation
@@ -6871,7 +6929,7 @@
 
         function addJerryXP(xp) {
             gameState.jerryXP += xp;
-            gameState.xpBalance += xp;
+            gameState.xpCoins = (gameState.xpCoins || 0) + Math.floor(xp * 0.8); // 8 coins per 10 XP
             
             while (gameState.jerryXP >= gameState.jerryXPToNext) {
                 levelUpJerry();
@@ -6886,11 +6944,12 @@
         function levelUpJerry() {
             gameState.jerryXP -= gameState.jerryXPToNext;
             gameState.jerryLevel++;
+            gameState.xpCoins = (gameState.xpCoins || 0) + 20; // Level-up bonus
             
             // Updated to 100s scale: level * 100
             gameState.jerryXPToNext = gameState.jerryLevel * 100;
             
-            showSuccessMessage(`🎉 ${gameState.rockName} leveled up!`, `Now Level ${gameState.jerryLevel}!`);
+            showSuccessMessage(`🎉 ${gameState.rockName} leveled up!`, `Now Level ${gameState.jerryLevel}! +20 XP Coins!`);
             
             if (window.fireConfetti) {
                 window.fireConfetti();
@@ -6917,14 +6976,14 @@
             //     }
             // }
             
-            // Check if user has enough XP Balance
-            if ((gameState.xpBalance || 0) < item.cost) {
-                alert(`⚠️ Not enough XP Balance! You need ${item.cost} XP but only have ${gameState.xpBalance || 0} XP.`);
+            // Check if user has enough XP Coins
+            if ((gameState.xpCoins || 0) < item.cost) {
+                alert(`⚠️ Not enough XP Coins! You need ${item.cost} XP but only have ${gameState.xpCoins || 0} XP.`);
                 return;
             }
             
-            // Deduct XP Balance
-            gameState.xpBalance -= item.cost;
+            // Deduct XP Coins
+            gameState.xpCoins -= item.cost;
             
             // Also deduct from jerryXP gauge (but prevent going below 0)
             gameState.jerryXP = Math.max(0, (gameState.jerryXP || 0) - item.cost);
@@ -7015,8 +7074,38 @@
             showSuccessMessage(`Notifications ${gameState.notifications ? 'enabled' : 'disabled'}!`);
         }
 
-        function shareEtsyStore() {
-            showSuccessMessage('Etsy store link copied to clipboard!');
+        async function shareEtsyStore() {
+            const etsyUrl = 'https://www.etsy.com/shop/TaskRock';
+            
+            // Try Web Share API first (mobile-friendly)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Task Rock Etsy Store',
+                        text: 'Check out Task Rock on Etsy!',
+                        url: etsyUrl
+                    });
+                    console.log('✅ Shared successfully');
+                } catch (err) {
+                    // User cancelled or error occurred
+                    if (err.name !== 'AbortError') {
+                        console.log('Share failed:', err);
+                        fallbackCopyToClipboard(etsyUrl);
+                    }
+                }
+            } else {
+                // Fallback: Copy to clipboard
+                fallbackCopyToClipboard(etsyUrl);
+            }
+        }
+        
+        function fallbackCopyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showSuccessMessage('Etsy store link copied to clipboard!');
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showSuccessMessage('Visit: ' + text);
+            });
         }
 
         function showResetOptions() {

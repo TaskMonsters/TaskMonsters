@@ -97,7 +97,7 @@ class QuestTaskManager {
         if (hoursElapsed > task.deadline) {
             const penalty = Math.floor(task.xp * 1.5);
             if (window.gameState) {
-                window.gameState.xpBalance = Math.max(0, (window.gameState.xpBalance || 0) - penalty);
+                window.gameState.xpCoins = Math.max(0, (window.gameState.xpCoins || 0) - penalty);
                 
                 if (typeof saveGameState === 'function') {
                     saveGameState();

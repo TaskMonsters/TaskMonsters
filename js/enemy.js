@@ -165,7 +165,93 @@ const LAZY_EYE_DATA = {
     }
 };
 
-const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA];
+// Octopus enemy data (appears at level 2+)
+const OCTOPUS_DATA = {
+    name: 'Octopus',
+    baseHP: 45,
+    baseAttack: 12,
+    baseDefense: 8,
+    minLevel: 2,
+    drenchAttack: true,
+    hugAttack: true,
+    projectileType: 'splash',
+    sprites: {
+        idle: 'assets/octopus.png',
+        attack1: 'assets/octopus.png',
+        attack2: 'assets/octopus.png',
+        hurt: 'assets/octopus.png',
+        die: 'assets/octopus.png',
+        run: 'assets/octopus.png',
+        sleep: 'assets/octopus.png',
+        wakeup: 'assets/octopus.png'
+    }
+};
+
+// Alien enemy data (appears at level 2+)
+const ALIEN_DATA = {
+    name: 'Alien',
+    baseHP: 40,
+    baseAttack: 10,
+    baseDefense: 6,
+    minLevel: 2,
+    variableDamage: true,
+    projectileType: 'alien',
+    sprites: {
+        idle: 'assets/alien.png',
+        attack1: 'assets/alien.png',
+        attack2: 'assets/alien.png',
+        hurt: 'assets/alien.png',
+        die: 'assets/alien.png',
+        run: 'assets/alien.png',
+        sleep: 'assets/alien.png',
+        wakeup: 'assets/alien.png'
+    }
+};
+
+// Fire Skull enemy data (appears at level 5+)
+const FIRE_SKULL_DATA = {
+    name: 'Fire Skull',
+    baseHP: 45,
+    baseAttack: 18,
+    baseDefense: 8,
+    minLevel: 5,
+    immunities: ['fire', 'spark'],
+    weakness: 'freeze',
+    weaknessDamage: 18,
+    projectileType: 'fire-explosion',
+    sprites: {
+        idle: 'assets/enemies/fire-skull/fire-skull-idle.png',
+        attack1: 'assets/enemies/fire-skull/fire-skull-explosion.png',
+        attack2: 'assets/enemies/fire-skull/fire-skull-explosion.png',
+        hurt: 'assets/enemies/fire-skull/fire-skull-idle.png',
+        die: 'assets/enemies/fire-skull/fire-skull-idle.png',
+        run: 'assets/enemies/fire-skull/fire-skull-idle.png',
+        sleep: 'assets/enemies/fire-skull/fire-skull-idle.png',
+        wakeup: 'assets/enemies/fire-skull/fire-skull-idle.png'
+    }
+};
+
+// Ogre enemy data (appears at level 13+)
+const OGRE_DATA = {
+    name: 'Ogre',
+    baseHP: 80,
+    baseAttack: 22,
+    baseDefense: 15,
+    minLevel: 13,
+    vulnerableToEvasion: true, // After player evades, next 2 attacks miss
+    sprites: {
+        idle: 'assets/enemies/ogre/ogre-idle.png',
+        attack1: 'assets/enemies/ogre/ogre-attack.png',
+        attack2: 'assets/enemies/ogre/ogre-attack.png',
+        hurt: 'assets/enemies/ogre/ogre-idle.png',
+        die: 'assets/enemies/ogre/ogre-idle.png',
+        run: 'assets/enemies/ogre/ogre-idle.png',
+        sleep: 'assets/enemies/ogre/ogre-idle.png',
+        wakeup: 'assets/enemies/ogre/ogre-idle.png'
+    }
+};
+
+const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA, FIRE_SKULL_DATA, OGRE_DATA];
 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
@@ -207,6 +293,25 @@ function createRandomEnemy(playerLevel) {
     if (enemyData.projectileType) {
         enemy.projectileType = enemyData.projectileType;
     }
+    if (enemyData.drenchAttack) {
+        enemy.drenchAttack = true;
+    }
+    if (enemyData.hugAttack) {
+        enemy.hugAttack = true;
+    }
+    if (enemyData.variableDamage) {
+        enemy.variableDamage = true;
+    }
+    if (enemyData.immunities) {
+        enemy.immunities = enemyData.immunities;
+    }
+    if (enemyData.weakness) {
+        enemy.weakness = enemyData.weakness;
+        enemy.weaknessDamage = enemyData.weaknessDamage;
+    }
+    if (enemyData.vulnerableToEvasion) {
+        enemy.vulnerableToEvasion = true;
+    }
 
     enemy.scaleToLevel(playerLevel);
     enemy.level = playerLevel; // Store level for XP calculations
@@ -223,7 +328,7 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
         spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
         
         // Remove all animation classes
-        spriteElement.classList.remove('bat-idle', 'bat-attack', 'bat-hurt', 'bat2-idle', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle');
+        spriteElement.classList.remove('bat-idle', 'bat-attack', 'bat-hurt', 'bat2-idle', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle', 'procedural-idle', 'procedural-attack');
         
         // Add appropriate animation class based on enemy type
         const isBat = enemy.name === 'Lazy Bat';
@@ -232,6 +337,7 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
         const isGhost = enemy.name === 'Ghost Task Stopper';
         const isMedusa = enemy.name === 'Medusa';
         const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
+        const isProcedural = enemy.name === 'Octopus' || enemy.name === 'Alien' || enemy.name === 'Fire Skull' || enemy.name === 'Ogre';
         
         if (animationKey === 'attack1' || animationKey === 'attack2') {
             if (isBat) spriteElement.classList.add('bat-attack');
@@ -239,12 +345,14 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
             else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
             else if (isMedusa) spriteElement.classList.add('medusa-idle');
+            else if (isProcedural) spriteElement.classList.add('procedural-attack');
         } else if (animationKey === 'hurt') {
             if (isBat) spriteElement.classList.add('bat-hurt');
             else if (isBat2) spriteElement.classList.add('bat2-idle');
             else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
             else if (isMedusa) spriteElement.classList.add('medusa-idle');
+            else if (isProcedural) spriteElement.classList.add('procedural-idle');
         } else {
             if (isBat) spriteElement.classList.add('bat-idle');
             else if (isBat2) spriteElement.classList.add('bat2-idle');
@@ -252,6 +360,7 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
             else if (isEye) spriteElement.classList.add('eye-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
             else if (isMedusa) spriteElement.classList.add('medusa-idle');
+            else if (isProcedural) spriteElement.classList.add('procedural-idle');
         }
 
         setTimeout(() => {

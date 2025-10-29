@@ -31,17 +31,29 @@ class BattleManager {
         this.battleLog = [];
         this.attackCount = 0;    // Track attack count for walk+attack animation
 
-        // Set battle background based on level
+        // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');
-        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple');
-        if (this.hero.level >= 12) {
-            battleContainer.classList.add('bg-night-town');
-        } else if (this.hero.level >= 5) {
-            battleContainer.classList.add('bg-temple'); // Temple arena for Slime, Medusa, Ghost levels
-        } else {
-            battleContainer.classList.add('bg-city'); // City background for early levels
-        }
+        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate');
         
+        // Determine available arenas based on level
+        const availableArenas = [];
+        if (this.hero.level >= 1) availableArenas.push('bg-city'); // city_sunset at level 1
+        if (this.hero.level >= 2) availableArenas.push('bg-ocean');
+        if (this.hero.level >= 5) availableArenas.push('bg-temple');
+        if (this.hero.level >= 12) availableArenas.push('bg-night-town');
+        if (this.hero.level >= 13) availableArenas.push('bg-skull-gate'); // Skull Gate at level 13+
+        
+        // Alternating encounter system: rotate through available arenas
+        if (!window.battleArenaIndex) window.battleArenaIndex = 0;
+        const arenaClass = availableArenas[window.battleArenaIndex % availableArenas.length];
+        battleContainer.classList.add(arenaClass);
+        window.battleArenaIndex++;
+        
+        // Play battle music
+        if (window.audioManager) {
+            window.audioManager.playMusic('battleMusic', 0.4);
+        }
+
         // Show battle arena
         showBattle(this.hero, this.enemy);
 
@@ -119,6 +131,11 @@ class BattleManager {
         const damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
         const isDead = this.enemy.takeDamage(damage);
 
+        // Play attack sound
+        if (window.audioManager) {
+            window.audioManager.playSound('monsterAttack', 0.6);
+        }
+
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
@@ -194,6 +211,11 @@ class BattleManager {
     // Player defends - activates defense mode
     async playerDefend() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        if (this.defendBlocked > 0) {
+            addBattleLog(`❌ Defend is blocked for ${this.defendBlocked} more turn(s)!`);
+            return;
+        }
 
         this.state = BattleState.ANIMATING;
         this.defendActive = true; // Flag to use defense gauge on next hit
@@ -208,6 +230,12 @@ class BattleManager {
     // Player uses fireball
     async playerFireball() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        if (this.fireballBlocked) {
+            addBattleLog('❌ Fireball is blocked by Drench!');
+            return;
+        }
+        
         if (this.attackGauge < 30) {
             addBattleLog('❌ Need 30 attack gauge for fireball!');
             return;
@@ -228,6 +256,11 @@ class BattleManager {
         // Play hero throw animation for fireball
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
+
+        // Play fireball sound
+        if (window.audioManager) {
+            window.audioManager.playSound('fireball', 0.7);
+        }
 
         // Play fireball animation
         await playFireballAnimation(
@@ -475,6 +508,11 @@ class BattleManager {
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.defense_refill--;
         
+        // Play item use sound
+        if (window.audioManager) {
+            window.audioManager.playSound('useItemBattle', 0.6);
+        }
+        
         const refillAmount = 50;
         this.defenseGauge = Math.min(100, this.defenseGauge + refillAmount);
         
@@ -512,6 +550,117 @@ class BattleManager {
 
         await new Promise(resolve => setTimeout(resolve, 1000));
         await this.enemyTurn();
+    }
+
+    // Player uses Blue Flame
+    async playerBlueFlame() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        if (this.attackGauge < 20) {
+            addBattleLog('❌ Need 20 attack gauge for Blue Flame!');
+            return;
+        }
+
+        const blueFlameCount = gameState.battleInventory?.blue_flame || 0;
+        if (blueFlameCount <= 0) {
+            addBattleLog('❌ No Blue Flames left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 20;
+        gameState.battleInventory.blue_flame--;
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero throw animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play blue flame animation
+        await playBlueFlameAnimation(
+            document.getElementById('heroSprite'),
+            document.getElementById('enemySprite')
+        );
+
+        // Calculate damage (20 base damage)
+        const damage = 20;
+        const isDead = this.enemy.takeDamage(damage);
+        addBattleLog(`🔵🔥 Blue Flame dealt ${damage} damage!`);
+        updateBattleUI(this.hero, this.enemy);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        if (isDead) {
+            this.state = BattleState.VICTORY;
+            await this.endBattle('victory');
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+        }
+    }
+
+    // Player uses Procrastination Ghost
+    async playerProcrastinationGhost() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        if (this.attackGauge < 25) {
+            addBattleLog('❌ Need 25 attack gauge for Procrastination Ghost!');
+            return;
+        }
+
+        const ghostCount = gameState.battleInventory?.procrastination_ghost || 0;
+        if (ghostCount <= 0) {
+            addBattleLog('❌ No Procrastination Ghosts left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 25;
+        gameState.battleInventory.procrastination_ghost--;
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero throw animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play procrastination ghost animation
+        await playProcrastinationGhostAnimation(
+            document.getElementById('heroSprite'),
+            document.getElementById('enemySprite')
+        );
+
+        // Calculate variable damage (10-16)
+        const damage = Math.floor(Math.random() * 7) + 10; // Random between 10-16
+        const isDead = this.enemy.takeDamage(damage);
+        addBattleLog(`👻 Procrastination Ghost dealt ${damage} damage and made enemy skip next turn!`);
+        updateBattleUI(this.hero, this.enemy);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        if (isDead) {
+            this.state = BattleState.VICTORY;
+            await this.endBattle('victory');
+        } else {
+            // Enemy skips turn, go back to player
+            addBattleLog('👻 Enemy is procrastinating and skips their turn!');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Refill gauges slightly for next turn
+            this.attackGauge = Math.min(100, this.attackGauge + 15);
+            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
+            
+            this.state = BattleState.PLAYER_TURN;
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+        }
     }
 
     // Enemy turn
@@ -580,14 +729,78 @@ class BattleManager {
             return;
         }
         
+        // Check for Octopus drench attack (50% chance)
+        const useDrench = this.enemy.drenchAttack && Math.random() < 0.5;
+        
+        // Check for Octopus hug attack (30% chance)
+        const useHug = this.enemy.hugAttack && !useDrench && Math.random() < 0.3;
+        
+        if (useDrench) {
+            // Drench attack
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Show splash projectile
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playSplashAnimation(enemySprite, heroSprite);
+            
+            // Apply drench effect: 10 damage + block fireball for 1 turn
+            this.hero.hp = Math.max(0, this.hero.hp - 10);
+            this.fireballBlocked = true;
+            addBattleLog(`💦 ${this.enemy.name}'s Drench attack dealt 10 damage and blocked fireball!`);
+            
+            // Play hero hurt animation
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            startHeroAnimation('idle');
+            
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.state = BattleState.PLAYER_TURN;
+            return;
+        } else if (useHug) {
+            // Hug attack
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Apply hug effect: block defend for 2 turns
+            this.defendBlocked = 2;
+            addBattleLog(`🐙 ${this.enemy.name}'s Hug blocked defend for 2 turns!`);
+            
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            this.state = BattleState.PLAYER_TURN;
+            return;
+        }
+        
         // Normal attack
         await playEnemyAnimation(this.enemy, 'attack1', 600);
+        
+        // If Lazy Bat, shoot rock projectile
+        if (this.enemy.name === 'Lazy Bat') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playBatRockProjectile(enemySprite, heroSprite);
+        }
         
         // If ghost enemy, shoot waveform projectile
         if (this.enemy.projectileType === 'waveform') {
             const enemySprite = document.getElementById('enemySprite');
             const heroSprite = document.getElementById('heroSprite');
             await playWaveformAnimation(enemySprite, heroSprite);
+        }
+        
+        // If alien enemy, shoot alien projectile
+        if (this.enemy.projectileType === 'alien') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playAlienProjectile(enemySprite, heroSprite);
+        }
+        
+        // If Fire Skull, show explosion animation
+        if (this.enemy.projectileType === 'fire-explosion') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playFireExplosion(enemySprite, heroSprite);
         }
 
         // Check if Invisibility Cloak is active
@@ -600,8 +813,18 @@ class BattleManager {
             return;
         }
         
+        // Play enemy attack sound
+        if (window.audioManager) {
+            window.audioManager.playSound('enemyAttack', 0.6);
+        }
+
         // Calculate damage
         let damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+        
+        // Alien variable damage (5 or 15)
+        if (this.enemy.variableDamage) {
+            damage = Math.random() < 0.5 ? 5 : 15;
+        }
         
         // Apply damage cap if enemy has one
         if (this.enemy.maxDamage) {
@@ -656,6 +879,14 @@ class BattleManager {
             this.state = BattleState.DEFEAT;
             await this.endBattle('defeat');
         } else {
+            // Decrement block counters
+            if (this.fireballBlocked) {
+                this.fireballBlocked = false;
+            }
+            if (this.defendBlocked > 0) {
+                this.defendBlocked--;
+            }
+            
             this.state = BattleState.PLAYER_TURN;
             await new Promise(resolve => setTimeout(resolve, 500));
             addBattleLog('⚔️ Your turn!');
@@ -729,6 +960,11 @@ class BattleManager {
             this.hero.defenseGauge = 100;
             updateBattleUI(this.hero, this.enemy);
             saveGameState();
+        }
+
+        // Stop battle music
+        if (window.audioManager) {
+            window.audioManager.stopMusic();
         }
 
         // Fade out after 2 seconds

@@ -45,11 +45,41 @@ function initEnemySprite(enemyData) {
         spriteElement.style.backgroundImage = `url('assets/enemies/flying-eye-idle-sheet.png')`;
         spriteElement.style.backgroundSize = '384px 48px'; // 8 frames × 48px = 384px
         spriteElement.classList.add('eye-idle');
-    } else {
-        // Default fallback
+    } else if (enemyData.name === 'Fire Skull') {
+        // Fire Skull: single sprite with procedural animation
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
-        spriteElement.classList.add('bat-idle');
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(2.5)';
+        spriteElement.classList.add('procedural-idle');
+    } else if (enemyData.name === 'Ogre') {
+        // Ogre: large enemy with procedural animation
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(3)';
+        spriteElement.classList.add('procedural-idle');
+    } else if (enemyData.name === 'Octopus') {
+        // Octopus: single sprite with procedural animation
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(2)';
+        spriteElement.classList.add('procedural-idle');
+    } else if (enemyData.name === 'Alien') {
+        // Alien: single sprite with procedural animation
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(2)';
+        spriteElement.classList.add('procedural-idle');
+    } else {
+        // Default fallback with procedural animation
+        spriteElement.classList.add('enemy-sprite-large');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(2)';
+        spriteElement.classList.add('procedural-idle');
     }
 }
 
