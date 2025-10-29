@@ -48,6 +48,12 @@ function updateThemesDisplay() {
     const grid = document.getElementById('themesGrid');
     if (!grid) return;
     
+    // Update XP Coins display
+    const xpCoinsDisplay = document.getElementById('xpCoinsThemes');
+    if (xpCoinsDisplay) {
+        xpCoinsDisplay.textContent = window.gameState.jerryXP || 0;
+    }
+    
     grid.innerHTML = '';
     
     // Render each theme

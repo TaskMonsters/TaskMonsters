@@ -287,6 +287,9 @@
     width: 90%;
     max-width: 400px;
     margin: 0 auto 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .btn-action, .btn-flee {

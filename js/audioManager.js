@@ -10,7 +10,7 @@ class AudioManager {
         this.music = {};
         this.currentMusicSource = null;
         this.isMusicPlaying = false;
-        this.basePath = 'assets/audio/';
+        this.basePath = 'assets/sounds/';
         this.soundEnabled = true;
         this.initialized = false;
         
@@ -56,7 +56,7 @@ class AudioManager {
             console.log(`✓ Loaded audio: ${name}`);
             return true;
         } catch (error) {
-            console.error(`✗ Error loading audio file ${path}:`, error.message);
+            console.warn(`Missing sound: ${name}`);
             return false;
         }
     }
@@ -152,17 +152,17 @@ class AudioManager {
         
         const soundMap = {
             // Sound Effects
-            'monsterAttack': 'Monster Attack.mp3',
-            'fireball': 'Fireball.mp3',
-            'useItemBattle': 'When users use any item during a battle or use items outside of battle.mp3',
-            'useItemOutsideBattle': 'When users use any item outside of battle mode.mp3',
-            'shopPurchase': 'When users buy any item from the shop or themes pages.mp3',
-            'enemyAttack': 'Enemy Attack.mp3',
-            'taskComplete': 'Quick Task & Regular Task Completion.mp3',
+            'monsterAttack': 'monsterAttack.mp3',
+            'fireball': 'fireball.mp3',
+            'useItemBattle': 'useItemBattle.mp3',
+            'useItemOutside': 'useItemOutside.mp3',
+            'shopPurchase': 'shopPurchase.mp3',
+            'enemyAttack': 'enemyAttack.mp3',
+            'taskComplete': 'taskComplete.mp3',
             
             // Music
-            'battleMusic': 'Battle Mode Music.mp3',
-            'questGiverMusic': 'Quest Giver Mode.mp3'
+            'battleMusic': 'battleMusic.mp3',
+            'questGiver': 'questGiver.mp3'
         };
 
         const loadPromises = Object.keys(soundMap).map(name => 
