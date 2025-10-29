@@ -650,12 +650,13 @@ function buyBattleItem(itemKey, cost) {
         alert('You need Level 3 to buy the Invisibility Cloak!');
         return;
     }
-    if (gameState.xp < cost) {
-        alert('Not enough XP!');
+    if (gameState.xpBalance < cost) {
+        alert('Not enough XP Balance!');
         return;
     }
 
-    gameState.xp -= cost;
+    gameState.xpBalance -= cost;
+    gameState.xp = Math.max(0, (gameState.xp || 0) - cost);
     gameState.battleInventory[itemKey]++;
     
     if (!gameState.unlockedBattleItems.includes(itemKey)) {
