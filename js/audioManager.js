@@ -64,6 +64,11 @@ class AudioManager {
     playSound(name, volume = 1.0) {
         if (!this.soundEnabled || !this.initialized) return;
         
+        // Resume AudioContext if suspended (required by browser autoplay policy)
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+        
         const buffer = this.sounds[name];
         if (!buffer) {
             console.warn(`Sound not loaded: ${name}`);
@@ -87,6 +92,11 @@ class AudioManager {
 
     playMusic(name, volume = 0.5) {
         if (!this.soundEnabled || !this.initialized) return;
+        
+        // Resume AudioContext if suspended (required by browser autoplay policy)
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
         
         const buffer = this.music[name];
         if (!buffer) {
@@ -133,6 +143,13 @@ class AudioManager {
         
         if (!this.soundEnabled) {
             this.stopMusic();
+        } else {
+            // Resume AudioContext when sound is enabled
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume().then(() => {
+                    console.log('🔊 Audio enabled - AudioContext resumed');
+                });
+            }
         }
         
         return this.soundEnabled;
@@ -144,6 +161,13 @@ class AudioManager {
         
         if (!enabled) {
             this.stopMusic();
+        } else {
+            // Resume AudioContext when sound is enabled
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume().then(() => {
+                    console.log('🔊 Audio enabled - AudioContext resumed');
+                });
+            }
         }
     }
 

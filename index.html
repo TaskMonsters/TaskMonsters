@@ -6785,7 +6785,8 @@
             }
             
             // Add XP (with boost if active)
-            let xpToAdd = basePoints * 2;
+            // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio)
+            let xpToAdd = basePoints * 0.8;
             if (gameState.xpBoostActive) {
                 xpToAdd *= 2;
                 gameState.xpBoostActive = false;  // Consume boost
@@ -6991,7 +6992,8 @@
             }
             
             // Add XP (with boost if active)
-            let xpToAdd = basePoints * 2;
+            // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio)
+            let xpToAdd = basePoints * 0.8;
             if (gameState.xpBoostActive) {
                 xpToAdd *= 2;
                 gameState.xpBoostActive = false;  // Consume boost
@@ -7131,7 +7133,7 @@
         }
 
         function levelUpJerry() {
-            gameState.jerryXP -= gameState.jerryXPToNext;
+            // Don't reset XP Coins - users keep their balance
             gameState.jerryLevel++;
             gameState.jerryXP += 20; // Level-up bonus
             
