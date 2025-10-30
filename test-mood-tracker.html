@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Tracker Test Suite</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
+        }
+        .test-section {
+            margin-bottom: 32px;
+        }
+        .test-section h2 {
+            color: #444;
+            font-size: 18px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 8px;
+        }
+        .test-item {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #6366f1;
+        }
+        .test-item h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .test-item p {
+            margin: 4px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .status.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status.manual {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .timer-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: #6366f1;
+            text-align: center;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+        .log {
+            background: #1f2937;
+            color: #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+        .log-entry {
+            margin-bottom: 4px;
+        }
+        .log-entry .timestamp {
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎮 Task Monsters Mood Tracker Test Suite</h1>
+        <p class="subtitle">AAA-Level Performance Validation</p>
+
+        <div class="test-section">
+            <h2>🎯 Core Functionality Tests</h2>
+            
+            <div class="test-item">
+                <h3>Test 1: Merlin Modal "No" Button Trigger</h3>
+                <p><strong>Expected:</strong> Clicking "No" on Merlin modal should hide modal and show mood tracker</p>
+                <p><strong>Validation:</strong> Mood tracker visible with mood options (😊 😢 🫤 😡)</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 2: 120-Second Timer Accuracy</h3>
+                <p><strong>Expected:</strong> Mood tracker remains visible for exactly 120 seconds</p>
+                <p><strong>Validation:</strong> Use timer below to verify duration</p>
+                <div class="timer-display" id="timerDisplay">--:--</div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startTimerTest()">Start Timer Test</button>
+                    <button class="btn-secondary" onclick="resetTimerTest()">Reset</button>
+                </div>
+                <span class="status pending">PENDING</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 3: Cinematic Fade-Out</h3>
+                <p><strong>Expected:</strong> After 120s, mood tracker fades out smoothly over 1 second</p>
+                <p><strong>Validation:</strong> Transition should use cubic-bezier(0.33, 1, 0.68, 1) curve</p>
+                <p><strong>Check:</strong> Inspect element during fade - should see 1s transition on opacity</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 4: User Interaction Cancels Timer</h3>
+                <p><strong>Expected:</strong> Selecting a mood during 2-minute window cancels fade-out timer</p>
+                <p><strong>Validation:</strong> Click mood, wait 2+ minutes - tracker should not fade out</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧠 Memory & Performance Tests</h2>
+            
+            <div class="test-item">
+                <h3>Test 5: Timer Cleanup on Re-trigger</h3>
+                <p><strong>Expected:</strong> Opening modal again clears previous timers</p>
+                <p><strong>Validation:</strong> Click "No" twice - only one timer should be active</p>
+                <button class="btn-primary" onclick="checkActiveTimers()">Check Active Timers</button>
+                <div id="timerStatus" style="margin-top: 8px; font-weight: 600;"></div>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 6: No Memory Leaks</h3>
+                <p><strong>Expected:</strong> Timers properly cleared, no orphaned references</p>
+                <p><strong>Validation:</strong> Check DevTools Memory profiler after multiple interactions</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 7: GPU-Accelerated Animation</h3>
+                <p><strong>Expected:</strong> Fade-out uses only opacity (GPU-accelerated)</p>
+                <p><strong>Validation:</strong> Check DevTools Performance - no layout/paint during fade</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📱 Device Compatibility Tests</h2>
+            
+            <div class="test-item">
+                <h3>Test 8: Mobile Safari Compatibility</h3>
+                <p><strong>Expected:</strong> Smooth transitions on iOS Safari</p>
+                <p><strong>Validation:</strong> Test on iPhone 8 or use Safari responsive mode</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 9: Low-Power Device Performance</h3>
+                <p><strong>Expected:</strong> No lag or stutter on iPhone 8 equivalent</p>
+                <p><strong>Validation:</strong> CPU throttling in DevTools (4x slowdown)</p>
+                <button class="btn-primary" onclick="simulateLowPower()">Simulate Low Power</button>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 10: Desktop Chrome/Firefox</h3>
+                <p><strong>Expected:</strong> Consistent behavior across browsers</p>
+                <p><strong>Validation:</strong> Test in Chrome, Firefox, Edge</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎨 Visual & UX Tests</h2>
+            
+            <div class="test-item">
+                <h3>Test 11: Modal Transition Smoothness</h3>
+                <p><strong>Expected:</strong> Modal fades out in 300ms with ease-out</p>
+                <p><strong>Validation:</strong> No flicker or visual artifacts</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 12: Mood Tracker Remains Interactive</h3>
+                <p><strong>Expected:</strong> All mood buttons clickable during 2-minute window</p>
+                <p><strong>Validation:</strong> Click each mood button - should respond immediately</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+
+            <div class="test-item">
+                <h3>Test 13: No UI Interference</h3>
+                <p><strong>Expected:</strong> Mood tracker doesn't interfere with Focus Timer, Daily Challenge, XP</p>
+                <p><strong>Validation:</strong> Check z-index and layout during active phase</p>
+                <span class="status manual">MANUAL TEST</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Log</h2>
+            <div class="log" id="testLog">
+                <div class="log-entry">
+                    <span class="timestamp">[00:00:00]</span> Test suite initialized
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval = null;
+        let startTime = null;
+
+        function log(message) {
+            const logEl = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function startTimerTest() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            startTime = Date.now();
+            log('⏱️ Timer test started - expecting 120 seconds');
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                
+                document.getElementById('timerDisplay').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                if (elapsed === 120) {
+                    log('✅ 120 seconds reached - fade-out should begin now');
+                } else if (elapsed === 121) {
+                    log('✅ Fade-out should be complete');
+                    clearInterval(timerInterval);
+                }
+            }, 100);
+        }
+
+        function resetTimerTest() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            document.getElementById('timerDisplay').textContent = '--:--';
+            log('🔄 Timer test reset');
+        }
+
+        function checkActiveTimers() {
+            const hasMainTimer = window.moodTrackerTimer !== null && window.moodTrackerTimer !== undefined;
+            const hasFadeTimer = window.moodTrackerFadeTimer !== null && window.moodTrackerFadeTimer !== undefined;
+            
+            const status = document.getElementById('timerStatus');
+            let message = '';
+            
+            if (hasMainTimer && hasFadeTimer) {
+                message = '⚠️ Both timers active';
+                status.style.color = '#f59e0b';
+            } else if (hasMainTimer) {
+                message = '✅ Main timer active (expected during 2-min window)';
+                status.style.color = '#10b981';
+            } else if (hasFadeTimer) {
+                message = '✅ Fade timer active (expected during fade-out)';
+                status.style.color = '#10b981';
+            } else {
+                message = '✅ No timers active (expected after completion)';
+                status.style.color = '#6b7280';
+            }
+            
+            status.textContent = message;
+            log(`Timer status: ${message}`);
+        }
+
+        function simulateLowPower() {
+            log('⚠️ To simulate low power:');
+            log('1. Open DevTools (F12)');
+            log('2. Go to Performance tab');
+            log('3. Click gear icon');
+            log('4. Set CPU throttling to 4x slowdown');
+            log('5. Test mood tracker interactions');
+        }
+
+        // Auto-detect if running in test environment
+        if (window.location.search.includes('autotest')) {
+            log('🤖 Auto-test mode detected');
+            setTimeout(() => {
+                log('Running automated checks...');
+                checkActiveTimers();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

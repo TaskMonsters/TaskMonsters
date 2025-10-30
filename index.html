@@ -2898,7 +2898,8 @@
         <p class="quest-prompt-message">Would you like a Quest or a Quiz today?</p>
         <div class="quest-prompt-buttons">
             <button id="merlinQuestBtn" class="quest-prompt-btn quest-prompt-yes">Quest</button>
-            <button id="merlinQuizBtn" class="quest-prompt-btn quest-prompt-no">Quiz</button>
+            <button id="merlinQuizBtn" class="quest-prompt-btn quest-prompt-yes">Quiz</button>
+            <button id="merlinNoBtn" class="quest-prompt-btn quest-prompt-no">No</button>
         </div>
     </div>
 </div>
@@ -4532,6 +4533,11 @@
         }
 
         window.selectMood = function(moodKey) {
+            // Cancel pending mood tracker timers - user has interacted
+            if (window.clearMoodTrackerTimers) {
+                window.clearMoodTrackerTimers();
+            }
+            
             const tooltip = document.getElementById("taskPalTooltip");
             const hero = document.getElementById("mainHeroSprite");
             const spritePrefix = getCurrentSpritePrefix();
@@ -4631,10 +4637,11 @@
         window.addEventListener("load", () => {
             const savedMood = localStorage.getItem("userMood");
             const hero = document.getElementById("mainHeroSprite");
+            const spritePrefix = getCurrentSpritePrefix();
             
-            // Always start with idle animation on page load
+            // Always start with idle animation on page load using user's selected monster
             if (hero) {
-                hero.src = "assets/heroes/hero-idle.png";
+                hero.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
                 hero.style.animation = "hero-idle-anim 0.8s steps(4) infinite";
             }
             

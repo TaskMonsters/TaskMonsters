@@ -645,9 +645,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (noBtn) {
         noBtn.addEventListener('click', () => {
-            // Hide modal
+            // Clear any existing mood tracker timers
+            if (window.clearMoodTrackerTimers) {
+                window.clearMoodTrackerTimers();
+            }
+            
+            // Hide modal with smooth transition
             if (modal) {
-                modal.classList.add('hidden');
+                modal.style.transition = 'opacity 0.3s ease-out';
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.style.opacity = '';
+                }, 300);
             }
             
             // Clear active quest
@@ -655,14 +665,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.questGiver.activeQuest = null;
             }
             
-            // Extend habit tracker visibility by 2 minutes
-            const habitTracker = document.getElementById('habitTracker');
-            if (habitTracker) {
-                habitTracker.style.transition = 'opacity 0.5s ease';
-                habitTracker.style.opacity = '1';
+            // Show mood tracker and keep it visible for 2 minutes
+            const tooltip = document.getElementById('taskPalTooltip');
+            if (tooltip && window.showMoodTracker) {
+                window.showMoodTracker();
                 
-                setTimeout(() => {
-                    habitTracker.style.opacity = '';
+                // Ensure tooltip is fully visible and interactive
+                tooltip.style.opacity = '1';
+                tooltip.style.pointerEvents = 'auto';
+                tooltip.style.transition = 'none';
+                
+                // Start 120-second countdown with cinematic fade-out
+                window.moodTrackerTimer = setTimeout(() => {
+                    // Cinematic fade-out (1s cubic ease-out)
+                    tooltip.style.transition = 'opacity 1s cubic-bezier(0.33, 1, 0.68, 1)';
+                    tooltip.style.opacity = '0';
+                    tooltip.style.pointerEvents = 'none';
+                    
+                    // Clean up after fade completes
+                    window.moodTrackerFadeTimer = setTimeout(() => {
+                        tooltip.classList.remove('visible');
+                        tooltip.style.transition = '';
+                        tooltip.style.opacity = '';
+                        tooltip.style.pointerEvents = '';
+                    }, 1000);
                 }, 120000); // 120 seconds (2 minutes)
             }
         });
