@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Persistence</title>
+</head>
+<body>
+    <h1>Battle Inventory Persistence Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        // Check localStorage
+        const saved = localStorage.getItem('taskRockGameState');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            output.innerHTML = `
+                <h2>LocalStorage Contents:</h2>
+                <pre>${JSON.stringify(parsed.battleInventory, null, 2)}</pre>
+                <h3>Health Potion Count: ${parsed.battleInventory?.health_potion || 'undefined'}</h3>
+                <h3>XP: ${parsed.jerryXP || parsed.xp || 0}</h3>
+                <h3>Unlocked Items:</h3>
+                <pre>${JSON.stringify(parsed.unlockedBattleItems, null, 2)}</pre>
+            `;
+        } else {
+            output.innerHTML = '<p>No saved game state found</p>';
+        }
+    </script>
+</body>
+</html>

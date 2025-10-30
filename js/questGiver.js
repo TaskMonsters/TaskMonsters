@@ -90,7 +90,24 @@ class QuestGiver {
             { id: 'q52', text: 'Do 20 squats during a break', category: 'Fitness', difficulty: 'Easy', xp: 15, duration: 24 },
             { id: 'q53', text: 'Stretch for 10 minutes after exercise', category: 'Fitness', difficulty: 'Easy', xp: 15, duration: 24 },
             { id: 'q54', text: 'Track your workout progress in a journal', category: 'Fitness', difficulty: 'Easy', xp: 15, duration: 24 },
-            { id: 'q55', text: 'Increase weight or reps on one exercise', category: 'Fitness', difficulty: 'Medium', xp: 25, duration: 48 }
+            { id: 'q55', text: 'Increase weight or reps on one exercise', category: 'Fitness', difficulty: 'Medium', xp: 25, duration: 48 },
+            
+            // Sad Mood Quest Pack - Calming, self-care, mindfulness
+            { id: 'q56', text: 'Take three slow breaths', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q57', text: 'Drink a full glass of water', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q58', text: 'Stretch your shoulders or neck', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q59', text: 'Write one thing you\'re grateful for', category: 'Mindfulness', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q60', text: 'Doodle or scribble anything', category: 'Creative', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q61', text: 'Step outside or open a window for fresh air', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q62', text: 'Sit quietly for one minute and breathe', category: 'Grounding', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q63', text: 'Listen to a song that soothes you', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q64', text: 'Tidy one small area (desk, cup, corner)', category: 'Self-Care', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q65', text: 'Notice three things around you right now', category: 'Grounding', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q66', text: 'Write a kind thought toward yourself', category: 'Mindfulness', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q67', text: 'Close your eyes and feel your heartbeat', category: 'Grounding', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q68', text: 'Imagine a calm place and picture yourself there', category: 'Mindfulness', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q69', text: 'Wash your face or hands with warm water', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q70', text: 'Smile at your Task Monster', category: 'Creative', difficulty: 'Easy', xp: 10, duration: 24 }
         ];
     }
 
@@ -208,9 +225,27 @@ class QuestGiver {
             }
         }
         
+        // Show prompt modal
+        const modal = document.getElementById('questPromptModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        } else {
+            // Fallback: show quest giver directly if modal missing
+            this.showQuestGiverDirect();
+        }
+    }
+    
+    // Show quest giver directly (after modal Yes or fallback)
+    showQuestGiverDirect() {
         const questGiverUI = document.getElementById('questGiverUI');
         if (!questGiverUI) {
             console.error('Quest Giver UI not found');
+            return;
+        }
+
+        const encounter = this.activeQuest;
+        if (!encounter) {
+            console.error('No active encounter');
             return;
         }
 
@@ -225,6 +260,17 @@ class QuestGiver {
         this.initCrowSprite();
 
         questGiverUI.classList.remove('hidden');
+        
+        // Play quest giver music only if UI is actually visible
+        if (window.audioManager && !questGiverUI.classList.contains('hidden')) {
+            // Small delay to ensure UI is rendered
+            setTimeout(() => {
+                if (!questGiverUI.classList.contains('hidden')) {
+                    console.log('🎵 Playing quest giver music');
+                    window.audioManager.playQuestMusic();
+                }
+            }, 100);
+        }
     }
 
     // Show quest UI
@@ -359,6 +405,14 @@ class QuestGiver {
             // Track quiz passed
             window.gameState.questQuizzesPassed = (window.gameState.questQuizzesPassed || 0) + 1;
             
+            // Track quiz perfect streak
+            window.gameState.quizPerfectStreak = (window.gameState.quizPerfectStreak || 0) + 1;
+            
+            // Check achievements
+            if (window.achievementTracker) {
+                window.achievementTracker.checkAchievements();
+            }
+            
             if (typeof window.addJerryXP === 'function') {
                 window.addJerryXP(this.activeQuest.xpReward);
                 console.log(`Quiz correct! Added ${this.activeQuest.xpReward} XP. Total: ${window.gameState.jerryXP}`);
@@ -386,6 +440,9 @@ class QuestGiver {
             // Track quiz failed
             window.gameState.questQuizzesFailed = (window.gameState.questQuizzesFailed || 0) + 1;
             
+            // Reset quiz perfect streak on failure
+            window.gameState.quizPerfectStreak = 0;
+            
             const oldXP = window.gameState.jerryXP || 0;
             window.gameState.jerryXP = Math.max(0, oldXP - this.activeQuest.xpPenalty);
             console.log(`Quiz wrong! Deducted ${this.activeQuest.xpPenalty} XP. Total: ${window.gameState.jerryXP}`);
@@ -407,6 +464,11 @@ class QuestGiver {
 
     // Pass quiz (decline to answer)
     passQuiz() {
+        // Reset quiz perfect streak when declining
+        if (window.gameState) {
+            window.gameState.quizPerfectStreak = 0;
+        }
+        
         this.close();
         if (typeof showMessage === 'function') {
             showMessage('Quiz declined. The crow flies away...');
@@ -490,6 +552,12 @@ class QuestGiver {
         if (questGiverUI) {
             questGiverUI.classList.add('hidden');
         }
+        
+        // Stop quest music
+        if (window.audioManager) {
+            window.audioManager.stopMusic();
+        }
+        
         this.activeQuest = null;
     }
 }
@@ -549,3 +617,54 @@ setTimeout(() => {
     }
 }, 5000);
 
+
+// Quest prompt modal handlers
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('questPromptModal');
+    const yesBtn = document.getElementById('questPromptYes');
+    const noBtn = document.getElementById('questPromptNo');
+    
+    if (yesBtn) {
+        yesBtn.addEventListener('click', () => {
+            // Initialize audio on user interaction
+            if (window.audioManager) {
+                window.audioManager.init();
+            }
+            
+            // Hide modal
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            
+            // Show quest giver
+            if (window.questGiver) {
+                window.questGiver.showQuestGiverDirect();
+            }
+        });
+    }
+    
+    if (noBtn) {
+        noBtn.addEventListener('click', () => {
+            // Hide modal
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            
+            // Clear active quest
+            if (window.questGiver) {
+                window.questGiver.activeQuest = null;
+            }
+            
+            // Extend habit tracker visibility by 2 minutes
+            const habitTracker = document.getElementById('habitTracker');
+            if (habitTracker) {
+                habitTracker.style.transition = 'opacity 0.5s ease';
+                habitTracker.style.opacity = '1';
+                
+                setTimeout(() => {
+                    habitTracker.style.opacity = '';
+                }, 120000); // 120 seconds (2 minutes)
+            }
+        });
+    }
+});

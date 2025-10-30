@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
+<!-- CRITICAL: Load state before any rendering -->
+<script src="js/instantHydration.js"></script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Task Monsters</title>
@@ -2020,6 +2022,11 @@
       from { object-position: 0 0; }
       to { object-position: -256px 0; }
     }
+    
+    @keyframes hero-walk-anim {
+      from { object-position: 0 0; }
+      to { object-position: -192px 0; }
+    }
 
     /* Native datetime-local input styling is handled by browser */
 
@@ -2749,6 +2756,154 @@
 
 </head>
 <body>
+<!-- Quest Prompt Modal -->
+<div id="questPromptModal" class="quest-prompt-modal hidden">
+    <div class="quest-prompt-content">
+        <div class="quest-prompt-icon">🧙‍♂️</div>
+        <h2 class="quest-prompt-title">Merlin Approaches</h2>
+        <p class="quest-prompt-message">Merlin has a quest for you. Would you like to hear it?</p>
+        <div class="quest-prompt-buttons">
+            <button id="questPromptYes" class="quest-prompt-btn quest-prompt-yes">✨ Yes</button>
+            <button id="questPromptNo" class="quest-prompt-btn quest-prompt-no">❌ No</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.quest-prompt-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.quest-prompt-modal.hidden {
+    display: none;
+}
+
+.quest-prompt-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px 30px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: scaleIn 0.3s ease;
+}
+
+.quest-prompt-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: bounce 1s infinite;
+}
+
+.quest-prompt-title {
+    color: white;
+    font-size: 28px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.quest-prompt-message {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 18px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.quest-prompt-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.quest-prompt-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.quest-prompt-yes {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.quest-prompt-yes:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+}
+
+.quest-prompt-no {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    color: white;
+}
+
+.quest-prompt-no:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(235, 51, 73, 0.4);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes xpFloat {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px) scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-40px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scale(0.8);
+    }
+}
+</style>
+
+<!-- Merlin Intro Modal (appears on app load) -->
+<div id="merlinModal" class="quest-prompt-modal">
+    <div class="quest-prompt-content">
+        <div class="quest-prompt-icon">🧙‍♂️</div>
+        <h2 class="quest-prompt-title">Merlin</h2>
+        <p class="quest-prompt-message">Would you like a Quest or a Quiz today?</p>
+        <div class="quest-prompt-buttons">
+            <button id="merlinQuestBtn" class="quest-prompt-btn quest-prompt-yes">Quest</button>
+            <button id="merlinQuizBtn" class="quest-prompt-btn quest-prompt-no">Quiz</button>
+        </div>
+    </div>
+</div>
+}
+</style>
 
 <!-- ========================================
      ONBOARDING SYSTEM
@@ -2968,8 +3123,8 @@
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
             ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
         </button>
-        <button id="btnBomb" class="btn-action" onclick="battleManager.playerBomb()" style="display: none;">
-            💣 Bomb <span class="item-count" id="bombCount">(0)</span>
+        <button id="btnPrickler" class="btn-action" onclick="battleManager.playerPrickler()" style="display: none;">
+            💣 Prickler <span class="item-count" id="pricklerCount">(0)</span>
         </button>
         <button id="btnFreeze" class="btn-action" onclick="battleManager.playerFreeze()" style="display: none;">
             ❄️ Freeze <span class="item-count" id="freezeCount">(0)</span>
@@ -3243,6 +3398,25 @@
                 </div>
             </div>
 
+            <!-- Focus Timer -->
+            <div class="daily-challenge-section" id="focusTimerCard">
+                <div class="daily-challenge-header" onclick="toggleFocusTimerExpansion()">
+                    <div class="daily-challenge-title">⏱️ Focus Timer</div>
+                    <div class="daily-challenge-toggle" id="focusTimerToggle">▼</div>
+                </div>
+                <div class="daily-challenge-content" id="focusTimerContent" style="display: none;">
+                    <div style="padding: 16px 20px;">
+                        <label for="focusDuration" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Set Timer (minutes):</label>
+                        <input type="number" id="focusDuration" min="1" max="480" value="25" class="form-input" style="margin-bottom: 16px;">
+                        <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
+                        <div style="display: flex; gap: 12px;">
+                            <button id="startFocusTimer" class="btn-primary" style="flex: 1;">Start</button>
+                            <button id="stopFocusTimer" class="btn-secondary" style="flex: 1;">Stop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quest Tasks -->
             <div class="card quest-tasks-card" id="questTasksCard" style="display: none;">
                 <div class="card-header quest-tasks-header">
@@ -3366,6 +3540,12 @@
                 <div class="settings-item">
                     <div class="settings-label">Notifications</div>
                     <div class="settings-toggle" id="notificationsToggle" onclick="toggleNotifications()">
+                        <div class="settings-toggle-slider"></div>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-label">Battle Mode</div>
+                    <div class="settings-toggle active" id="battleModeToggle" onclick="toggleBattleMode()">
                         <div class="settings-toggle-slider"></div>
                     </div>
                 </div>
@@ -3570,11 +3750,13 @@
             // Battle stats
             battlesWon: 0,
             battlesLost: 0,
+            battleStreak: 0,
             // Quest stats
             questQuizzesPassed: 0,
             questQuizzesFailed: 0,
             questTasksAccepted: 0,
             questTasksOffered: 0,
+            quizPerfectStreak: 0,
             // Achievement tracking
             achievementProgress: {},
             quickTaskStartTimes: {},
@@ -3701,48 +3883,82 @@
 
         // Achievements
         const achievements = [
-            // Starter Tier (💚)
+            // Starter Tier (💚) - Task Achievements
             { id: 'task_sprout', name: 'Task Sprout', desc: 'Complete your first regular task', icon: '🌱', requirement: 1, type: 'tasks', tier: 'starter' },
             { id: 'quick_spark', name: 'Quick Spark', desc: 'Complete 3 quick tasks in one day', icon: '⚡', requirement: 3, type: 'quick_daily', tier: 'starter' },
-            { id: 'momentum_builder', name: 'Momentum Builder', desc: 'Complete 5 tasks in one session', icon: '🚀', requirement: 5, type: 'session', tier: 'starter' },
+            { id: 'momentum_builder', name: 'Momentum Builder', desc: 'Complete 5 tasks in one session without leaving', icon: '🚀', requirement: 5, type: 'session', tier: 'starter' },
             { id: 'early_bird', name: 'Early Bird', desc: 'Complete a task before 10 AM', icon: '🌅', requirement: 1, type: 'early_morning', tier: 'starter' },
-            { id: 'weekend_warrior', name: 'Weekend Warrior', desc: 'Complete 2 tasks on a weekend', icon: '🏖️', requirement: 2, type: 'weekend', tier: 'starter' },
-            { id: 'consistency_rookie', name: 'Consistency Rookie', desc: '3-day task streak', icon: '🔥', requirement: 3, type: 'streak', tier: 'starter' },
-            { id: 'zen_mode', name: 'Zen Mode', desc: 'All daily tasks before noon', icon: '🧘', requirement: 1, type: 'before_noon', tier: 'starter' },
-            { id: 'first_flame', name: 'First Flame', desc: 'Earn 100 XP', icon: '✨', requirement: 100, type: 'xp', tier: 'starter' },
-            { id: 'quickfire_pro', name: 'Quickfire Pro', desc: '10 quick tasks total', icon: '⚡', requirement: 10, type: 'quick_total', tier: 'starter' },
-            { id: 'balanced_start', name: 'Balanced Start', desc: 'One quick + one regular task in a day', icon: '⚖️', requirement: 1, type: 'balanced_day', tier: 'starter' },
+            { id: 'weekend_warrior', name: 'Weekend Warrior', desc: 'Complete 2 tasks on Saturday or Sunday', icon: '🏖️', requirement: 2, type: 'weekend', tier: 'starter' },
+            { id: 'consistency_rookie', name: 'Consistency Rookie', desc: 'Complete tasks 3 days in a row', icon: '🔥', requirement: 3, type: 'streak', tier: 'starter' },
+            { id: 'quickfire_pro', name: 'Quickfire Pro', desc: 'Complete 10 quick tasks total', icon: '⚡', requirement: 10, type: 'quick_total', tier: 'starter' },
+            { id: 'balanced_start', name: 'Balanced Start', desc: 'Complete 1 quick task and 1 regular task in same day', icon: '⚖️', requirement: 1, type: 'balanced_day', tier: 'starter' },
             
-            // Intermediate Tier (💙)
-            { id: 'task_commander', name: 'Task Commander', desc: '10 work tasks', icon: '💼', requirement: 10, type: 'tasks', tier: 'intermediate' },
-            { id: 'focus_flow', name: 'Focus Flow', desc: '5 tasks without leaving app', icon: '🎯', requirement: 5, type: 'session', tier: 'intermediate' },
-            { id: 'habit_maker', name: 'Habit Maker', desc: '5-day task streak', icon: '🔥', requirement: 5, type: 'streak', tier: 'intermediate' },
-            { id: 'productivity_pulse', name: 'Productivity Pulse', desc: '50% weekly completion rate', icon: '📊', requirement: 50, type: 'completion_rate', tier: 'intermediate' },
-            { id: 'quick_reflexes', name: 'Quick Reflexes', desc: 'Quick task within 60 seconds', icon: '⏱️', requirement: 1, type: 'quick_fast', tier: 'intermediate' },
-            { id: 'planner_pro', name: 'Planner Pro', desc: '10 tasks in one day', icon: '📋', requirement: 10, type: 'daily_tasks', tier: 'intermediate' },
-            { id: 'no_distractions', name: 'No Distractions', desc: '5 tasks without tab switching', icon: '🎯', requirement: 5, type: 'session', tier: 'intermediate' },
-            { id: 'steady_hands', name: 'Steady Hands', desc: '3-day completion streak', icon: '✋', requirement: 3, type: 'streak', tier: 'intermediate' },
-            { id: 'time_keeper', name: 'Time Keeper', desc: 'Complete a task exactly on time', icon: '⏰', requirement: 1, type: 'on_time', tier: 'intermediate' },
-            { id: 'goal_crusher', name: 'Goal Crusher', desc: 'All tasks done 3 days in a row', icon: '💪', requirement: 3, type: 'all_tasks_streak', tier: 'intermediate' },
+            // Starter Tier (💚) - Battle Achievements
+            { id: 'first_victory', name: 'First Victory', desc: 'Defeat your first enemy in battle mode', icon: '⚔️', requirement: 1, type: 'battles', tier: 'starter' },
+            { id: 'battle_ready', name: 'Battle Ready', desc: 'Win 5 battles total', icon: '🛡️', requirement: 5, type: 'battles', tier: 'starter' },
             
-            // Advanced Tier (💛)
-            { id: 'master_balance', name: 'Master of Balance', desc: 'Equal quick + regular tasks in a week', icon: '⚖️', requirement: 1, type: 'balanced_week', tier: 'advanced' },
-            { id: 'daily_challenger', name: 'Daily Challenger', desc: '7 daily challenges', icon: '🏆', requirement: 7, type: 'challenges', tier: 'advanced' },
-            { id: 'midnight_focus', name: 'Midnight Focus', desc: 'Task between 12-3 AM', icon: '🌙', requirement: 1, type: 'midnight', tier: 'advanced' },
-            { id: 'task_marathoner', name: 'Task Marathoner', desc: '50 total tasks', icon: '🏃', requirement: 50, type: 'tasks', tier: 'advanced' },
-            { id: 'quickstorm', name: 'Quickstorm', desc: '25 quick tasks', icon: '⚡', requirement: 25, type: 'quick_total', tier: 'advanced' },
-            { id: 'planner_legend', name: 'Planner Legend', desc: '7-day streak', icon: '🔥', requirement: 7, type: 'streak', tier: 'advanced' },
-            { id: 'efficiency_expert', name: 'Efficiency Expert', desc: '5 high-priority tasks in a day', icon: '⭐', requirement: 5, type: 'high_priority_day', tier: 'advanced' },
-            { id: 'xp_collector', name: 'XP Collector', desc: '100 XP total', icon: '💎', requirement: 100, type: 'xp', tier: 'advanced' },
-            { id: 'unstoppable_force', name: 'Unstoppable Force', desc: '100 total tasks', icon: '🚀', requirement: 100, type: 'tasks', tier: 'advanced' },
-            { id: 'legend_of_focus', name: 'Legend of Focus', desc: '30-day streak', icon: '🔥', requirement: 30, type: 'streak', tier: 'advanced' }
+            // Starter Tier (💚) - Quest Achievements
+            { id: 'quest_beginner', name: 'Quest Beginner', desc: 'Pass your first Merlin quiz', icon: '📜', requirement: 1, type: 'quests', tier: 'starter' },
+            { id: 'curious_mind', name: 'Curious Mind', desc: 'Pass 3 Merlin quizzes', icon: '🧙', requirement: 3, type: 'quests', tier: 'starter' },
+            
+            // Intermediate Tier (💙) - Task Achievements
+            { id: 'task_commander', name: 'Task Commander', desc: 'Complete 25 regular tasks total', icon: '💼', requirement: 25, type: 'tasks', tier: 'intermediate' },
+            { id: 'focus_flow', name: 'Focus Flow', desc: 'Complete 10 tasks in one session without leaving', icon: '🎯', requirement: 10, type: 'session', tier: 'intermediate' },
+            { id: 'habit_maker', name: 'Habit Maker', desc: 'Complete tasks 5 days in a row', icon: '🔥', requirement: 5, type: 'streak', tier: 'intermediate' },
+            { id: 'productivity_pulse', name: 'Productivity Pulse', desc: 'Achieve 50% task completion rate', icon: '📊', requirement: 50, type: 'completion_rate', tier: 'intermediate' },
+            { id: 'quick_reflexes', name: 'Quick Reflexes', desc: 'Complete a quick task within 60 seconds', icon: '⏱️', requirement: 1, type: 'quick_fast', tier: 'intermediate' },
+            { id: 'planner_pro', name: 'Planner Pro', desc: 'Complete 10 tasks in a single day', icon: '📋', requirement: 10, type: 'daily_tasks', tier: 'intermediate' },
+            { id: 'time_keeper', name: 'Time Keeper', desc: 'Complete a task within 5 minutes of due time', icon: '⏰', requirement: 1, type: 'on_time', tier: 'intermediate' },
+            { id: 'first_flame', name: 'First Flame', desc: 'Earn 100 XP total', icon: '✨', requirement: 100, type: 'xp', tier: 'intermediate' },
+            
+            // Intermediate Tier (💙) - Battle Achievements
+            { id: 'combat_veteran', name: 'Combat Veteran', desc: 'Win 10 battles total', icon: '⚔️', requirement: 10, type: 'battles', tier: 'intermediate' },
+            { id: 'undefeated_streak', name: 'Undefeated Streak', desc: 'Win 3 battles in a row', icon: '🔥', requirement: 3, type: 'battle_streak', tier: 'intermediate' },
+            
+            // Intermediate Tier (💙) - Quest Achievements
+            { id: 'quest_enthusiast', name: 'Quest Enthusiast', desc: 'Pass 5 Merlin quizzes', icon: '📚', requirement: 5, type: 'quests', tier: 'intermediate' },
+            { id: 'perfect_student', name: 'Perfect Student', desc: 'Pass 5 Merlin quizzes in a row', icon: '🎓', requirement: 5, type: 'quiz_perfect', tier: 'intermediate' },
+            
+            // Advanced Tier (💛) - Task Achievements
+            { id: 'task_marathoner', name: 'Task Marathoner', desc: 'Complete 50 regular tasks total', icon: '🏃', requirement: 50, type: 'tasks', tier: 'advanced' },
+            { id: 'quickstorm', name: 'Quickstorm', desc: 'Complete 25 quick tasks total', icon: '⚡', requirement: 25, type: 'quick_total', tier: 'advanced' },
+            { id: 'planner_legend', name: 'Planner Legend', desc: 'Complete tasks 7 days in a row', icon: '🔥', requirement: 7, type: 'streak', tier: 'advanced' },
+            { id: 'efficiency_expert', name: 'Efficiency Expert', desc: 'Complete 5 high-priority tasks in one day', icon: '⭐', requirement: 5, type: 'high_priority_day', tier: 'advanced' },
+            { id: 'daily_challenger', name: 'Daily Challenger', desc: 'Complete 7 daily challenges', icon: '🏆', requirement: 7, type: 'challenges', tier: 'advanced' },
+            { id: 'midnight_focus', name: 'Midnight Focus', desc: 'Complete a task between 12 AM and 3 AM', icon: '🌙', requirement: 1, type: 'midnight', tier: 'advanced' },
+            { id: 'xp_collector', name: 'XP Collector', desc: 'Earn 500 XP total', icon: '💎', requirement: 500, type: 'xp', tier: 'advanced' },
+            { id: 'unstoppable_force', name: 'Unstoppable Force', desc: 'Complete 100 regular tasks total', icon: '🚀', requirement: 100, type: 'tasks', tier: 'advanced' },
+            { id: 'legend_of_focus', name: 'Legend of Focus', desc: 'Complete tasks 30 days in a row', icon: '🔥', requirement: 30, type: 'streak', tier: 'advanced' },
+            
+            // Advanced Tier (💛) - Battle Achievements
+            { id: 'battle_master', name: 'Battle Master', desc: 'Win 25 battles total', icon: '⚔️', requirement: 25, type: 'battles', tier: 'advanced' },
+            { id: 'unstoppable', name: 'Unstoppable', desc: 'Win 10 battles in a row', icon: '🔥', requirement: 10, type: 'battle_streak', tier: 'advanced' },
+            { id: 'battle_legend', name: 'Battle Legend', desc: 'Win 50 battles total', icon: '👑', requirement: 50, type: 'battles', tier: 'advanced' },
+            
+            // Advanced Tier (💛) - Quest Achievements
+            { id: 'quest_master', name: 'Quest Master', desc: 'Pass 10 Merlin quizzes', icon: '🧙‍♂️', requirement: 10, type: 'quests', tier: 'advanced' },
+            { id: 'scholar', name: 'Scholar', desc: 'Pass 20 Merlin quizzes total', icon: '📖', requirement: 20, type: 'quests', tier: 'advanced' }
         ];
+        
+        // Make achievements accessible globally
+        window.achievements = achievements;
 
         // Load game state from localStorage
         function loadGameState() {
-            const saved = localStorage.getItem('taskRockGameState');
-            if (saved) {
-                const parsedState = JSON.parse(saved);
+            // Use pre-hydrated state if available (prevents flash)
+            let parsedState = null;
+            
+            if (window.__HYDRATED_STATE__) {
+                parsedState = window.__HYDRATED_STATE__;
+                console.log('✅ Using pre-hydrated state (no flash)');
+            } else {
+                const saved = localStorage.getItem('taskRockGameState');
+                if (saved) {
+                    parsedState = JSON.parse(saved);
+                }
+            }
+            
+            if (parsedState) {
                 gameState = { ...gameState, ...parsedState };
                 window.gameState = gameState; // Update window reference
                 
@@ -3785,6 +4001,12 @@
                 if (typeof gameState.questTasksOffered === 'undefined') {
                     gameState.questTasksOffered = 0;
                 }
+                if (typeof gameState.battleStreak === 'undefined') {
+                    gameState.battleStreak = 0;
+                }
+                if (typeof gameState.quizPerfectStreak === 'undefined') {
+                    gameState.quizPerfectStreak = 0;
+                }
                 
                 // Migration: Ensure health is never 0 (fix for existing users)
                 if (!gameState.health || gameState.health === 0) {
@@ -3821,6 +4043,57 @@
                 if (typeof gameState.jerryXP === 'undefined') {
                     gameState.jerryXP = gameState.jerryXP || 0;
                 }
+                
+                // Migration: Initialize battleInventory for existing users
+                if (typeof gameState.battleInventory === 'undefined') {
+                    gameState.battleInventory = {
+                        fireball: 0,
+                        spark: 0,
+                        health_potion: 2,
+                        attack_refill: 2,
+                        defense_refill: 2,
+                        invisibility_cloak: 0,
+                        prickler: 0,
+                        freeze: 0,
+                        blue_flame: 0,
+                        procrastination_ghost: 0
+                    };
+                }
+                
+                // Migration: Ensure all battle items exist in inventory
+                const defaultBattleItems = {
+                    fireball: 0,
+                    spark: 0,
+                    health_potion: 2,
+                    attack_refill: 2,
+                    defense_refill: 2,
+                    invisibility_cloak: 0,
+                    prickler: 0,
+                    freeze: 0,
+                    blue_flame: 0,
+                    procrastination_ghost: 0
+                };
+                
+                // Add any missing items to existing inventory
+                Object.keys(defaultBattleItems).forEach(itemKey => {
+                    if (typeof gameState.battleInventory[itemKey] === 'undefined') {
+                        gameState.battleInventory[itemKey] = defaultBattleItems[itemKey];
+                    }
+                });
+                
+                // Migration: Initialize unlockedBattleItems for existing users
+                if (typeof gameState.unlockedBattleItems === 'undefined') {
+                    gameState.unlockedBattleItems = ['health_potion', 'attack_refill', 'defense_refill'];
+                }
+                
+                // Migration: Ensure unlockedBattleItems includes all items with quantity > 0
+                Object.keys(gameState.battleInventory).forEach(itemKey => {
+                    if (gameState.battleInventory[itemKey] > 0) {
+                        if (!gameState.unlockedBattleItems.includes(itemKey)) {
+                            gameState.unlockedBattleItems.push(itemKey);
+                        }
+                    }
+                });
             }
             
             // Sync monster name from onboarding if it exists
@@ -5547,6 +5820,7 @@
             const darkModeToggle = document.getElementById('darkModeToggle');
             const notificationsToggle = document.getElementById('notificationsToggle');
             const soundToggle = document.getElementById('soundToggle');
+            const battleModeToggle = document.getElementById('battleModeToggle');
             
             if (darkModeToggle) {
                 darkModeToggle.classList.toggle('active', gameState.darkMode);
@@ -5558,6 +5832,10 @@
             
             if (soundToggle && window.audioManager) {
                 soundToggle.classList.toggle('active', window.audioManager.soundEnabled);
+            }
+            
+            if (battleModeToggle) {
+                battleModeToggle.classList.toggle('active', window.battleModeEnabled !== false);
             }
         }
         
@@ -5935,6 +6213,228 @@
             }
         }
 
+        // Focus Timer System
+        let focusTimerInterval = null;
+        let focusRemaining = 0;
+        let focusActive = false;
+        let focusStartTime = 0;
+        let focusXPAwarded = 0;
+
+        function toggleFocusTimerExpansion() {
+            if (focusActive) return; // Cannot collapse while active
+            
+            const content = document.getElementById('focusTimerContent');
+            const toggle = document.getElementById('focusTimerToggle');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+                toggle.classList.add('expanded');
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▼';
+                toggle.classList.remove('expanded');
+            }
+        }
+
+        function updateFocusDisplay() {
+            const display = document.getElementById('focusTimerDisplay');
+            if (!display) return;
+            
+            const mins = Math.floor(focusRemaining / 60);
+            const secs = focusRemaining % 60;
+            display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            // Flash red during final 2 minutes
+            if (focusRemaining <= 120 && focusRemaining > 0) {
+                display.style.color = (focusRemaining % 2 === 0) ? '#FF4C4C' : 'var(--text-primary)';
+            } else {
+                display.style.color = 'var(--text-primary)';
+            }
+        }
+
+        let focusAnimationInterval = null;
+        let focusAnimationState = 'walk';
+
+        function toggleMonsterAnimation(state) {
+            const mainHeroSprite = document.getElementById('mainHeroSprite');
+            if (!mainHeroSprite) return;
+            
+            const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
+
+            if (state === 'active') {
+                // Start with walking animation
+                mainHeroSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
+                mainHeroSprite.style.animation = 'none';
+                mainHeroSprite.style.objectPosition = '0 0';
+                mainHeroSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                focusAnimationState = 'walk';
+                
+                // Alternate between walking and jumping every 3 seconds
+                focusAnimationInterval = setInterval(() => {
+                    if (focusAnimationState === 'walk') {
+                        mainHeroSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
+                        mainHeroSprite.style.animation = 'none';
+                        mainHeroSprite.style.objectPosition = '0 0';
+                        mainHeroSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                        focusAnimationState = 'jump';
+                    } else {
+                        mainHeroSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
+                        mainHeroSprite.style.animation = 'none';
+                        mainHeroSprite.style.objectPosition = '0 0';
+                        mainHeroSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                        focusAnimationState = 'walk';
+                    }
+                }, 3000);
+            } else {
+                // Stop animation loop
+                if (focusAnimationInterval) {
+                    clearInterval(focusAnimationInterval);
+                    focusAnimationInterval = null;
+                }
+                // Return to idle
+                mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                mainHeroSprite.style.animation = 'none';
+                mainHeroSprite.style.objectPosition = '0 0';
+                mainHeroSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+            }
+        }
+
+        function showXPGainAnimation() {
+            const mainHeroSprite = document.getElementById('mainHeroSprite');
+            if (!mainHeroSprite) return;
+            
+            // Create XP text element
+            const xpText = document.createElement('div');
+            xpText.textContent = '+1 XP';
+            xpText.style.position = 'absolute';
+            xpText.style.left = '50%';
+            xpText.style.top = '-40px';
+            xpText.style.transform = 'translateX(-50%)';
+            xpText.style.fontSize = '28px';
+            xpText.style.fontWeight = 'bold';
+            xpText.style.color = '#FFD700';
+            xpText.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
+            xpText.style.pointerEvents = 'none';
+            xpText.style.zIndex = '1000';
+            xpText.style.animation = 'xpFloat 2s ease-out forwards';
+            
+            // Add to main hero sprite container
+            const heroContainer = mainHeroSprite.parentElement;
+            if (heroContainer) {
+                heroContainer.style.position = 'relative';
+                heroContainer.appendChild(xpText);
+                
+                // Remove after animation completes
+                setTimeout(() => {
+                    if (xpText.parentElement) {
+                        xpText.parentElement.removeChild(xpText);
+                    }
+                }, 2000);
+            }
+        }
+
+        function startFocusTimer() {
+            if (focusActive) return;
+            
+            const durationInput = document.getElementById('focusDuration');
+            const minutes = parseInt(durationInput.value, 10);
+            
+            if (isNaN(minutes) || minutes < 1) {
+                showSuccessMessage('⏱️ Please enter a valid duration (1-480 minutes)');
+                return;
+            }
+            
+            focusActive = true;
+            focusRemaining = minutes * 60;
+            focusStartTime = Date.now();
+            focusXPAwarded = 0;
+            
+            // Expand card and lock it
+            const content = document.getElementById('focusTimerContent');
+            const toggle = document.getElementById('focusTimerToggle');
+            content.style.display = 'block';
+            toggle.textContent = '▼';
+            toggle.classList.add('expanded');
+            
+            // Start monster animation
+            toggleMonsterAnimation('active');
+            
+            // Update display immediately
+            updateFocusDisplay();
+            
+            // Start countdown
+            focusTimerInterval = setInterval(() => {
+                focusRemaining--;
+                updateFocusDisplay();
+
+                // Award 1 XP per minute
+                const minutesElapsed = Math.floor((Date.now() - focusStartTime) / 60000);
+                if (minutesElapsed > focusXPAwarded) {
+                    focusXPAwarded = minutesElapsed;
+                    addJerryXP(1);
+                    showXPGainAnimation();
+                    console.log(`⏱️ Focus Timer: +1 XP awarded (${focusXPAwarded} minutes elapsed)`);
+                }
+
+                if (focusRemaining <= 0) {
+                    stopFocusTimer(true);
+                }
+            }, 1000);
+            
+            showSuccessMessage('⏱️ Focus Timer Started!', `${minutes} minute${minutes > 1 ? 's' : ''} - Stay focused!`);
+        }
+
+        function stopFocusTimer(completed = false) {
+            clearInterval(focusTimerInterval);
+            focusActive = false;
+            focusRemaining = 0;
+            
+            // Stop monster animation
+            toggleMonsterAnimation('idle');
+            
+            // Reset display
+            const durationInput = document.getElementById('focusDuration');
+            const minutes = parseInt(durationInput.value, 10) || 25;
+            const display = document.getElementById('focusTimerDisplay');
+            display.textContent = `${String(minutes).padStart(2, '0')}:00`;
+            display.style.color = 'var(--text-primary)';
+            
+            if (completed) {
+                showSuccessMessage('🎉 Focus Session Complete!', `Great work! You earned ${focusXPAwarded} XP!`);
+            } else {
+                showSuccessMessage('⏱️ Focus Timer Stopped');
+            }
+        }
+
+        // Initialize Focus Timer buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const startBtn = document.getElementById('startFocusTimer');
+            const stopBtn = document.getElementById('stopFocusTimer');
+            const durationInput = document.getElementById('focusDuration');
+            
+            if (startBtn) {
+                startBtn.addEventListener('click', startFocusTimer);
+            }
+            
+            if (stopBtn) {
+                stopBtn.addEventListener('click', () => stopFocusTimer(false));
+            }
+            
+            // Update display when duration changes
+            if (durationInput) {
+                durationInput.addEventListener('input', () => {
+                    if (!focusActive) {
+                        const minutes = parseInt(durationInput.value, 10) || 25;
+                        const display = document.getElementById('focusTimerDisplay');
+                        if (display) {
+                            display.textContent = `${String(minutes).padStart(2, '0')}:00`;
+                        }
+                    }
+                });
+            }
+        });
+
         // Tab switching
         function switchToTab(tabName) {
             // Hide all tab contents
@@ -6178,14 +6678,14 @@
                 effect: 'attack_gauge',
                 value: 30
             },
-            bomb: {
-                id: 'bomb',
-                name: 'Bomb',
+            prickler: {
+                id: 'prickler',
+                name: 'Prickler',
                 emoji: '💣',
-                description: 'Explosive attack dealing 20 damage (Max: 15)',
+                description: 'Nuclear explosive attack dealing 10-15 damage (Max: 15)',
                 cost: 35,
                 effect: 'attack',
-                value: 20,
+                value: 15,
                 levelRequired: 3,
                 maxQuantity: 15
             },
@@ -6193,10 +6693,10 @@
                 id: 'fireball',
                 name: 'Fireball',
                 emoji: '🔥',
-                description: 'Powerful ranged attack dealing 30 damage (Max: 10)',
+                description: 'Explosive projectile dealing 15-18 damage (Max: 18)',
                 cost: 45,
                 effect: 'attack',
-                value: 30,
+                value: 18,
                 levelRequired: 4,
                 maxQuantity: 10
             },
@@ -6204,10 +6704,10 @@
                 id: 'spark',
                 name: 'Spark',
                 emoji: '⚡',
-                description: 'Electric ranged attack dealing 25 damage (Max: 10)',
+                description: 'Melee strike dealing 18-20 damage (Max: 20)',
                 cost: 50,
                 effect: 'attack',
-                value: 25,
+                value: 20,
                 levelRequired: 7,
                 maxQuantity: 10
             },
@@ -6215,10 +6715,10 @@
                 id: 'freeze',
                 name: 'Freeze',
                 emoji: '❄️',
-                description: 'Ice attack that deals damage and skips enemy turn (Max: 8)',
+                description: 'Ice projectile dealing 10 damage, skips 2 enemy turns (Max: 10)',
                 cost: 65,
                 effect: 'freeze',
-                value: 20,
+                value: 10,
                 levelRequired: 8,
                 maxQuantity: 8
             },
@@ -6235,7 +6735,7 @@
                 id: 'blue_flame',
                 name: 'Blue Flame',
                 emoji: '<img src="assets/blue-flame.png" alt="Blue Flame" style="width: 36px; height: 36px; vertical-align: middle;">',
-                description: 'Fire-type attack dealing 20 damage (Max: 12)',
+                description: 'Fire-type attack dealing 20 damage (Max: 20)',
                 cost: 50,
                 effect: 'attack',
                 value: 20,
@@ -6246,7 +6746,7 @@
                 id: 'procrastination_ghost',
                 name: 'Procrastination Ghost',
                 emoji: '👻',
-                description: '10-16 damage + skips enemy turn (Max: 8)',
+                description: '18-22 damage + skips 1 enemy turn (Max: 22)',
                 cost: 70,
                 effect: 'ghost_attack',
                 value: 13,
@@ -6859,6 +7359,12 @@
             // 30% chance to trigger battle
             if (Math.random() < 0.3) {
                 setTimeout(() => {
+                    // Check if Battle Mode is enabled
+                    if (window.battleModeEnabled === false) {
+                        console.log('⚙️ Battle Mode is disabled - skipping encounter');
+                        return;
+                    }
+                    
                     if (typeof window.startTestBattle === 'function') {
                         console.log('⚔️ Battle triggered after task completion!');
                         try {
@@ -7068,6 +7574,12 @@
             // 30% chance to trigger battle
             if (Math.random() < 0.3) {
                 setTimeout(() => {
+                    // Check if Battle Mode is enabled
+                    if (window.battleModeEnabled === false) {
+                        console.log('⚙️ Battle Mode is disabled - skipping encounter');
+                        return;
+                    }
+                    
                     if (typeof window.startTestBattle === 'function') {
                         console.log('⚔️ Battle triggered after quick task completion!');
                         try {
@@ -7218,6 +7730,13 @@
             saveGameState();
             updateSettingsDisplay();
             showSuccessMessage(`Notifications ${gameState.notifications ? 'enabled' : 'disabled'}!`);
+        }
+
+        function toggleBattleMode() {
+            window.battleModeEnabled = !window.battleModeEnabled;
+            localStorage.setItem('battleModeEnabled', window.battleModeEnabled);
+            updateSettingsDisplay();
+            showSuccessMessage(`Battle Mode ${window.battleModeEnabled ? 'enabled' : 'disabled'}!`);
         }
 
         async function shareEtsyStore() {
@@ -7470,7 +7989,11 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             try {
+                // Load state first
                 loadGameState();
+                
+                // Reveal UI now that state is loaded (prevents flash)
+                document.documentElement.style.visibility = 'visible';
                 generateDailyChallenge();
                 
                 // Initialize selectedQuickTasks if it doesn't exist
@@ -7483,6 +8006,14 @@
                     document.documentElement.setAttribute('data-theme', 'dark');
                 }
                 
+                // Initialize Battle Mode preference (default to true for existing users)
+                const storedBattleMode = localStorage.getItem('battleModeEnabled');
+                if (storedBattleMode === null) {
+                    window.battleModeEnabled = true; // Default ON for new users
+                    localStorage.setItem('battleModeEnabled', 'true');
+                } else {
+                    window.battleModeEnabled = storedBattleMode === 'true';
+                }
 
                 // Initialize audio manager
                 if (window.audioManager) {
@@ -7498,6 +8029,11 @@
                 
                 // Initialize shop display
                 updateShopDisplay();
+                
+                // Update battle button counts after loading game state
+                if (typeof updateBattleButtonsVisibility === 'function') {
+                    updateBattleButtonsVisibility();
+                }
                 
                 // Initialize the complete app with dialogue system
                 initializeApp();
@@ -7615,16 +8151,21 @@
     <script src="js/audioManager.js"></script>
     
     <!-- Battle System Modules -->
+    <script src="js/enemyAI.js"></script>
     <script src="js/enemy.js"></script>
     <script src="js/boss-enemies.js"></script>
     <script src="js/enemy-init.js"></script>
     <script src="js/battleUI.js"></script>
+    <script src="js/specialAttackAnimations.js"></script>
     <script src="js/medusaProjectile.js"></script>
     <script src="js/bossProjectiles.js"></script>
     <script src="js/battleManager.js"></script>
+    <script src="js/soundIntegration.js"></script>
     <script src="js/battleInit.js"></script>
     <script src="js/questTaskManager.js"></script>
     <script src="js/questGiver.js?v=2"></script>
+    <script src="js/moodFilter.js"></script>
+    <script src="js/merlinModal.js"></script>
     <script src="js/notificationManager.js"></script>
     <script src="js/achievementTracker.js"></script>
     

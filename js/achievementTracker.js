@@ -86,6 +86,18 @@ class AchievementTracker {
                 case 'high_priority_day':
                     isUnlocked = this.checkHighPriorityDayAchievement(achievement);
                     break;
+                case 'battles':
+                    isUnlocked = this.checkBattlesAchievement(achievement);
+                    break;
+                case 'battle_streak':
+                    isUnlocked = this.checkBattleStreakAchievement(achievement);
+                    break;
+                case 'quests':
+                    isUnlocked = this.checkQuestsAchievement(achievement);
+                    break;
+                case 'quiz_perfect':
+                    isUnlocked = this.checkQuizPerfectAchievement(achievement);
+                    break;
             }
 
             if (isUnlocked) {
@@ -208,6 +220,28 @@ class AchievementTracker {
                 task.priority === 'high'
             );
         return highPriorityToday.length >= achievement.requirement;
+    }
+
+    // Battle achievement checkers
+    checkBattlesAchievement(achievement) {
+        const battlesWon = window.gameState.battlesWon || 0;
+        return battlesWon >= achievement.requirement;
+    }
+
+    checkBattleStreakAchievement(achievement) {
+        const battleStreak = window.gameState.battleStreak || 0;
+        return battleStreak >= achievement.requirement;
+    }
+
+    // Quest achievement checkers
+    checkQuestsAchievement(achievement) {
+        const questsPassed = window.gameState.questQuizzesPassed || 0;
+        return questsPassed >= achievement.requirement;
+    }
+
+    checkQuizPerfectAchievement(achievement) {
+        const quizStreak = window.gameState.quizPerfectStreak || 0;
+        return quizStreak >= achievement.requirement;
     }
 
     // Check if achievement is unlocked

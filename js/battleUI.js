@@ -12,6 +12,27 @@ function showBattle(hero, enemy) {
 
 // Update battle button visibility based on inventory
 function updateBattleButtonsVisibility() {
+    // Ensure battleInventory exists
+    if (!gameState.battleInventory) {
+        gameState.battleInventory = {
+            fireball: 0,
+            spark: 0,
+            health_potion: 2,
+            attack_refill: 2,
+            defense_refill: 2,
+            invisibility_cloak: 0,
+            prickler: 0,
+            freeze: 0,
+            blue_flame: 0,
+            procrastination_ghost: 0
+        };
+    }
+    
+    // Ensure unlockedBattleItems exists
+    if (!gameState.unlockedBattleItems) {
+        gameState.unlockedBattleItems = ['health_potion', 'attack_refill', 'defense_refill'];
+    }
+    
     const inventory = gameState.battleInventory || {};
     const unlockedItems = gameState.unlockedBattleItems || [];
     
@@ -70,15 +91,15 @@ function updateBattleButtonsVisibility() {
         invisibilityCloakBtn.style.display = 'none';
     }
     
-    // Bomb button - only show if ever unlocked
-    const bombBtn = document.getElementById('btnBomb');
-    const bombCount = document.getElementById('bombCount');
-    const bombQty = inventory.bomb || 0;
-    if (unlockedItems.includes('bomb')) {
-        bombBtn.style.display = '';
-        bombCount.textContent = `(${bombQty})`;
+    // Prickler button - only show if ever unlocked
+    const pricklerBtn = document.getElementById('btnPrickler');
+    const pricklerCount = document.getElementById('pricklerCount');
+    const pricklerQty = inventory.prickler || 0;
+    if (unlockedItems.includes('prickler')) {
+        pricklerBtn.style.display = '';
+        pricklerCount.textContent = `(${pricklerQty})`;
     } else {
-        bombBtn.style.display = 'none';
+        pricklerBtn.style.display = 'none';
     }
     
     // Spark button - only show if ever unlocked
@@ -191,19 +212,19 @@ function updateActionButtons(hero) {
         }
     }
 
-    // Bomb requires 20 attack gauge AND inventory (unlocked at level 3)
-    const btnBomb = document.getElementById('btnBomb');
-    if (btnBomb) {
-        if (hero.level >= 3) {
-            btnBomb.style.display = '';
-            const bombCount = gameState.battleInventory?.bomb || 0;
-            const bombCountSpan = btnBomb.querySelector('.item-count');
-            if (bombCountSpan) {
-                bombCountSpan.textContent = `(${bombCount})`;
+    // Prickler requires 20 attack gauge AND inventory (unlocked at level 3)
+    const btnPrickler = document.getElementById('btnPrickler');
+    if (btnPrickler) {
+        if (gameState.unlockedBattleItems?.includes('prickler')) {
+            btnPrickler.style.display = '';
+            const pricklerCount = gameState.battleInventory?.prickler || 0;
+            const pricklerCountSpan = btnPrickler.querySelector('.item-count');
+            if (pricklerCountSpan) {
+                pricklerCountSpan.textContent = `(${pricklerCount})`;
             }
-            btnBomb.disabled = battleManager.attackGauge < 20 || bombCount === 0;
+            btnPrickler.disabled = battleManager.attackGauge < 20 || pricklerCount === 0;
         } else {
-            btnBomb.style.display = 'none';
+            btnPrickler.style.display = 'none';
         }
     }
 
@@ -462,14 +483,14 @@ async function playSparkAnimation(startElement, targetElement) {
     });
 }
 
-// Bomb Projectile Animation
-async function playBombAnimation(startElement, targetElement) {
+// Prickler Projectile Animation
+async function playPricklerAnimation(startElement, targetElement) {
     const projectile = document.createElement('div');
-    projectile.className = 'bomb-projectile';
+    projectile.className = 'prickler-projectile';
     projectile.style.width = '40px';
     projectile.style.height = '40px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/battle-items/bomb/bomb1.png")';
+    projectile.style.backgroundImage = 'url("assets/battle-items/prickler/prickler.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -503,7 +524,7 @@ async function playBombAnimation(startElement, targetElement) {
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
             
-            // Rotate bomb
+            // Rotate prickler
             projectile.style.transform = `rotate(${progress * 360}deg)`;
 
             if (progress < 1) {
@@ -511,7 +532,7 @@ async function playBombAnimation(startElement, targetElement) {
             } else {
                 // Remove projectile and show explosion
                 projectile.remove();
-                playBombExplosion(targetRect).then(resolve);
+                playPricklerExplosion(targetRect).then(resolve);
             }
         }
 
@@ -519,8 +540,8 @@ async function playBombAnimation(startElement, targetElement) {
     });
 }
 
-// Bomb Explosion Animation
-async function playBombExplosion(targetRect) {
+// Prickler Nuclear Explosion Animation
+async function playPricklerExplosion(targetRect) {
     const explosion = document.createElement('div');
     explosion.style.width = '120px';
     explosion.style.height = '120px';
@@ -532,20 +553,20 @@ async function playBombExplosion(targetRect) {
     explosion.style.zIndex = '1001';
     document.body.appendChild(explosion);
 
-    // Explosion frames from the Bomb folder
+    // Nuclear explosion frames from the Prickler folder
     const explosionFrames = [
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d1.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d2.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d3.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d4.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d5.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d6.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d7.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d8.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d9.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d10.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d11.png',
-        'assets/battle-items/bomb/Bomb Explosion/explosion-d12.png'
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d1.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d2.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d3.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d4.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d5.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d6.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d7.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d8.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d9.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d10.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d11.png',
+        'assets/battle-items/prickler/Prickler Explosion/explosion-d12.png'
     ];
 
     // Play each frame
@@ -577,11 +598,16 @@ async function playFreezeAnimation(startElement, targetElement) {
     projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
     projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
 
-    // Ice shot frames
+    // Ice shot frames (8-frame animation)
     const shotFrames = [
-        'assets/battle-items/freeze/shot-1.png',
-        'assets/battle-items/freeze/shot-2.png',
-        'assets/battle-items/freeze/shot-3.png'
+        'assets/battle-items/freeze/_0000_Layer-1.png',
+        'assets/battle-items/freeze/_0001_Layer-2.png',
+        'assets/battle-items/freeze/_0002_Layer-3.png',
+        'assets/battle-items/freeze/_0003_Layer-4.png',
+        'assets/battle-items/freeze/_0004_Layer-5.png',
+        'assets/battle-items/freeze/_0005_Layer-6.png',
+        'assets/battle-items/freeze/_0006_Layer-7.png',
+        'assets/battle-items/freeze/_0007_Layer-8.png'
     ];
     let frameIndex = 0;
 
@@ -661,20 +687,33 @@ async function playExplosionAnimation(targetRect) {
     explosion.style.top = targetRect.top + targetRect.height / 2 - 40 + 'px';
     explosion.classList.remove('hidden');
 
-    // Explosion frames
-    const explosionFrames = [
-        'assets/battle-items/bomb-explosion1.png',
-        'assets/battle-items/bomb-explosion2.png',
-        'assets/battle-items/bomb-explosion4.png',
-        'assets/battle-items/bomb-explosion5.png',
-        'assets/battle-items/bomb-explosion6.png'
-    ];
-
-    // Play each frame
-    for (let i = 0; i < explosionFrames.length; i++) {
-        explosion.style.backgroundImage = `url('${explosionFrames[i]}')`;
-        await new Promise(resolve => setTimeout(resolve, 80));
-    }
+    // Use fireball-explosion3.png as the explosion visual
+    explosion.style.backgroundImage = 'url("assets/battle-items/fireball-explosion3.png")';
+    explosion.style.width = '100px';
+    explosion.style.height = '100px';
+    explosion.style.backgroundSize = 'contain';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    
+    // Fade in explosion
+    explosion.style.opacity = '1';
+    explosion.style.transform = 'scale(0.5)';
+    
+    // Animate explosion scale and fade
+    await new Promise(resolve => {
+        let frame = 0;
+        const maxFrames = 8;
+        const interval = setInterval(() => {
+            frame++;
+            const progress = frame / maxFrames;
+            explosion.style.transform = `scale(${0.5 + progress * 0.5})`;
+            explosion.style.opacity = `${1 - progress * 0.5}`;
+            
+            if (frame >= maxFrames) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 60);
+    });
 
     // Hide explosion
     explosion.classList.add('hidden');
@@ -765,14 +804,13 @@ function buyBattleItem(itemKey, cost) {
 // Export to global scope
 window.showBattle = showBattle;
 window.updateBattleUI = updateBattleUI;
-window.updateGauges = updateGauges;
 window.hideBattle = hideBattle;
 window.addBattleLog = addBattleLog;
 window.animateFireball = animateFireball;
 window.playFireballAnimation = playFireballAnimation;
 window.playWaveformAnimation = playWaveformAnimation;
 window.playSparkAnimation = playSparkAnimation;
-window.playBombAnimation = playBombAnimation;
+window.playPricklerAnimation = playPricklerAnimation;
 window.playFreezeAnimation = playFreezeAnimation;
 window.updateBattleButtons = updateBattleButtons;
 window.updateBattleShopDisplay = updateBattleShopDisplay;
@@ -1002,6 +1040,7 @@ async function playBlueFlameAnimation(startElement, targetElement) {
 
     // Animate to target
     const deltaX = targetRect.left - startRect.right;
+    const duration = 500;
     const deltaY = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
     
     projectile.style.setProperty('--deltaX', deltaX + 'px');
@@ -1009,13 +1048,10 @@ async function playBlueFlameAnimation(startElement, targetElement) {
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Flash effect on impact
-    targetElement.style.filter = 'brightness(1.5) hue-rotate(200deg)';
-    setTimeout(() => {
-        targetElement.style.filter = '';
-    }, 200);
-
     projectile.remove();
+    
+    // Play fireball explosion on impact (same as Fireball)
+    await playExplosionAnimation(targetRect);
 }
 
 // Procrastination Ghost Animation
@@ -1029,7 +1065,7 @@ async function playProcrastinationGhostAnimation(startElement, targetElement) {
     projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
     projectile.style.width = '32px';
     projectile.style.height = '32px';
-    projectile.style.backgroundImage = 'url(assets/procrastination-ghost.png)';
+    projectile.style.backgroundImage = 'url(assets/procrastination-ghost-projectile.png)';
     projectile.style.backgroundSize = 'contain';
     projectile.style.imageRendering = 'pixelated';
     projectile.style.zIndex = '1000';

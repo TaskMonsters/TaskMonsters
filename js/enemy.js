@@ -19,14 +19,26 @@ class Enemy {
 
     // Scale stats based on player level
     scaleToLevel(playerLevel) {
+        // Apply difficulty scaling if AI system available
+        let scaling = { hpBonus: 0, healBonus: 0, defenseBonus: 0 };
+        if (window.enemyAI) {
+            scaling = window.enemyAI.getDifficultyScaling(playerLevel);
+        }
+        
         this.attack = this.baseAttack + playerLevel * 2;
         this.defense = this.baseDefense + playerLevel * 1.5;
-        this.maxHP = this.baseHP + playerLevel * 5;
+        this.maxHP = Math.floor((this.baseHP + playerLevel * 5) * (1 + scaling.hpBonus));
         this.hp = this.maxHP;
     }
 
     // Take damage
     takeDamage(amount) {
+        // Check if enemy is defending (reduces damage by 50%)
+        if (this.isDefending) {
+            amount = Math.floor(amount * 0.5);
+            this.isDefending = false; // Reset defense after hit
+        }
+        
         this.hp = Math.max(0, this.hp - amount);
         return this.hp <= 0;
     }
@@ -46,6 +58,7 @@ const LAZY_BAT_DATA = {
     baseAttack: 15,
     baseDefense: 10,
     minLevel: 1,
+    tier: 'early',
     sprites: {
         idle: 'assets/enemies/Bat-IdleFly.png',
         attack1: 'assets/enemies/Bat-Attack1.png',
@@ -65,6 +78,7 @@ const LAZY_BAT_II_DATA = {
     baseAttack: 15,
     baseDefense: 10,
     minLevel: 3,
+    tier: 'mid',
     sprites: {
         idle: 'assets/enemies/LazyBat2-IdleFly.png',
         attack1: 'assets/enemies/LazyBat2-IdleFly.png',
@@ -84,6 +98,7 @@ const SLIME_DATA = {
     baseAttack: 8,
     baseDefense: 5,
     minLevel: 5,
+    tier: 'early',
     maxDamage: 10, // Cap damage at 10
     drainEnergy: true, // Drains energy on hit
     drainDefense: true, // Drains defense on hit
@@ -107,6 +122,7 @@ const GHOST_TASK_STOPPER_DATA = {
     baseAttack: 15,
     baseDefense: 10,
     minLevel: 7,
+    tier: 'mid',
     canEvade: true,
     evasionChance: 0.25, // 25% chance to evade attacks
     projectileType: 'waveform',
@@ -129,6 +145,7 @@ const MEDUSA_DATA = {
     baseAttack: 15,
     baseDefense: 12,
     minLevel: 8,
+    tier: 'mid',
     maxDamage: 15, // Cap damage at 15
     canPetrify: true, // Can use petrify attack
     petrifyChance: 0.3, // 30% chance to petrify (skip player turn)
@@ -152,6 +169,8 @@ const LAZY_EYE_DATA = {
     baseAttack: 20,
     baseDefense: 15,
     minLevel: 12,
+    tier: 'boss',
+    specialDefense: true,
     canSleep: true,
     sprites: {
         idle: 'assets/enemies/Eye-Idle.png',
@@ -172,6 +191,7 @@ const OCTOPUS_DATA = {
     baseAttack: 12,
     baseDefense: 8,
     minLevel: 2,
+    tier: 'mid',
     drenchAttack: true,
     hugAttack: true,
     projectileType: 'splash',
@@ -194,6 +214,7 @@ const ALIEN_DATA = {
     baseAttack: 10,
     baseDefense: 6,
     minLevel: 2,
+    tier: 'mid',
     variableDamage: true,
     projectileType: 'alien',
     sprites: {
@@ -215,6 +236,7 @@ const FIRE_SKULL_DATA = {
     baseAttack: 18,
     baseDefense: 8,
     minLevel: 5,
+    tier: 'mid',
     immunities: ['fire', 'spark'],
     weakness: 'freeze',
     weaknessDamage: 18,
@@ -238,6 +260,8 @@ const OGRE_DATA = {
     baseAttack: 22,
     baseDefense: 15,
     minLevel: 13,
+    tier: 'boss',
+    specialDefense: true,
     vulnerableToEvasion: true, // After player evades, next 2 attacks miss
     sprites: {
         idle: 'assets/enemies/ogre/ogre-idle.png',
@@ -256,10 +280,17 @@ const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
     // Filter enemies available at current level
-    const availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
+    let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
     
-    // Pick random enemy from available ones
-    const enemyData = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+    // Octopus unlock at level 7
+    if (playerLevel < 7) {
+        availableEnemies = availableEnemies.filter(e => e.name !== 'Octopus');
+    }
+    
+    // Use weighted selection if AI system is available
+    const enemyData = window.enemyAI 
+        ? window.enemyAI.selectWeightedEnemy(playerLevel, availableEnemies)
+        : availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
     
     const enemy = new Enemy(
         enemyData.name,
@@ -268,6 +299,15 @@ function createRandomEnemy(playerLevel) {
         enemyData.baseDefense,
         enemyData.sprites
     );
+    
+    // Add tier for AI healing/defense calculations
+    if (enemyData.tier) {
+        enemy.tier = enemyData.tier;
+    }
+    if (enemyData.specialDefense) {
+        enemy.specialDefense = true;
+        enemy.defenseChance = 0.15; // 15% base defense chance
+    }
     
     // Add special abilities
     if (enemyData.canSleep) {

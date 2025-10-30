@@ -31,6 +31,28 @@ class BattleManager {
         this.battleLog = [];
         this.attackCount = 0;    // Track attack count for walk+attack animation
         
+        // Verify gameState inventory is loaded
+        if (!window.gameState.battleInventory) {
+            console.warn('Battle inventory not found, initializing...');
+            window.gameState.battleInventory = {
+                fireball: 0,
+                spark: 0,
+                health_potion: 2,
+                attack_refill: 2,
+                defense_refill: 2,
+                invisibility_cloak: 0,
+                prickler: 0,
+                freeze: 0,
+                blue_flame: 0,
+                procrastination_ghost: 0
+            };
+        }
+        
+        if (!window.gameState.unlockedBattleItems) {
+            console.warn('Unlocked battle items not found, initializing...');
+            window.gameState.unlockedBattleItems = ['health_potion', 'attack_refill', 'defense_refill'];
+        }
+        
         // Boss status effects
         this.poisonTurns = 0;
         this.poisonDamage = 0;
@@ -58,9 +80,9 @@ class BattleManager {
         battleContainer.classList.add(arenaClass);
         window.battleArenaIndex++;
         
-        // Play battle music
+        // Play alternating battle music
         if (window.audioManager) {
-            window.audioManager.playMusic('battleMusic', 0.4);
+            window.audioManager.playBattleMusic();
         }
 
         // Show battle arena
@@ -128,27 +150,39 @@ class BattleManager {
         updateBattleUI(this.hero, this.enemy);
 
         // Play hero attack animation
-        // Every 3rd attack uses walk+attack animation with movement
+        // Every 3rd attack uses special animation if level >= 6, otherwise walk+attack
         if (this.attackCount % 3 === 0 && this.attackCount > 0) {
             const heroSprite = document.getElementById('heroSprite');
-            const originalLeft = heroSprite.style.left || '0px';
+            const enemySprite = document.getElementById('enemySprite');
+            const heroLevel = gameState.level || 1;
+            const selectedMonster = localStorage.getItem('selectedMonster');
             
-            // Start walk+attack animation
-            startHeroAnimation('walk-attack');
-            
-            // Move hero forward toward enemy (150px to the right)
-            heroSprite.style.transition = 'left 0.45s ease-out';
-            heroSprite.style.left = '150px';
-            
-            // Wait for walk and attack to complete
-            await new Promise(resolve => setTimeout(resolve, 450));
-            
-            // Move back to original position
-            heroSprite.style.transition = 'left 0.45s ease-in';
-            heroSprite.style.left = originalLeft;
-            
-            await new Promise(resolve => setTimeout(resolve, 450));
-            heroSprite.style.transition = '';
+            // Check if level is 6 or higher and special attack animation exists
+            if (heroLevel >= 6 && selectedMonster && window.playSpecialAttackForMonster) {
+                // Play special attack animation for this monster
+                addBattleLog(`✨ ${this.hero.name} unleashes a special attack!`);
+                await window.playSpecialAttackForMonster(selectedMonster, heroSprite, enemySprite);
+            } else {
+                // Use regular walk+attack animation
+                const originalLeft = heroSprite.style.left || '0px';
+                
+                // Start walk+attack animation
+                startHeroAnimation('walk-attack');
+                
+                // Move hero forward toward enemy (150px to the right)
+                heroSprite.style.transition = 'left 0.45s ease-out';
+                heroSprite.style.left = '150px';
+                
+                // Wait for walk and attack to complete
+                await new Promise(resolve => setTimeout(resolve, 450));
+                
+                // Move back to original position
+                heroSprite.style.transition = 'left 0.45s ease-in';
+                heroSprite.style.left = originalLeft;
+                
+                await new Promise(resolve => setTimeout(resolve, 450));
+                heroSprite.style.transition = '';
+            }
         } else {
             startHeroAnimation('attack1');
             await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
@@ -185,7 +219,16 @@ class BattleManager {
         // Enemy defense reduces damage slightly but not too much
         const baseDamage = this.hero.attack;
         const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
-        const damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
+        let damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
+        
+        // Add special attack bonus damage (8 damage) if level >= 6 and 3rd attack
+        const heroLevel = gameState.level || 1;
+        const selectedMonster = localStorage.getItem('selectedMonster');
+        if (this.attackCount % 3 === 0 && heroLevel >= 6 && selectedMonster && window.playSpecialAttackForMonster) {
+            damage += 8; // Special attack bonus damage
+            addBattleLog(`💥 Special attack deals +8 bonus damage!`);
+        }
+        
         const isDead = this.enemy.takeDamage(damage);
 
         // Play attack sound
@@ -240,8 +283,8 @@ class BattleManager {
         const enemySprite = document.getElementById('enemySprite');
         await playSparkAnimation(heroSprite, enemySprite);
 
-        // Calculate damage (slightly less than fireball)
-        const damage = Math.floor((this.hero.attack * 2.2) - (this.enemy.defense / 3));
+        // Calculate damage (18-20 range, melee strike)
+        const damage = Math.floor(Math.random() * 3) + 18; // Random between 18-20
         const isDead = this.enemy.takeDamage(damage);
 
         // Play enemy hurt animation
@@ -325,8 +368,8 @@ class BattleManager {
             document.getElementById('enemySprite')
         );
 
-        // Calculate damage (2x multiplier)
-        const damage = Math.max(5, Math.floor((this.hero.attack - this.enemy.defense / 2) * 2));
+        // Calculate damage (15-18 range as per spec)
+        const damage = Math.floor(Math.random() * 4) + 15; // Random between 15-18
         const isDead = this.enemy.takeDamage(damage);
 
         // Play enemy hurt animation
@@ -350,44 +393,44 @@ class BattleManager {
         }
     }
 
-    // Player uses bomb
-    async playerBomb() {
+    // Player uses prickler
+    async playerPrickler() {
         if (this.state !== BattleState.PLAYER_TURN) return;
         if (this.attackGauge < 20) {
-            addBattleLog('❌ Need 20 attack gauge for bomb!');
+            addBattleLog('❌ Need 20 attack gauge for prickler!');
             return;
         }
 
-        const bombCount = gameState.battleInventory?.bomb || 0;
-        if (bombCount <= 0) {
-            addBattleLog('❌ No bombs left!');
+        const pricklerCount = gameState.battleInventory?.prickler || 0;
+        if (pricklerCount <= 0) {
+            addBattleLog('❌ No pricklers left!');
             return;
         }
 
         this.state = BattleState.ANIMATING;
-        this.attackGauge -= 20;  // Bomb costs 20 attack gauge
-        gameState.battleInventory.bomb--;
+        this.attackGauge -= 20;  // Prickler costs 20 attack gauge
+        gameState.battleInventory.prickler--;
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
-        // Play hero throw animation for bomb
+        // Play hero throw animation for prickler
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
 
-        // Play bomb animation
-        await playBombAnimation(
+        // Play prickler animation
+        await playPricklerAnimation(
             document.getElementById('heroSprite'),
             document.getElementById('enemySprite')
         );
 
-        // Calculate damage (moderate damage)
-        const damage = Math.floor((this.hero.attack * 1.8) - (this.enemy.defense / 3));
+        // Calculate damage (10-15 range with nuclear explosion)
+        const damage = Math.floor(Math.random() * 6) + 10; // Random between 10-15
         const isDead = this.enemy.takeDamage(damage);
 
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
-        addBattleLog(`💣 Bomb dealt ${damage} damage!`);
+        addBattleLog(`💣 Prickler dealt ${damage} damage!`);
         updateBattleUI(this.hero, this.enemy);
 
         // Reset hero sprite to idle
@@ -435,8 +478,8 @@ class BattleManager {
             document.getElementById('enemySprite')
         );
 
-        // Calculate damage
-        const damage = Math.floor((this.hero.attack * 1.7) - (this.enemy.defense / 3));
+        // Calculate damage (10 damage, skips 2 turns)
+        const damage = 10;
         const isDead = this.enemy.takeDamage(damage);
 
         // Play enemy hurt animation
@@ -690,8 +733,8 @@ class BattleManager {
             document.getElementById('enemySprite')
         );
 
-        // Calculate variable damage (10-16)
-        const damage = Math.floor(Math.random() * 7) + 10; // Random between 10-16
+        // Calculate variable damage (18-22 range, skips 1 turn)
+        const damage = Math.floor(Math.random() * 5) + 18; // Random between 18-22
         const isDead = this.enemy.takeDamage(damage);
         addBattleLog(`👻 Procrastination Ghost dealt ${damage} damage and made enemy skip next turn!`);
         updateBattleUI(this.hero, this.enemy);
@@ -725,6 +768,33 @@ class BattleManager {
         this.state = BattleState.ENEMY_TURN;
 
         await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // === ADAPTIVE HEALING AI ===
+        if (window.enemyAI && this.enemy.hp < this.enemy.maxHP) {
+            const playerLevel = gameState.level || 1;
+            const healResult = window.enemyAI.attemptEnemyHeal(this.enemy, playerLevel);
+            
+            if (healResult.healed) {
+                addBattleLog(`💚 ${this.enemy.name} regenerates ${healResult.amount} HP!`);
+                updateBattleUI(this.hero, this.enemy);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+                return;
+            }
+        }
+        
+        // === SMART DEFENSE AI ===
+        if (window.enemyAI) {
+            const willDefend = window.enemyAI.attemptEnemyDefense(this.enemy);
+            
+            if (willDefend) {
+                addBattleLog(`🛡️ ${this.enemy.name} braces for impact!`);
+                updateBattleUI(this.hero, this.enemy);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+                return;
+            }
+        }
 
         // Check if enemy can petrify (Medusa)
         const canPetrify = this.enemy.canPetrify && Math.random() < (this.enemy.petrifyChance || 0.3);
@@ -1067,6 +1137,11 @@ class BattleManager {
         if (result === 'victory') {
             addBattleLog(`🎉 VICTORY! You defeated the ${this.enemy.name}!`);
             
+            // Play victory sound
+            if (window.audioManager) {
+                window.audioManager.playSound('battle_victory');
+            }
+            
             // Calculate XP reward based on enemy level
             xpGained = Math.floor(15 + (this.enemy.level * 5));
             
@@ -1078,6 +1153,15 @@ class BattleManager {
             // Track battle win
             if (window.gameState) {
                 window.gameState.battlesWon = (window.gameState.battlesWon || 0) + 1;
+                
+                // Track battle streak
+                window.gameState.battleStreak = (window.gameState.battleStreak || 0) + 1;
+                
+                // Check achievements
+                if (window.achievementTracker) {
+                    window.achievementTracker.checkAchievements();
+                }
+                
                 if (typeof saveGameState === 'function') {
                     saveGameState();
                 }
@@ -1107,6 +1191,10 @@ class BattleManager {
             // Track battle loss
             if (window.gameState) {
                 window.gameState.battlesLost = (window.gameState.battlesLost || 0) + 1;
+                
+                // Reset battle streak on loss
+                window.gameState.battleStreak = 0;
+                
                 if (typeof saveGameState === 'function') {
                     saveGameState();
                 }
@@ -1157,7 +1245,7 @@ class BattleManager {
             saveGameState();
         }
 
-        // Stop battle music
+        // Ensure all music is stopped
         if (window.audioManager) {
             window.audioManager.stopMusic();
         }

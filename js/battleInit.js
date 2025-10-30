@@ -73,6 +73,12 @@ function initializeHeroSprite() {
 
 // Test function to start a battle (for development)
 function startTestBattle() {
+    // Check if Battle Mode is enabled
+    if (window.battleModeEnabled === false) {
+        console.log('⚙️ Battle Mode is OFF — skipping encounter.');
+        return;
+    }
+    
     if (!window.battleManager) {
         console.error('Battle Manager not initialized');
         return;
