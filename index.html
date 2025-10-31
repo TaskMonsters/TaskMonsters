@@ -1186,28 +1186,25 @@
             justify-content: flex-end;
         }
 
-        /* Edit Button - Purple Pill in Top-Right Corner */
+        /* Edit Button - Just the pencil emoji in Top-Right Corner */
         .task-edit-button {
             position: absolute;
             top: 12px;
             right: 12px;
-            background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+            background: transparent;
             border: none;
-            border-radius: 20px;
             cursor: pointer;
-            padding: 6px 12px;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
             z-index: 10;
-            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);
-            font-size: 16px;
+            font-size: 20px;
         }
 
         .task-edit-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(124, 58, 237, 0.5);
+            transform: scale(1.1);
         }
 
         .task-edit-button::before {
@@ -3414,6 +3411,7 @@
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
                         <div style="display: flex; gap: 12px;">
                             <button id="startFocusTimer" class="btn-primary" style="flex: 1;">Start</button>
+                            <button id="pauseFocusTimer" class="btn-secondary" style="flex: 1; display: none;">Pause</button>
                             <button id="stopFocusTimer" class="btn-secondary" style="flex: 1;">Stop</button>
                         </div>
                     </div>
@@ -6230,6 +6228,7 @@
         let focusTimerInterval = null;
         let focusRemaining = 0;
         let focusActive = false;
+        let focusPaused = false;
         let focusStartTime = 0;
         let focusXPAwarded = 0;
 
@@ -6358,7 +6357,7 @@
         }
 
         function startFocusTimer() {
-            if (focusActive) return;
+            if (focusActive && !focusPaused) return;
             
             const durationInput = document.getElementById('focusDuration');
             const minutes = parseInt(durationInput.value, 10);
@@ -6369,9 +6368,16 @@
             }
             
             focusActive = true;
+            focusPaused = false;
             focusRemaining = minutes * 60;
             focusStartTime = Date.now();
             focusXPAwarded = 0;
+            
+            // Update button visibility
+            const startBtn = document.getElementById('startFocusTimer');
+            const pauseBtn = document.getElementById('pauseFocusTimer');
+            if (startBtn) startBtn.style.display = 'none';
+            if (pauseBtn) pauseBtn.style.display = 'block';
             
             // Expand card and lock it
             const content = document.getElementById('focusTimerContent');
@@ -6407,10 +6413,76 @@
             
             showSuccessMessage('⏱️ Focus Timer Started!', `${minutes} minute${minutes > 1 ? 's' : ''} - Stay focused!`);
         }
+        
+        function pauseFocusTimer() {
+            if (!focusActive || focusPaused) return;
+            
+            // Pause the timer
+            clearInterval(focusTimerInterval);
+            focusPaused = true;
+            
+            // Pause monster animation
+            toggleMonsterAnimation('inactive');
+            
+            // Update button visibility and text
+            const startBtn = document.getElementById('startFocusTimer');
+            const pauseBtn = document.getElementById('pauseFocusTimer');
+            if (startBtn) {
+                startBtn.style.display = 'block';
+                startBtn.textContent = 'Resume';
+            }
+            if (pauseBtn) pauseBtn.style.display = 'none';
+            
+            showSuccessMessage('⏱️ Focus Timer Paused');
+        }
+        
+        function resumeFocusTimer() {
+            if (!focusActive || !focusPaused) return;
+            
+            focusPaused = false;
+            
+            // Update button visibility and text
+            const startBtn = document.getElementById('startFocusTimer');
+            const pauseBtn = document.getElementById('pauseFocusTimer');
+            if (startBtn) {
+                startBtn.style.display = 'none';
+                startBtn.textContent = 'Start';
+            }
+            if (pauseBtn) pauseBtn.style.display = 'block';
+            
+            // Resume monster animation
+            toggleMonsterAnimation('active');
+            
+            // Adjust start time to account for paused duration
+            const elapsedMinutes = focusXPAwarded;
+            focusStartTime = Date.now() - (elapsedMinutes * 60000);
+            
+            // Resume countdown
+            focusTimerInterval = setInterval(() => {
+                focusRemaining--;
+                updateFocusDisplay();
+
+                // Award 1 XP per minute
+                const minutesElapsed = Math.floor((Date.now() - focusStartTime) / 60000);
+                if (minutesElapsed > focusXPAwarded) {
+                    focusXPAwarded = minutesElapsed;
+                    addJerryXP(1);
+                    showXPGainAnimation();
+                    console.log(`⏱️ Focus Timer: +1 XP awarded (${focusXPAwarded} minutes elapsed)`);
+                }
+
+                if (focusRemaining <= 0) {
+                    stopFocusTimer(true);
+                }
+            }, 1000);
+            
+            showSuccessMessage('⏱️ Focus Timer Resumed');
+        }
 
         function stopFocusTimer(completed = false) {
             clearInterval(focusTimerInterval);
             focusActive = false;
+            focusPaused = false;
             focusRemaining = 0;
             
             // Stop monster animation using the toggleMonsterAnimation function
@@ -6428,6 +6500,15 @@
             const display = document.getElementById('focusTimerDisplay');
             display.textContent = `${String(minutes).padStart(2, '0')}:00`;
             display.style.color = 'var(--text-primary)';
+            
+            // Reset button visibility and text
+            const startBtn = document.getElementById('startFocusTimer');
+            const pauseBtn = document.getElementById('pauseFocusTimer');
+            if (startBtn) {
+                startBtn.style.display = 'block';
+                startBtn.textContent = 'Start';
+            }
+            if (pauseBtn) pauseBtn.style.display = 'none';
             
             if (completed) {
                 showSuccessMessage('🎉 Focus Session Complete!', `Great work! You earned ${focusXPAwarded} XP!`);
@@ -6452,11 +6533,22 @@
         // Initialize Focus Timer buttons
         document.addEventListener('DOMContentLoaded', () => {
             const startBtn = document.getElementById('startFocusTimer');
+            const pauseBtn = document.getElementById('pauseFocusTimer');
             const stopBtn = document.getElementById('stopFocusTimer');
             const durationInput = document.getElementById('focusDuration');
             
             if (startBtn) {
-                startBtn.addEventListener('click', startFocusTimer);
+                startBtn.addEventListener('click', () => {
+                    if (focusPaused) {
+                        resumeFocusTimer();
+                    } else {
+                        startFocusTimer();
+                    }
+                });
+            }
+            
+            if (pauseBtn) {
+                pauseBtn.addEventListener('click', pauseFocusTimer);
             }
             
             if (stopBtn) {
