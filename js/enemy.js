@@ -355,6 +355,15 @@ function createRandomEnemy(playerLevel) {
 
     enemy.scaleToLevel(playerLevel);
     enemy.level = playerLevel; // Store level for XP calculations
+    
+    // LAZY BAT FIX: Disable projectile for Lazy Bat only (not Lazy Bat II)
+    if (enemy.name === 'Lazy Bat') {
+        enemy.attackType = 'melee';
+        enemy.usesProjectile = false;
+        // Block projectile spawn
+        enemy.shoot = () => {};
+    }
+    
     return enemy;
 }
 

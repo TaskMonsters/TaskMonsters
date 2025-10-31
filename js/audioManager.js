@@ -17,6 +17,9 @@ class AudioManager {
         
         // Sound effects library
         this.sounds = {
+            // Regular attack (user melee)
+            regular_attack: 'assets/sounds/regular attack sound.mp3',
+            
             // Special attacks
             spark_attack: 'assets/sounds/Spark Attack sound.mp3',
             prickler_attack: 'assets/sounds/Prickler.mp3',
@@ -27,13 +30,15 @@ class AudioManager {
             potion_use: 'assets/sounds/Anytime user uses potion or power boost.mp3',
             
             // Battle events
+            enemy_regular_attack: 'assets/sounds/monsterregularattacksound.mp3',
+            enemy_fifth_attack: 'assets/sounds/enemyevery5thattacksound.mp3',
             enemy_strong_attack: 'assets/sounds/Stronger enemy attack sound.mp3',
             critical_hit: 'assets/sounds/When users monster deals over 10 damage.mp3',
             third_attack: 'assets/sounds/every 3rd attack by users monsters.mp3',
             battle_victory: 'assets/sounds/when user wins any battle.mp3',
             
             // UI sounds
-            quest_complete: 'assets/sounds/Quest Giver Task Complete:Accepted sound.mp3',
+            quest_complete: 'assets/sounds/Quest Giver Task Complete Accepted sound.mp3',
             taskComplete: 'assets/sounds/taskComplete.mp3',
             shopPurchase: 'assets/sounds/shopPurchase.mp3',
             useItemOutside: 'assets/sounds/useItemOutside.mp3'

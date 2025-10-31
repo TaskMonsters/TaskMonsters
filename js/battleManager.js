@@ -19,6 +19,7 @@ class BattleManager {
         this.defenseGauge = 0;
         this.battleLog = [];
         this.hasEvade = false;
+        this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
     }
 
     // Initialize battle with hero and enemy
@@ -30,6 +31,7 @@ class BattleManager {
         this.defenseGauge = 100; // Start with full defense gauge
         this.battleLog = [];
         this.attackCount = 0;    // Track attack count for walk+attack animation
+        this.enemyAttackCount = 0;  // Reset enemy attack count for every 5th attack sound
         
         // Verify gameState inventory is loaded
         if (!window.gameState.battleInventory) {
@@ -231,9 +233,20 @@ class BattleManager {
         
         const isDead = this.enemy.takeDamage(damage);
 
-        // Play attack sound
+        // Play attack sounds
         if (window.audioManager) {
-            window.audioManager.playSound('monsterAttack', 0.6);
+            // Play new monster regular attack sound for non-special attacks
+            window.audioManager.playSound('enemy_regular_attack', 0.8);
+            
+            // Play every 3rd attack sound
+            if (this.attackCount % 3 === 0 && this.attackCount > 0) {
+                window.audioManager.playSound('third_attack', 0.8);
+            }
+            
+            // Play critical hit sound for damage >= 10
+            if (damage >= 10) {
+                window.audioManager.playSound('critical_hit', 0.8);
+            }
         }
 
         // Play enemy hurt animation
@@ -282,10 +295,20 @@ class BattleManager {
         const heroSprite = document.getElementById('heroSprite');
         const enemySprite = document.getElementById('enemySprite');
         await playSparkAnimation(heroSprite, enemySprite);
+        
+        // Play spark attack sound
+        if (window.audioManager) {
+            window.audioManager.playSound('spark_attack', 0.8);
+        }
 
         // Calculate damage (18-20 range, melee strike)
         const damage = Math.floor(Math.random() * 3) + 18; // Random between 18-20
         const isDead = this.enemy.takeDamage(damage);
+        
+        // Play critical hit sound for damage >= 10 (Spark always deals 18-20)
+        if (window.audioManager && damage >= 10) {
+            window.audioManager.playSound('critical_hit', 0.8);
+        }
 
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
@@ -422,10 +445,20 @@ class BattleManager {
             document.getElementById('heroSprite'),
             document.getElementById('enemySprite')
         );
+        
+        // Play prickler attack sound
+        if (window.audioManager) {
+            window.audioManager.playSound('prickler_attack', 0.8);
+        }
 
         // Calculate damage (10-15 range with nuclear explosion)
         const damage = Math.floor(Math.random() * 6) + 10; // Random between 10-15
         const isDead = this.enemy.takeDamage(damage);
+        
+        // Play critical hit sound for damage >= 10 (Prickler always deals 10-15)
+        if (window.audioManager && damage >= 10) {
+            window.audioManager.playSound('critical_hit', 0.8);
+        }
 
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
@@ -477,10 +510,20 @@ class BattleManager {
             document.getElementById('heroSprite'),
             document.getElementById('enemySprite')
         );
+        
+        // Play freeze attack sound
+        if (window.audioManager) {
+            window.audioManager.playSound('freeze_attack', 0.8);
+        }
 
         // Calculate damage (10 damage, skips 2 turns)
         const damage = 10;
         const isDead = this.enemy.takeDamage(damage);
+        
+        // Play critical hit sound for damage >= 10
+        if (window.audioManager && damage >= 10) {
+            window.audioManager.playSound('critical_hit', 0.8);
+        }
 
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
@@ -581,6 +624,11 @@ class BattleManager {
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.attack_refill--;
         
+        // Play potion/power boost sound
+        if (window.audioManager) {
+            window.audioManager.playSound('potion_use', 0.8);
+        }
+        
         const refillAmount = 50;
         this.attackGauge = Math.min(100, this.attackGauge + refillAmount);
         
@@ -608,9 +656,9 @@ class BattleManager {
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.defense_refill--;
         
-        // Play item use sound
+        // Play potion/power boost sound
         if (window.audioManager) {
-            window.audioManager.playSound('useItemBattle', 0.6);
+            window.audioManager.playSound('potion_use', 0.8);
         }
         
         const refillAmount = 50;
@@ -641,7 +689,12 @@ class BattleManager {
         gameState.battleInventory.invisibility_cloak--;
         this.hasEvade = true;
         
-        addBattleLog('🥷🏼 Invisibility Cloak activated! You will evade the next attack.');
+        // Play invisibility cloak sound
+        if (window.audioManager) {
+            window.audioManager.playSound('cloak_use', 0.8);
+        }
+        
+        addBattleLog('🤟🏻 Invisibility Cloak activated! You will evade the next attack.');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -1049,9 +1102,18 @@ class BattleManager {
             return;
         }
         
-        // Play enemy attack sound
+        // Increment enemy attack counter
+        this.enemyAttackCount++;
+        
+        // Play enemy attack sound for all enemies
         if (window.audioManager) {
-            window.audioManager.playSound('enemyAttack', 0.6);
+            // Play every 5th attack sound
+            if (this.enemyAttackCount % 5 === 0) {
+                window.audioManager.playSound('enemy_fifth_attack', 0.8);
+            } else {
+                // Play regular monster attack sound
+                window.audioManager.playSound('enemy_regular_attack', 0.8);
+            }
         }
 
         // Calculate damage
@@ -1139,7 +1201,7 @@ class BattleManager {
             
             // Play victory sound
             if (window.audioManager) {
-                window.audioManager.playSound('battle_victory');
+                window.audioManager.playSound('battle_victory', 0.8);
             }
             
             // Calculate XP reward based on enemy level

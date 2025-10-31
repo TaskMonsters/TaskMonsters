@@ -369,6 +369,11 @@ class QuestGiver {
             console.error('Quest Task Manager not found');
         }
         
+        // Play quest complete sound
+        if (window.audioManager) {
+            window.audioManager.playSound('quest_complete', 0.8);
+        }
+        
         // Show confirmation
         const questName = this.activeQuest.text;
         const hours = this.activeQuest.duration;

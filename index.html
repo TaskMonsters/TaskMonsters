@@ -3408,8 +3408,8 @@
                         <label for="focusDuration" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Set Timer (minutes):</label>
                         <input type="number" id="focusDuration" min="1" max="480" value="25" class="form-input" style="margin-bottom: 16px;">
                         <!-- Focus Timer Monster Animation -->
-                        <div id="focusTimerMonsterContainer" style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px auto; display: none;">
-                            <img id="focusTimerMonsterSprite" src="" alt="Monster" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;">
+                        <div id="focusTimerMonsterContainer" style="position: relative; width: 120px; height: 120px; margin: 0 auto 10px auto; display: none; display: flex; align-items: center; justify-content: center;">
+                            <img id="focusTimerMonsterSprite" src="" alt="Monster" style="width: 100%; height: 100%; object-fit: contain; image-rendering: auto;">
                         </div>
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
                         <div style="display: flex; gap: 12px;">
@@ -6268,32 +6268,20 @@
             const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
 
             if (state === 'active') {
-                // Show the monster container
+                // Animation logic: Use the hero-idle.gif animated GIF for continuous animation
+                // This is a single unified animated element that contains the complete walk, jump, and attack animation loop
                 focusTimerMonsterContainer.style.display = 'block';
                 
-                // Start with walking animation
-                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
+                // Use the animated GIF which handles all animation frames internally
+                focusTimerMonsterSprite.src = 'assets/heroes/hero-idle.gif';
                 focusTimerMonsterSprite.style.animation = 'none';
                 focusTimerMonsterSprite.style.objectPosition = '0 0';
-                focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
-                focusAnimationState = 'walk';
                 
-                // Alternate between walking and punching (jump animation) every 3 seconds
-                focusAnimationInterval = setInterval(() => {
-                    if (focusAnimationState === 'walk') {
-                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
-                        focusTimerMonsterSprite.style.animation = 'none';
-                        focusTimerMonsterSprite.style.objectPosition = '0 0';
-                        focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
-                        focusAnimationState = 'jump';
-                    } else {
-                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
-                        focusTimerMonsterSprite.style.animation = 'none';
-                        focusTimerMonsterSprite.style.objectPosition = '0 0';
-                        focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
-                        focusAnimationState = 'walk';
-                    }
-                }, 3000);
+                // Clear any existing animation switching loop
+                if (focusAnimationInterval) {
+                    clearInterval(focusAnimationInterval);
+                    focusAnimationInterval = null;
+                }
             } else {
                 // Stop animation loop
                 if (focusAnimationInterval) {
@@ -6391,8 +6379,22 @@
             focusActive = false;
             focusRemaining = 0;
             
-            // Stop monster animation
-            toggleMonsterAnimation('idle');
+            // Stop monster animation and hide container
+            const focusTimerMonsterSprite = document.getElementById('focusTimerMonsterSprite');
+            const focusTimerMonsterContainer = document.getElementById('focusTimerMonsterContainer');
+            if (focusTimerMonsterSprite) {
+                focusTimerMonsterSprite.style.animation = 'none';
+                focusTimerMonsterSprite.style.animationPlayState = 'paused';
+            }
+            if (focusTimerMonsterContainer) {
+                focusTimerMonsterContainer.style.display = 'none';
+            }
+            
+            // Clear any animation intervals
+            if (focusAnimationInterval) {
+                clearInterval(focusAnimationInterval);
+                focusAnimationInterval = null;
+            }
             
             // Reset display
             const durationInput = document.getElementById('focusDuration');
