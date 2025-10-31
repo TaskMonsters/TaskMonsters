@@ -2898,8 +2898,7 @@
         <p class="quest-prompt-message">Would you like a Quest or a Quiz today?</p>
         <div class="quest-prompt-buttons">
             <button id="merlinQuestBtn" class="quest-prompt-btn quest-prompt-yes">Quest</button>
-            <button id="merlinQuizBtn" class="quest-prompt-btn quest-prompt-yes">Quiz</button>
-            <button id="merlinNoBtn" class="quest-prompt-btn quest-prompt-no">No</button>
+            <button id="merlinQuizBtn" class="quest-prompt-btn quest-prompt-no">Quiz</button>
         </div>
     </div>
 </div>
@@ -4533,11 +4532,6 @@
         }
 
         window.selectMood = function(moodKey) {
-            // Cancel pending mood tracker timers - user has interacted
-            if (window.clearMoodTrackerTimers) {
-                window.clearMoodTrackerTimers();
-            }
-            
             const tooltip = document.getElementById("taskPalTooltip");
             const hero = document.getElementById("mainHeroSprite");
             const spritePrefix = getCurrentSpritePrefix();
