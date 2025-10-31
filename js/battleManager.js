@@ -1064,7 +1064,12 @@ class BattleManager {
         // Normal attack
         await playEnemyAnimation(this.enemy, 'attack1', 600);
         
-        // Lazy Bat no longer shoots projectiles (removed per user request)
+        // If Lazy Bat, shoot rock projectile
+        if (this.enemy.name === 'Lazy Bat') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playBatRockProjectile(enemySprite, heroSprite);
+        }
         
         // If ghost enemy, shoot waveform projectile
         if (this.enemy.projectileType === 'waveform') {

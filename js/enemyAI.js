@@ -123,11 +123,6 @@
     }
     
     function attemptEnemyHeal(enemy, playerLevel) {
-        // Lazy Bats cannot heal (per user request)
-        if (enemy.name === 'Lazy Bat' || enemy.name === 'Lazy Bat II') {
-            return { healed: false };
-        }
-        
         // Initialize heal counter if not present
         if (typeof enemy.healCount === 'undefined') {
             enemy.healCount = 0;
