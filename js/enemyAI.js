@@ -109,17 +109,47 @@
         return baseHealChance + adaptiveBoost + levelBoost;
     }
     
+    function getMaxHealsForLevel(enemyLevel) {
+        // Determine max heals based on enemy level
+        if (enemyLevel >= 50) {
+            return 6;
+        } else if (enemyLevel >= 20) {
+            return 5;
+        } else if (enemyLevel >= 10) {
+            return 3;
+        } else {
+            return 1; // Level 1-9
+        }
+    }
+    
     function attemptEnemyHeal(enemy, playerLevel) {
+        // Initialize heal counter if not present
+        if (typeof enemy.healCount === 'undefined') {
+            enemy.healCount = 0;
+        }
+        
+        // Get enemy level (use playerLevel as proxy for enemy level if not set)
+        const enemyLevel = enemy.level || playerLevel;
+        const maxHeals = getMaxHealsForLevel(enemyLevel);
+        
+        // Check if enemy has reached heal limit
+        if (enemy.healCount >= maxHeals) {
+            return { healed: false, limitReached: true };
+        }
+        
         const healChance = calculateHealChance(enemy, playerLevel);
         
         if (Math.random() < healChance) {
             // Heal 10-25% of max HP
             const healAmount = Math.round(enemy.maxHP * (0.10 + Math.random() * 0.15));
             enemy.hp = Math.min(enemy.maxHP, enemy.hp + healAmount);
+            enemy.healCount++;
             
             return {
                 healed: true,
-                amount: healAmount
+                amount: healAmount,
+                healCount: enemy.healCount,
+                maxHeals: maxHeals
             };
         }
         
@@ -171,7 +201,8 @@
         selectWeightedEnemy,
         attemptEnemyHeal,
         attemptEnemyDefense,
-        getDifficultyScaling
+        getDifficultyScaling,
+        getMaxHealsForLevel
     };
     
     console.log('✅ Enemy AI Enhancement System loaded');

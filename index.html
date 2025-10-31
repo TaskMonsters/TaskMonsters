@@ -3407,6 +3407,10 @@
                     <div style="padding: 16px 20px;">
                         <label for="focusDuration" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Set Timer (minutes):</label>
                         <input type="number" id="focusDuration" min="1" max="480" value="25" class="form-input" style="margin-bottom: 16px;">
+                        <!-- Focus Timer Monster Animation -->
+                        <div id="focusTimerMonsterContainer" style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px auto; display: none;">
+                            <img id="focusTimerMonsterSprite" src="" alt="Monster" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;">
+                        </div>
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
                         <div style="display: flex; gap: 12px;">
                             <button id="startFocusTimer" class="btn-primary" style="flex: 1;">Start</button>
@@ -6257,32 +6261,36 @@
         let focusAnimationState = 'walk';
 
         function toggleMonsterAnimation(state) {
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (!mainHeroSprite) return;
+            const focusTimerMonsterSprite = document.getElementById('focusTimerMonsterSprite');
+            const focusTimerMonsterContainer = document.getElementById('focusTimerMonsterContainer');
+            if (!focusTimerMonsterSprite || !focusTimerMonsterContainer) return;
             
             const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
 
             if (state === 'active') {
+                // Show the monster container
+                focusTimerMonsterContainer.style.display = 'block';
+                
                 // Start with walking animation
-                mainHeroSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
-                mainHeroSprite.style.animation = 'none';
-                mainHeroSprite.style.objectPosition = '0 0';
-                mainHeroSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
+                focusTimerMonsterSprite.style.animation = 'none';
+                focusTimerMonsterSprite.style.objectPosition = '0 0';
+                focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
                 focusAnimationState = 'walk';
                 
-                // Alternate between walking and jumping every 3 seconds
+                // Alternate between walking and punching (jump animation) every 3 seconds
                 focusAnimationInterval = setInterval(() => {
                     if (focusAnimationState === 'walk') {
-                        mainHeroSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
-                        mainHeroSprite.style.animation = 'none';
-                        mainHeroSprite.style.objectPosition = '0 0';
-                        mainHeroSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
+                        focusTimerMonsterSprite.style.animation = 'none';
+                        focusTimerMonsterSprite.style.objectPosition = '0 0';
+                        focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
                         focusAnimationState = 'jump';
                     } else {
-                        mainHeroSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
-                        mainHeroSprite.style.animation = 'none';
-                        mainHeroSprite.style.objectPosition = '0 0';
-                        mainHeroSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk+Attack_6.png`;
+                        focusTimerMonsterSprite.style.animation = 'none';
+                        focusTimerMonsterSprite.style.objectPosition = '0 0';
+                        focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
                         focusAnimationState = 'walk';
                     }
                 }, 3000);
@@ -6292,46 +6300,39 @@
                     clearInterval(focusAnimationInterval);
                     focusAnimationInterval = null;
                 }
-                // Return to idle
-                mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                mainHeroSprite.style.animation = 'none';
-                mainHeroSprite.style.objectPosition = '0 0';
-                mainHeroSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                // Hide the monster container
+                focusTimerMonsterContainer.style.display = 'none';
             }
         }
 
         function showXPGainAnimation() {
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (!mainHeroSprite) return;
+            const focusTimerMonsterContainer = document.getElementById('focusTimerMonsterContainer');
+            if (!focusTimerMonsterContainer) return;
             
-            // Create XP text element
-            const xpText = document.createElement('div');
-            xpText.textContent = '+1 XP';
-            xpText.style.position = 'absolute';
-            xpText.style.left = '50%';
-            xpText.style.top = '-40px';
-            xpText.style.transform = 'translateX(-50%)';
-            xpText.style.fontSize = '28px';
-            xpText.style.fontWeight = 'bold';
-            xpText.style.color = '#FFD700';
-            xpText.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
-            xpText.style.pointerEvents = 'none';
-            xpText.style.zIndex = '1000';
-            xpText.style.animation = 'xpFloat 2s ease-out forwards';
+            // Create HP text element
+            const hpText = document.createElement('div');
+            hpText.textContent = '+1 HP';
+            hpText.style.position = 'absolute';
+            hpText.style.left = '50%';
+            hpText.style.top = '-10px';
+            hpText.style.transform = 'translateX(-50%)';
+            hpText.style.fontSize = '20px';
+            hpText.style.fontWeight = 'bold';
+            hpText.style.color = '#34d399';
+            hpText.style.textShadow = '0 0 10px rgba(52, 211, 153, 0.8), 0 0 20px rgba(52, 211, 153, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
+            hpText.style.pointerEvents = 'none';
+            hpText.style.zIndex = '1000';
+            hpText.style.animation = 'xpFloat 2s ease-out forwards';
             
-            // Add to main hero sprite container
-            const heroContainer = mainHeroSprite.parentElement;
-            if (heroContainer) {
-                heroContainer.style.position = 'relative';
-                heroContainer.appendChild(xpText);
-                
-                // Remove after animation completes
-                setTimeout(() => {
-                    if (xpText.parentElement) {
-                        xpText.parentElement.removeChild(xpText);
-                    }
-                }, 2000);
-            }
+            // Add to focus timer monster container
+            focusTimerMonsterContainer.appendChild(hpText);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                if (hpText.parentElement) {
+                    hpText.parentElement.removeChild(hpText);
+                }
+            }, 2000);
         }
 
         function startFocusTimer() {
@@ -6734,7 +6735,7 @@
             blue_flame: {
                 id: 'blue_flame',
                 name: 'Blue Flame',
-                emoji: '<img src="assets/blue-flame.png" alt="Blue Flame" style="width: 36px; height: 36px; vertical-align: middle;">',
+                emoji: '<img src="assets/blue-flame.png" alt="Blue Flame" style="width: 48px; height: 48px; vertical-align: middle;">',
                 description: 'Fire-type attack dealing 20 damage (Max: 20)',
                 cost: 50,
                 effect: 'attack',

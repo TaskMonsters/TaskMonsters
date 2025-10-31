@@ -1,42 +1,19 @@
 /**
- * AudioManager - Complete Audio System with Alternating Battle Music
+ * AudioManager - Complete Audio System with Sound Effects Only
  * Optimized for low-power devices (iPhone 8+)
- * Features: Alternating battle tracks, full sound effects, independent toggles
+ * Features: Full sound effects library (battle music removed)
  */
 
 class AudioManager {
     constructor() {
         // Audio state
         this.enabled = localStorage.getItem('soundEnabled') !== 'false'; // Default ON
-        this.musicEnabled = true;
-        this.currentBattleTrack = 1; // Alternates between 1 and 2
         
         // Track active sounds for cleanup
         this.activeSounds = new Set();
-        this.currentMusic = null;
         
         // Volume settings
-        this.musicVolume = 0.4;  // Low volume for background music
         this.sfxVolume = 1.0;    // Full volume for sound effects
-        
-        // Sound file paths - Battle Music (Alternating)
-        this.battleMusic = {
-            track1: new Audio('assets/sounds/BattleArenamusic1(lowvolume).mp3'),
-            track2: new Audio('assets/sounds/BattleArenamusic2(lowvolume).mp3')
-        };
-        
-        // Configure battle music tracks
-        Object.values(this.battleMusic).forEach(track => {
-            track.loop = true;
-            track.volume = this.musicVolume;
-            track.preload = 'auto';
-        });
-        
-        // Quest giver music
-        this.questMusic = new Audio('assets/sounds/Quest Giver Mode music.mp3');
-        this.questMusic.loop = true;
-        this.questMusic.volume = this.musicVolume;
-        this.questMusic.preload = 'auto';
         
         // Sound effects library
         this.sounds = {
@@ -77,18 +54,8 @@ class AudioManager {
         if (this.initialized) return;
         
         try {
-            // Preload battle music
-            Object.values(this.battleMusic).forEach(track => {
-                track.load();
-            });
-            
-            // Safari unlock - play and pause immediately
-            Object.values(this.battleMusic).forEach(track => {
-                track.play().then(() => track.pause()).catch(() => {});
-            });
-            
             this.initialized = true;
-            console.log('[AudioManager] Initialized with alternating battle music');
+            console.log('[AudioManager] Initialized with sound effects only');
         } catch (error) {
             console.warn('[AudioManager] Initialization skipped:', error.message);
         }
@@ -138,103 +105,36 @@ class AudioManager {
     }
     
     /**
-     * Play alternating battle music
-     * Switches between track1 and track2 each time a battle starts
+     * Play battle music - DISABLED (music removed)
+     * This method is kept for compatibility but does nothing
      */
     playBattleMusic() {
-        if (!this.enabled || !this.musicEnabled) return;
-        
-        // Ensure initialized
-        this.init();
-        
-        try {
-            // Stop any currently playing music
-            this.stopMusic();
-            
-            // Select next track (alternates)
-            const nextTrack = this.currentBattleTrack === 1 ? this.battleMusic.track1 : this.battleMusic.track2;
-            
-            console.log(`[AudioManager] Playing battle music track ${this.currentBattleTrack}`);
-            
-            // Set volume and loop
-            nextTrack.volume = this.musicVolume;
-            nextTrack.loop = true;
-            nextTrack.currentTime = 0;
-            
-            // Play the track
-            nextTrack.play().catch(err => {
-                console.warn('[AudioManager] Battle music playback failed:', err.message);
-            });
-            
-            this.currentMusic = nextTrack;
-            
-            // Alternate for next battle
-            this.currentBattleTrack = this.currentBattleTrack === 1 ? 2 : 1;
-            
-        } catch (error) {
-            console.warn('[AudioManager] Error playing battle music:', error.message);
-        }
+        console.log('[AudioManager] Battle music disabled - sound effects only');
+        return;
     }
     
     /**
-     * Play quest giver music
+     * Play quest giver music - DISABLED (music removed)
+     * This method is kept for compatibility but does nothing
      */
     playQuestMusic() {
-        if (!this.enabled || !this.musicEnabled) return;
-        
-        // Ensure initialized
-        this.init();
-        
-        try {
-            // Stop any currently playing music
-            this.stopMusic();
-            
-            this.questMusic.volume = this.musicVolume;
-            this.questMusic.loop = true;
-            this.questMusic.currentTime = 0;
-            
-            this.questMusic.play().catch(err => {
-                console.warn('[AudioManager] Quest music playback failed:', err.message);
-            });
-            
-            this.currentMusic = this.questMusic;
-            
-        } catch (error) {
-            console.warn('[AudioManager] Error playing quest music:', error.message);
-        }
+        console.log('[AudioManager] Quest music disabled - sound effects only');
+        return;
     }
     
     /**
-     * Stop current background music
+     * Stop current background music - DISABLED (music removed)
+     * This method is kept for compatibility but does nothing
      */
     stopMusic() {
-        // Stop all battle tracks
-        Object.values(this.battleMusic).forEach(track => {
-            try {
-                track.pause();
-                track.currentTime = 0;
-            } catch (error) {
-                // Ignore errors on cleanup
-            }
-        });
-        
-        // Stop quest music
-        try {
-            this.questMusic.pause();
-            this.questMusic.currentTime = 0;
-        } catch (error) {
-            // Ignore errors on cleanup
-        }
-        
-        this.currentMusic = null;
+        console.log('[AudioManager] No music to stop - sound effects only');
+        return;
     }
     
     /**
-     * Stop all sounds (music + effects)
+     * Stop all sounds (effects only)
      */
     stopAll() {
-        this.stopMusic();
-        
         // Stop all active sound effects
         this.activeSounds.forEach(sound => {
             try {
@@ -295,22 +195,12 @@ class AudioManager {
     }
     
     /**
-     * Pause audio when tab is hidden (battery saving)
+     * Handle visibility change - DISABLED (no music to pause)
+     * This method is kept for compatibility but does nothing
      */
     handleVisibilityChange() {
-        if (document.hidden) {
-            // Pause music when tab hidden
-            if (this.currentMusic && !this.currentMusic.paused) {
-                this.currentMusic.pause();
-                this.currentMusic._wasPlayingBeforeHide = true;
-            }
-        } else {
-            // Resume music when tab visible
-            if (this.currentMusic && this.currentMusic._wasPlayingBeforeHide) {
-                this.currentMusic.play().catch(() => {});
-                this.currentMusic._wasPlayingBeforeHide = false;
-            }
-        }
+        // No music to pause/resume
+        return;
     }
 }
 
@@ -327,4 +217,4 @@ document.addEventListener('click', () => {
     window.audioManager.init();
 }, { once: true });
 
-console.log('[AudioManager] Loaded with alternating battle music system');
+console.log('[AudioManager] Loaded with sound effects only (battle music removed)');
