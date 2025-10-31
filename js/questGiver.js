@@ -177,7 +177,25 @@ class QuestGiver {
             { id: 'quiz42', question: 'What is the tallest mountain in the world?', options: ['K2', 'Mount Kilimanjaro', 'Mount Everest', 'Denali'], correct: 2, xpReward: 10, xpPenalty: 5 },
             { id: 'quiz43', question: 'What is the deepest ocean trench?', options: ['Mariana Trench', 'Puerto Rico Trench', 'Java Trench', 'Philippine Trench'], correct: 0, xpReward: 20, xpPenalty: 10 },
             { id: 'quiz44', question: 'What is the largest desert in the world?', options: ['Sahara', 'Arabian', 'Gobi', 'Antarctic'], correct: 3, xpReward: 25, xpPenalty: 15 },
-            { id: 'quiz45', question: 'How many elements are in the periodic table?', options: ['92', '108', '118', '126'], correct: 2, xpReward: 20, xpPenalty: 10 }
+            { id: 'quiz45', question: 'How many elements are in the periodic table?', options: ['92', '108', '118', '126'], correct: 2, xpReward: 20, xpPenalty: 10 },
+            
+            // NEW QUIZZES - Literature & Arts
+            { id: 'quiz46', question: 'Who wrote "Romeo and Juliet"?', options: ['Charles Dickens', 'William Shakespeare', 'Jane Austen', 'Mark Twain'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz47', question: 'What is the most spoken language in the world by native speakers?', options: ['English', 'Spanish', 'Mandarin Chinese', 'Hindi'], correct: 2, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz48', question: 'In which city is the Louvre Museum located?', options: ['London', 'Rome', 'Paris', 'Madrid'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            
+            // NEW QUIZZES - Nature & Environment
+            { id: 'quiz49', question: 'What percentage of Earth\'s surface is covered by water?', options: ['50%', '61%', '71%', '81%'], correct: 2, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz50', question: 'How many legs does a spider have?', options: ['6', '8', '10', '12'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz51', question: 'What gas do plants absorb from the atmosphere?', options: ['Oxygen', 'Nitrogen', 'Carbon Dioxide', 'Hydrogen'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            
+            // NEW QUIZZES - Sports & Entertainment
+            { id: 'quiz52', question: 'How many players are on a soccer team on the field?', options: ['9', '10', '11', '12'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz53', question: 'In which year were the first modern Olympic Games held?', options: ['1892', '1896', '1900', '1904'], correct: 1, xpReward: 20, xpPenalty: 10 },
+            
+            // NEW QUIZZES - Food & Culture
+            { id: 'quiz54', question: 'What is the main ingredient in traditional Japanese miso soup?', options: ['Tofu', 'Seaweed', 'Fermented soybean paste', 'Rice'], correct: 2, xpReward: 20, xpPenalty: 10 },
+            { id: 'quiz55', question: 'Which country is the largest producer of coffee in the world?', options: ['Colombia', 'Vietnam', 'Brazil', 'Ethiopia'], correct: 2, xpReward: 15, xpPenalty: 10 }
         ];
     }
 

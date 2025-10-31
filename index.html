@@ -3408,8 +3408,8 @@
                         <label for="focusDuration" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Set Timer (minutes):</label>
                         <input type="number" id="focusDuration" min="1" max="480" value="25" class="form-input" style="margin-bottom: 16px;">
                         <!-- Focus Timer Monster Animation -->
-                        <div id="focusTimerMonsterContainer" style="position: relative; width: 120px; height: 120px; margin: 0 auto 10px auto; display: none; display: flex; align-items: center; justify-content: center;">
-                            <img id="focusTimerMonsterSprite" src="" alt="Monster" style="width: 100%; height: 100%; object-fit: contain; image-rendering: auto;">
+                        <div id="focusTimerMonsterContainer" style="position: relative; width: 140px; height: 140px; margin: 0 auto 10px auto; display: none; align-items: center; justify-content: center;">
+                            <img id="focusTimerMonsterSprite" src="assets/heroes/Pink_Monster_Idle_4.png" alt="Monster" style="width: 32px; height: 32px; image-rendering: pixelated; object-fit: none; object-position: 0 0; transform: scale(4); transform-origin: center center; animation: hero-idle-anim 0.8s steps(4) infinite;">
                         </div>
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
                         <div style="display: flex; gap: 12px;">
@@ -3940,7 +3940,16 @@
             
             // Advanced Tier (💛) - Quest Achievements
             { id: 'quest_master', name: 'Quest Master', desc: 'Pass 10 Merlin quizzes', icon: '🧙‍♂️', requirement: 10, type: 'quests', tier: 'advanced' },
-            { id: 'scholar', name: 'Scholar', desc: 'Pass 20 Merlin quizzes total', icon: '📖', requirement: 20, type: 'quests', tier: 'advanced' }
+            { id: 'scholar', name: 'Scholar', desc: 'Pass 20 Merlin quizzes total', icon: '📖', requirement: 20, type: 'quests', tier: 'advanced' },
+            
+            // NEW ACHIEVEMENTS - Focus & Productivity
+            { id: 'focused_mind', name: 'Focused Mind', desc: 'Use the Focus Timer for 25 minutes', icon: '⏱️', requirement: 1, type: 'focus_timer', tier: 'starter' },
+            { id: 'challenge_champion', name: 'Challenge Champion', desc: 'Complete 3 daily challenges', icon: '🎯', requirement: 3, type: 'challenges', tier: 'intermediate' },
+            { id: 'category_master', name: 'Category Master', desc: 'Complete at least 1 task in all 10 categories', icon: '🎨', requirement: 10, type: 'category_variety', tier: 'intermediate' },
+            { id: 'priority_pro', name: 'Priority Pro', desc: 'Complete 10 high-priority tasks total', icon: '🔴', requirement: 10, type: 'high_priority_total', tier: 'intermediate' },
+            { id: 'xp_master', name: 'XP Master', desc: 'Earn 1000 XP total', icon: '💫', requirement: 1000, type: 'xp', tier: 'advanced' },
+            { id: 'quest_collector', name: 'Quest Collector', desc: 'Accept 10 Merlin quests', icon: '📜', requirement: 10, type: 'quest_accepted', tier: 'intermediate' },
+            { id: 'dedication_master', name: 'Dedication Master', desc: 'Complete tasks 14 days in a row', icon: '🔥', requirement: 14, type: 'streak', tier: 'advanced' }
         ];
         
         // Make achievements accessible globally
@@ -5552,7 +5561,7 @@
                 }
             }
             // 3. Difficulty-based challenges (easy, medium, hard)
-            else if (!isQuickTask && task && task.difficulty) {
+            if (!shouldIncrement && !isQuickTask && task && task.difficulty) {
                 const taskDifficulty = (task.difficulty || '').toLowerCase().trim();
                 
                 if ((challengeDesc.includes('easy') && taskDifficulty === 'easy') ||
@@ -5562,7 +5571,7 @@
                 }
             }
             // 4. Priority-based challenges (high-priority, low-priority)
-            else if (!isQuickTask && task && task.priority) {
+            if (!shouldIncrement && !isQuickTask && task && task.priority) {
                 // Normalize priority value (could be 'High', 'high', 'HIGH', etc.)
                 const taskPriority = (task.priority || '').toLowerCase().trim();
                 const isHighPriorityChallenge = challengeDesc.includes('high-priority') || challengeDesc.includes('high priority');
@@ -6268,26 +6277,51 @@
             const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
 
             if (state === 'active') {
-                // Animation logic: Use the hero-idle.gif animated GIF for continuous animation
-                // This is a single unified animated element that contains the complete walk, jump, and attack animation loop
-                focusTimerMonsterContainer.style.display = 'block';
+                // Show the monster container
+                focusTimerMonsterContainer.style.display = 'flex';
                 
-                // Use the animated GIF which handles all animation frames internally
-                focusTimerMonsterSprite.src = 'assets/heroes/hero-idle.gif';
-                focusTimerMonsterSprite.style.animation = 'none';
-                focusTimerMonsterSprite.style.objectPosition = '0 0';
+                // Start with walk animation
+                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
+                focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                focusAnimationState = 'walk';
                 
                 // Clear any existing animation switching loop
                 if (focusAnimationInterval) {
                     clearInterval(focusAnimationInterval);
-                    focusAnimationInterval = null;
                 }
+                
+                // Cycle through walk, jump, and idle animations
+                focusAnimationInterval = setInterval(() => {
+                    if (!focusActive) return;
+                    
+                    if (focusAnimationState === 'walk') {
+                        // Switch to jump
+                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
+                        focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                        focusAnimationState = 'jump';
+                    } else if (focusAnimationState === 'jump') {
+                        // Switch to idle
+                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                        focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                        focusAnimationState = 'idle';
+                    } else {
+                        // Switch back to walk
+                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
+                        focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                        focusAnimationState = 'walk';
+                    }
+                }, 2000); // Change animation every 2 seconds
             } else {
                 // Stop animation loop
                 if (focusAnimationInterval) {
                     clearInterval(focusAnimationInterval);
                     focusAnimationInterval = null;
                 }
+                
+                // Return to idle animation
+                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                
                 // Hide the monster container
                 focusTimerMonsterContainer.style.display = 'none';
             }
@@ -6379,16 +6413,8 @@
             focusActive = false;
             focusRemaining = 0;
             
-            // Stop monster animation and hide container
-            const focusTimerMonsterSprite = document.getElementById('focusTimerMonsterSprite');
-            const focusTimerMonsterContainer = document.getElementById('focusTimerMonsterContainer');
-            if (focusTimerMonsterSprite) {
-                focusTimerMonsterSprite.style.animation = 'none';
-                focusTimerMonsterSprite.style.animationPlayState = 'paused';
-            }
-            if (focusTimerMonsterContainer) {
-                focusTimerMonsterContainer.style.display = 'none';
-            }
+            // Stop monster animation using the toggleMonsterAnimation function
+            toggleMonsterAnimation('inactive');
             
             // Clear any animation intervals
             if (focusAnimationInterval) {
@@ -6405,6 +6431,19 @@
             
             if (completed) {
                 showSuccessMessage('🎉 Focus Session Complete!', `Great work! You earned ${focusXPAwarded} XP!`);
+                
+                // Track focus timer achievement (25 minutes or more)
+                if (focusXPAwarded >= 25) {
+                    if (!gameState.achievementProgress) {
+                        gameState.achievementProgress = {};
+                    }
+                    gameState.achievementProgress.focusTimer25Min = true;
+                    
+                    // Check achievements
+                    if (window.achievementTracker) {
+                        window.achievementTracker.checkAchievements();
+                    }
+                }
             } else {
                 showSuccessMessage('⏱️ Focus Timer Stopped');
             }

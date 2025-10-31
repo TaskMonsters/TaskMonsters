@@ -98,6 +98,18 @@ class AchievementTracker {
                 case 'quiz_perfect':
                     isUnlocked = this.checkQuizPerfectAchievement(achievement);
                     break;
+                case 'focus_timer':
+                    isUnlocked = this.checkFocusTimerAchievement(achievement);
+                    break;
+                case 'category_variety':
+                    isUnlocked = this.checkCategoryVarietyAchievement(achievement);
+                    break;
+                case 'high_priority_total':
+                    isUnlocked = this.checkHighPriorityTotalAchievement(achievement);
+                    break;
+                case 'quest_accepted':
+                    isUnlocked = this.checkQuestAcceptedAchievement(achievement);
+                    break;
             }
 
             if (isUnlocked) {
@@ -242,6 +254,32 @@ class AchievementTracker {
     checkQuizPerfectAchievement(achievement) {
         const quizStreak = window.gameState.quizPerfectStreak || 0;
         return quizStreak >= achievement.requirement;
+    }
+
+    // NEW ACHIEVEMENT CHECKERS
+    checkFocusTimerAchievement(achievement) {
+        // Check if user has completed at least one 25-minute focus session
+        if (!window.gameState.achievementProgress) return false;
+        return window.gameState.achievementProgress.focusTimer25Min === true;
+    }
+
+    checkCategoryVarietyAchievement(achievement) {
+        // Check if user has completed tasks in all 10 categories
+        if (!window.gameState.achievementProgress) return false;
+        const categoriesCompleted = window.gameState.achievementProgress.categoriesCompleted || [];
+        return categoriesCompleted.length >= achievement.requirement;
+    }
+
+    checkHighPriorityTotalAchievement(achievement) {
+        // Check total high-priority tasks completed
+        const highPriorityCount = window.gameState.highPriorityTasksCompleted || 0;
+        return highPriorityCount >= achievement.requirement;
+    }
+
+    checkQuestAcceptedAchievement(achievement) {
+        // Check total quests accepted from Merlin
+        const questsAccepted = window.gameState.questTasksAccepted || 0;
+        return questsAccepted >= achievement.requirement;
     }
 
     // Check if achievement is unlocked
@@ -389,6 +427,22 @@ class AchievementTracker {
             if (allBeforeNoon && window.gameState.tasksCompletedToday.length >= 3) {
                 window.gameState.achievementProgress.allTasksBeforeNoon = true;
             }
+        }
+
+        // Track category variety
+        if (task && task.category) {
+            if (!window.gameState.achievementProgress.categoriesCompleted) {
+                window.gameState.achievementProgress.categoriesCompleted = [];
+            }
+            const category = task.category.toLowerCase();
+            if (!window.gameState.achievementProgress.categoriesCompleted.includes(category)) {
+                window.gameState.achievementProgress.categoriesCompleted.push(category);
+            }
+        }
+
+        // Track high-priority tasks
+        if (task && task.priority && task.priority.toLowerCase() === 'high') {
+            window.gameState.highPriorityTasksCompleted = (window.gameState.highPriorityTasksCompleted || 0) + 1;
         }
 
         // Track session
