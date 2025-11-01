@@ -52,6 +52,13 @@ class AudioManager {
     }
     
     /**
+     * Get sound enabled status
+     */
+    get soundEnabled() {
+        return this.enabled;
+    }
+    
+    /**
      * Initialize AudioContext on first user interaction
      * Required for iOS audio playback
      */
