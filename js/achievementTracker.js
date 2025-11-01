@@ -284,16 +284,16 @@ class AchievementTracker {
 
     // Check if achievement is unlocked
     isAchievementUnlocked(achievementId) {
-        if (!window.gameState.achievementProgress) return false;
-        return window.gameState.achievementProgress[achievementId] === true;
+        if (!window.gameState.unlockedAchievements) return false;
+        return window.gameState.unlockedAchievements[achievementId] === true;
     }
 
     // Unlock achievement
     unlockAchievement(achievementId) {
-        if (!window.gameState.achievementProgress) {
-            window.gameState.achievementProgress = {};
+        if (!window.gameState.unlockedAchievements) {
+            window.gameState.unlockedAchievements = {};
         }
-        window.gameState.achievementProgress[achievementId] = true;
+        window.gameState.unlockedAchievements[achievementId] = true;
         
         if (typeof window.saveGameState === 'function') {
             window.saveGameState();

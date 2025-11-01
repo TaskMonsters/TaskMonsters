@@ -3781,6 +3781,7 @@
             quizPerfectStreak: 0,
             // Achievement tracking
             achievementProgress: {},
+            unlockedAchievements: {},
             quickTaskStartTimes: {},
             sessionTaskCount: 0,
             sessionStartTime: null,
@@ -4047,6 +4048,9 @@
                 // Migration: Initialize achievement tracking for existing users
                 if (typeof gameState.achievementProgress === 'undefined') {
                     gameState.achievementProgress = {};
+                }
+                if (typeof gameState.unlockedAchievements === 'undefined') {
+                    gameState.unlockedAchievements = {};
                 }
                 if (typeof gameState.quickTaskStartTimes === 'undefined') {
                     gameState.quickTaskStartTimes = {};

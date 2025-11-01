@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Achievement Fix Test</title>
+</head>
+<body>
+    <h1>Achievement System Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Simulate game state
+        window.gameState = {
+            completedTasks: 5,
+            achievementProgress: {},
+            unlockedAchievements: {}
+        };
+        
+        // Simulate achievements
+        window.achievements = [
+            { id: 'task_starter', name: 'Task Starter', desc: 'Complete 1 task', icon: '🎯', requirement: 1, type: 'tasks', tier: 'beginner' },
+            { id: 'task_master', name: 'Task Master', desc: 'Complete 5 tasks', icon: '⭐', requirement: 5, type: 'tasks', tier: 'beginner' }
+        ];
+        
+        // Simulate saveGameState
+        window.saveGameState = function() {
+            console.log('Game state saved');
+        };
+        
+        // Load achievement tracker code
+        class AchievementTracker {
+            constructor() {
+                this.achievements = window.achievements;
+            }
+            
+            checkAchievements() {
+                const unlockedNew = [];
+                
+                this.achievements.forEach(achievement => {
+                    if (this.isAchievementUnlocked(achievement.id)) return;
+                    
+                    let isUnlocked = false;
+                    if (achievement.type === 'tasks') {
+                        const completed = window.gameState.completedTasks || 0;
+                        isUnlocked = completed >= achievement.requirement;
+                    }
+                    
+                    if (isUnlocked) {
+                        this.unlockAchievement(achievement.id);
+                        unlockedNew.push(achievement);
+                    }
+                });
+                
+                return unlockedNew;
+            }
+            
+            isAchievementUnlocked(achievementId) {
+                if (!window.gameState.unlockedAchievements) return false;
+                return window.gameState.unlockedAchievements[achievementId] === true;
+            }
+            
+            unlockAchievement(achievementId) {
+                if (!window.gameState.unlockedAchievements) {
+                    window.gameState.unlockedAchievements = {};
+                }
+                window.gameState.unlockedAchievements[achievementId] = true;
+                
+                if (typeof window.saveGameState === 'function') {
+                    window.saveGameState();
+                }
+            }
+        }
+        
+        // Run test
+        const tracker = new AchievementTracker();
+        const results = document.getElementById('results');
+        
+        results.innerHTML += '<h2>Test 1: Check achievements</h2>';
+        const unlocked = tracker.checkAchievements();
+        results.innerHTML += `<p>Unlocked ${unlocked.length} achievements</p>`;
+        unlocked.forEach(a => {
+            results.innerHTML += `<p>✅ ${a.icon} ${a.name}</p>`;
+        });
+        
+        results.innerHTML += '<h2>Test 2: Verify achievements are marked as unlocked</h2>';
+        const isTask1Unlocked = tracker.isAchievementUnlocked('task_starter');
+        const isTask2Unlocked = tracker.isAchievementUnlocked('task_master');
+        results.innerHTML += `<p>Task Starter unlocked: ${isTask1Unlocked ? '✅ YES' : '❌ NO'}</p>`;
+        results.innerHTML += `<p>Task Master unlocked: ${isTask2Unlocked ? '✅ YES' : '❌ NO'}</p>`;
+        
+        results.innerHTML += '<h2>Test 3: Check achievements again (should find none)</h2>';
+        const unlocked2 = tracker.checkAchievements();
+        results.innerHTML += `<p>Unlocked ${unlocked2.length} achievements (should be 0)</p>`;
+        
+        results.innerHTML += '<h2>Test 4: Game state</h2>';
+        results.innerHTML += `<pre>${JSON.stringify(window.gameState.unlockedAchievements, null, 2)}</pre>`;
+        
+        // Final verdict
+        if (isTask1Unlocked && isTask2Unlocked && unlocked2.length === 0) {
+            results.innerHTML += '<h2 style="color: green;">✅ ALL TESTS PASSED!</h2>';
+        } else {
+            results.innerHTML += '<h2 style="color: red;">❌ TESTS FAILED!</h2>';
+        }
+    </script>
+</body>
+</html>
