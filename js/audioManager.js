@@ -33,16 +33,31 @@ class AudioManager {
             enemy_regular_attack: 'assets/sounds/monsterregularattacksound.mp3',
             enemy_fifth_attack: 'assets/sounds/enemyevery5thattacksound.mp3',
             enemy_strong_attack: 'assets/sounds/Stronger enemy attack sound.mp3',
+            enemy_attack_low_level: 'assets/sounds/enemyattacksound2.mp3',
             critical_hit: 'assets/sounds/When users monster deals over 10 damage.mp3',
             third_attack: 'assets/sounds/every 3rd attack by users monsters.mp3',
             battle_victory: 'assets/sounds/when user wins any battle.mp3',
+            
+            // Defense sounds
+            defend: 'assets/sounds/Defend.mp3',
+            defense_boost: 'assets/sounds/Defenseboost.mp3',
             
             // UI sounds
             quest_complete: 'assets/sounds/Quest Giver Task Complete Accepted sound.mp3',
             taskComplete: 'assets/sounds/taskComplete.mp3',
             shopPurchase: 'assets/sounds/shopPurchase.mp3',
-            useItemOutside: 'assets/sounds/useItemOutside.mp3'
+            useItemOutside: 'assets/sounds/useItemOutside.mp3',
+            focus_timer_complete: 'assets/sounds/Focustimerdonesound.mp3'
         };
+        
+        // Music tracks (separate from sound effects)
+        this.music = {
+            quest_giver: 'assets/sounds/Quest Giver Mode music.mp3',
+            battle: 'assets/sounds/battleMusic.mp3'
+        };
+        
+        // Current music track
+        this.currentMusic = null;
         
         // Cache for loaded audio elements
         this.audioCache = {};
@@ -126,25 +141,48 @@ class AudioManager {
     }
     
     /**
-     * Play quest giver music - DISABLED (music removed)
-     * This method is kept for compatibility but does nothing
+     * Play quest giver music
      */
     playQuestMusic() {
-        console.log('[AudioManager] Quest music disabled - sound effects only');
-        return;
+        if (!this.enabled || !this.music.quest_giver) return;
+        
+        // Stop any currently playing music
+        this.stopMusic();
+        
+        try {
+            this.currentMusic = new Audio(this.music.quest_giver);
+            this.currentMusic.volume = 0.4; // Lower volume for background music
+            this.currentMusic.loop = true;
+            
+            this.currentMusic.play().catch(err => {
+                console.warn('[AudioManager] Quest music playback failed:', err.message);
+                this.currentMusic = null;
+            });
+            
+            console.log('[AudioManager] Quest giver music started');
+        } catch (error) {
+            console.warn('[AudioManager] Error playing quest music:', error.message);
+        }
     }
     
     /**
-     * Stop current background music - DISABLED (music removed)
-     * This method is kept for compatibility but does nothing
+     * Stop current background music
      */
     stopMusic() {
-        console.log('[AudioManager] No music to stop - sound effects only');
-        return;
+        if (this.currentMusic) {
+            try {
+                this.currentMusic.pause();
+                this.currentMusic.currentTime = 0;
+                this.currentMusic = null;
+                console.log('[AudioManager] Music stopped');
+            } catch (error) {
+                console.warn('[AudioManager] Error stopping music:', error.message);
+            }
+        }
     }
     
     /**
-     * Stop all sounds (effects only)
+     * Stop all sounds (effects and music)
      */
     stopAll() {
         // Stop all active sound effects
@@ -158,6 +196,9 @@ class AudioManager {
         });
         
         this.activeSounds.clear();
+        
+        // Stop music
+        this.stopMusic();
     }
     
     /**

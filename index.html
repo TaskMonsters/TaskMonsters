@@ -395,13 +395,16 @@
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            transition: opacity 0.5s ease;
+            opacity: 1;
+            transition: opacity 0.8s ease-out;
+            visibility: visible;
         }
 
         .loading-screen.hidden {
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
-            display: none !important;
+            transition: opacity 0.8s ease-out, visibility 0s 0.8s;
         }
 
         .loading-brand {
@@ -3119,6 +3122,9 @@
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
             ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
         </button>
+        <button id="btnAsteroid" class="btn-action" onclick="battleManager.playerAsteroid()" style="display: none;">
+            🪨 Asteroid Attack <span class="item-count" id="asteroidCount">(0)</span>
+        </button>
         <button id="btnPrickler" class="btn-action" onclick="battleManager.playerPrickler()" style="display: none;">
             💣 Prickler <span class="item-count" id="pricklerCount">(0)</span>
         </button>
@@ -3128,6 +3134,9 @@
         <button id="btnPotion" class="btn-action" onclick="battleManager.playerPotion()">
             🧪 Potion <span class="item-count" id="potionCount">(2)</span>
         </button>
+        <button id="btnHyperPotion" class="btn-action" onclick="battleManager.playerHyperPotion()">
+            ❤️‍🩹 Hyper Potion <span class="item-count" id="hyperPotionCount">(0)</span>
+        </button>
         <button id="btnAttackRefill" class="btn-action" onclick="battleManager.playerAttackRefill()">
             ⚡ Attack+ <span class="item-count" id="attackRefillCount">(0)</span>
         </button>
@@ -3136,6 +3145,9 @@
         </button>
         <button id="btnInvisibilityCloak" class="btn-action" onclick="battleManager.playerInvisibilityCloak()">
             🥷🏼 Cloak <span class="item-count" id="invisibilityCloakCount">(0)</span>
+        </button>
+        <button id="btnMirrorAttack" class="btn-action" onclick="battleManager.playerMirrorAttack()" style="display: none;">
+            🪞 Mirror <span class="item-count" id="mirrorAttackCount">(0)</span>
         </button>
         <button id="btnBlueFlame" class="btn-action" onclick="battleManager.playerBlueFlame()" style="display: none;">
             🔵🔥 Blue Flame <span class="item-count" id="blueFlameCount">(0)</span>
@@ -3469,7 +3481,7 @@
             <!-- Shop Sub-Tabs -->
             <div class="shop-sub-tabs">
                 <button class="pill-tab-shop active" onclick="switchShopSubTab('shop')">Shop</button>
-                <button class="pill-tab-shop" onclick="switchShopSubTab('owned')">Owned</button>
+                <button class="pill-tab-shop" onclick="switchShopSubTab('owned')">Inventory</button>
                 <button class="pill-tab-shop" onclick="switchShopSubTab('themes')">Themes</button>
             </div>
 
@@ -6519,6 +6531,11 @@
             if (pauseBtn) pauseBtn.style.display = 'none';
             
             if (completed) {
+                // Play focus timer completion sound
+                if (window.audioManager) {
+                    window.audioManager.playSound('focus_timer_complete', 0.8);
+                }
+                
                 showSuccessMessage('🎉 Focus Session Complete!', `Great work! You earned ${focusXPAwarded} XP!`);
                 
                 // Track focus timer achievement (25 minutes or more)
@@ -6687,8 +6704,27 @@
                     description: 'Digital cyberspace grid',
                     cost: 200,
                     background: 'assets/backgrounds/cyber-grid.png'
+                },
+                {
+                    id: 'synth_city',
+                    name: 'Synth City',
+                    emoji: '🌆',
+                    description: 'Retro synthwave cityscape',
+                    cost: 70,
+                    background: 'assets/backgrounds/themes/synth-city.png'
+                },
+                {
+                    id: 'space',
+                    name: 'Space',
+                    emoji: '🌌',
+                    description: 'Cosmic space vista',
+                    cost: 130,
+                    background: 'assets/backgrounds/themes/space.png'
                 }
             ];
+            
+            // Sort themes by cost (lowest to highest)
+            themes.sort((a, b) => a.cost - b.cost);
             
             // Render themes
             const grid = document.getElementById('themesGrid');
@@ -6743,7 +6779,9 @@
                 { id: 'night_city', cost: 120, background: 'assets/backgrounds/city-night.png' },
                 { id: 'ocean_depths', cost: 150, background: 'assets/backgrounds/ocean-deep.png' },
                 { id: 'mystic_temple', cost: 180, background: 'assets/backgrounds/temple-ruins.png' },
-                { id: 'cyber_grid', cost: 200, background: 'assets/backgrounds/cyber-grid.png' }
+                { id: 'cyber_grid', cost: 200, background: 'assets/backgrounds/cyber-grid.png' },
+                { id: 'synth_city', cost: 70, background: 'assets/backgrounds/themes/synth-city.png' },
+                { id: 'space', cost: 130, background: 'assets/backgrounds/themes/space.png' }
             ];
             
             const theme = themes.find(t => t.id === themeId);
@@ -6807,6 +6845,15 @@
                 effect: 'heal',
                 value: 20
             },
+            hyper_potion: {
+                id: 'hyper_potion',
+                name: 'Hyper Potion',
+                emoji: '❤️‍🩹',
+                description: 'Instantly restores 50 HP in battle',
+                cost: 40,
+                effect: 'heal',
+                value: 50
+            },
             defense_refill: {
                 id: 'defense_refill',
                 name: 'Shield',
@@ -6824,6 +6871,17 @@
                 cost: 25,
                 effect: 'attack_gauge',
                 value: 30
+            },
+            asteroid_attack: {
+                id: 'asteroid_attack',
+                name: 'Asteroid Attack',
+                emoji: '🪨',
+                description: 'Rock projectile dealing 12 damage (Max: 15)',
+                cost: 20,
+                effect: 'attack',
+                value: 12,
+                levelRequired: 1,
+                maxQuantity: 15
             },
             prickler: {
                 id: 'prickler',
@@ -6877,6 +6935,15 @@
                 cost: 40,
                 effect: 'evade',
                 levelRequired: 3
+            },
+            mirror_attack: {
+                id: 'mirror_attack',
+                name: 'Mirror Attack',
+                emoji: '🪞',
+                description: 'Reflects enemy\'s next attack back to them',
+                cost: 80,
+                effect: 'reflect',
+                levelRequired: 40
             },
             blue_flame: {
                 id: 'blue_flame',
@@ -7134,6 +7201,12 @@
                 
                 // Use healing item
                 gameState.battleInventory[itemId]--;
+                
+                // Play potion use sound
+                if (window.audioManager) {
+                    window.audioManager.playSound('potion_use', 0.7);
+                }
+                
                 const healAmount = Number(item.value);
                 const newHP = Math.min(maxHP, currentHP + healAmount);
                 const actualHealed = newHP - currentHP;

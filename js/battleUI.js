@@ -212,6 +212,22 @@ function updateActionButtons(hero) {
         }
     }
 
+    // Asteroid requires 15 attack gauge AND inventory (unlocked at level 1)
+    const btnAsteroid = document.getElementById('btnAsteroid');
+    if (btnAsteroid) {
+        if (gameState.unlockedBattleItems?.includes('asteroid_attack')) {
+            btnAsteroid.style.display = '';
+            const asteroidCount = gameState.battleInventory?.asteroid_attack || 0;
+            const asteroidCountSpan = btnAsteroid.querySelector('.item-count');
+            if (asteroidCountSpan) {
+                asteroidCountSpan.textContent = `(${asteroidCount})`;
+            }
+            btnAsteroid.disabled = battleManager.attackGauge < 15 || asteroidCount === 0;
+        } else {
+            btnAsteroid.style.display = 'none';
+        }
+    }
+
     // Prickler requires 20 attack gauge AND inventory (unlocked at level 3)
     const btnPrickler = document.getElementById('btnPrickler');
     if (btnPrickler) {
@@ -252,6 +268,17 @@ function updateActionButtons(hero) {
     }
     btnPotion.disabled = potionCount === 0;
     
+    // Hyper Potion requires inventory
+    const btnHyperPotion = document.getElementById('btnHyperPotion');
+    if (btnHyperPotion) {
+        const hyperPotionCount = gameState.battleInventory?.hyper_potion || 0;
+        const hyperPotionCountSpan = btnHyperPotion.querySelector('.item-count');
+        if (hyperPotionCountSpan) {
+            hyperPotionCountSpan.textContent = `(${hyperPotionCount})`;
+        }
+        btnHyperPotion.disabled = hyperPotionCount === 0;
+    }
+    
     // Attack+ refill
     const btnAttackRefill = document.getElementById('btnAttackRefill');
     if (btnAttackRefill) {
@@ -283,6 +310,22 @@ function updateActionButtons(hero) {
             invisibilityCloakCountSpan.textContent = `(${invisibilityCloakCount})`;
         }
         btnInvisibilityCloak.disabled = invisibilityCloakCount === 0;
+    }
+    
+    // Mirror Attack (unlocked at level 40)
+    const btnMirrorAttack = document.getElementById('btnMirrorAttack');
+    if (btnMirrorAttack) {
+        if (hero.level >= 40) {
+            btnMirrorAttack.style.display = '';
+            const mirrorAttackCount = gameState.battleInventory?.mirror_attack || 0;
+            const mirrorAttackCountSpan = btnMirrorAttack.querySelector('.item-count');
+            if (mirrorAttackCountSpan) {
+                mirrorAttackCountSpan.textContent = `(${mirrorAttackCount})`;
+            }
+            btnMirrorAttack.disabled = mirrorAttackCount === 0;
+        } else {
+            btnMirrorAttack.style.display = 'none';
+        }
     }
     
     // Blue Flame (unlocked at level 12)
@@ -469,6 +512,63 @@ async function playSparkAnimation(startElement, targetElement) {
 
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Remove projectile
+                projectile.remove();
+                resolve();
+            }
+        }
+
+        requestAnimationFrame(animate);
+    });
+}
+
+// Asteroid Projectile Animation
+async function playAsteroidAnimation(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'asteroid-projectile';
+    projectile.style.width = '50px';
+    projectile.style.height = '50px';
+    projectile.style.position = 'fixed';
+    projectile.style.backgroundImage = 'url("assets/battle-items/asteroid/asteroid.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.zIndex = '1000';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
+
+    // Animate projectile movement with arc
+    const duration = 700;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Easing function (ease-in)
+            const eased = progress * progress;
+
+            // Calculate position with arc
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 25;
+            const arc = Math.sin(progress * Math.PI) * 80; // Arc height
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 25 - arc;
+
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            // Rotate asteroid
+            projectile.style.transform = `rotate(${progress * 720}deg)`;
 
             if (progress < 1) {
                 requestAnimationFrame(animate);

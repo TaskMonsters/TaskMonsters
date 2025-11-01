@@ -19,6 +19,7 @@ class BattleManager {
         this.defenseGauge = 0;
         this.battleLog = [];
         this.hasEvade = false;
+        this.hasReflect = false;
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
     }
 
@@ -66,13 +67,14 @@ class BattleManager {
 
         // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');
-        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate');
+        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space');
         
         // Determine available arenas based on level
         const availableArenas = [];
         if (this.hero.level >= 1) availableArenas.push('bg-city'); // city_sunset at level 1
         if (this.hero.level >= 2) availableArenas.push('bg-ocean');
         if (this.hero.level >= 5) availableArenas.push('bg-temple');
+        if (this.hero.level >= 8) availableArenas.push('bg-space'); // New space background at level 8+
         if (this.hero.level >= 12) availableArenas.push('bg-night-town');
         if (this.hero.level >= 13) availableArenas.push('bg-skull-gate'); // Skull Gate at level 13+
         
@@ -343,6 +345,11 @@ class BattleManager {
         this.state = BattleState.ANIMATING;
         this.defendActive = true; // Flag to use defense gauge on next hit
         
+        // Play defend sound
+        if (window.audioManager) {
+            window.audioManager.playSound('defend', 0.7);
+        }
+        
         addBattleLog('🛡️ Defense stance activated!');
         updateBattleUI(this.hero, this.enemy);
 
@@ -417,6 +424,66 @@ class BattleManager {
     }
 
     // Player uses prickler
+    // Player uses asteroid attack
+    async playerAsteroid() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        if (this.attackGauge < 15) {
+            addBattleLog('❌ Need 15 attack gauge for asteroid!');
+            return;
+        }
+
+        const asteroidCount = gameState.battleInventory?.asteroid_attack || 0;
+        if (asteroidCount <= 0) {
+            addBattleLog('❌ No asteroids left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 15;  // Asteroid costs 15 attack gauge
+        gameState.battleInventory.asteroid_attack--;
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero throw animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play asteroid animation
+        await playAsteroidAnimation(
+            document.getElementById('heroSprite'),
+            document.getElementById('enemySprite')
+        );
+
+        // Calculate damage (fixed 12 damage)
+        const damage = 12;
+        const isDead = this.enemy.takeDamage(damage);
+        
+        // Play critical hit sound for damage >= 10
+        if (window.audioManager && damage >= 10) {
+            window.audioManager.playSound('critical_hit', 0.8);
+        }
+
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+        
+        addBattleLog(`🪨 Asteroid Attack dealt ${damage} damage!`);
+        updateBattleUI(this.hero, this.enemy);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        if (isDead) {
+            this.state = BattleState.VICTORY;
+            await this.endBattle('victory');
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            await this.enemyTurn();
+        }
+    }
+
     async playerPrickler() {
         if (this.state !== BattleState.PLAYER_TURN) return;
         if (this.attackGauge < 20) {
@@ -600,6 +667,55 @@ class BattleManager {
         await this.enemyTurn();
     }
 
+    // Player uses hyper potion
+    async playerHyperPotion() {
+        console.log('❤️‍🩹 playerHyperPotion called');
+        console.log('Battle state:', this.state);
+        
+        if (this.state !== BattleState.PLAYER_TURN) {
+            console.log('❌ Not player turn, state is:', this.state);
+            return;
+        }
+
+        const hyperPotionCount = gameState.battleInventory?.hyper_potion || 0;
+        console.log('Hyper Potion count:', hyperPotionCount);
+        
+        if (hyperPotionCount <= 0) {
+            addBattleLog('❌ No hyper potions left!');
+            console.log('❌ No hyper potions in inventory');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        gameState.battleInventory.hyper_potion--;
+        
+        // Play potion use sound
+        if (window.audioManager) {
+            window.audioManager.playSound('potion_use', 0.7);
+        }
+        
+        // Play hero jump animation
+        startHeroAnimation('jump');
+        
+        const healAmount = 50;
+        this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
+        
+        addBattleLog(`💚 Hyper Potion healed ${healAmount} HP!`);
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Save game state
+        saveGameState();
+
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Reset to idle
+        startHeroAnimation('idle');
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+        await this.enemyTurn();
+    }
+
     // Player flees
     async playerFlee() {
         if (this.state !== BattleState.PLAYER_TURN) return;
@@ -656,9 +772,9 @@ class BattleManager {
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.defense_refill--;
         
-        // Play potion/power boost sound
+        // Play defense boost sound
         if (window.audioManager) {
-            window.audioManager.playSound('potion_use', 0.8);
+            window.audioManager.playSound('defense_boost', 0.7);
         }
         
         const refillAmount = 50;
@@ -695,6 +811,36 @@ class BattleManager {
         }
         
         addBattleLog('🤟🏻 Invisibility Cloak activated! You will evade the next attack.');
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Save game state
+        saveGameState();
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await this.enemyTurn();
+    }
+
+    // Player uses Mirror Attack
+    async playerMirrorAttack() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+
+        const mirrorCount = gameState.battleInventory?.mirror_attack || 0;
+        if (mirrorCount <= 0) {
+            addBattleLog('❌ No Mirror Attacks left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        gameState.battleInventory.mirror_attack--;
+        this.hasReflect = true;
+        
+        // Play mirror sound (using cloak sound as placeholder)
+        if (window.audioManager) {
+            window.audioManager.playSound('cloak_use', 0.8);
+        }
+        
+        addBattleLog('🪞 Mirror Attack activated! Enemy\'s next attack will be reflected!');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -1097,16 +1243,49 @@ class BattleManager {
             return;
         }
         
+        // Check if Mirror Attack is active
+        if (this.hasReflect) {
+            addBattleLog('🪞 Mirror Attack reflected the attack back!');
+            this.hasReflect = false;
+            
+            // Calculate damage that would have been dealt to hero
+            const reflectedDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+            
+            // Apply damage to enemy instead
+            const isDead = this.enemy.takeDamage(reflectedDamage);
+            addBattleLog(`🔄 ${this.enemy.name} took ${reflectedDamage} reflected damage!`);
+            
+            // Play enemy hurt animation
+            await playEnemyAnimation(this.enemy, 'hurt', 300);
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (isDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+            }
+            return;
+        }
+        
         // Increment enemy attack counter
         this.enemyAttackCount++;
         
         // Play enemy attack sound for all enemies
         if (window.audioManager) {
+            // Check if this is a low-level enemy (Lazy Bat or Slime)
+            const isLowLevelEnemy = this.enemy.name === 'Lazy Bat' || this.enemy.name === 'Slime';
+            
             // Play every 5th attack sound
             if (this.enemyAttackCount % 5 === 0) {
                 window.audioManager.playSound('enemy_fifth_attack', 0.8);
+            } else if (isLowLevelEnemy) {
+                // Play low-level enemy attack sound for Lazy Bat and Slime
+                window.audioManager.playSound('enemy_attack_low_level', 0.7);
             } else {
-                // Play regular monster attack sound
+                // Play regular monster attack sound for other enemies
                 window.audioManager.playSound('enemy_regular_attack', 0.8);
             }
         }
