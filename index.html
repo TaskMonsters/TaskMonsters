@@ -5796,8 +5796,11 @@
             
             grid.innerHTML = '';
             
+            // Sort battle items by cost (lowest to highest)
+            const sortedBattleItems = Object.values(battleItems).sort((a, b) => a.cost - b.cost);
+            
             // Render each battle item as a shop card
-            Object.values(battleItems).forEach(item => {
+            sortedBattleItems.forEach(item => {
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
                 const isMaxed = item.maxQuantity && currentQuantity >= item.maxQuantity;
@@ -6966,6 +6969,18 @@
                 value: 13,
                 levelRequired: 15,
                 maxQuantity: 8
+            },
+            poison_leaf: {
+                id: 'poison_leaf',
+                name: 'Poison Leaf',
+                emoji: '🍃',
+                description: 'Reduces enemy HP by 10 for 4 turns',
+                cost: 80,
+                effect: 'poison',
+                value: 10,
+                duration: 4,
+                levelRequired: 30,
+                maxQuantity: 10
             }
         };
 
@@ -6989,8 +7004,11 @@
             
             grid.innerHTML = '';
             
+            // Sort battle items by cost (lowest to highest)
+            const sortedBattleItems = Object.values(battleItems).sort((a, b) => a.cost - b.cost);
+            
             // Render each battle item as a shop card
-            Object.values(battleItems).forEach(item => {
+            sortedBattleItems.forEach(item => {
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
                 const isMaxed = item.maxQuantity && currentQuantity >= item.maxQuantity;

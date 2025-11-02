@@ -40,6 +40,22 @@ const availableThemes = {
         description: 'Abandoned ships in the mist',
         price: 90,
         preview: 'assets/backgrounds/themes/graveyard.png'
+    },
+    synth_city: {
+        id: 'synth_city',
+        name: 'Synth City',
+        emoji: '🌆',
+        description: 'Retro synthwave cityscape',
+        price: 70,
+        preview: 'assets/backgrounds/themes/synth-city.png'
+    },
+    space: {
+        id: 'space',
+        name: 'Space',
+        emoji: '🌌',
+        description: 'Cosmic space vista',
+        price: 130,
+        preview: 'assets/backgrounds/themes/space.png'
     }
 };
 
@@ -56,8 +72,11 @@ function updateThemesDisplay() {
     
     grid.innerHTML = '';
     
+    // Sort themes by price (lowest to highest)
+    const sortedThemes = Object.values(availableThemes).sort((a, b) => a.price - b.price);
+    
     // Render each theme
-    Object.values(availableThemes).forEach(theme => {
+    sortedThemes.forEach(theme => {
         const isOwned = window.gameState && window.gameState.ownedThemes && window.gameState.ownedThemes.includes(theme.id);
         const isActive = window.gameState && window.gameState.activeTheme === theme.preview;
         const canAfford = window.gameState && (window.gameState.jerryXP || 0) >= theme.price;
