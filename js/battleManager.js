@@ -285,7 +285,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 25;  // Spark costs 25 attack gauge
-        gameState.battleInventory.spark--;
+        gameState.battleInventory.spark = Math.max(0, gameState.battleInventory.spark - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -379,7 +379,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 30;  // Fireball costs 30 attack gauge
-        gameState.battleInventory.fireball--;
+        gameState.battleInventory.fireball = Math.max(0, gameState.battleInventory.fireball - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -440,7 +440,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 15;  // Asteroid costs 15 attack gauge
-        gameState.battleInventory.asteroid_attack--;
+        gameState.battleInventory.asteroid_attack = Math.max(0, gameState.battleInventory.asteroid_attack - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -499,7 +499,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 20;  // Prickler costs 20 attack gauge
-        gameState.battleInventory.prickler--;
+        gameState.battleInventory.prickler = Math.max(0, gameState.battleInventory.prickler - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -564,7 +564,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 35;  // Freeze costs 35 attack gauge
-        gameState.battleInventory.freeze--;
+        gameState.battleInventory.freeze = Math.max(0, gameState.battleInventory.freeze - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -643,7 +643,7 @@ class BattleManager {
         }
 
          this.state = BattleState.ANIMATING;
-        gameState.battleInventory.hyper_potion--;
+        gameState.battleInventory.health_potion = Math.max(0, gameState.battleInventory.health_potion - 1);
         
         // Play potion use sound
         if (window.audioManager) {
@@ -653,7 +653,7 @@ class BattleManager {
         // Play hero jump animation
         startHeroAnimation('jump');
         
-        const healAmount = 60;
+        const healAmount = 20;
         this.hero.currentHP = Math.min(this.hero.maxHP, this.hero.currentHP + healAmount);
         
         addBattleLog(`💚 Healed ${healAmount} HP!`);
@@ -692,7 +692,7 @@ class BattleManager {
         }
 
         this.state = BattleState.ANIMATING;
-        gameState.battleInventory.hyper_potion--;
+        gameState.battleInventory.hyper_potion = Math.max(0, gameState.battleInventory.hyper_potion - 1);
         
         // Play potion use sound
         if (window.audioManager) {
@@ -743,7 +743,7 @@ class BattleManager {
         }
 
         this.state = BattleState.ANIMATING;
-        gameState.battleInventory.attack_refill--;
+        gameState.battleInventory.attack_refill = Math.max(0, gameState.battleInventory.attack_refill - 1);
         
         // Play potion/power boost sound
         if (window.audioManager) {
@@ -775,7 +775,7 @@ class BattleManager {
         }
 
         this.state = BattleState.ANIMATING;
-        gameState.battleInventory.defense_refill--;
+        gameState.battleInventory.defense_refill = Math.max(0, gameState.battleInventory.defense_refill - 1);
         
         // Play defense boost sound
         if (window.audioManager) {
@@ -807,7 +807,7 @@ class BattleManager {
         }
 
         this.state = BattleState.ANIMATING;
-        gameState.battleInventory.invisibility_cloak--;
+        gameState.battleInventory.invisibility_cloak = Math.max(0, gameState.battleInventory.invisibility_cloak - 1);
         this.hasEvade = true;
         
         // Play invisibility cloak sound
@@ -837,7 +837,7 @@ class BattleManager {
         }
 
         this.state = BattleState.ANIMATING;
-        gameState.battleInventory.mirror_attack--;
+        gameState.battleInventory.mirror_attack = Math.max(0, gameState.battleInventory.mirror_attack - 1);
         this.hasReflect = true;
         
         // Play mirror sound (using cloak sound as placeholder)
@@ -872,7 +872,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 20;
-        gameState.battleInventory.blue_flame--;
+        gameState.battleInventory.blue_flame = Math.max(0, gameState.battleInventory.blue_flame - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -923,7 +923,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 25;
-        gameState.battleInventory.procrastination_ghost--;
+        gameState.battleInventory.procrastination_ghost = Math.max(0, gameState.battleInventory.procrastination_ghost - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 

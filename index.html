@@ -7161,8 +7161,8 @@
                 window.audioManager.playSound('shopPurchase', 0.7);
             }
             
-            // Deduct XP
-            gameState.jerryXP = (gameState.jerryXP || 0) - item.cost;
+            // Deduct XP (ensure it doesn't go negative)
+            gameState.jerryXP = Math.max(0, (gameState.jerryXP || 0) - item.cost);
             
             // Add item to battle inventory
             if (!gameState.battleInventory[itemId]) {
@@ -7217,8 +7217,8 @@
                     return;
                 }
                 
-                // Use healing item
-                gameState.battleInventory[itemId]--;
+                // Use healing item (ensure count doesn't go negative)
+                gameState.battleInventory[itemId] = Math.max(0, gameState.battleInventory[itemId] - 1);
                 
                 // Play potion use sound
                 if (window.audioManager) {

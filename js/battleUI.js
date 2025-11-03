@@ -8,6 +8,7 @@ function showBattle(hero, enemy) {
     // Initialize UI elements
     updateBattleUI(hero, enemy);
     updateBattleButtonsVisibility();
+    updateActionButtons(hero);  // Update item counts on battle start
 }
 
 // Update battle button visibility based on inventory
