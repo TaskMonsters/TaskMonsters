@@ -49,7 +49,7 @@ class AudioManager {
             taskComplete: "assets/sounds/taskComplete.mp3",
             shopPurchase: "assets/sounds/shopPurchase.mp3",
             useItemOutside: "assets/sounds/useItemOutside.mp3",
-            focus_timer_complete: "assets/audio/FocusTimerSound.mp3",
+            focus_timer_complete: "assets/sounds/Focustimerdonesound.mp3",
         };
 
         // Music tracks (separate from sound effects)
