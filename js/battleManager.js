@@ -654,7 +654,7 @@ class BattleManager {
         startHeroAnimation('jump');
         
         const healAmount = 20;
-        this.hero.currentHP = Math.min(this.hero.maxHP, this.hero.currentHP + healAmount);
+        this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
         
         addBattleLog(`💚 Healed ${healAmount} HP!`);
         updateBattleUI(this.hero, this.enemy);
