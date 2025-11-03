@@ -169,6 +169,11 @@ class QuestTaskManager {
 
     // Show completion message
     showCompletionMessage(task) {
+        // Play quest complete sound (same as quest accept)
+        if (window.audioManager) {
+            window.audioManager.playSound('quest_complete', 0.8);
+        }
+        
         if (typeof showNotification === 'function') {
             showNotification(`Quest Complete! +${task.xp} XP`, 'success');
         } else {
