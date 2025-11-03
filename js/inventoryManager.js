@@ -97,8 +97,7 @@ class InventoryManager {
 
         switch (itemId) {
             case 'health_potion':
-                success = this.useHealthPotion();
-                message = success ? '🧪 Health Potion used! +30 HP' : '⚠️ HP already full!';
+               success = this.useHealthPotion();\n                message = success ? '💚 Health Potion used! +20 HP' : '⚠️ HP already full!';
                 break;
 
             case 'energy_drink':
@@ -160,7 +159,7 @@ class InventoryManager {
             return false;
         }
 
-        window.gameState.health = Math.min(maxHP, window.gameState.health + 30);
+        window.gameState.health = Math.min(maxHP, window.gameState.health + 20);
         
         // Play potion use sound
         if (window.audioManager) {
