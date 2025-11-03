@@ -6534,9 +6534,9 @@
             if (pauseBtn) pauseBtn.style.display = 'none';
             
             if (completed) {
-                // Play focus timer completion sound
+                // Play quick task completion sound
                 if (window.audioManager) {
-                    window.audioManager.playSound('focus_timer_complete', 0.8);
+                    window.audioManager.playSound('taskComplete', 0.7);
                 }
                 
                 showSuccessMessage('🎉 Focus Session Complete!', `Great work! You earned ${focusXPAwarded} XP!`);

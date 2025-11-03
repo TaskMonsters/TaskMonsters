@@ -533,7 +533,7 @@ async function playAsteroidAnimation(startElement, targetElement) {
     projectile.style.width = '50px';
     projectile.style.height = '50px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/battle-items/asteroid/asteroid.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/asteroid-projectile.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
