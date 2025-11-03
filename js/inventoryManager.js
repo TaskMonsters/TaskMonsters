@@ -162,6 +162,11 @@ class InventoryManager {
 
         window.gameState.health = Math.min(maxHP, window.gameState.health + 30);
         
+        // Play potion use sound
+        if (window.audioManager) {
+            window.audioManager.playSound('potion_use', 0.7);
+        }
+        
         if (typeof window.saveGameState === 'function') {
             window.saveGameState();
         }

@@ -642,18 +642,23 @@ class BattleManager {
             return;
         }
 
-        this.state = BattleState.ANIMATING;
-        gameState.battleInventory.health_potion--;
+         this.state = BattleState.ANIMATING;
+        gameState.battleInventory.hyper_potion--;
+        
+        // Play potion use sound
+        if (window.audioManager) {
+            window.audioManager.playSound('potion_use', 0.7);
+        }
         
         // Play hero jump animation
         startHeroAnimation('jump');
         
-        const healAmount = 30;
-        this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
+        const healAmount = 60;
+        this.hero.currentHP = Math.min(this.hero.maxHP, this.hero.currentHP + healAmount);
         
         addBattleLog(`💚 Healed ${healAmount} HP!`);
         updateBattleUI(this.hero, this.enemy);
-        updateActionButtons(this.hero);
+        updateActionButtons(this.hero);;
 
         // Save game state
         saveGameState();
@@ -1480,6 +1485,8 @@ class BattleManager {
             this.hero.defenseGauge = 100;
             saveGameState();
         }
+
+
 
         // Ensure all music is stopped
         if (window.audioManager) {
