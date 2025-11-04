@@ -71,9 +71,9 @@ function handleExplore() {
     exploreBtn.innerText = 'Exploring...';
   }
   
-  // 60% chance to encounter enemy
+  // 30% chance to encounter enemy
   setTimeout(() => {
-    if (Math.random() < 0.6) {
+    if (Math.random() < 0.3) {
       const enemy = createRandomEnemy();
       startBattle(enemy);
     } else {

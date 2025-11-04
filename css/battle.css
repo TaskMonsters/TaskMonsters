@@ -30,7 +30,6 @@
     width: 100%;
     max-width: 420px;
     aspect-ratio: 16 / 9;
-    min-height: 220px; /* Prevent collapse if sprites fail to load */
     margin: 1rem auto 0.5rem;
     position: relative;
     overflow: hidden;

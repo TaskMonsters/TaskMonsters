@@ -9,7 +9,6 @@ class AudioManager {
         // Audio state
         this.enabled = localStorage.getItem("soundEnabled") !== "false"; // Default ON
         this.battleMusicAudio = null; // New property for battle music
-        this.alarmAudio = null; // New property for the focus timer alarm
         this.battleMusicVolume = 0.4; // Default volume for battle music
 
         // Track active sounds for cleanup
@@ -24,6 +23,7 @@ class AudioManager {
             regular_attack: "assets/sounds/regular attack sound.mp3",
 
             // Special attacks
+            fireball: "assets/sounds/fireballsound.mp3",
             spark_attack: "assets/sounds/Spark Attack sound.mp3",
             prickler_attack: "assets/sounds/Prickler.mp3",
             freeze_attack: "assets/sounds/Freeze attack sound.mp3",
@@ -51,7 +51,6 @@ class AudioManager {
             shopPurchase: "assets/sounds/shopPurchase.mp3",
             useItemOutside: "assets/sounds/useItemOutside.mp3",
             focus_timer_complete: "assets/audio/FocusTimerSound.mp3",
-            focus_timer_alarm: "assets/sounds/FocusTimerAlarm.mp3",
         };
 
         // Music tracks (separate from sound effects)
@@ -215,52 +214,8 @@ class AudioManager {
     /**
      * Stop all sounds (effects and music)
      */
-	    /**
-	     * Play the focus timer alarm, which loops softly.
-	     */
-	    playAlarm() {
-	        if (!this.enabled || !this.sounds.focus_timer_alarm) return;
-
-	        // Stop any currently playing alarm
-	        this.stopAlarm();
-
-	        try {
-	            this.alarmAudio = new Audio(this.sounds.focus_timer_alarm);
-	            this.alarmAudio.volume = 0.6; // Soft loop
-	            this.alarmAudio.loop = true;
-
-	            this.alarmAudio.play().catch((err) => {
-	                console.warn("[AudioManager] Alarm playback failed:", err.message);
-	                this.alarmAudio = null;
-	            });
-
-	            console.log("[AudioManager] Focus Timer Alarm started");
-	        } catch (error) {
-	            console.warn("[AudioManager] Error playing alarm:", error.message);
-	        }
-	    }
-
-	    /**
-	     * Stop the focus timer alarm.
-	     */
-	    stopAlarm() {
-	        if (this.alarmAudio) {
-	            try {
-	                this.alarmAudio.pause();
-	                this.alarmAudio.currentTime = 0;
-	                this.alarmAudio = null;
-	                console.log("[AudioManager] Focus Timer Alarm stopped");
-	            } catch (error) {
-	                console.warn("[AudioManager] Error stopping alarm:", error.message);
-	            }
-	        }
-	    }
-
-	    /**
-	     * Stop all sounds (effects and music)
-	     */
-	    stopAll() {
-	        // Stop all active sound effects
+    stopAll() {
+        // Stop all active sound effects
         this.activeSounds.forEach((sound) => {
             try {
                 sound.pause();

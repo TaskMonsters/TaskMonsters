@@ -371,35 +371,42 @@ function addBattleLog(message) {
 
 // Fireball Projectile Animation
 async function playFireballAnimation(startElement, targetElement) {
-    const projectile = document.getElementById('fireballProjectile');
-    const explosion = document.getElementById('explosionEffect');
+    const projectile = document.createElement('div');
+    projectile.className = 'fireball-projectile';
+    projectile.style.width = '60px';
+    projectile.style.height = '60px';
+    projectile.style.position = 'fixed';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.zIndex = '1000';
+    document.body.appendChild(projectile);
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
-
-    // Make fireball larger
-    projectile.style.width = '80px';
-    projectile.style.height = '80px';
     
     // Position projectile at start
-    projectile.style.left = startRect.left + startRect.width / 2 - 40 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 40 + 'px';
-    projectile.classList.remove('hidden');
+    projectile.style.left = startRect.left + startRect.width / 2 - 30 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 30 + 'px';
 
-    // Use new single fireball sprite
-    projectile.style.backgroundImage = 'url("assets/battle-items/fireball.png")';
-    projectile.style.backgroundSize = 'contain';
+    // Fireball animation frames
+    const fireballFrames = [
+        'assets/battle-items/fire-ball.png',
+        'assets/battle-items/fire-ball-2.png',
+        'assets/battle-items/fire-ball-3.png'
+    ];
     
-    // Rotate fireball for effect
-    let rotation = 0;
+    let currentFrame = 0;
+    projectile.style.backgroundImage = `url("${fireballFrames[0]}")`;
+    
+    // Animate frames during flight
     const frameInterval = setInterval(() => {
-        rotation += 15;
-        projectile.style.transform = `rotate(${rotation}deg)`;
+        currentFrame = (currentFrame + 1) % fireballFrames.length;
+        projectile.style.backgroundImage = `url("${fireballFrames[currentFrame]}")`;
     }, 100);
 
-    // Animate projectile movement
-    const duration = 800;
+    // Animate projectile movement with arc
+    const duration = 700;
     const startTime = Date.now();
 
     return new Promise((resolve) => {
@@ -407,25 +414,29 @@ async function playFireballAnimation(startElement, targetElement) {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            // Easing function (ease-out)
-            const eased = 1 - Math.pow(1 - progress, 3);
+            // Easing function (ease-in)
+            const eased = progress * progress;
 
-            // Calculate position
-            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 40;
-            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 40;
+            // Calculate position with arc
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 30;
+            const arc = Math.sin(progress * Math.PI) * 60; // Arc height
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 30 - arc;
 
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
+            
+            // Slight rotation for effect
+            projectile.style.transform = `rotate(${progress * 180}deg)`;
 
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
                 // Stop frame animation
                 clearInterval(frameInterval);
-
-                // Hide projectile
-                projectile.classList.add('hidden');
-
+                
+                // Remove projectile
+                projectile.remove();
+                
                 // Play explosion
                 playExplosionAnimation(targetRect).then(resolve);
             }
@@ -534,7 +545,7 @@ async function playAsteroidAnimation(startElement, targetElement) {
     projectile.style.width = '50px';
     projectile.style.height = '50px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/projectiles/PricklerProjectile.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/asteroid-projectile.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -584,66 +595,6 @@ async function playAsteroidAnimation(startElement, targetElement) {
     });
 }
 
-// Asteroid Projectile Animation
-async function playAsteroidAnimation(startElement, targetElement) {
-    const projectile = document.createElement('div');
-    projectile.className = 'asteroid-projectile';
-    document.body.appendChild(projectile);
-
-    // Get positions
-    const startRect = startElement.getBoundingClientRect();
-    const targetRect = targetElement.getBoundingClientRect();
-    
-    // Position projectile at start
-    projectile.style.position = 'fixed';
-    projectile.style.left = startRect.left + startRect.width / 2 - 16 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 16 + 'px';
-    projectile.style.width = '32px';
-    projectile.style.height = '32px';
-    projectile.style.backgroundImage = 'url("assets/projectiles/AsteroidAttackProjectile.png")';
-    projectile.style.backgroundSize = 'contain';
-    projectile.style.backgroundRepeat = 'no-repeat';
-    projectile.style.imageRendering = 'pixelated';
-    projectile.style.zIndex = '10000';
-
-    // Animate projectile movement
-    const duration = 500;
-    const startTime = Date.now();
-
-    return new Promise((resolve) => {
-        function animate() {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-
-            // Calculate parabolic trajectory (simple arc)
-            const startX = startRect.left + startRect.width / 2;
-            const startY = startRect.top + startRect.height / 2;
-            const endX = targetRect.left + targetRect.width / 2;
-            const endY = targetRect.top + targetRect.height / 2;
-
-            const currentX = startX + (endX - startX) * progress;
-            // Simple arc: y = A * (x - h)^2 + k. Here, we use a simpler time-based arc.
-            const arcHeight = -200 * progress * (progress - 1); // Max height at progress 0.5
-            const currentY = startY + (endY - startY) * progress - arcHeight;
-
-            projectile.style.left = currentX - 16 + 'px';
-            projectile.style.top = currentY - 16 + 'px';
-            projectile.style.transform = `rotate(${progress * 720}deg)`; // Two full rotations
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                projectile.style.opacity = '0';
-                setTimeout(() => {
-                    projectile.remove();
-                    resolve();
-                }, 100);
-            }
-        }
-        animate();
-    });
-}
-
 // Prickler Projectile Animation
 async function playPricklerAnimation(startElement, targetElement) {
     const projectile = document.createElement('div');
@@ -651,7 +602,7 @@ async function playPricklerAnimation(startElement, targetElement) {
     projectile.style.width = '40px';
     projectile.style.height = '40px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/projectiles/PricklerProjectile.png")';
+    projectile.style.backgroundImage = 'url("assets/battle-items/prickler/prickler.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -972,7 +923,6 @@ window.playFireballAnimation = playFireballAnimation;
 window.playWaveformAnimation = playWaveformAnimation;
 window.playSparkAnimation = playSparkAnimation;
 window.playPricklerAnimation = playPricklerAnimation;
-window.playAsteroidAnimation = playAsteroidAnimation;
 window.playFreezeAnimation = playFreezeAnimation;
 window.updateBattleButtons = updateBattleButtons;
 window.updateBattleShopDisplay = updateBattleShopDisplay;

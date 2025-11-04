@@ -105,32 +105,6 @@ function initEnemySprite(enemyData) {
     }
 }
 
-// Sprite Reinitialization Guard - ensures sprite is always visible and properly initialized
-function reapplyEnemySprite(enemyData) {
-    const spriteElement = document.getElementById('enemySprite');
-    if (!spriteElement) return false;
-    
-    // Force reset sprite state to ensure visibility
-    spriteElement.classList.remove('hidden', 'hurt', 'attack');
-    spriteElement.style.visibility = 'visible';
-    spriteElement.style.opacity = '1';
-    
-    // Check if sprite has valid background image
-    const hasBackgroundImage = spriteElement.style.backgroundImage && 
-                               spriteElement.style.backgroundImage !== 'none' && 
-                               spriteElement.style.backgroundImage !== '';
-    
-    // If missing, reinitialize from scratch
-    if (!hasBackgroundImage && enemyData) {
-        console.warn('⚠️ Enemy sprite missing background-image, reinitializing...');
-        initEnemySprite(enemyData);
-        return true;
-    }
-    
-    return hasBackgroundImage;
-}
-
 // Export to global scope
 window.initEnemySprite = initEnemySprite;
-window.reapplyEnemySprite = reapplyEnemySprite;
 

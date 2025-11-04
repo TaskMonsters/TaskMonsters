@@ -9,66 +9,43 @@
     function getWeightedEnemyPool(playerLevel) {
         const pools = {
             early: ['Lazy Bat', 'Slime'],
-            mid: ['Lazy Bat II', 'Alien', 'Fire Skull'],
-            advanced: ['Ghost Task Stopper', 'Octopus', 'Medusa'],
-            late: ['Lazy Eye', 'Ogre']
+            mid: ['Lazy Bat II', 'Alien'],
+            advanced: ['Ghost Task Stopper'],
+            late: ['Octopus', 'Medusa', 'Fire Skull', 'Lazy Eye', 'Ogre']
         };
         
         let weights = {};
         
-        if (playerLevel <= 1) {
-            // Level 1: Only Lazy Bat
-            weights['Lazy Bat'] = 100;
-        } else if (playerLevel <= 3) {
-            // Levels 2-3: Early enemies + some variety
-            weights['Lazy Bat'] = 35;
-            weights['Lazy Bat II'] = 25;
-            weights['Slime'] = 25;
-            weights['Alien'] = 10;
-            weights['Fire Skull'] = 5;
+        if (playerLevel <= 3) {
+            // Levels 1-3: Only early enemies
+            weights['Lazy Bat'] = 60;
+            weights['Slime'] = 40;
         } else if (playerLevel <= 6) {
-            // Levels 4-6: More variety with mid-tier
-            weights['Lazy Bat'] = 20;
-            weights['Lazy Bat II'] = 20;
-            weights['Slime'] = 15;
-            weights['Alien'] = 15;
-            weights['Fire Skull'] = 10;
-            weights['Octopus'] = 10;
-            weights['Ghost Task Stopper'] = 10;
+            // Levels 4-6: Add mid-tier
+            weights['Lazy Bat'] = 30;
+            weights['Slime'] = 20;
+            weights['Lazy Bat II'] = 30;
+            weights['Alien'] = 20;
         } else if (playerLevel <= 9) {
-            // Levels 7-9: Add advanced enemies
-            weights['Lazy Bat'] = 12;
-            weights['Slime'] = 12;
-            weights['Lazy Bat II'] = 15;
-            weights['Alien'] = 13;
-            weights['Fire Skull'] = 13;
-            weights['Octopus'] = 15;
-            weights['Ghost Task Stopper'] = 12;
-            weights['Medusa'] = 8;
-        } else if (playerLevel <= 11) {
-            // Levels 10-11: Balanced mix, bosses still rare
+            // Levels 7-9: Add advanced (Octopus unlocks at 7)
+            weights['Lazy Bat'] = 15;
+            weights['Slime'] = 15;
+            weights['Lazy Bat II'] = 20;
+            weights['Alien'] = 15;
+            weights['Octopus'] = 20;
+            weights['Ghost Task Stopper'] = 15;
+        } else {
+            // Level 10+: All enemies weighted by proximity
             weights['Lazy Bat'] = 8;
             weights['Slime'] = 8;
             weights['Lazy Bat II'] = 12;
             weights['Alien'] = 12;
-            weights['Fire Skull'] = 12;
             weights['Octopus'] = 15;
-            weights['Ghost Task Stopper'] = 13;
-            weights['Medusa'] = 12;
-            weights['Lazy Eye'] = 4;
-            weights['Ogre'] = 4;
-        } else {
-            // Level 12+: All enemies available
-            weights['Lazy Bat'] = 6;
-            weights['Slime'] = 6;
-            weights['Lazy Bat II'] = 10;
-            weights['Alien'] = 10;
+            weights['Ghost Task Stopper'] = 15;
+            weights['Medusa'] = 10;
             weights['Fire Skull'] = 10;
-            weights['Octopus'] = 13;
-            weights['Ghost Task Stopper'] = 12;
-            weights['Medusa'] = 12;
-            weights['Lazy Eye'] = 11;
-            weights['Ogre'] = 10;
+            weights['Lazy Eye'] = 5;
+            weights['Ogre'] = 5;
         }
         
         return weights;

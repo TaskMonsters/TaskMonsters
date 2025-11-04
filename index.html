@@ -6431,10 +6431,6 @@
 
                 if (focusRemaining <= 0) {
                     stopFocusTimer(true);
-                    // CRITICAL: Trigger the alarm when timer hits 00:00
-                    if (window.audioManager) {
-                        window.audioManager.playAlarm();
-                    }
                 }
             }, 1000);
             
@@ -6500,22 +6496,13 @@
 
                 if (focusRemaining <= 0) {
                     stopFocusTimer(true);
-                    // CRITICAL: Trigger the alarm when timer hits 00:00
-                    if (window.audioManager) {
-                        window.audioManager.playAlarm();
-                    }
                 }
             }, 1000);
             
             showSuccessMessage('⏱️ Focus Timer Resumed');
         }
 
-         function stopFocusTimer(completed = false) {
-            // CRITICAL: Stop the alarm sound immediately
-            if (window.audioManager) {
-                window.audioManager.stopAlarm();
-            }
-            
+        function stopFocusTimer(completed = false) {
             clearInterval(focusTimerInterval);
             focusActive = false;
             focusPaused = false;
