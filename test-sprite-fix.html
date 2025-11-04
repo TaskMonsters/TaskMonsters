@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Sprite Fix Test</title>
+    <link rel="stylesheet" href="css/battle.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        .test-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .test-btn:hover {
+            background: #4f46e5;
+        }
+        .test-log {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .test-log p {
+            margin: 3px 0;
+        }
+        .success { color: #34d399; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h3>Sprite Fix Test Suite</h3>
+        <button class="test-btn" onclick="testRapidBattles()">Test: Rapid Battles (10x)</button>
+        <button class="test-btn" onclick="testSpriteValidation()">Test: Sprite Validation</button>
+        <button class="test-btn" onclick="testArenaStability()">Test: Arena Stability</button>
+        <button class="test-btn" onclick="simulateBugCondition()">Simulate: Bug Condition</button>
+        <button class="test-btn" onclick="clearLog()">Clear Log</button>
+        <div class="test-log" id="testLog"></div>
+    </div>
+
+    <!-- Battle Arena (copied from main game) -->
+    <div id="battleArena" class="battle-arena hidden">
+        <div class="battle-container bg-city">
+            <div class="sprite-container">
+                <div class="sprite-wrapper">
+                    <div id="heroSprite" class="sprite hero-sprite"></div>
+                </div>
+                <div class="hp-bar-container">
+                    <div class="hp-label">
+                        <span>HP</span>
+                        <span id="heroHPText">100/100</span>
+                    </div>
+                    <div class="hp-bar-bg">
+                        <div id="heroHPBar" class="hp-bar-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sprite-container">
+                <div class="sprite-wrapper">
+                    <div id="enemySprite" class="sprite enemy-sprite-large"></div>
+                </div>
+                <div class="hp-bar-container">
+                    <div class="hp-label">
+                        <span>HP</span>
+                        <span id="enemyHPText">50/50</span>
+                    </div>
+                    <div class="hp-bar-bg">
+                        <div id="enemyHPBar" class="hp-bar-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="battle-log" id="battleLog">
+            <p>⚔️ Battle Start!</p>
+        </div>
+    </div>
+
+    <!-- Load game scripts -->
+    <script src="js/enemy-init.js"></script>
+    
+    <script>
+        // Test logger
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('testLog');
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        // Mock enemy data
+        const mockEnemies = [
+            {
+                name: 'Lazy Bat',
+                sprites: {
+                    idle: 'assets/enemies/bat-idle-sheet.png',
+                    attack: 'assets/enemies/bat-attack-sheet.png',
+                    hurt: 'assets/enemies/bat-hurt-sheet.png'
+                }
+            },
+            {
+                name: 'Slime',
+                sprites: {
+                    idle: 'assets/enemies/slime-idle-sheet.png'
+                }
+            },
+            {
+                name: 'Ghost Task Stopper',
+                sprites: {
+                    idle: 'assets/enemies/ghost-idle-sheet.png'
+                }
+            }
+        ];
+
+        // Test 1: Rapid battle sequence
+        async function testRapidBattles() {
+            log('Starting rapid battle test...', 'warning');
+            const arena = document.getElementById('battleArena');
+            
+            for (let i = 0; i < 10; i++) {
+                const enemy = mockEnemies[i % mockEnemies.length];
+                
+                // Show battle
+                arena.classList.remove('hidden');
+                
+                // Initialize sprite
+                if (typeof initEnemySprite === 'function') {
+                    initEnemySprite(enemy);
+                }
+                
+                // Validate sprite
+                await new Promise(resolve => requestAnimationFrame(resolve));
+                const isValid = validateSprite();
+                
+                if (isValid) {
+                    log(`Battle ${i + 1}: ${enemy.name} - ✓ Sprite OK`, 'success');
+                } else {
+                    log(`Battle ${i + 1}: ${enemy.name} - ✗ Sprite FAILED`, 'error');
+                    
+                    // Try reapply
+                    if (typeof reapplyEnemySprite === 'function') {
+                        reapplyEnemySprite(enemy);
+                        const fixed = validateSprite();
+                        if (fixed) {
+                            log(`  → Reapply fixed the sprite`, 'success');
+                        } else {
+                            log(`  → Reapply FAILED to fix sprite`, 'error');
+                        }
+                    }
+                }
+                
+                // Simulate battle end
+                await new Promise(resolve => setTimeout(resolve, 100));
+                arena.classList.add('hidden');
+                
+                // Reset sprite (simulate endBattle cleanup)
+                const enemySprite = document.getElementById('enemySprite');
+                if (enemySprite) {
+                    enemySprite.style.opacity = '0'; // Simulate bug condition
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            
+            log('Rapid battle test complete!', 'success');
+        }
+
+        // Test 2: Sprite validation
+        function testSpriteValidation() {
+            log('Testing sprite validation...', 'warning');
+            const enemySprite = document.getElementById('enemySprite');
+            
+            if (!enemySprite) {
+                log('✗ Enemy sprite element not found', 'error');
+                return;
+            }
+            
+            const checks = {
+                'Element exists': !!enemySprite,
+                'Has background-image': !!enemySprite.style.backgroundImage && enemySprite.style.backgroundImage !== 'none',
+                'Opacity is 1': enemySprite.style.opacity === '1' || enemySprite.style.opacity === '',
+                'Visibility is visible': enemySprite.style.visibility === 'visible' || enemySprite.style.visibility === '',
+                'Has sprite class': enemySprite.classList.contains('sprite')
+            };
+            
+            for (const [check, passed] of Object.entries(checks)) {
+                log(`  ${check}: ${passed ? '✓' : '✗'}`, passed ? 'success' : 'error');
+            }
+        }
+
+        // Test 3: Arena stability
+        function testArenaStability() {
+            log('Testing arena stability...', 'warning');
+            const container = document.querySelector('.battle-container');
+            
+            if (!container) {
+                log('✗ Battle container not found', 'error');
+                return;
+            }
+            
+            const rect = container.getBoundingClientRect();
+            const computedStyle = window.getComputedStyle(container);
+            
+            log(`Container height: ${rect.height}px`, 'info');
+            log(`Min-height: ${computedStyle.minHeight}`, 'info');
+            log(`Aspect-ratio: ${computedStyle.aspectRatio}`, 'info');
+            
+            if (rect.height < 200) {
+                log('✗ Container height too small (collapsed)', 'error');
+            } else {
+                log('✓ Container height is stable', 'success');
+            }
+        }
+
+        // Test 4: Simulate bug condition
+        async function simulateBugCondition() {
+            log('Simulating bug condition...', 'warning');
+            const arena = document.getElementById('battleArena');
+            const enemySprite = document.getElementById('enemySprite');
+            
+            // Show arena
+            arena.classList.remove('hidden');
+            
+            // Simulate sprite initialization failure
+            enemySprite.style.opacity = '0';
+            enemySprite.style.backgroundImage = '';
+            
+            log('Set sprite opacity to 0 and cleared background-image', 'warning');
+            
+            // Wait a frame
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
+            // Try to fix with reapply
+            log('Attempting to fix with reapplyEnemySprite...', 'info');
+            const enemy = mockEnemies[0];
+            
+            if (typeof reapplyEnemySprite === 'function') {
+                const fixed = reapplyEnemySprite(enemy);
+                
+                if (fixed || validateSprite()) {
+                    log('✓ Sprite successfully restored!', 'success');
+                } else {
+                    log('✗ Sprite restoration failed', 'error');
+                }
+            } else {
+                log('✗ reapplyEnemySprite function not found', 'error');
+            }
+        }
+
+        // Helper: Validate sprite state
+        function validateSprite() {
+            const enemySprite = document.getElementById('enemySprite');
+            if (!enemySprite) return false;
+            
+            const hasBackground = enemySprite.style.backgroundImage && 
+                                 enemySprite.style.backgroundImage !== 'none' && 
+                                 enemySprite.style.backgroundImage !== '';
+            const isVisible = (enemySprite.style.opacity === '1' || enemySprite.style.opacity === '') &&
+                             (enemySprite.style.visibility === 'visible' || enemySprite.style.visibility === '');
+            
+            return hasBackground && isVisible;
+        }
+
+        // Initialize test
+        log('Test suite ready. Click buttons to run tests.', 'success');
+    </script>
+</body>
+</html>

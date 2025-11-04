@@ -71,13 +71,13 @@ const LAZY_BAT_DATA = {
     }
 };
 
-// Lazy Bat II enemy data (appears at level 3+)
+// Lazy Bat II enemy data (appears at level 2+)
 const LAZY_BAT_II_DATA = {
     name: 'Lazy Bat II',
     baseHP: 50,
     baseAttack: 15,
     baseDefense: 10,
-    minLevel: 3,
+    minLevel: 2,
     tier: 'mid',
     sprites: {
         idle: 'assets/enemies/LazyBat2-IdleFly.png',
@@ -91,13 +91,13 @@ const LAZY_BAT_II_DATA = {
     }
 };
 
-// Slime enemy data (appears at level 5+)
+// Slime enemy data (appears at level 2+)
 const SLIME_DATA = {
     name: 'Slime',
     baseHP: 40,
     baseAttack: 8,
     baseDefense: 5,
-    minLevel: 5,
+    minLevel: 2,
     tier: 'early',
     maxDamage: 10, // Cap damage at 10
     drainEnergy: true, // Drains energy on hit
@@ -115,13 +115,13 @@ const SLIME_DATA = {
     }
 };
 
-// Ghost Task Stopper enemy data (appears at level 7+)
+// Ghost Task Stopper enemy data (appears at level 4+)
 const GHOST_TASK_STOPPER_DATA = {
     name: 'Ghost Task Stopper',
     baseHP: 50,
     baseAttack: 15,
     baseDefense: 10,
-    minLevel: 7,
+    minLevel: 4,
     tier: 'mid',
     canEvade: true,
     evasionChance: 0.25, // 25% chance to evade attacks
@@ -138,13 +138,13 @@ const GHOST_TASK_STOPPER_DATA = {
     }
 };
 
-// Medusa enemy data (appears at level 8+)
+// Medusa enemy data (appears at level 5+)
 const MEDUSA_DATA = {
     name: 'Medusa',
     baseHP: 60,
     baseAttack: 15,
     baseDefense: 12,
-    minLevel: 8,
+    minLevel: 5,
     tier: 'mid',
     maxDamage: 15, // Cap damage at 15
     canPetrify: true, // Can use petrify attack
@@ -229,13 +229,13 @@ const ALIEN_DATA = {
     }
 };
 
-// Fire Skull enemy data (appears at level 5+)
+// Fire Skull enemy data (appears at level 3+)
 const FIRE_SKULL_DATA = {
     name: 'Fire Skull',
     baseHP: 45,
     baseAttack: 18,
     baseDefense: 8,
-    minLevel: 5,
+    minLevel: 3,
     tier: 'mid',
     immunities: ['fire', 'spark'],
     weakness: 'freeze',
@@ -282,8 +282,8 @@ function createRandomEnemy(playerLevel) {
     // Filter enemies available at current level
     let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
     
-    // Octopus unlock at level 7
-    if (playerLevel < 7) {
+    // Octopus unlock at level 4
+    if (playerLevel < 4) {
         availableEnemies = availableEnemies.filter(e => e.name !== 'Octopus');
     }
     

@@ -92,9 +92,29 @@ class BattleManager {
         // Show battle arena
         showBattle(this.hero, this.enemy);
 
+        // Async safety: wait for DOM to be ready before sprite initialization
+        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        // Reset enemy sprite state before initialization
+        const enemySprite = document.getElementById('enemySprite');
+        if (enemySprite) {
+            enemySprite.classList.remove('hidden', 'hurt', 'attack', 'bat-idle', 'bat-attack', 'bat-hurt', 
+                                         'bat2-idle', 'slime-idle', 'ghost-idle', 'medusa-idle', 'eye-idle', 
+                                         'procedural-idle', 'alien-idle-animated', 'boss-animated');
+            enemySprite.style.visibility = 'visible';
+            enemySprite.style.opacity = '1';
+            enemySprite.style.transform = '';
+        }
+
         // Initialize enemy sprite with correct size class
         if (typeof initEnemySprite === 'function') {
             initEnemySprite(this.enemy);
+        }
+        
+        // Validate sprite initialization with reapply guard
+        if (typeof reapplyEnemySprite === 'function') {
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            reapplyEnemySprite(this.enemy);
         }
 
         // Play wake up sequence
@@ -1498,6 +1518,18 @@ class BattleManager {
             document.getElementById('battleLog').innerHTML = '';
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
+            
+            // Reset enemy sprite state for next battle
+            const enemySprite = document.getElementById('enemySprite');
+            if (enemySprite) {
+                enemySprite.classList.remove('hidden', 'hurt', 'attack', 'bat-idle', 'bat-attack', 'bat-hurt', 
+                                             'bat2-idle', 'slime-idle', 'ghost-idle', 'medusa-idle', 'eye-idle', 
+                                             'procedural-idle', 'alien-idle-animated', 'boss-animated');
+                enemySprite.style.visibility = 'visible';
+                enemySprite.style.opacity = '1';
+                enemySprite.style.transform = '';
+                enemySprite.style.backgroundImage = '';
+            }
         }, 2000);
     }
     
@@ -1511,7 +1543,8 @@ class BattleManager {
         const container = enemySprite.parentElement;
         const containerRect = container.getBoundingClientRect();
         
-        // Hide enemy sprite
+        // Temporarily hide enemy sprite for dust animation
+        const originalOpacity = enemySprite.style.opacity;
         enemySprite.style.opacity = '0';
         
         // Create dust sprite element

@@ -534,7 +534,7 @@ async function playAsteroidAnimation(startElement, targetElement) {
     projectile.style.width = '50px';
     projectile.style.height = '50px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/projectiles/asteroid-projectile.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/PricklerProjectile.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -584,6 +584,66 @@ async function playAsteroidAnimation(startElement, targetElement) {
     });
 }
 
+// Asteroid Projectile Animation
+async function playAsteroidAnimation(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'asteroid-projectile';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.left + startRect.width / 2 - 16 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 16 + 'px';
+    projectile.style.width = '32px';
+    projectile.style.height = '32px';
+    projectile.style.backgroundImage = 'url("assets/projectiles/AsteroidAttackProjectile.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.imageRendering = 'pixelated';
+    projectile.style.zIndex = '10000';
+
+    // Animate projectile movement
+    const duration = 500;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Calculate parabolic trajectory (simple arc)
+            const startX = startRect.left + startRect.width / 2;
+            const startY = startRect.top + startRect.height / 2;
+            const endX = targetRect.left + targetRect.width / 2;
+            const endY = targetRect.top + targetRect.height / 2;
+
+            const currentX = startX + (endX - startX) * progress;
+            // Simple arc: y = A * (x - h)^2 + k. Here, we use a simpler time-based arc.
+            const arcHeight = -200 * progress * (progress - 1); // Max height at progress 0.5
+            const currentY = startY + (endY - startY) * progress - arcHeight;
+
+            projectile.style.left = currentX - 16 + 'px';
+            projectile.style.top = currentY - 16 + 'px';
+            projectile.style.transform = `rotate(${progress * 720}deg)`; // Two full rotations
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.style.opacity = '0';
+                setTimeout(() => {
+                    projectile.remove();
+                    resolve();
+                }, 100);
+            }
+        }
+        animate();
+    });
+}
+
 // Prickler Projectile Animation
 async function playPricklerAnimation(startElement, targetElement) {
     const projectile = document.createElement('div');
@@ -591,7 +651,7 @@ async function playPricklerAnimation(startElement, targetElement) {
     projectile.style.width = '40px';
     projectile.style.height = '40px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/battle-items/prickler/prickler.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/PricklerProjectile.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -912,6 +972,7 @@ window.playFireballAnimation = playFireballAnimation;
 window.playWaveformAnimation = playWaveformAnimation;
 window.playSparkAnimation = playSparkAnimation;
 window.playPricklerAnimation = playPricklerAnimation;
+window.playAsteroidAnimation = playAsteroidAnimation;
 window.playFreezeAnimation = playFreezeAnimation;
 window.updateBattleButtons = updateBattleButtons;
 window.updateBattleShopDisplay = updateBattleShopDisplay;
