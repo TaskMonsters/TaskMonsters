@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Trigger Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .test-section {
+            background: #16213e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 2px solid #0f3460;
+        }
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #c23b52;
+        }
+        #console-output {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 3px;
+        }
+        .log-info { color: #4CAF50; }
+        .log-warn { color: #FFC107; }
+        .log-error { color: #F44336; }
+        h1 { color: #e94560; }
+        h2 { color: #0f3460; }
+    </style>
+</head>
+<body>
+    <h1>🎮 Battle Trigger Test - v3.14 FIXED</h1>
+    
+    <div class="test-section">
+        <h2>Test Instructions</h2>
+        <p>This page tests the battle initialization fix. The battleManager loads asynchronously, and the fix ensures startTestBattle waits for it to be ready.</p>
+        <ol>
+            <li>Open browser console (F12)</li>
+            <li>Click "Trigger Battle" button</li>
+            <li>Watch the console for retry messages</li>
+            <li>Battle should start successfully after battleManager initializes</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Controls</h2>
+        <button onclick="testBattleTrigger()">🎯 Trigger Battle</button>
+        <button onclick="checkBattleManager()">🔍 Check BattleManager Status</button>
+        <button onclick="clearConsoleOutput()">🗑️ Clear Console</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <div id="console-output"></div>
+    </div>
+
+    <!-- Mock game state for testing -->
+    <script>
+        // Mock gameState
+        window.gameState = {
+            jerryLevel: 5,
+            health: 100,
+            attack: 20,
+            defense: 10,
+            battleInventory: {
+                attackGauge: 100,
+                defenseGauge: 100
+            }
+        };
+
+        // Mock functions that battleInit.js expects
+        window.saveGameState = function() {
+            customLog('💾 saveGameState called', 'info');
+        };
+
+        window.isBossLevel = function(level) {
+            return level % 10 === 0;
+        };
+
+        window.createBossEnemy = function(level) {
+            return { name: 'Boss Enemy', hp: 200, attack: 30, defense: 15, level: level };
+        };
+
+        window.createRandomEnemy = function(level) {
+            return { name: 'Random Enemy', hp: 100, attack: 20, defense: 10, level: level };
+        };
+
+        window.getBossArenaBackground = function(count) {
+            return 'assets/backgrounds/boss-arena.png';
+        };
+
+        // Custom console logger
+        function customLog(message, type = 'info') {
+            const output = document.getElementById('console-output');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(entry);
+            output.scrollTop = output.scrollHeight;
+            
+            // Also log to real console
+            console.log(message);
+        }
+
+        function clearConsoleOutput() {
+            document.getElementById('console-output').innerHTML = '';
+        }
+
+        function testBattleTrigger() {
+            customLog('🎯 Test: Triggering battle...', 'info');
+            if (typeof window.startTestBattle === 'function') {
+                window.startTestBattle();
+            } else {
+                customLog('❌ startTestBattle function not found!', 'error');
+            }
+        }
+
+        function checkBattleManager() {
+            if (window.battleManager) {
+                customLog('✅ BattleManager is initialized!', 'info');
+                customLog('   Type: ' + typeof window.battleManager, 'info');
+            } else {
+                customLog('❌ BattleManager is NOT initialized!', 'error');
+            }
+        }
+
+        // Intercept console methods
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const message = args.join(' ');
+            if (message.includes('🔵') || message.includes('✅') || message.includes('⚔️') || message.includes('🔄')) {
+                customLog(message, 'info');
+            }
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            customLog(args.join(' '), 'warn');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            customLog(args.join(' '), 'error');
+        };
+
+        customLog('🚀 Test page loaded. Waiting for scripts to initialize...', 'info');
+    </script>
+
+    <!-- Load the actual game scripts -->
+    <script src="js/battleManager.js?v=3.14"></script>
+    <script src="js/battleInit.js?v=3.14"></script>
+
+    <script>
+        // Check initialization after a delay
+        setTimeout(() => {
+            checkBattleManager();
+            customLog('📋 Ready to test! Click "Trigger Battle" button.', 'info');
+        }, 1000);
+    </script>
+</body>
+</html>

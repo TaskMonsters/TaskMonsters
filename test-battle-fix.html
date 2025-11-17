@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle System Test</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #status {
+            background: #16213e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Battle System Test - v3.6</h1>
+    
+    <div id="status">
+        <h2>Status:</h2>
+        <div id="statusText">Loading...</div>
+    </div>
+    
+    <button onclick="testBattleManager()">Test Battle Manager</button>
+    <button onclick="testStartBattle()">Start Test Battle</button>
+    <button onclick="clearConsole()">Clear Console</button>
+    
+    <div id="console" style="background: black; padding: 10px; margin-top: 20px; font-family: monospace; font-size: 12px;"></div>
+    
+    <script>
+        // Custom console logger
+        const customLog = (msg, type = 'log') => {
+            const consoleDiv = document.getElementById('console');
+            const color = type === 'error' ? 'red' : type === 'warn' ? 'yellow' : 'lime';
+            consoleDiv.innerHTML += `<div style="color: ${color}">${msg}</div>`;
+            console[type](msg);
+        };
+        
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+        }
+        
+        function updateStatus(msg) {
+            document.getElementById('statusText').innerHTML = msg;
+        }
+        
+        customLog('🔵 Test page loaded');
+        updateStatus('Test page loaded. Waiting for scripts...');
+    </script>
+    
+    <!-- Load battle system scripts -->
+    <script src="js/battleManager.js?v=3.6.test"></script>
+    <script src="js/battleInit.js?v=3.6.test"></script>
+    
+    <script>
+        // Wait a moment then check status
+        setTimeout(() => {
+            customLog('=== CHECKING BATTLE SYSTEM ===');
+            customLog('window.battleManager: ' + (window.battleManager ? '✅ EXISTS' : '❌ NULL'));
+            customLog('typeof BattleManager: ' + typeof BattleManager);
+            customLog('window.startTestBattle: ' + (typeof window.startTestBattle === 'function' ? '✅ EXISTS' : '❌ NOT FOUND'));
+            
+            if (window.battleManager) {
+                updateStatus('✅ Battle Manager initialized successfully!');
+                customLog('✅ Battle system is ready!');
+            } else {
+                updateStatus('❌ Battle Manager failed to initialize');
+                customLog('❌ Battle Manager not found!');
+            }
+        }, 1000);
+        
+        function testBattleManager() {
+            customLog('--- Testing Battle Manager ---');
+            if (window.battleManager) {
+                customLog('✅ battleManager exists');
+                customLog('battleManager.state: ' + window.battleManager.state);
+            } else {
+                customLog('❌ battleManager is null');
+            }
+        }
+        
+        function testStartBattle() {
+            customLog('--- Testing Start Battle ---');
+            if (typeof window.startTestBattle === 'function') {
+                customLog('✅ Calling startTestBattle()...');
+                try {
+                    window.startTestBattle();
+                    customLog('✅ startTestBattle() called successfully');
+                } catch (e) {
+                    customLog('❌ Error: ' + e.message, 'error');
+                }
+            } else {
+                customLog('❌ startTestBattle not found', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
