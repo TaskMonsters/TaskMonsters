@@ -183,6 +183,21 @@ setInterval(() => {
 // Make updateHeroStats available globally
 window.updateHeroStats = updateHeroStats;
 
+// Global function to add XP
+window.addJerryXP = function(amount) {
+  if (hero) {
+    const levelUp = hero.gainXP(amount);
+    updateHeroStats();
+    saveHero();
+    if (levelUp) {
+      uiManager.showMessage(`🎉 Level Up! Hero is now Level ${hero.level}!`);
+      hero.celebrate();
+    }
+  } else {
+    console.error('Hero object not initialized. Cannot add XP.');
+  }
+};
+
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initGame);

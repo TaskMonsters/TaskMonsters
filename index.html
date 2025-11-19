@@ -7,7 +7,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Task Monsters</title>
 <!-- PWA Manifest -->
-<link href="manifest.json?v=3.14" rel="manifest"/>
+<link href="manifest.json?v=1757559779" rel="manifest"/>
 <!-- PWA Meta Tags -->
 <meta content="#111111" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
@@ -38,53 +38,7 @@
 <meta content="Task Monsters - RPG Productivity Game" name="twitter:title"/>
 <meta content="A fun task management app with Jerry the Rock, your virtual pet companion" name="twitter:description"/>
 <meta content="assets/images/icon-512x512.png" name="twitter:image"/>
-
-<!-- Cache Control -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-
-<!-- 
-VERSION 3.5 CHANGELOG:
-- CRITICAL FIX: Simplified battle trigger logic to fix battles not starting
-- Removed problematic retry loop in startTestBattle() that could cause infinite recursion
-- Removed redundant battleModeEnabled checks in task completion functions
-- Streamlined battle initialization to match working v2.11 architecture
-- Enhanced console logging for better debugging
-- All cache parameters updated to v3.5 for automatic cache refresh
--->
-
-<!-- Auto Version Check -->
-<script>
-(function() {
-    const APP_VERSION = '3.14';
-    const STORED_VERSION = localStorage.getItem('app_version');
-    
-    if (STORED_VERSION && STORED_VERSION !== APP_VERSION) {
-        console.log(`🔄 Version update detected: ${STORED_VERSION} → ${APP_VERSION}`);
-        console.log('🔄 Clearing cache and reloading...');
-        
-        // Clear all caches
-        if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-            });
-        }
-        
-        // Update version
-        localStorage.setItem('app_version', APP_VERSION);
-        
-        // Force reload without cache
-        window.location.reload(true);
-    } else if (!STORED_VERSION) {
-        // First time load
-        console.log(`✅ App version ${APP_VERSION} initialized`);
-        localStorage.setItem('app_version', APP_VERSION);
-    } else {
-        console.log(`✅ App version ${APP_VERSION} (up to date)`);
-    }
-})();
-</script>
+    <link href="assets/css/special-attacks.css" rel="stylesheet"/>
 
 <style>
         :root {
@@ -3137,6 +3091,15 @@ VERSION 3.5 CHANGELOG:
     <div class="gauge-container">
         <div class="gauge">
             <div class="gauge-label">
+                <span>⚡ Special Attack</span>
+                <span id="specialGaugeText">0/100</span>
+            </div>
+            <div class="gauge-bar-bg">
+                <div id="specialGaugeBar" class="gauge-bar-fill" style="width: 0%; background: linear-gradient(90deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%);"></div>
+            </div>
+        </div>
+        <div class="gauge">
+            <div class="gauge-label">
                 <span>⚔️ Attack Gauge</span>
                 <span id="attackGaugeText">0/100</span>
             </div>
@@ -3163,7 +3126,7 @@ VERSION 3.5 CHANGELOG:
         <button id="btnDefend" class="btn-action" onclick="battleManager.playerDefend()">
             🪨 Defend
         </button>
-        <button id="btnSpecialAttack" class="btn-action btn-special" onclick="battleManager.playerSpecialAttack()" disabled>
+        <button id="btnSpecialAttack" class="btn-action" onclick="playerSpecialAttack()">
             ⚡ Special Attack
         </button>
         <button id="btnFireball" class="btn-action" onclick="battleManager.playerFireball()">
@@ -3204,9 +3167,6 @@ VERSION 3.5 CHANGELOG:
         </button>
         <button id="btnProcrastinationGhost" class="btn-action" onclick="battleManager.playerProcrastinationGhost()" style="display: none;">
             👻 Ghost <span class="item-count" id="procrastinationGhostCount">(0)</span>
-        </button>
-        <button id="btnPoisonLeaf" class="btn-action" onclick="battleManager.playerPoisonLeaf()" style="display: none;">
-            🍃 Poison Leaf <span class="item-count" id="poisonLeafCount">(0)</span>
         </button>
         <button id="btnFlee" class="btn-flee" onclick="battleManager.playerFlee()">
             🏃 Flee
@@ -4575,13 +4535,6 @@ VERSION 3.5 CHANGELOG:
 
         function getRandomPhrase(mood) {
             const phrases = moodPhrases[mood];
-            
-            // Safety check: if mood doesn't exist, use happy as default
-            if (!phrases) {
-                console.warn(`Unknown mood: ${mood}, using 'happy' as default`);
-                return getRandomPhrase('happy');
-            }
-            
             let availablePhrases = phrases.filter(p => !phraseHistory[mood].includes(p));
             
             if (availablePhrases.length === 0) {
@@ -6903,18 +6856,17 @@ VERSION 3.5 CHANGELOG:
                 id: 'health_potion',
                 name: 'Potion',
                 emoji: '🧪',
-                description: 'Heals 25% of Monster\'s Max HP',
-                cost: 10,
+                description: 'Instantly restores 20 HP in battle',
+                cost: 20,
                 effect: 'heal',
-                value: 25,
-                levelRequired: 1
+                value: 20
             },
             hyper_potion: {
                 id: 'hyper_potion',
                 name: 'Hyper Potion',
                 emoji: '❤️‍🩹',
                 description: 'Instantly restores 50 HP in battle',
-                cost: 15,
+                cost: 40,
                 effect: 'heal',
                 value: 50
             },
@@ -6923,7 +6875,7 @@ VERSION 3.5 CHANGELOG:
                 name: 'Shield',
                 emoji: '🛡️',
                 description: 'Adds +20 Defense in next battle',
-                cost: 15,
+                cost: 25,
                 effect: 'defense',
                 value: 20
             },
@@ -6931,44 +6883,39 @@ VERSION 3.5 CHANGELOG:
                 id: 'attack_refill',
                 name: 'Power Boost',
                 emoji: '⚡',
-                description: 'Increases Monster\'s Attack by 20% for 3 turns',
-                cost: 15,
-                effect: 'attack_buff',
-                value: 20,
-                duration: 3,
-                levelRequired: 5
+                description: 'Refills +30 Attack for your gauge',
+                cost: 25,
+                effect: 'attack_gauge',
+                value: 30
             },
             asteroid_attack: {
                 id: 'asteroid_attack',
-                name: 'Asteroid',
+                name: 'Asteroid Attack',
                 emoji: '🪨',
-                description: 'Deals massive 150 Damage, but has a 10% chance to miss',
-                cost: 150,
+                description: 'Rock projectile dealing 12 damage (Max: 15)',
+                cost: 20,
                 effect: 'attack',
-                value: 150,
-                missChance: 0.10,
-                levelRequired: 35,
-                maxQuantity: 8
+                value: 12,
+                levelRequired: 1,
+                maxQuantity: 15
             },
             prickler: {
                 id: 'prickler',
                 name: 'Prickler',
                 emoji: '💣',
-                description: 'Deals 50 Damage, applies Poison debuff (5 Damage per turn for 3 turns)',
-                cost: 100,
+                description: 'Nuclear explosive attack dealing 10-15 damage (Max: 15)',
+                cost: 35,
                 effect: 'attack',
-                value: 50,
-                poisonDamage: 5,
-                poisonDuration: 3,
-                levelRequired: 25,
+                value: 15,
+                levelRequired: 3,
                 maxQuantity: 15
             },
             fireball: {
                 id: 'fireball',
                 name: 'Fireball',
                 emoji: '🔥',
-                description: 'Explosive fire projectile with fiery blast (15-18 damage)',
-                cost: 20,
+                description: 'Explosive projectile dealing 15-18 damage (Max: 18)',
+                cost: 45,
                 effect: 'attack',
                 value: 18,
                 levelRequired: 4,
@@ -6976,54 +6923,50 @@ VERSION 3.5 CHANGELOG:
             },
             spark: {
                 id: 'spark',
-                name: 'Spark Orb',
+                name: 'Spark',
                 emoji: '⚡',
-                description: 'Deals 100 Damage, 10% chance to hit twice',
-                cost: 80,
+                description: 'Melee strike dealing 18-20 damage (Max: 20)',
+                cost: 50,
                 effect: 'attack',
-                value: 100,
-                doubleHitChance: 0.10,
-                levelRequired: 20,
+                value: 20,
+                levelRequired: 7,
                 maxQuantity: 10
             },
             freeze: {
                 id: 'freeze',
-                name: 'Freeze Attack',
+                name: 'Freeze',
                 emoji: '❄️',
-                description: 'Deals 50 Damage, Freezes enemy for 2-3 turns (level based)',
-                cost: 50,
+                description: 'Ice projectile dealing 10 damage, skips 2 enemy turns (Max: 10)',
+                cost: 65,
                 effect: 'freeze',
-                value: 50,
-                stunChance: 0.30,
-                levelRequired: 10,
+                value: 10,
+                levelRequired: 8,
                 maxQuantity: 8
             },
             invisibility_cloak: {
                 id: 'invisibility_cloak',
                 name: 'Invisibility Cloak',
                 emoji: '🥷🏼',
-                description: 'Become invisible for 2 turns, evading all enemy attacks',
-                cost: 20,
+                description: 'Allows your monster to evade the next enemy attack',
+                cost: 40,
                 effect: 'evade',
                 levelRequired: 3
             },
             mirror_attack: {
                 id: 'mirror_attack',
-                name: 'Mirror Explosion',
+                name: 'Mirror Attack',
                 emoji: '🪞',
-                description: 'Deals 75 Damage, reflects 50% of damage taken back to enemy next turn',
-                cost: 70,
-                effect: 'mirror',
-                value: 75,
-                reflectPercent: 0.50,
-                levelRequired: 15
+                description: 'Reflects enemy\'s next attack back to them',
+                cost: 80,
+                effect: 'reflect',
+                levelRequired: 40
             },
             blue_flame: {
                 id: 'blue_flame',
                 name: 'Blue Flame',
                 emoji: '<img src="assets/blue-flame.png" alt="Blue Flame" style="width: 48px; height: 48px; vertical-align: middle;">',
-                description: 'Intense blue fire projectile with explosive blast (20 damage)',
-                cost: 30,
+                description: 'Fire-type attack dealing 20 damage (Max: 20)',
+                cost: 50,
                 effect: 'attack',
                 value: 20,
                 levelRequired: 12,
@@ -7033,8 +6976,8 @@ VERSION 3.5 CHANGELOG:
                 id: 'procrastination_ghost',
                 name: 'Procrastination Ghost',
                 emoji: '👻',
-                description: 'Haunting projectile with ghostly blast, skips 1 enemy turn (18-22 damage)',
-                cost: 40,
+                description: '18-22 damage + skips 1 enemy turn (Max: 22)',
+                cost: 70,
                 effect: 'ghost_attack',
                 value: 13,
                 levelRequired: 15,
@@ -7044,8 +6987,8 @@ VERSION 3.5 CHANGELOG:
                 id: 'poison_leaf',
                 name: 'Poison Leaf',
                 emoji: '🍃',
-                description: 'Toxic leaf projectile with poison cloud, 10 damage/turn for 4 turns',
-                cost: 60,
+                description: 'Reduces enemy HP by 10 for 4 turns',
+                cost: 80,
                 effect: 'poison',
                 value: 10,
                 duration: 4,
@@ -7664,28 +7607,14 @@ VERSION 3.5 CHANGELOG:
                 console.warn('Confetti function not available');
             }
             
-            // 35% chance to trigger battle
-            const battleRoll = Math.random();
-            console.log('🎲 Battle roll:', battleRoll);
-            
-            if (battleRoll < 0.35) {
-                setTimeout(() => {
-                    console.log('⚔️ Battle roll succeeded! Triggering battle...');
-                    
-                    if (typeof window.startTestBattle === 'function') {
-                        console.log('⚔️ Calling startTestBattle()...');
-                        try {
-                            window.startTestBattle();
-                        } catch(e) {
-                            console.error('❌ Battle trigger error:', e);
-                        }
-                    } else {
-                        console.error('❌ Battle system not loaded! window.startTestBattle is', typeof window.startTestBattle);
-                    }
-                }, 2000); // Wait 2 seconds after confetti
-            } else {
-                console.log('❌ Battle roll failed (need < 0.35)');
-            }
+            // Trigger battle with 50% probability for regular tasks
+            setTimeout(() => {
+                if (typeof window.maybeTriggerBattle === 'function') {
+                    window.maybeTriggerBattle('regularTask');
+                } else {
+                    console.warn('Battle trigger system not loaded yet');
+                }
+            }, 2000); // Wait 2 seconds after confetti
             
             // Show dialogue after a brief delay
             setTimeout(() => {
@@ -7880,28 +7809,14 @@ VERSION 3.5 CHANGELOG:
                 console.warn('Confetti function not available');
             }
             
-            // 35% chance to trigger battle
-            const battleRoll = Math.random();
-            console.log('🎲 Quick Task Battle roll:', battleRoll);
-            
-            if (battleRoll < 0.35) {
-                setTimeout(() => {
-                    console.log('⚔️ Battle roll succeeded! Triggering battle...');
-                    
-                    if (typeof window.startTestBattle === 'function') {
-                        console.log('⚔️ Calling startTestBattle()...');
-                        try {
-                            window.startTestBattle();
-                        } catch(e) {
-                            console.error('❌ Battle trigger error:', e);
-                        }
-                    } else {
-                        console.error('❌ Battle system not loaded! window.startTestBattle is', typeof window.startTestBattle);
-                    }
-                }, 2000); // Wait 2 seconds after confetti
-            } else {
-                console.log('❌ Battle roll failed (need < 0.35)');
-            }
+            // Trigger battle with 20% probability for quick tasks
+            setTimeout(() => {
+                if (typeof window.maybeTriggerBattle === 'function') {
+                    window.maybeTriggerBattle('quickTask');
+                } else {
+                    console.warn('Battle trigger system not loaded yet');
+                }
+            }, 2000); // Wait 2 seconds after confetti
         }
 
         function removeQuickTask(taskId) {
@@ -8044,10 +7959,9 @@ VERSION 3.5 CHANGELOG:
 
         function toggleBattleMode() {
             window.battleModeEnabled = !window.battleModeEnabled;
-            localStorage.setItem('battleModeEnabled', window.battleModeEnabled ? 'true' : 'false');
+            localStorage.setItem('battleModeEnabled', window.battleModeEnabled);
             updateSettingsDisplay();
             showSuccessMessage(`Battle Mode ${window.battleModeEnabled ? 'enabled' : 'disabled'}!`);
-            console.log('Battle Mode toggled:', window.battleModeEnabled);
         }
 
         async function shareEtsyStore() {
@@ -8447,46 +8361,41 @@ VERSION 3.5 CHANGELOG:
     
     
     <!-- Dark Theme CSS -->
-    <link rel="stylesheet" href="css/dark-theme.css?v=3.14">
+    <link rel="stylesheet" href="css/dark-theme.css?v=2">
     
     <!-- Battle System CSS -->
-    <link rel="stylesheet" href="css/battle.css?v=3.14">
+    <link rel="stylesheet" href="css/battle.css?v=2">
     
     <!-- Quest Giver CSS -->
-    <link rel="stylesheet" href="css/questGiver.css?v=3.14">
+    <link rel="stylesheet" href="css/questGiver.css?v=1">
     
     <!-- Quest Tasks CSS -->
     <link rel="stylesheet" href="css/questTasks.css">
     
+    <!-- Background Manager for time-based backgrounds -->
+    <script src="js/backgroundManager.js"></script>
+    <script src="js/themeManager.js"></script>
+    
     <!-- Audio Manager -->
     <script src="js/audioManager.js"></script>
     
-    <!-- New Battle System Core (Load First) -->
-    <script src="js/assetConfig.js?v=3.14"></script>
-    <script src="js/levelSystem.js?v=3.14"></script>
-    <script src="js/enemyTierSystem.js?v=3.14"></script>
-    <script src="js/specialGaugeSystem.js?v=3.14"></script>
-    <script src="js/monsterSpecialAttacks.js?v=3.14"></script>
-    <script src="js/battleMusicSystem.js?v=3.14"></script>
-    <script src="js/battleBackgroundSystem.js?v=3.14"></script>
-    
     <!-- Battle System Modules -->
-    <script src="js/battleTrigger.js?v=3.14"></script>
-    <script src="js/enemyAI.js?v=3.14"></script>
-    <script src="js/enemy.js?v=3.14"></script>
-    <script src="js/boss-enemies.js?v=3.14"></script>
-    <script src="js/enemy-init.js?v=3.14"></script>
-    <script src="js/battleUI.js?v=3.14"></script>
-    <script src="js/specialAttackAnimations.js?v=3.14"></script>
-    <script src="js/medusaProjectile.js?v=3.14"></script>
-    <script src="js/bossProjectiles.js?v=3.14"></script>
-    <script src="js/battleLog.js?v=3.14"></script>
-    <script src="js/showBattle.js?v=3.14"></script>
-    <script src="js/battleManager.js?v=3.14"></script>
-    <script src="js/soundIntegration.js?v=3.14"></script>
-    <script src="js/battleInit.js?v=3.14"></script>
+    <script src="js/enemyAI.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/boss-enemies.js"></script>
+    <script src="js/enemy-init.js"></script>
+    <script src="js/battleUI.js"></script>
+    <script src="js/specialAttackAnimations.js"></script>
+    <script src="js/monsterSpecialAttacks.js"></script>
+    <script src="js/specialAttackHandler.js"></script>
+    <script src="js/medusaProjectile.js"></script>
+    <script src="js/bossProjectiles.js"></script>
+    <script src="js/lootSystem.js"></script>
+    <script src="js/battleManager.js"></script>
+    <script src="js/soundIntegration.js"></script>
+    <script src="js/battleInit.js"></script>
     <script src="js/questTaskManager.js"></script>
-    <script src="js/questGiver.js?v=3.14"></script>
+    <script src="js/questGiver.js?v=2"></script>
     <script src="js/moodFilter.js"></script>
     <script src="js/merlinModal.js"></script>
     <script src="js/notificationManager.js"></script>
@@ -8789,6 +8698,5 @@ VERSION 3.5 CHANGELOG:
 
     </script>
 
-<script src="task-monsters-bug-fixes.js?v=3.15"></script>
 </body>
 </html>

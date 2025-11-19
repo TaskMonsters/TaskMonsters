@@ -55,25 +55,8 @@ class QuestTaskManager {
         task.completed = true;
 
         // Award XP using the proper function
-        if (!window.gameState) {
-            console.error('window.gameState not found! Cannot award XP.');
-            alert('⚠️ Error: Game state not loaded. Please refresh the page.');
-            return;
-        }
-        
         if (typeof window.addJerryXP === 'function') {
             window.addJerryXP(task.xp);
-            console.log(`Quest task completed! Added ${task.xp} XP. Total: ${window.gameState.jerryXP}`);
-            
-            // Save game state
-            if (typeof window.saveGameState === 'function') {
-                window.saveGameState();
-            }
-            
-            // Update UI
-            if (typeof window.updateUI === 'function') {
-                window.updateUI();
-            }
         } else {
             console.error('addJerryXP function not found!');
         }

@@ -436,12 +436,11 @@ class QuestGiver {
                 window.achievementTracker.checkAchievements();
             }
             
-            if (typeof window.addJerryXP === 'function') {
+           if (typeof window.addJerryXP === 'function') {
                 window.addJerryXP(this.activeQuest.xpReward);
-                console.log(`Quiz correct! Added ${this.activeQuest.xpReward} XP. Total: ${window.gameState.jerryXP}`);
-                
-                if (typeof window.saveGameState === 'function') {
-                    window.saveGameState();
+            } else {
+                console.error('addJerryXP function not found');
+            }      window.saveGameState();
                 }
                 
                 if (typeof window.updateUI === 'function') {
@@ -466,9 +465,13 @@ class QuestGiver {
             // Reset quiz perfect streak on failure
             window.gameState.quizPerfectStreak = 0;
             
-            const oldXP = window.gameState.jerryXP || 0;
-            window.gameState.jerryXP = Math.max(0, oldXP - this.activeQuest.xpPenalty);
-            console.log(`Quiz wrong! Deducted ${this.activeQuest.xpPenalty} XP. Total: ${window.gameState.jerryXP}`);
+            if (typeof window.addJerryXP === 'function') {
+                window.addJerryXP(-this.activeQuest.xpPenalty);
+            } else {
+                const oldXP = window.gameState.jerryXP || 0;
+                window.gameState.jerryXP = Math.max(0, oldXP - this.activeQuest.xpPenalty);
+                console.log(`Quiz wrong! Deducted ${this.activeQuest.xpPenalty} XP. Total: ${window.gameState.jerryXP}`);
+            }
             
             if (typeof window.saveGameState === 'function') {
                 window.saveGameState();
@@ -600,8 +603,12 @@ function checkExpiredQuests() {
     expiredQuests.forEach(quest => {
         // Deduct XP penalty
         if (window.gameState) {
-            window.gameState.jerryXP = Math.max(0, (window.gameState.jerryXP || 0) - quest.questPenalty);
-            console.log(`Quest expired! Deducted ${quest.questPenalty} XP`);
+            if (typeof window.addJerryXP === 'function') {
+                window.addJerryXP(-quest.questPenalty);
+            } else {
+                window.gameState.jerryXP = Math.max(0, (window.gameState.jerryXP || 0) - quest.questPenalty);
+                console.log(`Quest expired! Deducted ${quest.questPenalty} XP`);
+            }
         }
         
         // Remove quest from tasks

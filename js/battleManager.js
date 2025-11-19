@@ -1,7 +1,5 @@
 // Battle Manager - State Machine and Combat Logic
 
-console.log('📜 battleManager.js is loading...');
-
 const BattleState = {
     INITIALIZING: 'initializing',
     PLAYER_TURN: 'player_turn',
@@ -14,6 +12,7 @@ const BattleState = {
 
 class BattleManager {
     constructor() {
+        this.initialized = false;  // Track initialization state
         this.state = BattleState.INITIALIZING;
         this.hero = null;
         this.enemy = null;
@@ -23,20 +22,12 @@ class BattleManager {
         this.hasEvade = false;
         this.hasReflect = false;
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
+        this.reflectTurns = 0;  // Luna's reflect effect turns remaining
+        this.reflectActive = false;  // Luna's reflect effect active flag
     }
 
     // Initialize battle with hero and enemy
     async startBattle(heroData, enemyData) {
-        // Check if enemy was created successfully
-        if (!enemyData) {
-            console.error('❌ Cannot start battle: Enemy data is null!');
-            console.error('This usually means createRandomEnemy() failed.');
-            console.error('Check that ASSET_CONFIG.enemies is loaded.');
-            return;
-        }
-        
-        console.log('✅ Starting battle with:', { hero: heroData, enemy: enemyData });
-        
         this.state = BattleState.INITIALIZING;
         this.hero = heroData;
         this.enemy = enemyData;
@@ -47,36 +38,30 @@ class BattleManager {
         this.enemyAttackCount = 0;  // Reset enemy attack count for every 5th attack sound
         
         // Verify gameState inventory is loaded
-        // Sync main inventory to battle inventory
         if (!window.gameState.battleInventory) {
-            window.gameState.battleInventory = {};
-        }
-        
-        // Sync items from main inventory to battle inventory
-        if (window.gameState.inventory) {
-            // Copy all items from main inventory
-            window.gameState.battleInventory.potion = window.gameState.inventory.potion || 0;
-            window.gameState.battleInventory.hyper_potion = window.gameState.inventory.hyper_potion || 0;
-            window.gameState.battleInventory.fireball = window.gameState.inventory.fireball || 0;
-            window.gameState.battleInventory.spark = window.gameState.inventory.spark || 0;
-            window.gameState.battleInventory.attack_refill = window.gameState.inventory.attack_refill || 0;
-            window.gameState.battleInventory.defense_refill = window.gameState.inventory.defense_refill || 0;
-            console.log('✅ Synced inventory to battle:', window.gameState.battleInventory);
-        } else {
-            // Fallback: initialize with defaults
+            console.warn('Battle inventory not found, initializing...');
             window.gameState.battleInventory = {
-                potion: 0,
-                hyper_potion: 0,
                 fireball: 0,
                 spark: 0,
-                attack_refill: 0,
-                defense_refill: 0
+                health_potion: 2,
+                attack_refill: 2,
+                defense_refill: 2,
+                invisibility_cloak: 0,
+                prickler: 0,
+                freeze: 0,
+                blue_flame: 0,
+                procrastination_ghost: 0
             };
         }
         
         if (!window.gameState.unlockedBattleItems) {
             console.warn('Unlocked battle items not found, initializing...');
             window.gameState.unlockedBattleItems = ['health_potion', 'attack_refill', 'defense_refill'];
+        }
+        
+        // Initialize special attack gauge if not exists
+        if (window.initSpecialAttackGauge) {
+            window.initSpecialAttackGauge();
         }
         
         // Boss status effects
@@ -87,8 +72,6 @@ class BattleManager {
         this.mushroomMissChance = 0;
         this.mushroomSkipChance = 0;
         this.mushroomGaugeDrain = 0;
-        this.enemyFrozenTurns = 0;  // Freeze effect from Freeze Attack
-        this.invisibilityTurns = 0;  // Invisibility Cloak effect
 
         // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');
@@ -106,24 +89,12 @@ class BattleManager {
         // Alternating encounter system: rotate through available arenas
         if (!window.battleArenaIndex) window.battleArenaIndex = 0;
         const arenaClass = availableArenas[window.battleArenaIndex % availableArenas.length];
-        console.log(`🏞️ Battle Arena #${window.battleArenaIndex + 1}: ${arenaClass} (Available: ${availableArenas.join(', ')})`);
         battleContainer.classList.add(arenaClass);
         window.battleArenaIndex++;
         
-        // Initialize new battle systems
-        if (window.specialGauge) {
-            window.specialGauge.init();
-        }
-        if (window.battleMusicSystem) {
-            window.battleMusicSystem.init();
-            const tier = window.getEnemyTier ? window.getEnemyTier(this.hero.level) : 'common';
-            window.battleMusicSystem.playBattleMusic(tier);
-        } else if (window.audioManager) {
+        // Play alternating battle music
+        if (window.audioManager) {
             window.audioManager.playBattleMusic();
-        }
-        if (window.battleBackgroundSystem) {
-            window.battleBackgroundSystem.init();
-            window.battleBackgroundSystem.loadBackgroundForLevel(this.hero.level);
         }
 
         // Show battle arena
@@ -138,26 +109,15 @@ class BattleManager {
         addBattleLog(`💤 A ${this.enemy.name} appears!`);
         await playWakeUpSequence(this.enemy);
         addBattleLog('⚔️ Battle Start!');
-        
-        // Enemy attacks first (will set state to PLAYER_TURN when done)
+
+        // Enemy attacks first
         await this.enemyTurn();
     }
 
     // Player attacks
     async playerAttack() {
-        console.log('🎯 playerAttack called! Current state:', this.state, 'Expected:', BattleState.PLAYER_TURN);
-        if (this.state !== BattleState.PLAYER_TURN) {
-            console.warn('❌ Attack blocked - not player turn. State:', this.state);
-            return;
-        }
-        if (this.actionInProgress) {
-            console.warn('❌ Attack blocked - action already in progress');
-            return;
-        }
-        this.actionInProgress = true;
-        console.log('✅ Attack proceeding...');
+        if (this.state !== BattleState.PLAYER_TURN) return;
         
-        try {
         // Process poison effect
         if (this.poisonTurns > 0) {
             this.hero.hp = Math.max(0, this.hero.hp - this.poisonDamage);
@@ -165,12 +125,6 @@ class BattleManager {
             this.defenseGauge = Math.max(0, this.defenseGauge - this.poisonGaugeDrain);
             addBattleLog(`☠️ Poison drained ${this.poisonDamage} HP and ${this.poisonGaugeDrain} from each gauge!`);
             this.poisonTurns--;
-            
-            // Play hurt animation for poison damage
-            startHeroAnimation('hurt');
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            startHeroAnimation('idle');
-            
             updateBattleUI(this.hero, this.enemy);
             
             if (this.hero.hp <= 0) {
@@ -202,52 +156,14 @@ class BattleManager {
             return;
         }
 
-        // Don't change state to ANIMATING - keep as PLAYER_TURN
-        // This allows buttons to remain clickable during animation
+        this.state = BattleState.ANIMATING;
         this.attackGauge -= 10;
         this.attackCount++;
         updateBattleUI(this.hero, this.enemy);
 
-        // Play hero attack animation
-        // Every 3rd attack uses special animation if level >= 6, otherwise walk+attack
-        if (this.attackCount % 3 === 0 && this.attackCount > 0) {
-            const heroSprite = document.getElementById('heroSprite');
-            const enemySprite = document.getElementById('enemySprite');
-            const heroLevel = gameState.level || 1;
-            const selectedMonster = localStorage.getItem('selectedMonster');
-            
-            // Check if level is 6 or higher and special attack animation exists
-            if (heroLevel >= 6 && selectedMonster && window.playSpecialAttackForMonster) {
-                // Play special attack animation for this monster
-                addBattleLog(`✨ ${this.hero.name} unleashes a special attack!`);
-                await window.playSpecialAttackForMonster(selectedMonster, heroSprite, enemySprite);
-            } else {
-                // Use regular walk+attack animation
-                const originalLeft = heroSprite.style.left || '0px';
-                
-                // Start walk+attack animation
-                startHeroAnimation('walk-attack');
-                
-                // Move hero forward toward enemy (150px to the right)
-                heroSprite.style.transition = 'left 0.45s ease-out';
-                heroSprite.style.left = '150px';
-                
-                // Wait for walk and attack to complete
-                await new Promise(resolve => setTimeout(resolve, 450));
-                
-                // Move back to original position
-                heroSprite.style.transition = 'left 0.45s ease-in';
-                heroSprite.style.left = originalLeft;
-                
-                await new Promise(resolve => setTimeout(resolve, 450));
-                heroSprite.style.transition = '';
-            }
-        } else {
-            startHeroAnimation('attack1');
-            await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
-            // Immediately return to idle after attack animation completes
-            startHeroAnimation('idle');
-        }
+        // Play hero attack animation (regular attack only)
+        startHeroAnimation('attack1');
+        await new Promise(resolve => setTimeout(resolve, 600)); // 4 frames * 150ms
 
         // Check for mushroom miss effect
         if (this.mushroomTurns > 0 && Math.random() < this.mushroomMissChance) {
@@ -282,32 +198,13 @@ class BattleManager {
         const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
         let damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
         
-        // Apply Power Boost buff if active
-        if (this.attackBuffTurns > 0) {
-            const buffBonus = Math.floor(damage * this.attackBuffPercent);
-            damage += buffBonus;
-            addBattleLog(`⚡ Power Boost adds +${buffBonus} damage! (${this.attackBuffTurns} turns left)`);
-            this.attackBuffTurns--;
-        }
-        
-        // Add special attack bonus damage (8 damage) if level >= 6 and 3rd attack
-        const heroLevel = gameState.level || 1;
-        const selectedMonster = localStorage.getItem('selectedMonster');
-        if (this.attackCount % 3 === 0 && heroLevel >= 6 && selectedMonster && window.playSpecialAttackForMonster) {
-            damage += 8; // Special attack bonus damage
-            addBattleLog(`💥 Special attack deals +8 bonus damage!`);
-        }
-        
         const isDead = this.enemy.takeDamage(damage);
         
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-        
-        // Fill special gauge on attack
-        if (window.specialGauge) {
-            window.specialGauge.fillOnAttack();
+        // Increase special attack gauge by 15 per attack
+        if (window.increaseSpecialGauge) {
+            window.increaseSpecialGauge(15);
+            // Update action buttons to enable special attack button if gauge is full
+            updateActionButtons(this.hero);
         }
 
         // Play attack sounds
@@ -337,110 +234,10 @@ class BattleManager {
 
         if (isDead) {
             this.state = BattleState.VICTORY;
-            this.actionInProgress = false;
             await this.endBattle('victory');
         } else {
             await new Promise(resolve => setTimeout(resolve, 800));
-            this.actionInProgress = false;
             await this.enemyTurn();
-        }
-        } catch (error) {
-            console.error('❌ Error in playerAttack:', error);
-            this.actionInProgress = false;
-            this.state = BattleState.PLAYER_TURN;
-            addBattleLog('❌ An error occurred during attack!');
-        }
-    }
-
-    // Player uses special attack (monster-specific)
-    async playerSpecialAttack() {
-        console.log('⚡ playerSpecialAttack called! Current state:', this.state, 'Expected:', BattleState.PLAYER_TURN);
-        if (this.state !== BattleState.PLAYER_TURN) {
-            console.warn('❌ Special Attack blocked - not player turn. State:', this.state);
-            return;
-        }
-        if (this.actionInProgress) {
-            console.warn('❌ Special Attack blocked - action already in progress');
-            return;
-        }
-        
-        // Check if special gauge is ready
-        if (!window.specialGauge || !window.specialGauge.isReady) {
-            addBattleLog('❌ Special Attack not ready yet!');
-            return;
-        }
-        
-        this.actionInProgress = true;
-        console.log('✅ Special Attack proceeding...');
-        
-        try {
-        this.state = BattleState.ANIMATING;
-        
-        // Get monster type from localStorage
-        const selectedMonster = localStorage.getItem('selectedMonster') || 'nova';
-        const monsterType = selectedMonster.toLowerCase();
-        
-        // Get enemy sprite element
-        const enemySprite = document.getElementById('enemySprite');
-        
-        // Execute special attack animation and get result
-        const result = await window.executeSpecialAttack(monsterType, enemySprite, this.hero.level);
-        
-        if (!result) {
-            this.state = BattleState.PLAYER_TURN;
-            this.actionInProgress = false;
-            return;
-        }
-        
-        // Apply damage
-        const isDead = this.enemy.takeDamage(result.damage);
-        
-        // Apply special effects based on monster
-        if (monsterType === 'benny') {
-            // Stun enemy for 1 turn
-            this.enemy.stunned = true;
-            this.enemy.stunnedTurns = 1;
-        } else if (monsterType === 'luna') {
-            // Reduce enemy defense by 20% for 2 turns
-            this.enemy.defenseReduction = 0.2;
-            this.enemy.defenseReductionTurns = 2;
-        }
-        
-        // Don't fill special gauge on special attack - it should reset
-        // if (window.specialGauge) {
-        //     window.specialGauge.fillOnAttack();
-        // }
-        
-        // Play critical hit sound
-        if (window.audioManager) {
-            window.audioManager.playSound('critical_hit', 0.8);
-        }
-        
-        // Play enemy hurt animation
-        await playEnemyAnimation(this.enemy, 'hurt', 300);
-        
-        updateBattleUI(this.hero, this.enemy);
-        
-        // Save game state
-        saveGameState();
-        
-        // Reset hero sprite to idle
-        startHeroAnimation('idle');
-        
-        if (isDead) {
-            this.state = BattleState.VICTORY;
-            this.actionInProgress = false;
-            await this.endBattle('victory');
-        } else {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            this.actionInProgress = false;
-            await this.enemyTurn();
-        }
-        } catch (error) {
-            console.error('❌ Error in playerSpecialAttack:', error);
-            this.actionInProgress = false;
-            this.state = BattleState.PLAYER_TURN;
-            addBattleLog('❌ An error occurred during special attack!');
         }
     }
 
@@ -478,18 +275,9 @@ class BattleManager {
             window.audioManager.playSound('spark_attack', 0.8);
         }
 
-        // Blueprint v2.0: Spark Orb deals 100 damage with 10% double hit chance
-        let damage = 100;
-        const doubleHit = Math.random() < 0.10;
-        
-        let isDead = this.enemy.takeDamage(damage);
-        
-        if (doubleHit && !isDead) {
-            addBattleLog('⚡⚡ DOUBLE HIT!');
-            await new Promise(resolve => setTimeout(resolve, 300));
-            isDead = this.enemy.takeDamage(damage);
-            damage = damage * 2; // For log display
-        }
+        // Calculate damage (18-20 range, melee strike)
+        const damage = Math.floor(Math.random() * 3) + 18; // Random between 18-20
+        const isDead = this.enemy.takeDamage(damage);
         
         // Play critical hit sound for damage >= 10 (Spark always deals 18-20)
         if (window.audioManager && damage >= 10) {
@@ -528,6 +316,13 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.defendActive = true; // Flag to use defense gauge on next hit
+        
+          // Increase special attack gauge by 10 per defend
+        if (window.increaseSpecialGauge) {
+            window.increaseSpecialGauge(10);
+            // Update action buttons to enable special attack button if gauge is full
+            updateActionButtons(this.hero);
+        }
         
         // Play defend sound
         if (window.audioManager) {
@@ -586,11 +381,6 @@ class BattleManager {
         const damage = Math.floor(Math.random() * 4) + 15; // Random between 15-18
         const isDead = this.enemy.takeDamage(damage);
 
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
@@ -637,35 +427,15 @@ class BattleManager {
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600));
 
-        // Play asteroid sound
-        if (window.audioManager) {
-            window.audioManager.playSound('asteroid_attack', 0.8);
-        }
-
         // Play asteroid animation
         await playAsteroidAnimation(
             document.getElementById('heroSprite'),
             document.getElementById('enemySprite')
         );
-        
-        // Blueprint v2.0: Asteroid deals 150 damage with 10% miss chance
-        const missChance = 0.10;
-        
-        if (Math.random() < missChance) {
-            addBattleLog('💨 Asteroid missed!');
-            startHeroAnimation('idle');
-            await new Promise(resolve => setTimeout(resolve, 800));
-            await this.enemyTurn();
-            return;
-        }
-        
-        const damage = 150;
+
+        // Calculate damage (fixed 12 damage)
+        const damage = 12;
         const isDead = this.enemy.takeDamage(damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
         
         // Play critical hit sound for damage >= 10
         if (window.audioManager && damage >= 10) {
@@ -727,21 +497,9 @@ class BattleManager {
             window.audioManager.playSound('prickler_attack', 0.8);
         }
 
-        // Blueprint v2.0: Prickler deals 50 damage + applies Poison (5 dmg/turn for 3 turns)
-        const damage = 50;
+        // Calculate damage (10-15 range with nuclear explosion)
+        const damage = Math.floor(Math.random() * 6) + 10; // Random between 10-15
         const isDead = this.enemy.takeDamage(damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-        
-        // Apply poison debuff
-        if (!isDead) {
-            this.enemy.poisonTurns = 3;
-            this.enemy.poisonDamage = 5;
-            addBattleLog('🦠 Enemy is poisoned! (5 damage per turn for 3 turns)');
-        }
         
         // Play critical hit sound for damage >= 10 (Prickler always deals 10-15)
         if (window.audioManager && damage >= 10) {
@@ -804,28 +562,9 @@ class BattleManager {
             window.audioManager.playSound('freeze_attack', 0.8);
         }
 
-        // Enhanced Freeze: Deals 50 damage and freezes enemy for 2-3 turns based on level
-        const damage = 50;
+        // Calculate damage (10 damage, skips 2 turns)
+        const damage = 10;
         const isDead = this.enemy.takeDamage(damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-        
-        // Freeze effect: 2 turns at level < 20, 3 turns at level >= 20
-        const playerLevel = gameState.jerryLevel || 1;
-        const freezeTurns = playerLevel >= 20 ? 3 : 2;
-        
-        if (!isDead) {
-            this.enemyFrozenTurns = freezeTurns;
-            addBattleLog(`❄️ Enemy is frozen for ${freezeTurns} turns!`);
-            
-            // Apply visual freeze effect
-            if (window.applyFreezeEffect) {
-                window.applyFreezeEffect(true);
-            }
-        }
         
         // Play critical hit sound for damage >= 10
         if (window.audioManager && damage >= 10) {
@@ -835,7 +574,7 @@ class BattleManager {
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
-        addBattleLog(`❄️ Freeze dealt ${damage} damage!`);
+        addBattleLog(`❄️ Freeze dealt ${damage} damage and froze the enemy!`);
         updateBattleUI(this.hero, this.enemy);
 
         // Reset hero sprite to idle
@@ -848,8 +587,17 @@ class BattleManager {
             this.state = BattleState.VICTORY;
             await this.endBattle('victory');
         } else {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            await this.enemyTurn();
+            // Enemy is frozen, skip their turn and go back to player turn
+            addBattleLog('❄️ Enemy is frozen and cannot move!');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Refill gauges slightly for next turn
+            this.attackGauge = Math.min(100, this.attackGauge + 15);
+            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
+            
+            this.state = BattleState.PLAYER_TURN;
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
         }
     }
 
@@ -884,14 +632,8 @@ class BattleManager {
         // Play hero jump animation
         startHeroAnimation('jump');
         
-        // Blueprint v2.0: Heal 25% of Monster's Max HP
-        const healAmount = Math.floor(this.hero.maxHP * 0.25);
+        const healAmount = 20;
         this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
-        
-        // Show floating heal text
-        if (window.showFloatingText) {
-            window.showFloatingText(`+${healAmount} HP`, 'hp-heal', document.getElementById('heroSprite'));
-        }
         
         addBattleLog(`💚 Healed ${healAmount} HP!`);
         updateBattleUI(this.hero, this.enemy);
@@ -942,11 +684,6 @@ class BattleManager {
         const healAmount = 50;
         this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
         
-        // Show floating heal text
-        if (window.showFloatingText) {
-            window.showFloatingText(`+${healAmount} HP`, 'hp-heal', document.getElementById('heroSprite'));
-        }
-        
         addBattleLog(`💚 Hyper Potion healed ${healAmount} HP!`);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -980,7 +717,7 @@ class BattleManager {
 
         const refillCount = gameState.battleInventory?.attack_refill || 0;
         if (refillCount <= 0) {
-            addBattleLog('❌ No Power Boosts left!');
+            addBattleLog('❌ No attack refills left!');
             return;
         }
 
@@ -992,31 +729,17 @@ class BattleManager {
             window.audioManager.playSound('potion_use', 0.8);
         }
         
-        // Play hero jump animation
-        startHeroAnimation('jump');
+        const refillAmount = 50;
+        this.attackGauge = Math.min(100, this.attackGauge + refillAmount);
         
-        // Blueprint v2.0: Power Boost increases Monster's Attack by 20% for 3 turns
-        this.attackBuffPercent = 0.20;
-        this.attackBuffTurns = 3;
-        
-        // Show floating attack boost text
-        if (window.showFloatingText) {
-            window.showFloatingText(`+20% ATK`, 'attack-up', document.getElementById('heroSprite'));
-        }
-        
-        addBattleLog(`⚡ Power Boost activated! Attack increased by 20% for 3 turns!`);
+        addBattleLog(`⚡ Restored ${refillAmount} attack gauge!`);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
         // Save game state
         saveGameState();
 
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Reset to idle
-        startHeroAnimation('idle');
-        
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await this.enemyTurn();
     }
 
@@ -1041,11 +764,6 @@ class BattleManager {
         const refillAmount = 50;
         this.defenseGauge = Math.min(100, this.defenseGauge + refillAmount);
         
-        // Show floating defense boost text
-        if (window.showFloatingText) {
-            window.showFloatingText(`+${refillAmount} DEF`, 'defense-up', document.getElementById('heroSprite'));
-        }
-        
         addBattleLog(`🛡️ Restored ${refillAmount} defense gauge!`);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -1069,21 +787,14 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.invisibility_cloak = Math.max(0, gameState.battleInventory.invisibility_cloak - 1);
-        
-        // Invisibility lasts for 2 turns
-        this.invisibilityTurns = 2;
+        this.hasEvade = true;
         
         // Play invisibility cloak sound
         if (window.audioManager) {
             window.audioManager.playSound('cloak_use', 0.8);
         }
         
-        // Make hero vanish
-        if (window.applyInvisibilityEffect) {
-            window.applyInvisibilityEffect(true);
-        }
-        
-        addBattleLog('🤟🏻 Invisibility Cloak activated! You are invisible for 2 turns.');
+        addBattleLog('🤟🏻 Invisibility Cloak activated! You will evade the next attack.');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -1106,59 +817,22 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.mirror_attack = Math.max(0, gameState.battleInventory.mirror_attack - 1);
+        this.hasReflect = true;
         
-        // Play hero throw animation
-        startHeroAnimation('throw');
-        await new Promise(resolve => setTimeout(resolve, 600));
-        
-        // Play mirror sound
+        // Play mirror sound (using cloak sound as placeholder)
         if (window.audioManager) {
-            window.audioManager.playSound('mirror_attack', 0.8);
+            window.audioManager.playSound('cloak_use', 0.8);
         }
         
-        // Play mirror animation
-        await playMirrorAnimation(
-            document.getElementById('heroSprite'),
-            document.getElementById('enemySprite')
-        );
-        
-        // Blueprint v2.0: Mirror deals 75 damage + reflects 50% of damage taken next turn
-        const damage = 75;
-        const isDead = this.enemy.takeDamage(damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-        
-        // Apply reflect buff
-        if (!isDead) {
-            this.hasReflect = true;
-            this.reflectPercent = 0.50;
-            addBattleLog('🪞 Mirror dealt 75 damage! Next damage taken will be reflected 50%!');
-        } else {
-            addBattleLog('🪞 Mirror dealt 75 damage!');
-        }
-        
-        // Play enemy hurt animation
-        await playEnemyAnimation(this.enemy, 'hurt', 300);
-        
+        addBattleLog('🪞 Mirror Attack activated! Enemy\'s next attack will be reflected!');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
-        
-        // Reset hero sprite to idle
-        startHeroAnimation('idle');
 
         // Save game state
         saveGameState();
 
-        if (isDead) {
-            this.state = BattleState.VICTORY;
-            await this.endBattle('victory');
-        } else {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            await this.enemyTurn();
-        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await this.enemyTurn();
     }
 
     // Player uses Blue Flame
@@ -1185,11 +859,6 @@ class BattleManager {
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600));
 
-        // Play blue flame sound
-        if (window.audioManager) {
-            window.audioManager.playSound('blue_flame_attack', 0.8);
-        }
-
         // Play blue flame animation
         await playBlueFlameAnimation(
             document.getElementById('heroSprite'),
@@ -1199,12 +868,6 @@ class BattleManager {
         // Calculate damage (20 base damage)
         const damage = 20;
         const isDead = this.enemy.takeDamage(damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-        
         addBattleLog(`🔵🔥 Blue Flame dealt ${damage} damage!`);
         updateBattleUI(this.hero, this.enemy);
 
@@ -1247,11 +910,6 @@ class BattleManager {
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600));
 
-        // Play procrastination ghost sound
-        if (window.audioManager) {
-            window.audioManager.playSound('procrastination_ghost_attack', 0.8);
-        }
-
         // Play procrastination ghost animation
         await playProcrastinationGhostAnimation(
             document.getElementById('heroSprite'),
@@ -1261,12 +919,6 @@ class BattleManager {
         // Calculate variable damage (18-22 range, skips 1 turn)
         const damage = Math.floor(Math.random() * 5) + 18; // Random between 18-22
         const isDead = this.enemy.takeDamage(damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('enemySprite'));
-        }
-        
         addBattleLog(`👻 Procrastination Ghost dealt ${damage} damage and made enemy skip next turn!`);
         updateBattleUI(this.hero, this.enemy);
 
@@ -1294,80 +946,135 @@ class BattleManager {
         }
     }
 
-    // Player uses Poison Leaf
-    async playerPoisonLeaf() {
-        if (this.state !== BattleState.PLAYER_TURN) return;
-        if (this.attackGauge < 25) {
-            addBattleLog('❌ Need 25 attack gauge for Poison Leaf!');
-            return;
-        }
-
-        const poisonLeafCount = gameState.battleInventory?.poison_leaf || 0;
-        if (poisonLeafCount <= 0) {
-            addBattleLog('❌ No Poison Leaves left!');
-            return;
-        }
-
-        this.state = BattleState.ANIMATING;
-        this.attackGauge -= 25;
-        gameState.battleInventory.poison_leaf = Math.max(0, gameState.battleInventory.poison_leaf - 1);
-        updateBattleUI(this.hero, this.enemy);
-        updateActionButtons(this.hero);
-
-        // Play hero throw animation
-        startHeroAnimation('throw');
-        await new Promise(resolve => setTimeout(resolve, 600));
-
-        // Play poison leaf sound
-        if (window.audioManager) {
-            window.audioManager.playSound('poison_leaf_attack', 0.8);
-        }
-
-        // Play poison leaf animation
-        await playPoisonLeafAnimation(
-            document.getElementById('heroSprite'),
-            document.getElementById('enemySprite')
-        );
-
-        // Apply poison effect: 10 damage per turn for 4 turns
-        if (!this.enemy.poisonTurns) {
-            this.enemy.poisonTurns = 4;
-            this.enemy.poisonDamage = 10;
-        } else {
-            // Stack poison duration
-            this.enemy.poisonTurns += 4;
-            this.enemy.poisonDamage = Math.max(this.enemy.poisonDamage || 0, 10);
-        }
-        
-        addBattleLog(`🍃 Poison Leaf applied! Enemy will take 10 damage per turn for 4 turns!`);
-        updateBattleUI(this.hero, this.enemy);
-
-        // Reset hero sprite to idle
-        startHeroAnimation('idle');
-
-        // Save game state
-        saveGameState();
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await this.enemyTurn();
-    }
-
     // Enemy turn
     async enemyTurn() {
         this.state = BattleState.ENEMY_TURN;
+
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Check if enemy is frozen
-        if (this.enemyFrozenTurns && this.enemyFrozenTurns > 0) {
-            this.enemyFrozenTurns--;
-            addBattleLog(`❄️ ${this.enemy.name} is frozen! (${this.enemyFrozenTurns} turns left)`);
+        // === ADAPTIVE HEALING AI ===
+        if (window.enemyAI && this.enemy.hp < this.enemy.maxHP) {
+            const playerLevel = gameState.level || 1;
+            const healResult = window.enemyAI.attemptEnemyHeal(this.enemy, playerLevel);
             
-            // Remove freeze effect if no turns left
-            if (this.enemyFrozenTurns === 0) {
-                addBattleLog(`❄️ ${this.enemy.name} thawed out!`);
-                if (window.applyFreezeEffect) {
-                    window.applyFreezeEffect(false);
-                }
+            if (healResult.healed) {
+                addBattleLog(`💚 ${this.enemy.name} regenerates ${healResult.amount} HP!`);
+                updateBattleUI(this.hero, this.enemy);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+                return;
             }
+        }
+        
+        // === SMART DEFENSE AI ===
+        if (window.enemyAI) {
+            const willDefend = window.enemyAI.attemptEnemyDefense(this.enemy);
+            
+            if (willDefend) {
+                addBattleLog(`🛡️ ${this.enemy.name} braces for impact!`);
+                updateBattleUI(this.hero, this.enemy);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+                return;
+            }
+        }
+
+        // Check if enemy can petrify (Medusa)
+        const canPetrify = this.enemy.canPetrify && Math.random() < (this.enemy.petrifyChance || 0.3);
+        
+        if (canPetrify) {
+            // Petrify attack
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Show Medusa projectile if available
+            if (this.enemy.projectileType === 'medusa') {
+                const enemySprite = document.getElementById('enemySprite');
+                const heroSprite = document.getElementById('heroSprite');
+                await playMedusaProjectile(enemySprite, heroSprite);
+            }
+            
+            addBattleLog(`💎 ${this.enemy.name}'s gaze petrifies you! Turn skipped!`);
+            
+            // Show stone effect on hero
+            const heroSprite = document.getElementById('heroSprite');
+            const stoneEffect = document.createElement('div');
+            stoneEffect.style.position = 'absolute';
+            stoneEffect.style.fontSize = '3rem';
+            stoneEffect.style.animation = 'pulse 1s ease-in-out';
+            stoneEffect.textContent = '🗿';
+            heroSprite.parentElement.appendChild(stoneEffect);
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            stoneEffect.remove();
+            
+            // Enemy gets another turn (player is petrified)
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await this.enemyTurn();
+            return;
+        }
+
+        // Check if enemy can cast sleep (Lazy Eye)
+        const canCastSleep = this.enemy.canSleep && Math.random() < 0.3; // 30% chance
+        
+        if (canCastSleep) {
+            // Sleep attack
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            addBattleLog(`😴 ${this.enemy.name} cast Sleep! You skip your next turn!`);
+            
+            // Show Z emojis on hero
+            const heroSprite = document.getElementById('heroSprite');
+            const sleepEmojis = document.createElement('div');
+            sleepEmojis.style.position = 'absolute';
+            sleepEmojis.style.fontSize = '2rem';
+            sleepEmojis.style.animation = 'float 2s ease-in-out';
+            sleepEmojis.textContent = '💤 💤 💤';
+            heroSprite.parentElement.appendChild(sleepEmojis);
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            sleepEmojis.remove();
+            
+            // Enemy gets another turn
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await this.enemyTurn();
+            return;
+        }
+        
+        // Check for Octopus drench attack (50% chance)
+        const useDrench = this.enemy.drenchAttack && Math.random() < 0.5;
+        
+        // Check for Octopus hug attack (30% chance)
+        const useHug = this.enemy.hugAttack && !useDrench && Math.random() < 0.3;
+        
+        if (useDrench) {
+            // Drench attack
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Show splash projectile
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playSplashAnimation(enemySprite, heroSprite);
+            
+            // Apply drench effect: 10 damage + block fireball for 1 turn
+            this.hero.hp = Math.max(0, this.hero.hp - 10);
+            this.fireballBlocked = true;
+            addBattleLog(`💦 ${this.enemy.name}'s Drench attack dealt 10 damage and blocked fireball!`);
+            
+            // Play hero hurt animation
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            startHeroAnimation('idle');
+            
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.state = BattleState.PLAYER_TURN;
+            return;
+        } else if (useHug) {
+            // Hug attack
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Apply hug effect: block defend for 2 turns
+            this.defendBlocked = 2;
+            addBattleLog(`🐙 ${this.enemy.name}'s Hug blocked defend for 2 turns!`);
             
             updateBattleUI(this.hero, this.enemy);
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -1375,150 +1082,306 @@ class BattleManager {
             return;
         }
         
-        // Process poison damage on enemy (from Prickler)
-        if (this.enemy.poisonTurns && this.enemy.poisonTurns > 0) {
-            const poisonDamage = this.enemy.poisonDamage || 5;
-            this.enemy.hp = Math.max(0, this.enemy.hp - poisonDamage);
-            addBattleLog(`🦠 ${this.enemy.name} takes ${poisonDamage} poison damage!`);
-            this.enemy.poisonTurns--;
-            updateBattleUI(this.hero, this.enemy);
-            
-            if (this.enemy.hp <= 0) {
-                this.state = BattleState.VICTORY;
-                await this.endBattle('victory');
+        // Boss special attacks
+        if (this.enemy.isBoss) {
+            // Treant poison attack
+            if (this.enemy.poisonAttack) {
+                await playEnemyAnimation(this.enemy, 'attack1', 600);
+                
+                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                // Apply poison effect for 2 turns
+                this.poisonTurns = this.enemy.poisonDuration;
+                this.poisonDamage = 5; // HP drain per turn
+                this.poisonGaugeDrain = 10; // Gauge drain per turn
+                
+                addBattleLog(`🌳 ${this.enemy.name} dealt ${damage} damage and poisoned you!`);
+                addBattleLog(`☠️ Poison will drain HP and gauges for ${this.poisonTurns} turns!`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                } else {
+                    this.state = BattleState.PLAYER_TURN;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    addBattleLog('⚔️ Your turn!');
+                }
                 return;
             }
             
-            await new Promise(resolve => setTimeout(resolve, 800));
-        }
-        
-        // Check for boss enrage
-        if (window.ENEMY_TIER_SYSTEM && window.ENEMY_TIER_SYSTEM.checkEnrage(this.enemy)) {
-            this.enemy = window.ENEMY_TIER_SYSTEM.applyEnrage(this.enemy);
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // === SMART AI DECISION SYSTEM ===
-        // All enemy actions are now decided by the Smart AI
-        if (window.enemyAI) {
-            const decision = window.enemyAI.makeSmartDecision(this.enemy, this.hero, this);
+            // Sunny Dragon attack gauge drain
+            if (this.enemy.drainAttackGauge) {
+                await playEnemyAnimation(this.enemy, 'attack1', 600);
+                
+                // Show dragon bolt projectile
+                const enemySprite = document.getElementById('enemySprite');
+                const heroSprite = document.getElementById('heroSprite');
+                await playDragonBoltProjectile(enemySprite, heroSprite);
+                
+                // Variable damage 18-40
+                const damage = Math.floor(Math.random() * 23) + 18;
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                // Drain attack gauge to 5%
+                this.attackGauge = 5;
+                
+                addBattleLog(`🐉 ${this.enemy.name} dealt ${damage} damage!`);
+                addBattleLog(`⚡ Your attack gauge was drained to 5%!`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                } else {
+                    this.state = BattleState.PLAYER_TURN;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    addBattleLog('⚔️ Your turn!');
+                }
+                return;
+            }
             
-            console.log(`🤖 Enemy AI Decision: ${decision.action} - ${decision.reason}`);
-            
-            // Execute the decided action
-            switch (decision.action) {
-                case 'heal':
-                    await this.executeEnemyHeal();
-                    return;
-                    
-                case 'defend':
-                    await this.executeEnemyDefend();
-                    return;
-                    
-                case 'special':
-                    await this.executeEnemySpecial();
-                    return;
-                    
-                case 'status':
-                    await this.executeEnemyStatus();
-                    return;
-                    
-                case 'attack':
-                default:
-                    await this.executeEnemyAttack();
-                    return;
+            // Mushroom special attack
+            if (this.enemy.mushroomAttack) {
+                await playEnemyAnimation(this.enemy, 'attack2', 600);
+                
+                // Show mushroom emoji projectiles
+                const enemySprite = document.getElementById('enemySprite');
+                const heroSprite = document.getElementById('heroSprite');
+                await playMushroomProjectile(enemySprite, heroSprite);
+                
+                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                // Apply mushroom effect for 2 turns
+                this.mushroomTurns = this.enemy.mushroomEffectDuration;
+                this.mushroomMissChance = this.enemy.mushroomMissChance;
+                this.mushroomSkipChance = this.enemy.mushroomSkipChance;
+                this.mushroomGaugeDrain = 8; // Gauge drain per turn
+                
+                addBattleLog(`🍄 ${this.enemy.name} threw mushrooms dealing ${damage} damage!`);
+                addBattleLog(`😵 Mushroom effect: attacks may miss or skip turns for ${this.mushroomTurns} turns!`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                } else {
+                    this.state = BattleState.PLAYER_TURN;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    addBattleLog('⚔️ Your turn!');
+                }
+                return;
             }
         }
         
-        // Fallback if AI not loaded (should never happen)
-        console.warn('⚠️ Enemy AI not loaded, using fallback attack');
-        await this.executeEnemyAttack();
-    }
-    
-    // ===== ENEMY ACTION EXECUTION METHODS =====
-    
-    // Execute enemy heal action
-    async executeEnemyHeal() {
-        const playerLevel = gameState.level || 1;
-        const healResult = window.enemyAI.executeHeal(this.enemy, playerLevel);
+        // Normal attack
+        await playEnemyAnimation(this.enemy, 'attack1', 600);
         
-        if (healResult.healed) {
-            addBattleLog(`💚 ${this.enemy.name} regenerates ${healResult.amount} HP!`);
+        // Lazy Bat no longer shoots projectiles (removed per user request)
+        
+        // If ghost enemy, shoot waveform projectile
+        if (this.enemy.projectileType === 'waveform') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playWaveformAnimation(enemySprite, heroSprite);
+        }
+        
+        // If alien enemy, shoot alien projectile
+        if (this.enemy.projectileType === 'alien') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playAlienProjectile(enemySprite, heroSprite);
+        }
+        
+        // If Fire Skull, show explosion animation
+        if (this.enemy.projectileType === 'fire-explosion') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            await playFireExplosion(enemySprite, heroSprite);
+        }
+
+        // Check if Invisibility Cloak is active
+        if (this.hasEvade) {
+            addBattleLog('🥷🏼 Your monster used the Invisibility Cloak and evaded the attack!');
+            this.hasEvade = false;
             updateBattleUI(this.hero, this.enemy);
             await new Promise(resolve => setTimeout(resolve, 1500));
+            this.state = BattleState.PLAYER_TURN;
+            return;
         }
         
-        this.state = BattleState.PLAYER_TURN;
-        addBattleLog('⚔️ Your turn!');
-    }
-    
-    // Execute enemy defend action
-    async executeEnemyDefend() {
-        addBattleLog(`🛡️ ${this.enemy.name} braces for impact!`);
+        // Check if Mirror Attack is active
+        if (this.hasReflect) {
+            addBattleLog('🪞 Mirror Attack reflected the attack back!');
+            this.hasReflect = false;
+            
+            // Calculate damage that would have been dealt to hero
+            const reflectedDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+            
+            // Apply damage to enemy instead
+            const isDead = this.enemy.takeDamage(reflectedDamage);
+            addBattleLog(`🔄 ${this.enemy.name} took ${reflectedDamage} reflected damage!`);
+            
+            // Play enemy hurt animation
+            await playEnemyAnimation(this.enemy, 'hurt', 300);
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (isDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+            }
+            return;
+        }
         
-        // Set defense flag for next player attack
-        this.enemy.isDefending = true;
-        this.enemy.defenseReduction = 0.50; // 50% damage reduction
+        // Check if Luna's Chaos Curse (Reflect) is active
+        if (this.reflectActive && this.reflectTurns > 0) {
+            addBattleLog(`🌙 Chaos Curse active! Enemy damages itself! (${this.reflectTurns} turns left)`);
+            
+            // Calculate damage that would have been dealt to hero
+            const reflectedDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+            
+            // Apply damage to enemy instead
+            const isDead = this.enemy.takeDamage(reflectedDamage);
+            addBattleLog(`🔮 ${this.enemy.name} took ${reflectedDamage} damage from its own attack!`);
+            
+            // Play enemy hurt animation
+            await playEnemyAnimation(this.enemy, 'hurt', 300);
+            
+            // Decrement reflect turns
+            this.reflectTurns--;
+            if (this.reflectTurns <= 0) {
+                this.reflectActive = false;
+                addBattleLog('✨ Chaos Curse effect ended!');
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (isDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                this.state = BattleState.PLAYER_TURN;
+            }
+            return;
+        }
+        
+        // Increment enemy attack counter
+        this.enemyAttackCount++;
+        
+        // Play enemy attack sound for all enemies
+        if (window.audioManager) {
+            // Check if this is a low-level enemy (Lazy Bat or Slime)
+            const isLowLevelEnemy = this.enemy.name === 'Lazy Bat' || this.enemy.name === 'Slime';
+            
+            // Play every 5th attack sound
+            if (this.enemyAttackCount % 5 === 0) {
+                window.audioManager.playSound('enemy_fifth_attack', 0.8);
+            } else if (isLowLevelEnemy) {
+                // Play low-level enemy attack sound for Lazy Bat and Slime
+                window.audioManager.playSound('enemy_attack_low_level', 0.7);
+            } else {
+                // Play regular monster attack sound for other enemies
+                window.audioManager.playSound('enemy_regular_attack', 0.8);
+            }
+        }
+
+        // Calculate damage
+        let damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+        
+        // Alien variable damage (5 or 15)
+        if (this.enemy.variableDamage) {
+            damage = Math.random() < 0.5 ? 5 : 15;
+        }
+        
+        // Apply damage cap if enemy has one
+        if (this.enemy.maxDamage) {
+            damage = Math.min(damage, this.enemy.maxDamage);
+        }
+        
+        // Check if defend was active - use defense gauge instead of HP
+        if (this.defendActive && this.defenseGauge > 0) {
+            const gaugeUsed = Math.min(damage, this.defenseGauge);
+            this.defenseGauge -= gaugeUsed;
+            const remainingDamage = damage - gaugeUsed;
+            if (remainingDamage > 0) {
+                this.hero.hp = Math.max(0, this.hero.hp - remainingDamage);
+                addBattleLog(`🛡️ Blocked ${gaugeUsed} damage! Took ${remainingDamage} damage!`);
+            } else {
+                addBattleLog(`🛡️ Blocked all ${damage} damage!`);
+            }
+            this.defendActive = false;
+        } else {
+            this.hero.hp = Math.max(0, this.hero.hp - damage);
+        }
+
+        // Play hero hurt animation if took damage
+        if (damage > 0 || this.hero.hp < 30) {
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 seconds as requested
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        addBattleLog(`💢 ${this.enemy.name} dealt ${damage} damage!`);
+        
+        // Slime drain effects
+        if (this.enemy.drainEnergy) {
+            const energyDrain = 15;
+            this.attackGauge = Math.max(0, this.attackGauge - energyDrain);
+            addBattleLog(`💧 ${this.enemy.name} drained ${energyDrain} energy!`);
+        }
+        
+        if (this.enemy.drainDefense) {
+            const defenseDrain = 12;
+            this.defenseGauge = Math.max(0, this.defenseGauge - defenseDrain);
+            addBattleLog(`💧 ${this.enemy.name} weakened your defense by ${defenseDrain}!`);
+        }
         
         updateBattleUI(this.hero, this.enemy);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        this.state = BattleState.PLAYER_TURN;
-        addBattleLog('⚔️ Your turn!');
-    }
-    
-    // Execute enemy special attack
-    async executeEnemySpecial() {
-        const specialType = window.enemyAI.getSpecialAttackType(this.enemy);
-        
-        switch (specialType) {
-            case 'petrify':
-                await this.enemyPetrifyAttack();
-                break;
-            case 'poison':
-                await this.enemyPoisonAttack();
-                break;
-            case 'drain_gauge':
-                await this.enemyDrainGaugeAttack();
-                break;
-            case 'mushroom':
-                await this.enemyMushroomAttack();
-                break;
-            default:
-                await this.executeEnemyAttack();
-                break;
-        }
-    }
-    
-    // Execute enemy status effect
-    async executeEnemyStatus() {
-        // Check for Octopus drench attack (50% chance)
-        const useDrench = this.enemy.drenchAttack && Math.random() < 0.5;
-        
-        // Check for Octopus hug attack (30% chance)
-        const useHug = this.enemy.hugAttack && !useDrench && Math.random() < 0.3;
-        
-        // Check for sleep (Lazy Eye)
-        const useSleep = this.enemy.canSleep && Math.random() < 0.3;
-        
-        if (useDrench) {
-            await this.enemyDrenchAttack();
-        } else if (useHug) {
-            await this.enemyHugAttack();
-        } else if (useSleep) {
-            await this.enemySleepAttack();
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        if (this.hero.hp <= 0) {
+            this.state = BattleState.DEFEAT;
+            await this.endBattle('defeat');
         } else {
-            // Fallback to normal attack
-            await this.executeEnemyAttack();
+            // Decrement block counters
+            if (this.fireballBlocked) {
+                this.fireballBlocked = false;
+            }
+            if (this.defendBlocked > 0) {
+                this.defendBlocked--;
+            }
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 500));
+            addBattleLog('⚔️ Your turn!');
         }
     }
-    
-    // Execute normal enemy attack
-    async executeEnemyAttack() {
-        await this.executeEnemyNormalAttack();
-    }
-    
+
     // End battle
     async endBattle(result) {
         let xpGained = 0;
@@ -1527,102 +1390,16 @@ class BattleManager {
         if (result === 'victory') {
             addBattleLog(`🎉 VICTORY! You defeated the ${this.enemy.name}!`);
             
-            // Play victory music from new battle music syst        // Stop battle music
-        if (window.battleMusicSystem) {
-            window.battleMusicSystem.stopBattleMusic();
-        } else if (window.audioManager) {
-            window.audioManager.stopBattleMusic();
-        }
-        
-        // Hide battle arena to return to main app
-        if (window.hideBattle) {
-            window.hideBattle();
-        }    }
-            
-            // Calculate XP reward using new system
-            if (window.LEVEL_SYSTEM) {
-                const actionsUsed = this.attackCount || 0;
-                xpGained = window.LEVEL_SYSTEM.calculateBattleXP(this.enemy.level, actionsUsed);
-            } else {
-                xpGained = Math.floor(15 + (this.enemy.level * 5));
+            // Play victory sound
+            if (window.audioManager) {
+                window.audioManager.playSound('battle_victory', 0.8);
             }
             
-            // Blueprint v2.0: Ensure minimum 50 XP reward
-            xpGained = Math.max(50, xpGained);
+            // Calculate XP reward based on enemy level
+            xpGained = Math.floor(15 + (this.enemy.level * 5));
             
-            // Blueprint v2.0: Tiered Loot Drop System (70% Common, 25% Uncommon, 5% Rare)
-            const lootRoll = Math.random();
-            let lootTier = 'Common';
-            let lootMultiplier = 1.0;
-            
-            if (lootRoll < 0.05) {
-                // 5% Rare
-                lootTier = 'Rare';
-                lootMultiplier = 2.5;
-                addBattleLog('✨✨ RARE LOOT DROP! ✨✨');
-            } else if (lootRoll < 0.30) {
-                // 25% Uncommon (5% + 25% = 30%)
-                lootTier = 'Uncommon';
-                lootMultiplier = 1.5;
-                addBattleLog('💎 Uncommon Loot Drop!');
-            } else {
-                // 70% Common
-                lootTier = 'Common';
-                lootMultiplier = 1.0;
-            }
-            
-            // Apply loot multiplier to XP
-            xpGained = Math.floor(xpGained * lootMultiplier);
-            
-            // Award loot items based on tier
-            let lootItems = [];
-            if (window.inventoryManager) {
-                if (lootTier === 'Rare') {
-                    // Rare: 2-3 random items
-                    const itemCount = Math.random() < 0.5 ? 2 : 3;
-                    const possibleItems = ['potion', 'hyper_potion', 'fireball'];
-                    for (let i = 0; i < itemCount; i++) {
-                        const item = possibleItems[Math.floor(Math.random() * possibleItems.length)];
-                        window.inventoryManager.addItem(item, 1);
-                        lootItems.push(item);
-                    }
-                } else if (lootTier === 'Uncommon') {
-                    // Uncommon: 1-2 items
-                    const itemCount = Math.random() < 0.6 ? 1 : 2;
-                    const possibleItems = ['potion', 'fireball'];
-                    for (let i = 0; i < itemCount; i++) {
-                        const item = possibleItems[Math.floor(Math.random() * possibleItems.length)];
-                        window.inventoryManager.addItem(item, 1);
-                        lootItems.push(item);
-                    }
-                } else {
-                    // Common: 1 item (60% chance)
-                    if (Math.random() < 0.6) {
-                        window.inventoryManager.addItem('potion', 1);
-                        lootItems.push('potion');
-                    }
-                }
-                
-                if (lootItems.length > 0) {
-                    const itemNames = lootItems.map(id => {
-                        if (id === 'potion') return 'Potion';
-                        if (id === 'hyper_potion') return 'Hyper Potion';
-                        if (id === 'fireball') return 'Fireball';
-                        return id;
-                    });
-                    addBattleLog(`📦 Loot: ${itemNames.join(', ')}`);
-                }
-                
-                // Save inventory after adding items
-                if (typeof saveGameState === 'function') {
-                    saveGameState();
-                }
-            }
-            
-            // Award XP using new system
-            if (window.updatePlayerXP) {
-                window.updatePlayerXP(xpGained);
-            } else if (window.gameState && typeof window.addJerryXP === 'function') {
+            // Award XP
+            if (window.gameState && typeof window.addJerryXP === 'function') {
                 window.addJerryXP(xpGained);
             }
             
@@ -1649,29 +1426,28 @@ class BattleManager {
             // Play dust animation and hide enemy
             await this.playDustAnimation();
             
-            // Play loot drop animation (P1: QA Report)
-            await new Promise(resolve => setTimeout(resolve, 300));
-            if (window.playLootDropAnimation) {
-                await window.playLootDropAnimation(lootTier, xpGained);
+            // Generate and add loot drops
+            await new Promise(resolve => setTimeout(resolve, 500));
+            let lootDrops = [];
+            if (window.lootSystem) {
+                lootDrops = window.lootSystem.generateLoot(this.enemy);
+                console.log('🎁 Loot drops:', lootDrops);
+                
+                // Add loot to inventory (BACKEND FUNCTION)
+                window.lootSystem.addLootToInventory(lootDrops);
+                
+                // Update battle UI to reflect new inventory counts
+                updateActionButtons(this.hero);
+                
+                // Show loot modal
+                window.lootSystem.showLootModal(lootDrops, xpGained, this.enemy.name);
+            } else {
+                // Fallback to alert if loot system not loaded
+                alert(`🎉 Victory!\n\nYou defeated the ${this.enemy.name}!\n\n✨ +${xpGained} XP earned!\n\nGreat job, keep it up! 💪`);
             }
-            
-            // Show friendly victory message
-            await new Promise(resolve => setTimeout(resolve, 200));
-            const itemsMessage = lootItems.length > 0 ? `\n\n📦 Loot: ${lootItems.map(id => {
-                if (id === 'potion') return 'Potion';
-                if (id === 'hyper_potion') return 'Hyper Potion';
-                if (id === 'fireball') return 'Fireball';
-                return id;
-            }).join(', ')}` : '\n\n🚫 No loot this time';
-            alert(`🎉 Victory!\n\nYou defeated the ${this.enemy.name}!${itemsMessage}\n\n✨ +${xpGained} XP earned!\n\nGreat job, keep it up! 💪`);
             
         } else if (result === 'defeat') {
             addBattleLog('💫 DEFEAT! You were defeated...');
-            
-            // Play defeat music from new battle music system
-            if (window.battleMusicSystem) {
-                window.battleMusicSystem.playDefeat();
-            }
             
             // Calculate XP loss (smaller penalty)
             xpLost = Math.floor(5 + (this.enemy.level * 2));
@@ -1745,18 +1521,12 @@ class BattleManager {
             window.audioManager.stopMusic();
         }
 
-        // Return to main app immediately after alert
-        document.getElementById('battleLog').innerHTML = '';
-        const arena = document.getElementById('battleArena');
-        arena.classList.add('hidden');
-        
-        // Refresh main app UI
-        if (typeof updateTasksDisplay === 'function') {
-            updateTasksDisplay();
-        }
-        if (typeof updateJerryDisplay === 'function') {
-            updateJerryDisplay();
-        }
+        // Fade out after 2 seconds
+        setTimeout(() => {
+            document.getElementById('battleLog').innerHTML = '';
+            const arena = document.getElementById('battleArena');
+            arena.classList.add('hidden');
+        }, 2000);
     }
     
     // Play dust animation when enemy is defeated
@@ -1806,506 +1576,49 @@ class BattleManager {
         // Wait for animation to complete
         await new Promise(resolve => setTimeout(resolve, frameCount * frameDuration));
     }
-    
-    // ===== ENEMY SPECIAL ATTACK METHODS =====
-    
-    // Medusa petrify attack
-    async enemyPetrifyAttack() {
-        await playEnemyAnimation(this.enemy, 'attack1', 600);
-        
-        // Show Medusa projectile if available
-        if (this.enemy.projectileType === 'medusa') {
-            const enemySprite = document.getElementById('enemySprite');
-            const heroSprite = document.getElementById('heroSprite');
-            await playMedusaProjectile(enemySprite, heroSprite);
-        }
-        
-        addBattleLog(`💎 ${this.enemy.name}'s gaze petrifies you! Turn skipped!`);
-        
-        // Show stone effect on hero
-        const heroSprite = document.getElementById('heroSprite');
-        const stoneEffect = document.createElement('div');
-        stoneEffect.style.position = 'absolute';
-        stoneEffect.style.fontSize = '3rem';
-        stoneEffect.style.animation = 'pulse 1s ease-in-out';
-        stoneEffect.textContent = '🗿';
-        heroSprite.parentElement.appendChild(stoneEffect);
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        stoneEffect.remove();
-        
-        // Enemy gets another turn (player is petrified)
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await this.enemyTurn();
-    }
-    
-    // Poison attack (Treant boss)
-    async enemyPoisonAttack() {
-        await playEnemyAnimation(this.enemy, 'attack1', 600);
-                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
-        this.hero.hp = Math.max(0, this.hero.hp - damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('heroSprite'));
-        }
-        
-        // Fill special gauge when taking damage (+10%)
-        if (window.specialGauge && damage > 0) {
-            window.specialGauge.fillOnDamage();
-        }
-        
-        // Apply poison effect: 3 damage per turn for 4 turnsonTurns = this.enemy.poisonDuration || 2;
-        this.poisonDamage = 5; // HP drain per turn
-        this.poisonGaugeDrain = 10; // Gauge drain per turn
-        
-        addBattleLog(`🌳 ${this.enemy.name} dealt ${damage} damage and poisoned you!`);
-        addBattleLog(`☠️ Poison will drain HP and gauges for ${this.poisonTurns} turns!`);
-        
-        startHeroAnimation('hurt');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        startHeroAnimation('idle');
-        
-        updateBattleUI(this.hero, this.enemy);
-        
-        if (this.hero.hp <= 0) {
-            this.state = BattleState.DEFEAT;
-            await this.endBattle('defeat');
-        } else {
-            this.state = BattleState.PLAYER_TURN;
-            console.log('✅ State set to PLAYER_TURN after enemy attack');
-            await new Promise(resolve => setTimeout(resolve, 500));
-            addBattleLog('⚔️ Your turn!');
-        }
-    }
-    
-    // Sunny Dragon attack gauge drain
-    async enemyDrainGaugeAttack() {
-        await playEnemyAnimation(this.enemy, 'attack1', 600);
-        
-        // Show dragon bolt projectile
-        const enemySprite = document.getElementById('enemySprite');
-        const heroSprite = document.getElementById('heroSprite');
-        await playDragonBoltProjectile(enemySprite, heroSprite);
-        
-        // Variable damage 18-40
-        const damage = Math.floor(Math.random() * 23) + 18;
-        this.hero.hp = Math.max(0, this.hero.hp - damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('heroSprite'));
-        }
-        
-        // Fill special gauge when taking damage (+10%)
-        if (window.specialGauge && damage > 0) {
-            window.specialGauge.fillOnDamage();
-        }
-        
-        // Drain attack gauge to 5%
-        this.attackGauge = 5;
-        
-        addBattleLog(`🐉 ${this.enemy.name} dealt ${damage} damage!`);
-        addBattleLog(`⚡ Your attack gauge was drained to 5%!`);
-        
-        startHeroAnimation('hurt');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        startHeroAnimation('idle');
-        
-        updateBattleUI(this.hero, this.enemy);
-        
-        if (this.hero.hp <= 0) {
-            this.state = BattleState.DEFEAT;
-            await this.endBattle('defeat');
-        } else {
-            this.state = BattleState.PLAYER_TURN;
-            console.log('✅ State set to PLAYER_TURN after enemy attack');
-            await new Promise(resolve => setTimeout(resolve, 500));
-            addBattleLog('⚔️ Your turn!');
-        }
-    }
-    
-    // Mushroom confusion attack
-    async enemyMushroomAttack() {
-        await playEnemyAnimation(this.enemy, 'attack2', 600);
-        
-        // Show mushroom emoji projectiles
-        const enemySprite = document.getElementById('enemySprite');
-        const heroSprite = document.getElementById('heroSprite');
-        await playMushroomProjectile(enemySprite, heroSprite);
-        
-        const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
-        this.hero.hp = Math.max(0, this.hero.hp - damage);
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('heroSprite'));
-        }
-        
-        // Fill special gauge when taking damage (+10%)
-        if (window.specialGauge && damage > 0) {
-            window.specialGauge.fillOnDamage();
-        }
-        
-        // Apply mushroom effect: 30% miss chance, 20% skip turn, 10 gauge drain per turn for 3 turnshroomEffectDuration || 2;
-        this.mushroomMissChance = this.enemy.mushroomMissChance || 0.3;
-        this.mushroomSkipChance = this.enemy.mushroomSkipChance || 0.2;
-        this.mushroomGaugeDrain = 8; // Gauge drain per turn
-        
-        addBattleLog(`🍄 ${this.enemy.name} threw mushrooms dealing ${damage} damage!`);
-        addBattleLog(`😵 Mushroom effect: attacks may miss or skip turns for ${this.mushroomTurns} turns!`);
-        
-        startHeroAnimation('hurt');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        startHeroAnimation('idle');
-        
-        updateBattleUI(this.hero, this.enemy);
-        
-        if (this.hero.hp <= 0) {
-            this.state = BattleState.DEFEAT;
-            await this.endBattle('defeat');
-        } else {
-            this.state = BattleState.PLAYER_TURN;
-            console.log('✅ State set to PLAYER_TURN after enemy attack');
-            await new Promise(resolve => setTimeout(resolve, 500));
-            addBattleLog('⚔️ Your turn!');
-        }
-    }
-    
-    // Octopus drench attack
-    async enemyDrenchAttack() {
-        await playEnemyAnimation(this.enemy, 'attack1', 600);
-        
-        // Show splash projectile
-        const enemySprite = document.getElementById('enemySprite');
-        const heroSprite = document.getElementById('heroSprite');
-        await playSplashAnimation(enemySprite, heroSprite);
-        
-        // Apply drench effect: 10 damage + block fireball for 1 turn
-        this.hero.hp = Math.max(0, this.hero.hp - 10);
-        
-        // Fill special gauge when taking damage (+10%)
-        if (window.specialGauge) {
-            window.specialGauge.fillOnDamage();
-        }
-        
-        this.fireballBlocked = true;
-        addBattleLog(`💦 ${this.enemy.name}'s Drench attack dealt 10 damage and blocked fireball!`);
-        
-        // Play hero hurt animation
-        startHeroAnimation('hurt');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        startHeroAnimation('idle');
-        
-        updateBattleUI(this.hero, this.enemy);
-        
-        if (this.hero.hp <= 0) {
-            this.state = BattleState.DEFEAT;
-            await this.endBattle('defeat');
-        } else {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            this.state = BattleState.PLAYER_TURN;
-            addBattleLog('⚔️ Your turn!');
-        }
-    }
-    
-    // Octopus hug attack
-    async enemyHugAttack() {
-        await playEnemyAnimation(this.enemy, 'attack1', 600);
-        
-        // Apply hug effect: block defend for 2 turns
-        this.defendBlocked = 2;
-        addBattleLog(`🐙 ${this.enemy.name}'s Hug blocked defend for 2 turns!`);
-        
-        updateBattleUI(this.hero, this.enemy);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        this.state = BattleState.PLAYER_TURN;
-        addBattleLog('⚔️ Your turn!');
-    }
-    
-    // Lazy Eye sleep attack
-    async enemySleepAttack() {
-        await playEnemyAnimation(this.enemy, 'attack1', 600);
-        addBattleLog(`😴 ${this.enemy.name} cast Sleep! You skip your next turn!`);
-        
-        // Show Z emojis on hero
-        const heroSprite = document.getElementById('heroSprite');
-        const sleepEmojis = document.createElement('div');
-        sleepEmojis.style.position = 'absolute';
-        sleepEmojis.style.fontSize = '2rem';
-        sleepEmojis.style.animation = 'float 2s ease-in-out';
-        sleepEmojis.textContent = '💤 💤 💤';
-        heroSprite.parentElement.appendChild(sleepEmojis);
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        sleepEmojis.remove();
-        
-        // Enemy gets another turn
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await this.enemyTurn();
-    }
-    
-    // Normal enemy attack
-    async executeEnemyNormalAttack() {
-        // Play enemy attack animation using new system
-        if (window.startEnemyAnimation) {
-            window.startEnemyAnimation(this.enemy.name, 'attack');
-            await new Promise(resolve => setTimeout(resolve, 600));
-            window.startEnemyAnimation(this.enemy.name, 'idle');
-        } else {
-            await playEnemyAnimation(this.enemy, 'attack1', 600);
-        }
-        
-        // Play enemy-specific attack sound
-        if (window.audioManager) {
-            const enemyName = this.enemy.name.toLowerCase().replace(/\s+/g, '_');
-            const soundMap = {
-                'bunny': 'bunny_attack',
-                'ogre': 'ogre_attack',
-                'alien_walking': 'alien_walking_attack',
-                'alien_flying': 'alien_flying_attack',
-                'drone': 'drone_attack',
-                'robot': 'robot_attack',
-                'lazy_bat': 'lazy_bat_attack',
-                'slime': 'enemy_attack_default',
-                'medusa': 'enemy_attack_default',
-                'octopus': 'enemy_attack_default',
-                'fire_skull': 'enemy_attack_default',
-                'treant': 'enemy_attack_default'
-            };
-            const soundKey = soundMap[enemyName] || 'enemy_attack_default';
-            window.audioManager.playSound(soundKey, 0.7);
-        }
-        
-        // Show projectiles based on enemy type
-        if (this.enemy.projectileType === 'waveform') {
-            const enemySprite = document.getElementById('enemySprite');
-            const heroSprite = document.getElementById('heroSprite');
-            await playWaveformAnimation(enemySprite, heroSprite);
-        }
-        
-        if (this.enemy.projectileType === 'alien') {
-            const enemySprite = document.getElementById('enemySprite');
-            const heroSprite = document.getElementById('heroSprite');
-            await playAlienProjectile(enemySprite, heroSprite);
-        }
-        
-        if (this.enemy.projectileType === 'fire-explosion') {
-            const enemySprite = document.getElementById('enemySprite');
-            const heroSprite = document.getElementById('heroSprite');
-            await playFireExplosion(enemySprite, heroSprite);
-        }
-
-        // Check if Invisibility Cloak is active
-        if (this.hasEvade) {
-            addBattleLog('🥷🏼 Your monster used the Invisibility Cloak and evaded the attack!');
-            this.hasEvade = false;
-            updateBattleUI(this.hero, this.enemy);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            this.state = BattleState.PLAYER_TURN;
-            addBattleLog('⚔️ Your turn!');
-            return;
-        }
-        
-        // Check if Mirror Attack is active
-        if (this.hasReflect) {
-            const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
-            this.hero.hp = Math.max(0, this.hero.hp - damage);
-            
-            // Show floating damage text
-            if (window.showFloatingText) {
-                window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('heroSprite'));
-            }
-            
-            // Fill special gauge when taking damage (+10%)
-            if (window.specialGauge && damage > 0) {
-                window.specialGauge.fillOnDamage();
-            }
-            
-            addBattleLog(`${this.enemy.name} dealt ${damage} damage!`);
-            
-            // Play hero hurt animation
-            startHeroAnimation('hurt');
-            await new Promise(resolve => setTimeout(resolve, 500));
-            startHeroAnimation('idle');
-            
-            updateBattleUI(this.hero, this.enemy);
-            
-            // Calculate and apply reflected damage
-            const reflectedDamage = Math.floor(damage * this.reflectPercent);
-            this.hasReflect = false;
-            
-            const isDead = this.enemy.takeDamage(reflectedDamage);
-            addBattleLog(`🔄 ${this.enemy.name} took ${reflectedDamage} reflected damage!`);
-            
-            // Play enemy hurt animation
-            await playEnemyAnimation(this.enemy, 'hurt', 300);
-            
-            updateBattleUI(this.hero, this.enemy);
-            
-            if (isDead) {
-                this.state = BattleState.VICTORY;
-                await this.endBattle('victory');
-                return;
-            }
-            
-            if (this.hero.hp <= 0) {
-                this.state = BattleState.DEFEAT;
-                await this.endBattle('defeat');
-                return;
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            this.state = BattleState.PLAYER_TURN;
-            addBattleLog('⚔️ Your turn!');
-            return;
-        }
-        
-        // Check if hero is invisible
-        if (this.invisibilityTurns && this.invisibilityTurns > 0) {
-            this.invisibilityTurns--;
-            addBattleLog(`🤟🏻 You are invisible! ${this.enemy.name}'s attack missed! (${this.invisibilityTurns} turns left)`);
-            
-            // Make hero reappear if invisibility ends
-            if (this.invisibilityTurns === 0) {
-                addBattleLog(`🤟🏻 You reappeared!`);
-                if (window.applyInvisibilityEffect) {
-                    window.applyInvisibilityEffect(false);
-                }
-            }
-            
-            updateBattleUI(this.hero, this.enemy);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            this.state = BattleState.PLAYER_TURN;
-            return;
-        }
-        
-        // Increment enemy attack counter
-        this.enemyAttackCount++;
-        
-        // Play enemy attack sound for all enemies
-        if (window.audioManager) {
-            // Check if this is a low-level enemy (Lazy Bat or Slime)
-            const isLowLevelEnemy = this.enemy.name === 'Lazy Bat' || this.enemy.name === 'Slime';
-            
-            // Play every 5th attack sound
-            if (this.enemyAttackCount % 5 === 0) {
-                window.audioManager.playSound('enemy_fifth_attack', 0.8);
-            } else if (isLowLevelEnemy) {
-                // Play low-level enemy attack sound for Lazy Bat and Slime
-                window.audioManager.playSound('enemy_low_level_attack', 0.8);
-            } else {
-                // Play regular enemy attack sound for all other enemies
-                window.audioManager.playSound('enemy_regular_attack', 0.8);
-            }
-        }
-        
-        // Calculate damage
-        let damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
-        
-        // Apply enemy defense reduction if defending
-        if (this.enemy.isDefending) {
-            damage = Math.floor(damage * (1 - this.enemy.defenseReduction));
-            this.enemy.isDefending = false;
-            addBattleLog(`🛡️ ${this.enemy.name}'s defense reduced damage!`);
-        }
-        
-        // Check if player is defending - use defense gauge instead of HP
-        if (this.defendActive) {
-            this.defendActive = false; // Reset defend flag
-            
-            // Defense gauge absorbs the damage
-            if (this.defenseGauge >= damage) {
-                // Defense gauge fully absorbs the damage
-                this.defenseGauge -= damage;
-                addBattleLog(`🛡️ Your defense absorbed ${damage} damage! (Defense gauge: ${this.defenseGauge}/100)`);
-                damage = 0; // No HP damage
-            } else {
-                // Defense gauge partially absorbs, rest goes to HP
-                const absorbed = this.defenseGauge;
-                const remaining = damage - absorbed;
-                this.defenseGauge = 0;
-                this.hero.hp = Math.max(0, this.hero.hp - remaining);
-                addBattleLog(`🛡️ Your defense absorbed ${absorbed} damage, ${remaining} damage to HP!`);
-                damage = remaining;
-            }
-        } else {
-            // Normal damage to HP
-            this.hero.hp = Math.max(0, this.hero.hp - damage);
-        }
-        
-        // Only log damage if it actually hit HP
-        if (damage > 0) {
-            addBattleLog(`${this.enemy.name} dealt ${damage} damage!`);
-        }
-        
-        // Show floating damage text
-        if (window.showFloatingText) {
-            window.showFloatingText(`-${damage} HP`, 'hp-damage', document.getElementById('heroSprite'));
-        }
-        
-        // Fill special gauge when taking damage (+10%)
-        if (window.specialGauge && damage > 0) {
-            window.specialGauge.fillOnDamage();
-        }
-        
-        // Play hero hurt animation
-        startHeroAnimation('hurt');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Check for Octopus defense drain
-        if (this.enemy.drainDefense) {
-            const defenseDrain = 10;
-            this.defenseGauge = Math.max(0, this.defenseGauge - defenseDrain);
-            addBattleLog(`💧 ${this.enemy.name} weakened your defense by ${defenseDrain}!`);
-        }
-        
-        updateBattleUI(this.hero, this.enemy);
-
-        // Reset hero sprite to idle
-        startHeroAnimation('idle');
-
-        if (this.hero.hp <= 0) {
-            this.state = BattleState.DEFEAT;
-            await this.endBattle('defeat');
-        } else {
-            // Decrement block counters
-            if (this.fireballBlocked) {
-                this.fireballBlocked = false;
-            }
-            if (this.defendBlocked > 0) {
-                this.defendBlocked--;
-            }
-            
-            this.state = BattleState.PLAYER_TURN;
-            console.log('✅ State set to PLAYER_TURN after enemy attack');
-            await new Promise(resolve => setTimeout(resolve, 500));
-            addBattleLog('⚔️ Your turn!');
-        }
-    }
 }
 
 // Global battle manager instance
 let battleManager = null;
 
-// Initialize battle manager when DOM is ready (SIMPLIFIED VERSION - matches v2.11)
-console.log('🔵 battleManager.js: Initializing...');
-console.log('🔵 document.readyState:', document.readyState);
-
-if (document.readyState === 'loading') {
-    console.log('⏳ Waiting for DOM to load...');
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🎮 DOM loaded, creating BattleManager...');
-        battleManager = new BattleManager();
-        window.battleManager = battleManager;
-        console.log('✅ Battle Manager initialized successfully!');
-        console.log('✅ window.battleManager:', window.battleManager);
-    });
-} else {
-    console.log('✅ DOM already loaded, creating BattleManager immediately...');
+// Initialize battle manager immediately
+function initBattleManager() {
+    if (window.battleManager && window.battleManager.initialized) {
+        console.log('⚠️ Battle Manager already initialized');
+        return;
+    }
+    
+    console.log('🔧 Initializing Battle Manager...');
     battleManager = new BattleManager();
     window.battleManager = battleManager;
-    console.log('✅ Battle Manager initialized successfully!');
-    console.log('✅ window.battleManager:', window.battleManager);
+    
+    // Set initialized flag explicitly
+    window.battleManager.initialized = true;
+    
+    console.log('✅ Battle Manager initialized and ready', {
+        initialized: window.battleManager.initialized,
+        exists: !!window.battleManager,
+        readyState: document.readyState
+    });
 }
+
+// Try multiple initialization strategies
+console.log('📜 battleManager.js loaded, readyState:', document.readyState);
+
+// Strategy 1: Initialize immediately
+initBattleManager();
+
+// Strategy 2: Also listen for DOMContentLoaded in case we're early
+if (document.readyState === 'loading') {
+    console.log('📋 Also listening for DOMContentLoaded...');
+    document.addEventListener('DOMContentLoaded', initBattleManager);
+}
+
+// Strategy 3: Also listen for window load as a fallback
+window.addEventListener('load', function() {
+    if (!window.battleManager || !window.battleManager.initialized) {
+        console.log('🔄 Retry initialization on window load...');
+        initBattleManager();
+    }
+});
 

@@ -23,15 +23,9 @@ class AudioManager {
             regular_attack: "assets/sounds/regular attack sound.mp3",
 
             // Special attacks
-            fireball: "assets/sounds/fireballsound.mp3",
             spark_attack: "assets/sounds/Spark Attack sound.mp3",
             prickler_attack: "assets/sounds/Prickler.mp3",
             freeze_attack: "assets/sounds/Freeze attack sound.mp3",
-            asteroid_attack: "assets/sounds/Asteroid Attack sound.mp3",
-            blue_flame_attack: "assets/sounds/Blue Flame Attack sound.mp3",
-            mirror_attack: "assets/sounds/Mirror Attack sound.mp3",
-            poison_leaf_attack: "assets/sounds/Poison Leaf Attack sound.mp3",
-            procrastination_ghost_attack: "assets/sounds/Procrastination Ghost Attack sound.mp3",
 
             // Items
             cloak_use: "assets/sounds/Invisibility Cloak sound.mp3",
@@ -45,22 +39,6 @@ class AudioManager {
             critical_hit: "assets/sounds/When users monster deals over 10 damage.mp3",
             third_attack: "assets/sounds/every 3rd attack by users monsters.mp3",
             battle_victory: "assets/sounds/when user wins any battle.mp3",
-            
-            // Loot drop sounds (P1: QA Report)
-            loot_drop: "assets/sounds/loot_drop.mp3",
-            uncommon_loot: "assets/sounds/uncommon_loot.mp3",
-            rare_loot: "assets/sounds/rare_loot.mp3",
-            
-            // Enemy-specific attack sounds
-            bunny_attack: "assets/sounds/enemies/Bunny Attack Sound.mp3",
-            ogre_attack: "assets/sounds/enemies/Ogre Attack Sound.mp3",
-            alien_walking_attack: "assets/sounds/enemies/Alien Walking Enemy Attack Sound.mp3",
-            alien_flying_attack: "assets/sounds/enemies/Alien Flying Enemy Attack Sound.mp3",
-            drone_attack: "assets/sounds/enemies/Drone Attack Sound.mp3",
-            robot_attack: "assets/sounds/enemies/Robot Attack Sound.mp3",
-            lazy_bat_attack: "assets/sounds/enemies/Lazy Bat Attack Sound (And All Other Enemies).mp3",
-            enemy_attack_default: "assets/sounds/enemies/Enemy Attack (All Other Enemies).mp3",
-            enemy_heal: "assets/sounds/enemies/Enemy Heal Sound.mp3",
 
             // Defense sounds
             defend: "assets/sounds/Defend.mp3",

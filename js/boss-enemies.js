@@ -135,19 +135,12 @@ function createBossEnemy(playerLevel) {
         boss.drainGauges = true;
     }
     
-    // Use Smart AI dynamic scaling for bosses (Blueprint v2.0)
-    if (window.enemyAI && window.enemyAI.applyDynamicScaling) {
-        // Smart AI applies: BaseHP * (1 + 0.1 * UserLevel)
-        window.enemyAI.applyDynamicScaling(boss, playerLevel);
-    } else {
-        // Fallback: Scale boss stats more aggressively
-        boss.attack = boss.baseAttack + playerLevel * 3;
-        boss.defense = boss.baseDefense + playerLevel * 2;
-        boss.maxHP = boss.baseHP + playerLevel * 10;
-        boss.hp = boss.maxHP;
-    }
+    // Scale boss stats more aggressively
+    boss.attack = boss.baseAttack + playerLevel * 3;
+    boss.defense = boss.baseDefense + playerLevel * 2;
+    boss.maxHP = boss.baseHP + playerLevel * 10;
+    boss.hp = boss.maxHP;
     boss.level = playerLevel;
-    boss.tier = 'boss'; // Set tier for Smart AI decision making
     
     return boss;
 }

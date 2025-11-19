@@ -1,315 +1,335 @@
-// Monster Special Attack Animations
-// Nova: Stellar Burst, Benny: Sonic Boom, Luna: Lunar Eclipse
+// Monster Special Attack Projectile Animations
+// These projectile animations fly from hero to enemy on every 3rd attack (level 6+)
 
-// Play Nova's Stellar Burst special attack
-async function playNovaSpecialAttack(targetElement) {
-    if (!ASSET_CONFIG || !ASSET_CONFIG.monsterSpecials.nova) {
-        console.error('Nova special attack config not found');
-        return;
+// Helper function to get battle element positions relative to battle arena
+function getBattleElementPositions() {
+    const battleArena = document.querySelector('.battle-container');
+    const heroSprite = document.getElementById('heroSprite');
+    const enemySprite = document.getElementById('enemySprite');
+    
+    if (!battleArena || !heroSprite || !enemySprite) {
+        console.error('❌ Battle elements not found');
+        return null;
     }
     
-    const special = ASSET_CONFIG.monsterSpecials.nova;
-    const frames = special.frames;
+    const arenaRect = battleArena.getBoundingClientRect();
+    const heroRect = heroSprite.getBoundingClientRect();
+    const enemyRect = enemySprite.getBoundingClientRect();
     
-    // Create full-screen special attack overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'special-attack-overlay';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
-        pointer-events: none;
-    `;
+    // Calculate positions relative to battle arena
+    const positions = {
+        arena: battleArena,
+        hero: {
+            x: heroRect.left - arenaRect.left + heroRect.width / 2,
+            y: heroRect.top - arenaRect.top + heroRect.height / 2
+        },
+        enemy: {
+            x: enemyRect.left - arenaRect.left + enemyRect.width / 2,
+            y: enemyRect.top - arenaRect.top + enemyRect.height / 2
+        }
+    };
     
-    const animation = document.createElement('div');
-    animation.style.cssText = `
-        width: 400px;
-        height: 400px;
+    console.log('🎯 Battle positions (relative to arena):', positions);
+    return positions;
+}
+
+// Nova Special Attack - Life Drain (Pink energy projectile)
+async function playNovaSpecialAttack(heroElement, enemyElement) {
+    console.log('🌟 Nova Special Attack: Life Drain');
+    
+    const frames = [
+        'assets/special-attacks/nova/_0000_Layer-1.png',
+        'assets/special-attacks/nova/_0001_Layer-2.png',
+        'assets/special-attacks/nova/_0002_Layer-3.png',
+        'assets/special-attacks/nova/_0003_Layer-4.png',
+        'assets/special-attacks/nova/_0004_Layer-5.png',
+        'assets/special-attacks/nova/_0005_Layer-6.png',
+        'assets/special-attacks/nova/_0006_Layer-7.png',
+        'assets/special-attacks/nova/_0007_Layer-8.png'
+    ];
+    
+    const positions = getBattleElementPositions();
+    if (!positions) return;
+    
+    // Create projectile element
+    const projectile = document.createElement('div');
+    projectile.style.cssText = `
+        position: absolute;
+        width: 120px;
+        height: 120px;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
+        z-index: 9999;
+        filter: drop-shadow(0 0 20px rgba(255, 105, 180, 0.8));
+        pointer-events: none;
+        left: ${positions.hero.x - 60}px;
+        top: ${positions.hero.y - 60}px;
     `;
+    positions.arena.appendChild(projectile);
     
-    overlay.appendChild(animation);
-    document.body.appendChild(overlay);
-    
-    // Show special attack name
+    // Show attack name
     const nameDisplay = document.createElement('div');
-    nameDisplay.textContent = special.name.toUpperCase();
+    nameDisplay.textContent = 'LIFE DRAIN';
     nameDisplay.style.cssText = `
         position: absolute;
         top: 20%;
         left: 50%;
         transform: translateX(-50%);
-        color: #ffd700;
-        font-size: 48px;
-        font-weight: bold;
-        text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6b6b;
-        animation: specialNamePulse 2s ease-in-out;
-    `;
-    overlay.appendChild(nameDisplay);
-    
-    // Play animation frames
-    for (let i = 0; i < frames.length; i++) {
-        animation.style.backgroundImage = `url('${frames[i]}')`;
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    // Flash effect for AoE damage
-    overlay.style.background = 'rgba(255,215,0,0.8)';
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    // Remove overlay
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.5s';
-    await new Promise(resolve => setTimeout(resolve, 500));
-    overlay.remove();
-}
-
-// Play Benny's Sonic Boom special attack
-async function playBennySpecialAttack(targetElement) {
-    if (!ASSET_CONFIG || !ASSET_CONFIG.monsterSpecials.benny) {
-        console.error('Benny special attack config not found');
-        return;
-    }
-    
-    const special = ASSET_CONFIG.monsterSpecials.benny;
-    const frames = special.frames;
-    
-    // Create projectile-style special attack
-    const projectile = document.createElement('div');
-    projectile.style.cssText = `
-        position: fixed;
-        width: 200px;
-        height: 200px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        z-index: 9999;
-        filter: drop-shadow(0 0 20px rgba(100,200,255,0.8));
-    `;
-    
-    // Get positions
-    const heroSprite = document.getElementById('heroSprite') || document.querySelector('.hero-sprite');
-    const startRect = heroSprite ? heroSprite.getBoundingClientRect() : { left: 100, top: 300 };
-    const targetRect = targetElement.getBoundingClientRect();
-    
-    projectile.style.left = startRect.left + 'px';
-    projectile.style.top = startRect.top + 'px';
-    
-    document.body.appendChild(projectile);
-    
-    // Show special attack name
-    const nameDisplay = document.createElement('div');
-    nameDisplay.textContent = special.name.toUpperCase();
-    nameDisplay.style.cssText = `
-        position: fixed;
-        top: 30%;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #64c8ff;
+        color: #ff69b4;
         font-size: 42px;
         font-weight: bold;
-        text-shadow: 0 0 20px #64c8ff;
+        text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff1493;
         z-index: 10000;
-        animation: specialNamePulse 1.5s ease-out;
+        pointer-events: none;
+        animation: fadeOut 1.5s ease-out forwards;
     `;
-    document.body.appendChild(nameDisplay);
+    positions.arena.appendChild(nameDisplay);
     
-    // Animate frames and movement
-    const duration = 800;
+    // Animate projectile flying to enemy
+    const duration = 1800; // Slower for visibility
     const startTime = Date.now();
-    let frameIndex = 0;
     
     return new Promise((resolve) => {
         function animate() {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Update frame
-            frameIndex = Math.floor((elapsed / 120) % frames.length);
+            // Cycle through frames (slower frame rate)
+            const frameIndex = Math.floor((elapsed / 200) % frames.length);
             projectile.style.backgroundImage = `url('${frames[frameIndex]}')`;
             
-            // Move projectile
-            const currentX = startRect.left + (targetRect.left - startRect.left) * progress;
-            const currentY = startRect.top + (targetRect.top - startRect.top) * progress;
+            // Move from hero to enemy
+            const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 60;
+            const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - 60;
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
             
             // Scale up as it travels
-            const scale = 1 + progress * 0.5;
+            const scale = 1 + progress * 0.6;
             projectile.style.transform = `scale(${scale})`;
             
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Impact effect
-                projectile.style.filter = 'brightness(2) drop-shadow(0 0 40px rgba(100,200,255,1))';
+                // Impact flash
+                projectile.style.filter = 'brightness(2) drop-shadow(0 0 40px rgba(255, 105, 180, 1))';
                 setTimeout(() => {
                     projectile.remove();
                     nameDisplay.remove();
                     resolve();
-                }, 300);
+                }, 250);
             }
         }
         requestAnimationFrame(animate);
     });
 }
 
-// Play Luna's Lunar Eclipse special attack
-async function playLunaSpecialAttack(targetElement) {
-    if (!ASSET_CONFIG || !ASSET_CONFIG.monsterSpecials.luna) {
-        console.error('Luna special attack config not found');
-        return;
-    }
+// Benny Special Attack - Stunning Strike (Cyan ring projectile)
+async function playBennySpecialAttack(heroElement, enemyElement) {
+    console.log('💨 Benny Special Attack: Stunning Strike');
     
-    const special = ASSET_CONFIG.monsterSpecials.luna;
-    const frames = special.frames;
+    const frames = [
+        'assets/special-attacks/benny/_0000_Layer-1.png',
+        'assets/special-attacks/benny/_0001_Layer-2.png',
+        'assets/special-attacks/benny/_0002_Layer-3.png',
+        'assets/special-attacks/benny/_0003_Layer-4.png',
+        'assets/special-attacks/benny/_0004_Layer-5.png',
+        'assets/special-attacks/benny/_0005_Layer-6.png'
+    ];
     
-    // Create eclipse overlay
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 10000;
-        background: radial-gradient(circle, rgba(138,43,226,0.4) 0%, rgba(0,0,0,0.8) 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-    `;
+    const positions = getBattleElementPositions();
+    if (!positions) return;
     
-    const animation = document.createElement('div');
-    animation.style.cssText = `
-        width: 350px;
-        height: 350px;
+    // Create projectile element
+    const projectile = document.createElement('div');
+    projectile.style.cssText = `
+        position: absolute;
+        width: 100px;
+        height: 100px;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
-        filter: drop-shadow(0 0 30px rgba(138,43,226,0.9));
+        z-index: 9999;
+        filter: drop-shadow(0 0 18px rgba(100, 200, 255, 0.8));
+        pointer-events: none;
+        left: ${positions.hero.x - 50}px;
+        top: ${positions.hero.y - 50}px;
     `;
+    positions.arena.appendChild(projectile);
     
-    overlay.appendChild(animation);
-    document.body.appendChild(overlay);
-    
-    // Show special attack name
+    // Show attack name
     const nameDisplay = document.createElement('div');
-    nameDisplay.textContent = special.name.toUpperCase();
+    nameDisplay.textContent = 'STUNNING STRIKE';
     nameDisplay.style.cssText = `
         position: absolute;
         top: 25%;
         left: 50%;
         transform: translateX(-50%);
-        color: #8a2be2;
-        font-size: 44px;
+        color: #64c8ff;
+        font-size: 40px;
         font-weight: bold;
-        text-shadow: 0 0 20px #8a2be2, 0 0 40px #4b0082;
-        animation: specialNamePulse 2s ease-in-out;
+        text-shadow: 0 0 18px #64c8ff, 0 0 35px #00bfff;
+        z-index: 10000;
+        pointer-events: none;
+        animation: fadeOut 1.5s ease-out forwards;
     `;
-    overlay.appendChild(nameDisplay);
+    positions.arena.appendChild(nameDisplay);
     
-    // Play animation frames
-    for (let i = 0; i < frames.length; i++) {
-        animation.style.backgroundImage = `url('${frames[i]}')`;
-        await new Promise(resolve => setTimeout(resolve, 120));
-    }
+    // Animate projectile flying to enemy
+    const duration = 1800; // Slower for visibility
+    const startTime = Date.now();
     
-    // Defense down visual effect on enemy
-    if (targetElement) {
-        targetElement.style.filter = 'brightness(0.6) saturate(0.5)';
-        setTimeout(() => {
-            targetElement.style.filter = '';
-        }, 2000);
-    }
-    
-    // Fade out overlay
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.6s';
-    await new Promise(resolve => setTimeout(resolve, 600));
-    overlay.remove();
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Cycle through frames (slower frame rate)
+            const frameIndex = Math.floor((elapsed / 200) % frames.length);
+            projectile.style.backgroundImage = `url('${frames[frameIndex]}')`;
+            
+            // Move from hero to enemy
+            const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 50;
+            const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - 50;
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            // Rotate and scale
+            const rotation = progress * 720; // Two full rotations
+            const scale = 1 + progress * 0.5;
+            projectile.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Impact flash
+                projectile.style.filter = 'brightness(2) drop-shadow(0 0 35px rgba(100, 200, 255, 1))';
+                setTimeout(() => {
+                    projectile.remove();
+                    nameDisplay.remove();
+                    resolve();
+                }, 250);
+            }
+        }
+        requestAnimationFrame(animate);
+    });
 }
 
-// Execute special attack based on monster type
-async function executeSpecialAttack(monsterType, targetElement, playerLevel) {
-    if (!window.specialGauge || !window.specialGauge.use()) {
-        console.error('Special gauge not available or not ready');
-        return null; // Gauge not ready
-    }
+// Luna Special Attack - Chaos Curse (Purple crescent moon projectile)
+async function playLunaSpecialAttack(heroElement, enemyElement) {
+    console.log('🌙 Luna Special Attack: Chaos Curse');
     
-    // Calculate damage
-    const damage = window.calculateSpecialDamage ? window.calculateSpecialDamage(monsterType, playerLevel) : 30;
+    const frames = [
+        'assets/special-attacks/luna/_0000_Layer-1.png',
+        'assets/special-attacks/luna/_0001_Layer-2.png',
+        'assets/special-attacks/luna/_0002_Layer-3.png',
+        'assets/special-attacks/luna/_0003_Layer-4.png',
+        'assets/special-attacks/luna/_0004_Layer-5.png'
+    ];
     
-    // Play appropriate animation
-    switch(monsterType.toLowerCase()) {
+    const positions = getBattleElementPositions();
+    if (!positions) return;
+    
+    // Create projectile element
+    const projectile = document.createElement('div');
+    projectile.style.cssText = `
+        position: absolute;
+        width: 110px;
+        height: 110px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        z-index: 9999;
+        filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.8));
+        pointer-events: none;
+        left: ${positions.hero.x - 55}px;
+        top: ${positions.hero.y - 55}px;
+    `;
+    positions.arena.appendChild(projectile);
+    
+    // Show attack name
+    const nameDisplay = document.createElement('div');
+    nameDisplay.textContent = 'CHAOS CURSE';
+    nameDisplay.style.cssText = `
+        position: absolute;
+        top: 22%;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #8a2be2;
+        font-size: 41px;
+        font-weight: bold;
+        text-shadow: 0 0 20px #8a2be2, 0 0 38px #4b0082;
+        z-index: 10000;
+        pointer-events: none;
+        animation: fadeOut 1.5s ease-out forwards;
+    `;
+    positions.arena.appendChild(nameDisplay);
+    
+    // Animate projectile flying to enemy with arc motion
+    const duration = 1800; // Slower for visibility
+    const startTime = Date.now();
+    
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Cycle through frames (slower frame rate)
+            const frameIndex = Math.floor((elapsed / 200) % frames.length);
+            projectile.style.backgroundImage = `url('${frames[frameIndex]}')`;
+            
+            // Move from hero to enemy with slight upward arc
+            const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 55;
+            const arcHeight = Math.sin(progress * Math.PI) * 60; // Arc upward
+            const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - arcHeight - 55;
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            // Gentle rotation and scale
+            const rotation = progress * 180;
+            const scale = 1 + progress * 0.4;
+            projectile.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Impact flash
+                projectile.style.filter = 'brightness(2) drop-shadow(0 0 38px rgba(138, 43, 226, 1))';
+                setTimeout(() => {
+                    projectile.remove();
+                    nameDisplay.remove();
+                    resolve();
+                }, 250);
+            }
+        }
+        requestAnimationFrame(animate);
+    });
+}
+
+// Helper function to determine which special attack to play based on monster type
+async function playSpecialAttackForMonster(monsterType, heroElement, enemyElement) {
+    console.log(`🎯 Playing special attack for: ${monsterType}`);
+    
+    switch(monsterType) {
         case 'nova':
-            await playNovaSpecialAttack(targetElement);
-            if (window.addBattleLog) {
-                addBattleLog(`⭐ ${ASSET_CONFIG.monsterSpecials.nova.name} dealt ${damage} damage!`);
-                addBattleLog(`💥 ${ASSET_CONFIG.monsterSpecials.nova.effect}`);
-            }
+            await playNovaSpecialAttack(heroElement, enemyElement);
             break;
-            
         case 'benny':
-            await playBennySpecialAttack(targetElement);
-            if (window.addBattleLog) {
-                addBattleLog(`🔊 ${ASSET_CONFIG.monsterSpecials.benny.name} dealt ${damage} damage!`);
-                addBattleLog(`😵 ${ASSET_CONFIG.monsterSpecials.benny.effect}`);
-            }
+            await playBennySpecialAttack(heroElement, enemyElement);
             break;
-            
         case 'luna':
-            await playLunaSpecialAttack(targetElement);
-            if (window.addBattleLog) {
-                addBattleLog(`🌙 ${ASSET_CONFIG.monsterSpecials.luna.name} dealt ${damage} damage!`);
-                addBattleLog(`🛡️ ${ASSET_CONFIG.monsterSpecials.luna.effect}`);
-            }
+            await playLunaSpecialAttack(heroElement, enemyElement);
             break;
-            
         default:
-            console.error('Unknown monster type:', monsterType);
-            return null;
+            console.warn(`Unknown monster type: ${monsterType}`);
+            // Fallback to a generic animation
+            await new Promise(resolve => setTimeout(resolve, 600));
     }
-    
-    return {
-        damage: damage,
-        effect: ASSET_CONFIG.monsterSpecials[monsterType.toLowerCase()].effect
-    };
 }
 
-// Add CSS animations
-const specialStyles = document.createElement('style');
-specialStyles.textContent = `
-    @keyframes specialNamePulse {
-        0% {
-            opacity: 0;
-            transform: translateX(-50%) scale(0.5);
-        }
-        50% {
-            opacity: 1;
-            transform: translateX(-50%) scale(1.2);
-        }
-        100% {
-            opacity: 0.8;
-            transform: translateX(-50%) scale(1);
-        }
-    }
-`;
-document.head.appendChild(specialStyles);
-
-// Export functions
-if (typeof window !== 'undefined') {
-    window.playNovaSpecialAttack = playNovaSpecialAttack;
-    window.playBennySpecialAttack = playBennySpecialAttack;
-    window.playLunaSpecialAttack = playLunaSpecialAttack;
-    window.executeSpecialAttack = executeSpecialAttack;
-}
+// Export to window for global access
+window.playNovaSpecialAttack = playNovaSpecialAttack;
+window.playBennySpecialAttack = playBennySpecialAttack;
+window.playLunaSpecialAttack = playLunaSpecialAttack;
+window.playSpecialAttackForMonster = playSpecialAttackForMonster;

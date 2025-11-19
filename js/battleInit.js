@@ -61,171 +61,6 @@ function stopHeroAnimation() {
 window.startHeroAnimation = startHeroAnimation;
 window.stopHeroAnimation = stopHeroAnimation;
 
-// Enemy Animation System
-let enemyAnimationInterval = null;
-let enemyCurrentFrame = 0;
-let enemyTotalFrames = 8;
-let enemyFrameWidth = 34;
-
-function startEnemyAnimation(enemyName, animationType = 'idle') {
-    const enemySprite = document.getElementById('enemySprite');
-    if (!enemySprite) return;
-    
-    // Stop any existing animation
-    if (enemyAnimationInterval) {
-        clearInterval(enemyAnimationInterval);
-    }
-    
-    // Enemy animation configurations (updated with actual sprite dimensions)
-    const enemyAnimations = {
-        'Bunny': {
-            idle: { frames: 8, width: 272, height: 44, sprite: 'Bunny/Idle (34x44).png', speed: 150 },
-            run: { frames: 8, width: 272, height: 44, sprite: 'Bunny/Run (34x44).png', speed: 100 },
-            hurt: { frames: 4, width: 136, height: 44, sprite: 'Bunny/Hit (34x44).png', speed: 150 }
-        },
-        'Ogre': {
-            idle: { frames: 12, width: 576, height: 80, sprite: 'Ogre/Spritesheets/ogre-idle.png', speed: 150 },
-            attack: { frames: 21, width: 1008, height: 80, sprite: 'Ogre/Spritesheets/ogre-attack.png', speed: 80 },
-            hurt: { frames: 12, width: 576, height: 80, sprite: 'Ogre/Spritesheets/ogre-idle.png', speed: 150 }
-        },
-        'Medusa': {
-            idle: { frames: 1, width: 32, height: 32, sprite: 'Medusa/frame1.png', speed: 150 },
-            attack: { frames: 7, width: 224, height: 32, sprite: 'Medusa/Medusa Attack Explosion/spritesheet.png', speed: 100 },
-            hurt: { frames: 1, width: 32, height: 32, sprite: 'Medusa/frame2.png', speed: 150 }
-        },
-        'Fire Skull': {
-            idle: { frames: 6, width: 216, height: 70, sprite: 'Fire Skull/Spritesheets/fire-skull-no-fire.png', speed: 150 },
-            attack: { frames: 8, width: 768, height: 112, sprite: 'Fire Skull/Spritesheets/fire-skull.png', speed: 100 },
-            hurt: { frames: 6, width: 216, height: 70, sprite: 'Fire Skull/Spritesheets/fire-skull-no-fire.png', speed: 150 }
-        },
-        'Treant': {
-            idle: { 
-                frames: 4, 
-                width: 80, 
-                height: 84, 
-                frameFiles: ['Treant/Treant1.png', 'Treant/Treant2.png', 'Treant/Treant3.png', 'Treant/Treant4.png'],
-                speed: 200 
-            },
-            attack: { frames: 1, width: 25, height: 25, sprite: 'Treant/Treant Attack 2.png', speed: 150 },
-            hurt: { frames: 1, width: 80, height: 84, sprite: 'Treant/Treant2.png', speed: 150 }
-        },
-        'Octopus': {
-            idle: { frames: 1, width: 28, height: 37, sprite: 'Octopus/octopus-1.png', speed: 150 },
-            attack: { frames: 3, width: 78, height: 32, sprite: 'Octopus/Octopus Attack/spritesheet.png', speed: 120 },
-            hurt: { frames: 1, width: 28, height: 37, sprite: 'Octopus/octopus-2.png', speed: 150 }
-        },
-        'Lazy Bat': {
-            idle: { frames: 9, width: 576, height: 64, sprite: 'Lazy Bat/Bat-IdleFly.png', speed: 150 },
-            attack: { frames: 9, width: 576, height: 64, sprite: 'Lazy Bat/Bat-Attack1.png', speed: 120 },
-            hurt: { frames: 9, width: 576, height: 64, sprite: 'Lazy Bat/Bat-Hurt.png', speed: 150 }
-        },
-        'Drone': {
-            idle: { 
-                frames: 4, 
-                width: 55, 
-                height: 52, 
-                frameFiles: ['Drone/drone-1.png', 'Drone/drone-2.png', 'Drone/drone-3.png', 'Drone/drone-4.png'],
-                speed: 150 
-            },
-            attack: { frames: 1, width: 60, height: 11, sprite: 'Drone/Drone Attack.png', speed: 120 },
-            hurt: { frames: 1, width: 55, height: 52, sprite: 'Drone/drone-2.png', speed: 150 }
-        },
-        'Robot': {
-            idle: { 
-                frames: 2, 
-                width: 22, 
-                height: 24, 
-                frameFiles: ['Robot/enemy1.png', 'Robot/enemy2.png'],
-                speed: 150 
-            },
-            attack: { frames: 1, width: 48, height: 32, sprite: 'Robot/Robot Attack.png', speed: 120 },
-            hurt: { frames: 1, width: 22, height: 24, sprite: 'Robot/enemy2.png', speed: 150 }
-        },
-        'Slime': {
-            idle: { frames: 4, width: 472, height: 79, sprite: 'Slime II/slime-sheet.png', speed: 150 },
-            attack: { frames: 3, width: 78, height: 32, sprite: 'Slime II/Slime II Attack/spritesheet.png', speed: 120 },
-            hurt: { frames: 4, width: 472, height: 79, sprite: 'Slime II/slime-sheet.png', speed: 150 }
-        },
-        'Alien Walking': {
-            idle: { frames: 4, width: 192, height: 48, sprite: 'Alien Walking Enemy/Spritesheets/alien-enemy-idle.png', speed: 150 },
-            walk: { frames: 6, width: 342, height: 42, sprite: 'Alien Walking Enemy/Spritesheets/alien-enemy-walk.png', speed: 120 }
-        },
-        'Alien Flying': {
-            idle: { frames: 8, width: 664, height: 64, sprite: 'Alien Flying Enemy/spritesheet.png', speed: 150 }
-        }
-    };
-    
-    // Get animation config for this enemy
-    const enemyConfig = enemyAnimations[enemyName];
-    if (!enemyConfig) {
-        console.warn(`No animation config for enemy: ${enemyName}`);
-        return;
-    }
-    
-    const anim = enemyConfig[animationType] || enemyConfig.idle;
-    enemyTotalFrames = anim.frames;
-    enemyCurrentFrame = 0;
-    enemyFrameWidth = anim.width / anim.frames;
-    
-    // Clear any existing styles and classes
-    enemySprite.className = 'sprite';
-    enemySprite.style.backgroundRepeat = 'no-repeat';
-    enemySprite.style.imageRendering = 'pixelated';
-    
-        // Calculate scale to match hero size (hero is ~80px tall after scaling)
-        const targetHeight = 80;
-        let scale = targetHeight / anim.height;
-        
-        // Fix for Lazy Bat: ensure a minimum scale of 2.5 to prevent it from being too small
-        if (enemyName === 'Lazy Bat' && scale < 2.5) {
-            scale = 2.5;
-        }
-    
-    // Check if using individual frame files or spritesheet
-    if (anim.frameFiles) {
-        // Individual frame files mode
-        enemySprite.style.width = `${anim.width}px`;
-        enemySprite.style.height = `${anim.height}px`;
-        enemySprite.style.backgroundSize = 'contain';
-        enemySprite.style.backgroundPosition = 'center';
-        enemySprite.style.transform = `scale(${scale})`;
-        
-        // Set initial frame
-        enemySprite.style.backgroundImage = `url('assets/enemies/${anim.frameFiles[0]}')`;
-        
-        // Animate by switching frame files
-        enemyAnimationInterval = setInterval(() => {
-            enemyCurrentFrame = (enemyCurrentFrame + 1) % enemyTotalFrames;
-            enemySprite.style.backgroundImage = `url('assets/enemies/${anim.frameFiles[enemyCurrentFrame]}')`;
-        }, anim.speed);
-    } else {
-        // Spritesheet mode - EXACTLY like hero animation
-        enemySprite.style.backgroundImage = `url('assets/enemies/${anim.sprite}')`;
-        enemySprite.style.backgroundSize = `${anim.width}px ${anim.height}px`;
-        enemySprite.style.width = `${enemyFrameWidth}px`;  // Single frame width only
-        enemySprite.style.height = `${anim.height}px`;
-        enemySprite.style.transform = `scale(${scale})`;
-        
-        // Animate frames by changing background position
-        enemyAnimationInterval = setInterval(() => {
-            enemyCurrentFrame = (enemyCurrentFrame + 1) % enemyTotalFrames;
-            const xPos = -(enemyCurrentFrame * enemyFrameWidth);
-            enemySprite.style.backgroundPosition = `${xPos}px 0`;
-        }, anim.speed);
-    }
-}
-
-function stopEnemyAnimation() {
-    if (enemyAnimationInterval) {
-        clearInterval(enemyAnimationInterval);
-        enemyAnimationInterval = null;
-    }
-}
-
-// Export to global scope
-window.startEnemyAnimation = startEnemyAnimation;
-window.stopEnemyAnimation = stopEnemyAnimation;
-
 // Start idle animation when battle starts
 function initializeHeroSprite() {
     const heroSprite = document.getElementById('heroSprite');
@@ -238,74 +73,30 @@ function initializeHeroSprite() {
 
 // Test function to start a battle (for development)
 function startTestBattle() {
-    console.log('🔵 startTestBattle called!');
-    
     // Check if Battle Mode is enabled
     if (window.battleModeEnabled === false) {
         console.log('⚙️ Battle Mode is OFF — skipping encounter.');
         return;
     }
     
-    // Wait for battleManager to be initialized with retry mechanism
-    if (!window.battleManager) {
-        console.warn('⏳ Battle Manager not yet initialized, waiting...');
-        
-        // Retry up to 10 times with 100ms delay
-        let retryCount = 0;
-        const maxRetries = 10;
-        
-        const checkBattleManager = setInterval(() => {
-            retryCount++;
-            console.log(`🔄 Retry ${retryCount}/${maxRetries} - Checking for battleManager...`);
-            
-            if (window.battleManager) {
-                console.log('✅ Battle Manager found! Starting battle...');
-                clearInterval(checkBattleManager);
-                // Call the actual battle start logic
-                startBattleInternal();
-            } else if (retryCount >= maxRetries) {
-                console.error('❌ Battle Manager not initialized after ' + maxRetries + ' retries!');
-                clearInterval(checkBattleManager);
-            }
-        }, 100);
-        
+    // Safeguard: Check if Battle Manager is initialized
+    if (!window.battleManager || !window.battleManager.initialized) {
+        console.warn('⚠️ Battle Manager not initialized – skipping battle trigger');
         return;
     }
-    
-    // If battleManager exists, start immediately
-    startBattleInternal();
-}
-
-// Internal function that contains the actual battle start logic
-function startBattleInternal() {
-    if (!window.battleManager) {
-        console.error('❌ Battle Manager not initialized!');
-        return;
-    }
-    
-    console.log('✅ Battle Manager is ready! Starting battle...')
 
     // Create hero data from gameState
     const level = gameState.jerryLevel || 1;
     
-    // Level-based attack damage scaling with non-linear curve (P1: QA Report)
-    // Uses exponential curve for more impactful progression at higher tiers
-    const baseAttack = 15;
-    
-    // Non-linear scaling curve: starts similar to linear but accelerates at higher levels
-    // Formula: baseAttack * (1 + (level - 1) * 0.08 + Math.pow((level - 1) / 50, 1.5) * 0.5)
-    const linearComponent = (level - 1) * 0.08; // Reduced from 0.1 to 0.08
-    const exponentialComponent = Math.pow((level - 1) / 50, 1.5) * 0.5; // Exponential growth
-    const levelScale = 1 + linearComponent + exponentialComponent;
-    let baseDamage = Math.floor(baseAttack * levelScale);
-    
-    // Examples with new curve:
-    // Level 1:  15 damage (1.00x) - Same as before
-    // Level 5:  18 damage (1.20x) - Slightly slower early game
-    // Level 10: 22 damage (1.47x) - Still reasonable
-    // Level 20: 33 damage (2.20x) - Starts accelerating
-    // Level 30: 46 damage (3.07x) - Noticeable power
-    // Level 50: 88 damage (5.87x) - Dramatic late game power
+    // Level-based attack damage scaling (grows with level)
+    let baseDamage;
+    if (level >= 15) {
+        baseDamage = 13 + Math.floor((level - 15) / 5); // Grows every 5 levels after 15
+    } else if (level >= 10) {
+        baseDamage = 10 + Math.floor((level - 10) / 3); // Grows every 3 levels after 10
+    } else {
+        baseDamage = 6 + Math.floor(level / 3);  // Grows every 3 levels
+    }
     
     const heroData = {
         hp: gameState.health || 100,
@@ -321,61 +112,39 @@ function startBattleInternal() {
     const playerLevel = gameState.jerryLevel || 1;
     let enemyData;
     
-    // Use new enemy tier system if available
-    if (window.ENEMY_TIER_SYSTEM) {
-        enemyData = window.ENEMY_TIER_SYSTEM.selectEnemy(playerLevel);
+    if (isBossLevel(playerLevel)) {
+        // Create boss enemy
+        enemyData = createBossEnemy(playerLevel);
         
-        // Set background based on tier
-        if (window.battleBackgroundSystem) {
-            window.battleBackgroundSystem.setBackground(playerLevel, enemyData.tier);
+        // Track boss count for arena alternation
+        if (!gameState.bossCount) {
+            gameState.bossCount = 0;
+        }
+        gameState.bossCount++;
+        
+        // Set boss arena background
+        const arenaBackground = getBossArenaBackground(gameState.bossCount);
+        const battleArena = document.getElementById('battleArena');
+        if (battleArena) {
+            battleArena.style.backgroundImage = `url('${arenaBackground}')`;
+            battleArena.style.backgroundSize = 'cover';
+            battleArena.style.backgroundPosition = 'center';
         }
         
-        // Track boss count for boss enemies
-        if (enemyData.tier === 'boss') {
-            if (!gameState.bossCount) {
-                gameState.bossCount = 0;
-            }
-            gameState.bossCount++;
-            saveGameState();
-        }
+        saveGameState();
     } else {
-        // Fallback to old system
-        if (isBossLevel(playerLevel)) {
-            enemyData = createBossEnemy(playerLevel);
-            
-            if (!gameState.bossCount) {
-                gameState.bossCount = 0;
-            }
-            gameState.bossCount++;
-            
-            const arenaBackground = getBossArenaBackground(gameState.bossCount);
-            const battleArena = document.getElementById('battleArena');
-            if (battleArena) {
-                battleArena.style.backgroundImage = `url('${arenaBackground}')`;
-                battleArena.style.backgroundSize = 'cover';
-                battleArena.style.backgroundPosition = 'center';
-            }
-            
-            saveGameState();
-        } else {
-            enemyData = createRandomEnemy(playerLevel);
-            
-            const battleArena = document.getElementById('battleArena');
-            if (battleArena) {
-                battleArena.style.backgroundImage = '';
-            }
+        // Create regular enemy
+        enemyData = createRandomEnemy(playerLevel);
+        
+        // Reset to default arena for regular battles
+        const battleArena = document.getElementById('battleArena');
+        if (battleArena) {
+            battleArena.style.backgroundImage = '';
         }
     }
 
     // Start battle
-    console.log('⚔️ Calling battleManager.startBattle with:', { heroData, enemyData });
-    try {
-        battleManager.startBattle(heroData, enemyData);
-        console.log('✅ battleManager.startBattle called successfully!');
-    } catch(error) {
-        console.error('❌ Error calling battleManager.startBattle:', error);
-        return;
-    }
+    battleManager.startBattle(heroData, enemyData);
     
     // Initialize hero sprite animation
     setTimeout(() => {
@@ -448,4 +217,55 @@ if (originalStartBattle && window.battleManager) {
         return result;
     };
 }
+
+
+
+// ===================================
+// PROBABILITY-BASED BATTLE TRIGGER
+// ===================================
+
+/**
+ * Unified battle trigger function with probability control
+ * Only Quick Tasks and Regular Tasks can trigger battles
+ * @param {string} sourceType - Either 'quickTask' or 'regularTask'
+ */
+function maybeTriggerBattle(sourceType) {
+    // Check if Battle Mode is enabled
+    if (window.battleModeEnabled === false) {
+        console.log('⚙️ Battle Mode is OFF — skipping encounter.');
+        return;
+    }
+    
+    // Safeguard: Check if Battle Manager is initialized
+    if (!window.battleManager || !window.battleManager.initialized) {
+        console.warn('⚠️ Battle Manager not initialized – skipping battle trigger');
+        return;
+    }
+    
+    let chance = 0;
+    
+    if (sourceType === 'quickTask') {
+        chance = 0.20; // 20% probability for quick tasks
+    } else if (sourceType === 'regularTask') {
+        chance = 0.50; // 50% probability for regular tasks
+    } else {
+        // Any other source should never trigger battle
+        console.log(`🚫 Battle trigger blocked for source: ${sourceType}`);
+        return;
+    }
+    
+    // Roll the dice
+    const roll = Math.random();
+    console.log(`🎲 Battle probability check: ${(chance * 100)}% chance, rolled ${(roll * 100).toFixed(1)}%`);
+    
+    if (roll < chance) {
+        console.log('⚔️ Battle triggered!');
+        startTestBattle();
+    } else {
+        console.log('✨ No battle this time');
+    }
+}
+
+// Expose globally for use in index.html
+window.maybeTriggerBattle = maybeTriggerBattle;
 

@@ -116,12 +116,13 @@
     justify-content: center;
 }
 
-/* Enemy sprites (32x32 base) */
-.sprite.enemy-sprite {
+/* Hero sprites (32x32 base) */
+.sprite.hero-sprite {
     width: 32px;
     height: 32px;
     image-rendering: pixelated;
-    background-size: 32px 32px;   background-repeat: no-repeat;
+    background-size: auto 32px;
+    background-repeat: no-repeat;
     background-position: 0 0;
     transform: scale(2.5);
     transform-origin: center;
@@ -132,7 +133,7 @@
     width: 64px;
     height: 64px;
     image-rendering: pixelated;
-    background-size: 64px 64px;
+    background-size: auto 64px;
     background-repeat: no-repeat;
     background-position: 0 0;
     transform: scale(2);
@@ -144,7 +145,7 @@
     width: 48px;
     height: 48px;
     image-rendering: pixelated;
-    background-size: 48px 48px;
+    background-size: auto 48px;
     background-repeat: no-repeat;
 }
 
@@ -153,7 +154,7 @@
     width: 32px;
     height: 32px;
     image-rendering: pixelated;
-    background-size: 32px 32px;
+    background-size: auto 32px;
     background-repeat: no-repeat;
     background-position: 0 0;
     transform: scale(2.2);
@@ -165,7 +166,7 @@
     width: 118px;
     height: 79px;
     image-rendering: pixelated;
-    background-size: 118px 79px;
+    background-size: auto 79px;
     background-repeat: no-repeat;
     background-position: 0 0;
     transform: scale(1.5);
@@ -462,46 +463,6 @@
     to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
 }
 
-/* Bunny animations - 34x44 sprites, 8 frames */
-#enemySprite.bunny-idle {
-    animation: bunnyIdle 1.2s steps(8) infinite;
-}
-
-@keyframes bunnyIdle {
-    from { background-position: 0 0; }
-    to { background-position: -272px 0; } /* 8 frames × 34px = 272px */
-}
-
-/* Ogre animations - 48x80 sprites, 12 frames */
-#enemySprite.ogre-idle {
-    animation: ogreIdle 1.8s steps(12) infinite;
-}
-
-@keyframes ogreIdle {
-    from { background-position: 0 0; }
-    to { background-position: -576px 0; } /* 12 frames × 48px = 576px */
-}
-
-/* Fire Skull animations - 36x70 sprites, 6 frames */
-#enemySprite.fire-skull-idle {
-    animation: fireSkullIdle 0.9s steps(6) infinite;
-}
-
-@keyframes fireSkullIdle {
-    from { background-position: 0 0; }
-    to { background-position: -216px 0; } /* 6 frames × 36px = 216px */
-}
-
-/* Alien animations - 48x48 sprites, 4 frames */
-#enemySprite.alien-idle {
-    animation: alienIdle 0.6s steps(4) infinite;
-}
-
-@keyframes alienIdle {
-    from { background-position: 0 0; }
-    to { background-position: -192px 0; } /* 4 frames × 48px = 192px */
-}
-
 /* ===================================
    FIREBALL & EXPLOSION EFFECTS
    =================================== */
@@ -655,8 +616,8 @@
 }
 
 @keyframes proceduralIdle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    0%, 100% { transform: scale(2) translateY(0); }
+    50% { transform: scale(2) translateY(-8px); }
 }
 
 /* Procedural attack lunge */
@@ -665,9 +626,9 @@
 }
 
 @keyframes proceduralAttack {
-    0% { transform: translateX(0); }
-    50% { transform: translateX(-30px); }
-    100% { transform: translateX(0); }
+    0% { transform: scale(2) translateX(0); }
+    50% { transform: scale(2) translateX(-30px); }
+    100% { transform: scale(2) translateX(0); }
 }
 
 /* Skull Gate Arena (Level 13+) */
@@ -758,38 +719,5 @@
     }
     to {
         background-position-x: -664px;
-    }
-}
-
-/* Special Attack Button Styles */
-.btn-special {
-    background: linear-gradient(135deg, #ffd700 0%, #ff6b6b 100%) !important;
-    border-color: #ffd700 !important;
-    color: #000 !important;
-    font-weight: bold;
-    animation: specialButtonPulse 2s ease-in-out infinite;
-}
-
-.btn-special:disabled {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    animation: none;
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-special:not(:disabled):hover {
-    background: linear-gradient(135deg, #ffed4e 0%, #ff8787 100%) !important;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
-}
-
-@keyframes specialButtonPulse {
-    0%, 100% {
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
     }
 }

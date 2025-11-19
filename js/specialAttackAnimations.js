@@ -6,10 +6,6 @@
 
 // Benny Special Attack Animation (4 frames)
 async function playBennySpecialAttack(heroElement, enemyElement) {
-    if (!heroElement || !enemyElement) {
-        console.error('Missing hero or enemy element for special attack animation.');
-        return;
-    }
     const frames = [
         'assets/special-attacks/benny/_0000_Layer-1.png',
         'assets/special-attacks/benny/_0001_Layer-2.png',
@@ -39,11 +35,9 @@ async function playBennySpecialAttack(heroElement, enemyElement) {
     }
     
     // Flash effect on enemy
-    if (enemyElement) {
-        enemyElement.style.filter = 'brightness(2) saturate(0)';
-        await new Promise(resolve => setTimeout(resolve, 100));
-        enemyElement.style.filter = '';
-    }
+    enemyElement.style.filter = 'brightness(2) saturate(0)';
+    await new Promise(resolve => setTimeout(resolve, 100));
+    enemyElement.style.filter = '';
     
     // Remove effect
     attackEffect.remove();
@@ -80,11 +74,9 @@ async function playLunaSpecialAttack(heroElement, enemyElement) {
     }
     
     // Flash effect on enemy
-    if (enemyElement) {
-        enemyElement.style.filter = 'brightness(2) saturate(0)';
-        await new Promise(resolve => setTimeout(resolve, 100));
-        enemyElement.style.filter = '';
-    }
+    enemyElement.style.filter = 'brightness(2) saturate(0)';
+    await new Promise(resolve => setTimeout(resolve, 100));
+    enemyElement.style.filter = '';
     
     // Remove effect
     attackEffect.remove();
@@ -121,11 +113,9 @@ async function playNovaSpecialAttack(heroElement, enemyElement) {
     }
     
     // Flash effect on enemy
-    if (enemyElement) {
-        enemyElement.style.filter = 'brightness(2) saturate(0)';
-        await new Promise(resolve => setTimeout(resolve, 100));
-        enemyElement.style.filter = '';
-    }
+    enemyElement.style.filter = 'brightness(2) saturate(0)';
+    await new Promise(resolve => setTimeout(resolve, 100));
+    enemyElement.style.filter = '';
     
     // Remove effect
     attackEffect.remove();
