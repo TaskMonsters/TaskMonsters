@@ -417,7 +417,7 @@ async function playFireballAnimation(startElement, targetElement) {
     projectile.classList.remove('hidden');
 
     // Use new single fireball sprite
-    projectile.style.backgroundImage = 'url("assets/battle-items/fireball.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/fireball.png")';
     projectile.style.backgroundSize = 'contain';
     
     // Rotate fireball for effect
@@ -563,7 +563,7 @@ async function playAsteroidAnimation(startElement, targetElement) {
     projectile.style.width = '50px';
     projectile.style.height = '50px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/projectiles/asteroid-projectile.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/asteroid.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -620,7 +620,7 @@ async function playPricklerAnimation(startElement, targetElement) {
     projectile.style.width = '40px';
     projectile.style.height = '40px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/battle-items/prickler/prickler.png")';
+    projectile.style.backgroundImage = 'url("assets/projectiles/prickler.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.zIndex = '1000';
@@ -728,18 +728,8 @@ async function playFreezeAnimation(startElement, targetElement) {
     projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
     projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
 
-    // Ice shot frames (8-frame animation)
-    const shotFrames = [
-        'assets/battle-items/freeze/_0000_Layer-1.png',
-        'assets/battle-items/freeze/_0001_Layer-2.png',
-        'assets/battle-items/freeze/_0002_Layer-3.png',
-        'assets/battle-items/freeze/_0003_Layer-4.png',
-        'assets/battle-items/freeze/_0004_Layer-5.png',
-        'assets/battle-items/freeze/_0005_Layer-6.png',
-        'assets/battle-items/freeze/_0006_Layer-7.png',
-        'assets/battle-items/freeze/_0007_Layer-8.png'
-    ];
-    let frameIndex = 0;
+    // Use single freeze projectile image
+    projectile.style.backgroundImage = 'url("assets/projectiles/freeze.png")';
 
     // Animate projectile movement
     const duration = 700;
@@ -760,9 +750,8 @@ async function playFreezeAnimation(startElement, targetElement) {
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
             
-            // Cycle through animation frames
-            frameIndex = Math.floor((elapsed / 100) % shotFrames.length);
-            projectile.style.backgroundImage = `url('${shotFrames[frameIndex]}')`;
+            // Rotate freeze projectile
+            projectile.style.transform = `rotate(${progress * 360}deg)`;
 
             if (progress < 1) {
                 requestAnimationFrame(animate);
@@ -934,15 +923,17 @@ function buyBattleItem(itemKey, cost) {
 // Export to global scope
 window.showBattle = showBattle;
 window.updateBattleUI = updateBattleUI;
-window.hideBattle = hideBattle;
+// window.hideBattle = hideBattle; // Function not defined, commented out to prevent error
 window.addBattleLog = addBattleLog;
-window.animateFireball = animateFireball;
+// Export projectile animation functions
 window.playFireballAnimation = playFireballAnimation;
 window.playWaveformAnimation = playWaveformAnimation;
 window.playSparkAnimation = playSparkAnimation;
 window.playPricklerAnimation = playPricklerAnimation;
 window.playFreezeAnimation = playFreezeAnimation;
-window.updateBattleButtons = updateBattleButtons;
+window.playAsteroidAnimation = playAsteroidAnimation;
+window.playBlueFlameAnimation = playBlueFlameAnimation;
+window.playProcrastinationGhostAnimation = playProcrastinationGhostAnimation;
 window.updateBattleShopDisplay = updateBattleShopDisplay;
 window.updateBattleInventoryDisplay = updateBattleInventoryDisplay;
 window.buyBattleItem = buyBattleItem;
@@ -1159,7 +1150,7 @@ async function playBlueFlameAnimation(startElement, targetElement) {
     projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
     projectile.style.width = '32px';
     projectile.style.height = '32px';
-    projectile.style.backgroundImage = 'url(assets/blue-flame-spritesheet.png)';
+    projectile.style.backgroundImage = 'url(assets/projectiles/blue-flame.png)';
     projectile.style.backgroundSize = '128px 32px'; // 4 frames
     projectile.style.imageRendering = 'pixelated';
     projectile.style.zIndex = '1000';
@@ -1195,7 +1186,7 @@ async function playProcrastinationGhostAnimation(startElement, targetElement) {
     projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
     projectile.style.width = '32px';
     projectile.style.height = '32px';
-    projectile.style.backgroundImage = 'url(assets/procrastination-ghost-projectile.png)';
+    projectile.style.backgroundImage = 'url(assets/projectiles/ghost.png)';
     projectile.style.backgroundSize = 'contain';
     projectile.style.imageRendering = 'pixelated';
     projectile.style.zIndex = '1000';

@@ -2783,6 +2783,7 @@
     justify-content: center;
     z-index: 10000;
     animation: fadeIn 0.3s ease;
+    visibility: visible !important; /* Override document-level hiding */
 }
 
 .quest-prompt-modal.hidden {
@@ -3495,6 +3496,7 @@
             <div class="shop-sub-tabs">
                 <button class="pill-tab-shop active" onclick="switchShopSubTab('shop')">Shop</button>
                 <button class="pill-tab-shop" onclick="switchShopSubTab('owned')">Inventory</button>
+                <button class="pill-tab-shop" onclick="switchShopSubTab('skins')">Skins</button>
                 <button class="pill-tab-shop" onclick="switchShopSubTab('themes')">Themes</button>
             </div>
 
@@ -3530,6 +3532,25 @@
                         <!-- Owned items will be rendered here -->
                     </div>
                 </div>
+            </div>
+
+            <!-- Skins Sub-Tab Content -->
+            <div id="skinsSubTabContent" class="shop-sub-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🎨 Monster Skins - Shop</div>
+                        <span id="skinsShopCount" class="item-count-badge">9 skins</span>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="text-align: center; color: #666; margin-bottom: 10px;">Customize your monster's appearance! Most skins unlock at Level 15.</p>
+                        <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsSkins">0</span></p>
+                        <div id="skinsShopGrid" class="shop-items-grid">
+                            <!-- Skins shop will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Inventory section removed - equip/unequip now happens directly on shop cards -->
             </div>
 
             <!-- Themes Sub-Tab Content -->
@@ -3769,6 +3790,8 @@
             notifications: false,
             selectedQuickTasks: [],
             completedQuickTasks: [],
+            ownedSkins: [],
+            equippedSkinId: null,
             lastQuickTasksDate: null,
             dailyChallenge: null,
             dailyChallengeCompleted: false,
@@ -4022,6 +4045,14 @@
                     gameState.totalTasksCreated = gameState.completedTasks;
                 }
                 
+                // Migration: Initialize skins system for existing users
+                if (!gameState.ownedSkins) {
+                    gameState.ownedSkins = [];
+                }
+                if (typeof gameState.equippedSkinId === 'undefined') {
+                    gameState.equippedSkinId = null;
+                }
+                
                 // Migration: Initialize new stats for existing users
                 if (typeof gameState.battlesWon === 'undefined') {
                     gameState.battlesWon = 0;
@@ -4239,8 +4270,10 @@
             const completedTasks = gameState.completedTasks || 0;
             const currentStreak = gameState.currentStreak || 0;
             const level = gameState.jerryLevel || 1;
-            const currentXP = gameState.jerryXP || 0;
-            const xpToNext = 100 * level; // Updated to 100s scale
+            
+            // XP System: XP resets on level-up (prevents negative values)
+            const currentXP = Math.max(0, gameState.jerryXP || 0); // Clamp to prevent negative
+            const xpToNext = gameState.jerryXPToNext || Math.floor(100 * Math.pow(1.2, level - 1));
             
             // Energy (Health)
             document.getElementById('energyFill').style.width = `${health}%`;
@@ -4258,10 +4291,10 @@
             
             // Level text (now handled in unified levelLabel above)
             
-            // XP Bar
+            // XP Bar - Simple display (XP resets on level-up)
             const xpPercentage = Math.min(100, (currentXP / xpToNext) * 100);
             document.getElementById('xpFill').style.width = `${xpPercentage}%`;
-            document.getElementById('xpText').textContent = `${currentXP.toLocaleString()} / ${xpToNext.toLocaleString()} XP`;
+            document.getElementById('xpText').textContent = `${Math.floor(currentXP).toLocaleString()} / ${Math.floor(xpToNext).toLocaleString()} XP`;
             
             // Calculate comprehensive stats
             const activeTasks = gameState.tasks.filter(task => !task.completed);
@@ -4327,7 +4360,7 @@
             if (currentStreakEl) currentStreakEl.textContent = currentStreak;
             if (bestStreakEl) bestStreakEl.textContent = bestStreak;
             if (rockLevelEl) rockLevelEl.textContent = rockLevel;
-            if (experienceEl) experienceEl.textContent = `${currentXP}/${nextLevelXP} XP`;
+            if (experienceEl) experienceEl.textContent = `${Math.floor(currentXP)}/${Math.floor(xpToNext)} XP`;
             if (achievementsEl) achievementsEl.textContent = `${unlockedAchievements}/${achievements.length}`;
             
             // Update new battle and quest stats
@@ -4456,17 +4489,32 @@
 
         // Helper functions
         function getCategoryPhrases(category) {
-            return categoryPhrases[category] || categoryPhrases.generic;
+            const phrases = categoryPhrases[category] || categoryPhrases.generic;
+            // Extra safety: ensure we always return an array
+            if (!phrases || !Array.isArray(phrases) || phrases.length === 0) {
+                console.warn('[getCategoryPhrases] Invalid category or empty phrases for:', category);
+                return categoryPhrases.generic || ['Keep going! ⚡'];
+            }
+            return phrases;
         }
 
         function getRandomPhrase(category) {
             const phrases = getCategoryPhrases(category);
+            // Extra safety: validate phrases array
+            if (!phrases || phrases.length === 0) {
+                console.warn('[getRandomPhrase] No phrases available for category:', category);
+                return 'Keep going! ⚡';
+            }
             const phrase = phrases[Math.floor(Math.random() * phrases.length)];
             return userName ? phrase.replace("{name}", userName) : phrase.replace("{name}", "");
         }
 
         function showCategoryTooltip(category) {
             const tooltip = document.getElementById('taskPalTooltip');
+            if (!tooltip) {
+                console.warn('[showCategoryTooltip] Tooltip element not found');
+                return;
+            }
             const message = getRandomPhrase(category);
             tooltip.textContent = message.trim();
             tooltip.classList.add('visible');
@@ -4533,8 +4581,15 @@
 
         let phraseHistory = { happy: [], sad: [], mad: [] };
 
-        function getRandomPhrase(mood) {
+        function getRandomMoodPhrase(mood) {
             const phrases = moodPhrases[mood];
+            
+            // Validate that phrases exist for this mood
+            if (!phrases || !Array.isArray(phrases) || phrases.length === 0) {
+                console.warn('[getRandomMoodPhrase] No phrases found for mood:', mood);
+                return 'Keep going! 💪';
+            }
+            
             let availablePhrases = phrases.filter(p => !phraseHistory[mood].includes(p));
             
             if (availablePhrases.length === 0) {
@@ -4583,9 +4638,9 @@
             
             let message;
             if (moodKey === 'sad' || moodKey === 'discouraged') {
-                message = getRandomPhrase('sad'); // Use 'sad' phrases for 'discouraged'
+                message = getRandomMoodPhrase('sad'); // Use 'sad' phrases for 'discouraged'
             } else {
-                message = getRandomPhrase(moodKey);
+                message = getRandomMoodPhrase(moodKey);
             }
             tooltip.innerText = message;
             setTimeout(() => tooltip.classList.remove("visible"), 10000);
@@ -5691,6 +5746,10 @@
                 gameState.dailyChallengeCompleted = true;
                 gameState.taskPoints += challenge.reward;
                 
+                // CRITICAL FIX: Award XP and XP Coins for daily challenge completion
+                addJerryXP(challenge.reward); // Adds to jerryXP (XP Coins) and triggers level-up check
+                console.log(`✅ Daily Challenge Complete! +${challenge.reward} XP and XP Coins awarded`);
+                
                 // Track challenge completion for achievements
                 if (window.achievementTracker) {
                     window.achievementTracker.trackChallengeComplete();
@@ -6309,6 +6368,8 @@
             const focusTimerMonsterContainer = document.getElementById('focusTimerMonsterContainer');
             if (!focusTimerMonsterSprite || !focusTimerMonsterContainer) return;
             
+            // Use equipped skin if available, otherwise use default monster
+            const appearance = window.getActiveHeroAppearance ? window.getActiveHeroAppearance() : null;
             const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
 
             if (state === 'active') {
@@ -6316,8 +6377,14 @@
                 focusTimerMonsterContainer.style.display = 'flex';
                 
                 // Start with walk animation
-                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                if (appearance && appearance.isSkin) {
+                    focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
+                    const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
+                    focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
+                } else {
+                    focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
+                    focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                }
                 focusAnimationState = 'walk';
                 
                 // Clear any existing animation switching loop
@@ -6331,18 +6398,36 @@
                     
                     if (focusAnimationState === 'walk') {
                         // Switch to jump
-                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
-                        focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                        if (appearance && appearance.isSkin) {
+                            focusTimerMonsterSprite.src = appearance.animations.jump || appearance.animations.idle;
+                            const frameCount = appearance.frameCount.jump || appearance.frameCount.idle;
+                            focusTimerMonsterSprite.style.animation = `hero-jump-anim 0.8s steps(${frameCount}) infinite`;
+                        } else {
+                            focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
+                            focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                        }
                         focusAnimationState = 'jump';
                     } else if (focusAnimationState === 'jump') {
                         // Switch to idle
-                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                        focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                        if (appearance && appearance.isSkin) {
+                            focusTimerMonsterSprite.src = appearance.animations.idle;
+                            const frameCount = appearance.frameCount.idle;
+                            focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
+                        } else {
+                            focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                            focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                        }
                         focusAnimationState = 'idle';
                     } else {
                         // Switch back to walk
-                        focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                        focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                        if (appearance && appearance.isSkin) {
+                            focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
+                            const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
+                            focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
+                        } else {
+                            focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
+                            focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                        }
                         focusAnimationState = 'walk';
                     }
                 }, 2000); // Change animation every 2 seconds
@@ -6354,8 +6439,14 @@
                 }
                 
                 // Return to idle animation
-                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                if (appearance && appearance.isSkin) {
+                    focusTimerMonsterSprite.src = appearance.animations.idle;
+                    const frameCount = appearance.frameCount.idle;
+                    focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
+                } else {
+                    focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                    focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                }
                 
                 // Hide the monster container
                 focusTimerMonsterContainer.style.display = 'none';
@@ -6394,6 +6485,11 @@
 
         function startFocusTimer() {
             if (focusActive && !focusPaused) return;
+            
+            // Stop any existing alarm from previous session
+            if (window.audioManager) {
+                window.audioManager.stopFocusAlarm();
+            }
             
             const durationInput = document.getElementById('focusDuration');
             const minutes = parseInt(durationInput.value, 10);
@@ -6547,9 +6643,9 @@
             if (pauseBtn) pauseBtn.style.display = 'none';
             
             if (completed) {
-                // Play quick task completion sound
+                // Start looping alarm when timer completes
                 if (window.audioManager) {
-                    window.audioManager.playSound('taskComplete', 0.7);
+                    window.audioManager.playFocusAlarm();
                 }
                 
                 showSuccessMessage('🎉 Focus Session Complete!', `Great work! You earned ${focusXPAwarded} XP!`);
@@ -6567,6 +6663,10 @@
                     }
                 }
             } else {
+                // Stop alarm if user manually stops timer
+                if (window.audioManager) {
+                    window.audioManager.stopFocusAlarm();
+                }
                 showSuccessMessage('⏱️ Focus Timer Stopped');
             }
         }
@@ -6663,8 +6763,24 @@
                 updateShopDisplay();
             } else if (subTabName === 'owned') {
                 updateOwnedItemsDisplay();
+            } else if (subTabName === 'skins') {
+                updateSkinsDisplay();
             } else if (subTabName === 'themes') {
                 updateThemesDisplay();
+            }
+        }
+        
+        // Update skins display
+        function updateSkinsDisplay() {
+            // Update XP display
+            const xpCoinsSkins = document.getElementById('xpCoinsSkins');
+            if (xpCoinsSkins) {
+                xpCoinsSkins.textContent = gameState.jerryXP || 0;
+            }
+            
+            // Render skins shop (inventory section removed)
+            if (window.skinsManager) {
+                window.skinsManager.renderSkinsShop();
             }
         }
         
@@ -7529,15 +7645,14 @@
             }
             gameState.completedTasksToday++;
             
-            // Update streak
+            // Update streak (for tracking only, no multiplier)
             updateStreak();
             
-            // Calculate points with streak multiplier
+            // Calculate points (no multiplier)
             const basePoints = task.points || 5;
-            const multipliedPoints = Math.floor(basePoints * gameState.streakMultiplier);
             
             // Add points and health
-            gameState.taskPoints += multipliedPoints;
+            gameState.taskPoints += basePoints;
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
             
@@ -7582,8 +7697,7 @@
             
             // Show completion message with random variation
             const randomMsg = getRandomCompletionMessage(false);
-            const streakBonus = gameState.streakMultiplier > 1 ? `${gameState.streakMultiplier}x streak! ` : '';
-            showSuccessMessage(`${randomMsg.emoji} ${randomMsg.message}`, `${streakBonus}+${multipliedPoints} points earned!`);
+            showSuccessMessage(`${randomMsg.emoji} ${randomMsg.message}`, `+${basePoints} points earned!`);
             
             saveGameState();
             
@@ -7615,6 +7729,15 @@
                     console.warn('Battle trigger system not loaded yet');
                 }
             }, 2000); // Wait 2 seconds after confetti
+            
+            // Trigger Merlin quest giver after task completion
+            setTimeout(() => {
+                if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
+                    window.triggerMerlinQuestFromTaskCompletion();
+                } else {
+                    console.warn('Quest giver trigger system not loaded yet');
+                }
+            }, 5000); // Wait 5 seconds (after battle trigger)
             
             // Show dialogue after a brief delay
             setTimeout(() => {
@@ -7729,15 +7852,14 @@
             }
             gameState.completedTasksToday++;
             
-            // Update streak
+            // Update streak (for tracking only, no multiplier)
             updateStreak();
             
-            // Calculate points with streak multiplier
+            // Calculate points (no multiplier)
             const basePoints = task.points || 3;
-            const multipliedPoints = Math.floor(basePoints * gameState.streakMultiplier);
             
             // Add points and health
-            gameState.taskPoints += multipliedPoints;
+            gameState.taskPoints += basePoints;
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
             
@@ -7763,8 +7885,7 @@
             
             // Show completion message with random variation
             const randomMsg = getRandomCompletionMessage(true);
-            const streakBonus = gameState.streakMultiplier > 1 ? `${gameState.streakMultiplier}x streak! ` : '';
-            showSuccessMessage(`${randomMsg.emoji} ${randomMsg.message}`, `${streakBonus}+${multipliedPoints} points earned!`);
+            showSuccessMessage(`${randomMsg.emoji} ${randomMsg.message}`, `+${basePoints} points earned!`);
             
             // Track completed quick task
             if (!gameState.completedQuickTasks) {
@@ -7817,6 +7938,15 @@
                     console.warn('Battle trigger system not loaded yet');
                 }
             }, 2000); // Wait 2 seconds after confetti
+            
+            // Trigger Merlin quest giver after quick task completion
+            setTimeout(() => {
+                if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
+                    window.triggerMerlinQuestFromTaskCompletion();
+                } else {
+                    console.warn('Quest giver trigger system not loaded yet');
+                }
+            }, 5000); // Wait 5 seconds (after battle trigger)
         }
 
         function removeQuickTask(taskId) {
@@ -7862,41 +7992,50 @@
         }
 
         function updateStreakMultiplier() {
-            if (gameState.currentStreak >= 7) {
-                gameState.streakMultiplier = 3;
-            } else if (gameState.currentStreak >= 3) {
-                gameState.streakMultiplier = 2;
-            } else {
-                gameState.streakMultiplier = 1;
-            }
+            // Streak multiplier disabled - always 1x
+            gameState.streakMultiplier = 1;
         }
 
         function addJerryXP(xp) {
             gameState.jerryXP += xp;
             
+            // Check for level ups
+            let leveledUp = false;
             while (gameState.jerryXP >= gameState.jerryXPToNext) {
                 levelUpJerry();
+                leveledUp = true;
             }
             
             // Refresh shop display to update affordability
             if (typeof updateShopDisplay === 'function') {
                 updateShopDisplay();
             }
+            
+            // Update UI to reflect new XP
+            if (!leveledUp) {
+                updateUI();
+            }
+            saveGameState();
         }
 
         function levelUpJerry() {
-            // Don't reset XP Coins - users keep their balance
+            // Deduct XP for level-up (prevents negative XP)
+            gameState.jerryXP -= gameState.jerryXPToNext;
             gameState.jerryLevel++;
-            gameState.jerryXP += 20; // Level-up bonus
             
-            // Updated to 100s scale: level * 100
-            gameState.jerryXPToNext = gameState.jerryLevel * 100;
+            // Calculate next level threshold with exponential curve
+            gameState.jerryXPToNext = Math.floor(100 * Math.pow(1.2, gameState.jerryLevel - 1));
             
-            showSuccessMessage(`🎉 ${gameState.rockName} leveled up!`, `Now Level ${gameState.jerryLevel}! +20 XP Coins!`);
+            console.log(`🎉 Level Up! Level ${gameState.jerryLevel}, Next threshold: ${gameState.jerryXPToNext}`);
+            
+            showSuccessMessage(`🎉 ${gameState.rockName} leveled up!`, `Now Level ${gameState.jerryLevel}!`);
             
             if (window.fireConfetti) {
                 window.fireConfetti();
             }
+            
+            updateUI();
+            saveGameState();
         }
 
         // Duplicate buyItem function removed - consolidated into single function above
@@ -8214,12 +8353,16 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                // Load state first
-                loadGameState();
-                
-                // Reveal UI now that state is loaded (prevents flash)
-                document.documentElement.style.visibility = 'visible';
-                generateDailyChallenge();
+                // Use the app initializer for proper sequencing
+                if (window.appInitializer) {
+                    window.appInitializer.initialize();
+                } else {
+                    console.error('[AppInit] App initializer not loaded - using fallback');
+                    // Fallback to basic initialization
+                    loadGameState();
+                    document.documentElement.style.visibility = 'visible';
+                    generateDailyChallenge();
+                }
                 
                 // Initialize selectedQuickTasks if it doesn't exist
                 if (!gameState.selectedQuickTasks) {
@@ -8354,7 +8497,7 @@
 
 
     <!-- Task Monsters Game Modules -->
-    <script type="module" src="js/main.js"></script>
+    <!-- <script type="module" src="js/main.js"></script> --> <!-- Removed: Not part of Task Monsters, causes loading errors -->
     
     <!-- Game Message Display -->
     <div id="gameMessage" class="hidden"></div>
@@ -8372,6 +8515,9 @@
     <!-- Quest Tasks CSS -->
     <link rel="stylesheet" href="css/questTasks.css">
     
+    <!-- App Initializer - Disabled: Using inline checkOnboardingStatus instead -->
+    <!-- <script src="js/appInitializer.js"></script> -->
+    
     <!-- Background Manager for time-based backgrounds -->
     <script src="js/backgroundManager.js"></script>
     <script src="js/themeManager.js"></script>
@@ -8379,14 +8525,19 @@
     <!-- Audio Manager -->
     <script src="js/audioManager.js"></script>
     
+    <!-- Skins System -->
+    <script src="js/skinsConfig.js?v=3"></script>
+    <script src="js/skinsManager.js?v=3"></script>
+    
     <!-- Battle System Modules -->
     <script src="js/enemyAI.js"></script>
     <script src="js/enemy.js"></script>
     <script src="js/boss-enemies.js"></script>
     <script src="js/enemy-init.js"></script>
     <script src="js/battleUI.js"></script>
-    <script src="js/specialAttackAnimations.js"></script>
-    <script src="js/monsterSpecialAttacks.js"></script>
+    <script src="js/projectileSystem.js"></script>
+    <script src="js/heroRollAnimation.js"></script>
+    <script src="js/monsterSpecialAttacksUnified.js"></script>
     <script src="js/specialAttackHandler.js"></script>
     <script src="js/medusaProjectile.js"></script>
     <script src="js/bossProjectiles.js"></script>
@@ -8395,7 +8546,7 @@
     <script src="js/soundIntegration.js"></script>
     <script src="js/battleInit.js"></script>
     <script src="js/questTaskManager.js"></script>
-    <script src="js/questGiver.js?v=2"></script>
+    <script src="js/questGiver.js?v=7"></script>
     <script src="js/moodFilter.js"></script>
     <script src="js/merlinModal.js"></script>
     <script src="js/notificationManager.js"></script>

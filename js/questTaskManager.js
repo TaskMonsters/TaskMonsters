@@ -54,6 +54,11 @@ class QuestTaskManager {
 
         task.completed = true;
 
+        // Play quest task completion sound
+        if (window.audioManager) {
+            window.audioManager.playSound('quest_complete', 0.8);
+        }
+        
         // Award XP using the proper function
         if (typeof window.addJerryXP === 'function') {
             window.addJerryXP(task.xp);

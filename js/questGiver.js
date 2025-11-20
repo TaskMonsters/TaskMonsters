@@ -8,8 +8,10 @@ class QuestGiver {
         this.questDatabase = this.initializeQuests();
         this.quizDatabase = this.initializeQuizzes();
         this.activeQuest = null;
-        this.lastQuestTime = null;
-        this.questCooldown = 3600000; // 1 hour in milliseconds
+        // Load last quest time from localStorage
+        const stored = localStorage.getItem('lastQuestGiverTimestamp');
+        this.lastQuestTime = stored ? parseInt(stored, 10) : null;
+        this.questCooldown = 300000; // 5 minutes in milliseconds
         this.questHeroAnimationInterval = null;
         this.questCrowAnimationInterval = null;
     }
@@ -107,7 +109,29 @@ class QuestGiver {
             { id: 'q67', text: 'Close your eyes and feel your heartbeat', category: 'Grounding', difficulty: 'Easy', xp: 10, duration: 24 },
             { id: 'q68', text: 'Imagine a calm place and picture yourself there', category: 'Mindfulness', difficulty: 'Easy', xp: 15, duration: 24 },
             { id: 'q69', text: 'Wash your face or hands with warm water', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
-            { id: 'q70', text: 'Smile at your Task Monster', category: 'Creative', difficulty: 'Easy', xp: 10, duration: 24 }
+            { id: 'q70', text: 'Smile at your Task Monster', category: 'Creative', difficulty: 'Easy', xp: 10, duration: 24 },
+
+            // NEW QUESTS - Universal Low-Friction Tasks (q71-q90)
+            { id: 'q71', text: 'Take 5 minutes to clean your phone screen', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q72', text: 'Sort one small folder on your computer or device', category: 'Productivity', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q73', text: 'Write down one clear goal for tomorrow', category: 'Productivity', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q74', text: 'Spend 3 minutes listing things you are grateful for', category: 'Mindfulness', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q75', text: 'Unsubscribe from one email list you never read', category: 'Digital-Clean', difficulty: 'Easy', xp: 20, duration: 24 },
+            { id: 'q76', text: 'Delete 5 unnecessary photos or screenshots from your phone', category: 'Digital-Clean', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q77', text: 'Turn off notifications for one distracting app', category: 'Self-Care', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q78', text: 'Organize the icons on your phone\'s home screen', category: 'Digital-Clean', difficulty: 'Medium', xp: 20, duration: 48 },
+            { id: 'q79', text: 'Spend 2 minutes focusing only on your breathing', category: 'Mindfulness', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q80', text: 'Write a positive note or affirmation to yourself', category: 'Mindfulness', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q81', text: 'Organize one drawer, shelf, or small space in your home', category: 'Self-Care', difficulty: 'Medium', xp: 25, duration: 48 },
+            { id: 'q82', text: 'Choose one task on your to-do list and break it into 3 smaller steps', category: 'Productivity', difficulty: 'Medium', xp: 20, duration: 48 },
+            { id: 'q83', text: 'Write a short journal entry about how your day went', category: 'Creative', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q84', text: 'Find a quote that inspires you and save or write it down', category: 'Creative', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q85', text: 'Spend 5 minutes sitting quietly with no screens', category: 'Self-Care', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q86', text: 'Change one important password to something more secure', category: 'Digital-Clean', difficulty: 'Medium', xp: 25, duration: 48 },
+            { id: 'q87', text: 'Reply to one message or email you have been avoiding', category: 'Productivity', difficulty: 'Medium', xp: 20, duration: 48 },
+            { id: 'q88', text: 'Make a simple list of three things you want to improve this week', category: 'Productivity', difficulty: 'Easy', xp: 15, duration: 24 },
+            { id: 'q89', text: 'Prepare a glass of water and drink it slowly and mindfully', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
+            { id: 'q90', text: 'Step away from all screens for 60 seconds and look around your space', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 }
         ];
     }
 
@@ -195,7 +219,73 @@ class QuestGiver {
             
             // NEW QUIZZES - Food & Culture
             { id: 'quiz54', question: 'What is the main ingredient in traditional Japanese miso soup?', options: ['Tofu', 'Seaweed', 'Fermented soybean paste', 'Rice'], correct: 2, xpReward: 20, xpPenalty: 10 },
-            { id: 'quiz55', question: 'Which country is the largest producer of coffee in the world?', options: ['Colombia', 'Vietnam', 'Brazil', 'Ethiopia'], correct: 2, xpReward: 15, xpPenalty: 10 }
+            { id: 'quiz55', question: 'Which country is the largest producer of coffee in the world?', options: ['Colombia', 'Vietnam', 'Brazil', 'Ethiopia'], correct: 2, xpReward: 15, xpPenalty: 10 },
+
+            // NEW QUIZZES - Science & Nature (quiz56-quiz65)
+            { id: 'quiz56', question: 'Which layer of the atmosphere is closest to Earth\'s surface?', options: ['Stratosphere', 'Troposphere', 'Mesosphere', 'Thermosphere'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz57', question: 'What do bees collect from flowers to make honey?', options: ['Water', 'Sap', 'Nectar', 'Dust'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz58', question: 'Which scientist proposed the three laws of motion?', options: ['Albert Einstein', 'Isaac Newton', 'Galileo Galilei', 'Niels Bohr'], correct: 1, xpReward: 20, xpPenalty: 10 },
+            { id: 'quiz59', question: 'What is the main gas plants release during photosynthesis?', options: ['Oxygen', 'Carbon Dioxide', 'Nitrogen', 'Helium'], correct: 0, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz60', question: 'What is the boiling point of water at sea level?', options: ['50°C', '75°C', '100°C', '150°C'], correct: 2, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz61', question: 'Which blood type is known as the universal donor?', options: ['A+', 'O−', 'AB+', 'B−'], correct: 1, xpReward: 20, xpPenalty: 10 },
+            { id: 'quiz62', question: 'What part of the human eye controls the amount of light that enters?', options: ['Lens', 'Retina', 'Iris', 'Cornea'], correct: 2, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz63', question: 'Which metal is most commonly used for electrical wiring?', options: ['Gold', 'Iron', 'Copper', 'Aluminum'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz64', question: 'Which vitamin is mainly found in citrus fruits like oranges?', options: ['Vitamin A', 'Vitamin B12', 'Vitamin C', 'Vitamin D'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz65', question: 'What is the hardest naturally occurring rock?', options: ['Granite', 'Obsidian', 'Diamond', 'Quartzite'], correct: 2, xpReward: 15, xpPenalty: 10 },
+
+            // NEW QUIZZES - Geography (quiz66-quiz75)
+            { id: 'quiz66', question: 'What is the capital of Japan?', options: ['Osaka', 'Kyoto', 'Tokyo', 'Sapporo'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz67', question: 'Which country is famous for the landmark Christ the Redeemer?', options: ['Spain', 'Brazil', 'Portugal', 'Mexico'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz68', question: 'Which US state is known as "The Sunshine State"?', options: ['California', 'Florida', 'Arizona', 'Texas'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz69', question: 'Which city is known as the "Big Apple"?', options: ['Los Angeles', 'Chicago', 'New York City', 'Boston'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz70', question: 'Which continent is the driest on Earth?', options: ['Africa', 'Antarctica', 'Australia', 'Asia'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz71', question: 'Which country is home to the ancient city of Petra?', options: ['Egypt', 'Jordan', 'Greece', 'Turkey'], correct: 1, xpReward: 20, xpPenalty: 10 },
+            { id: 'quiz72', question: 'Which river flows through the city of London?', options: ['Seine', 'Thames', 'Danube', 'Rhine'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz73', question: 'What is the capital of Canada?', options: ['Toronto', 'Vancouver', 'Ottawa', 'Montreal'], correct: 2, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz74', question: 'Which country is known for the Taj Mahal?', options: ['India', 'Pakistan', 'Bangladesh', 'Sri Lanka'], correct: 0, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz75', question: 'Which continent is home to the Amazon rainforest?', options: ['Africa', 'Asia', 'South America', 'Australia'], correct: 2, xpReward: 10, xpPenalty: 5 },
+
+            // NEW QUIZZES - History (quiz76-quiz80)
+            { id: 'quiz76', question: 'In which year did humans first land on the Moon?', options: ['1965', '1969', '1972', '1975'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz77', question: 'Who was the first President of the United States?', options: ['George Washington', 'Thomas Jefferson', 'John Adams', 'James Madison'], correct: 0, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz78', question: 'Who is credited with inventing the printing press in Europe?', options: ['Johannes Gutenberg', 'Leonardo da Vinci', 'Galileo Galilei', 'Martin Luther'], correct: 0, xpReward: 20, xpPenalty: 10 },
+            { id: 'quiz79', question: 'Which ancient civilization built the pyramids at Giza?', options: ['Greek', 'Roman', 'Egyptian', 'Persian'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz80', question: 'What event started on October 29, 1929, known as "Black Tuesday"?', options: ['World War I', 'The Great Depression', 'World War II', 'The Cold War'], correct: 1, xpReward: 20, xpPenalty: 10 },
+
+            // NEW QUIZZES - Arts & Culture (quiz81-quiz85)
+            { id: 'quiz81', question: 'Who wrote the novel "Pride and Prejudice"?', options: ['Jane Austen', 'Charlotte Brontë', 'Emily Dickinson', 'Mary Shelley'], correct: 0, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz82', question: 'Which artist is famous for cutting off part of his own ear?', options: ['Pablo Picasso', 'Vincent van Gogh', 'Claude Monet', 'Salvador Dalí'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz83', question: 'In music, how many notes are in a standard major scale?', options: ['5', '6', '7', '8'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz84', question: 'Which Shakespeare play features the characters Rosencrantz and Guildenstern?', options: ['Hamlet', 'Macbeth', 'Othello', 'King Lear'], correct: 0, xpReward: 20, xpPenalty: 10 },
+            { id: 'quiz85', question: 'What is the term for a painting done directly on a wall or ceiling?', options: ['Fresco', 'Mosaic', 'Etching', 'Relief'], correct: 0, xpReward: 15, xpPenalty: 10 },
+
+            // NEW QUIZZES - Technology (quiz86-quiz90)
+            { id: 'quiz86', question: 'What does "URL" stand for?', options: ['Universal Record Link', 'Uniform Resource Locator', 'Unified Routing List', 'Universal Routing Locator'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz87', question: 'Which company created the Windows operating system?', options: ['Apple', 'Microsoft', 'IBM', 'Google'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz88', question: 'What does "AI" stand for in computing?', options: ['Automated Input', 'Artificial Intelligence', 'Advanced Interface', 'Automated Internet'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz89', question: 'Which social media platform is represented by a blue bird logo?', options: ['Instagram', 'Twitter/X', 'TikTok', 'Snapchat'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz90', question: 'What device is used to input handwritten or drawn content onto a computer screen?', options: ['Mouse', 'Keyboard', 'Graphics tablet', 'Joystick'], correct: 2, xpReward: 15, xpPenalty: 10 },
+
+            // NEW QUIZZES - Space & Physics (quiz91-quiz95)
+            { id: 'quiz91', question: 'Which planet is known for its prominent ring system?', options: ['Mars', 'Venus', 'Saturn', 'Mercury'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz92', question: 'What is a group of stars that forms a pattern called?', options: ['Galaxy', 'Nebula', 'Constellation', 'Cluster'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz93', question: 'Which planet is sometimes called Earth\'s twin due to its similar size?', options: ['Venus', 'Mars', 'Mercury', 'Neptune'], correct: 0, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz94', question: 'What is the name of our galaxy?', options: ['Andromeda', 'Whirlpool Galaxy', 'Milky Way', 'Sombrero Galaxy'], correct: 2, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz95', question: 'What phenomenon causes the apparent bending of light as it passes through water?', options: ['Reflection', 'Refraction', 'Diffraction', 'Absorption'], correct: 1, xpReward: 15, xpPenalty: 10 },
+
+            // NEW QUIZZES - Human Body (quiz96-quiz100)
+            { id: 'quiz96', question: 'Which organ in the human body is primarily responsible for detoxifying chemicals?', options: ['Heart', 'Liver', 'Lungs', 'Kidneys'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz97', question: 'What is the normal human body temperature in Celsius?', options: ['34°C', '36.5–37°C', '39°C', '41°C'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz98', question: 'What is the largest joint in the human body?', options: ['Shoulder', 'Knee', 'Elbow', 'Hip'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz99', question: 'Which sense is associated with the olfactory nerve?', options: ['Sight', 'Hearing', 'Smell', 'Taste'], correct: 2, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz100', question: 'Which part of the nervous system is made up of the brain and spinal cord?', options: ['Central nervous system', 'Peripheral nervous system', 'Autonomic nervous system', 'Somatic nervous system'], correct: 0, xpReward: 20, xpPenalty: 10 },
+
+            // NEW QUIZZES - Food & Cuisine (quiz101-quiz105)
+            { id: 'quiz101', question: 'What is the main ingredient in guacamole?', options: ['Tomato', 'Avocado', 'Cucumber', 'Peas'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz102', question: 'Sushi originates from which country?', options: ['China', 'Japan', 'Korea', 'Thailand'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz103', question: 'Which grain is traditionally used to make risotto?', options: ['Basmati rice', 'Arborio rice', 'Jasmine rice', 'Brown rice'], correct: 1, xpReward: 15, xpPenalty: 10 },
+            { id: 'quiz104', question: 'Which drink is made by fermenting grapes?', options: ['Beer', 'Wine', 'Cider', 'Vodka'], correct: 1, xpReward: 10, xpPenalty: 5 },
+            { id: 'quiz105', question: 'Which country is famous for originating pizza as we know it today?', options: ['France', 'Italy', 'Germany', 'United Kingdom'], correct: 1, xpReward: 10, xpPenalty: 5 }
         ];
     }
 
@@ -232,6 +322,8 @@ class QuestGiver {
     // Show quest giver UI
     show() {
         this.lastQuestTime = Date.now();
+        // Save to localStorage for persistence
+        localStorage.setItem('lastQuestGiverTimestamp', this.lastQuestTime.toString());
         const encounter = this.getRandomEncounter();
         this.activeQuest = encounter;
         
@@ -243,18 +335,19 @@ class QuestGiver {
             }
         }
         
-        // Show prompt modal
-        const modal = document.getElementById('questPromptModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-        } else {
-            // Fallback: show quest giver directly if modal missing
-            this.showQuestGiverDirect();
-        }
+        // Skip modal - go straight to quest/quiz
+        this.showQuestGiverDirect();
     }
     
     // Show quest giver directly (after modal Yes or fallback)
     showQuestGiverDirect() {
+        // CRITICAL: Ensure main app UI is visible before showing quest giver
+        // This prevents black screen when quest giver UI is displayed
+        if (document.documentElement.style.visibility !== 'visible') {
+            document.documentElement.style.visibility = 'visible';
+            console.log('✅ [showQuestGiverDirect] Main app UI revealed');
+        }
+        
         const questGiverUI = document.getElementById('questGiverUI');
         if (!questGiverUI) {
             console.error('Quest Giver UI not found');
@@ -387,9 +480,9 @@ class QuestGiver {
             console.error('Quest Task Manager not found');
         }
         
-        // Play quest complete sound
+        // Play quest accepted sound
         if (window.audioManager) {
-            window.audioManager.playSound('quest_complete', 0.8);
+            window.audioManager.playSound('quest_accepted', 0.8);
         }
         
         // Show confirmation
@@ -402,6 +495,13 @@ class QuestGiver {
         }
 
         this.close();
+        
+        // ENSURE MAIN APP UI IS ALWAYS VISIBLE after accepting quest
+        // This fixes the black screen issue
+        if (document.documentElement.style.visibility !== 'visible') {
+            document.documentElement.style.visibility = 'visible';
+            console.log('✅ Main app UI revealed after quest accepted');
+        }
     }
 
     // Decline quest
@@ -440,15 +540,19 @@ class QuestGiver {
                 window.addJerryXP(this.activeQuest.xpReward);
             } else {
                 console.error('addJerryXP function not found');
-            }      window.saveGameState();
-                }
-                
-                if (typeof window.updateUI === 'function') {
-                    window.updateUI();
-                }
-            } else {
-                console.error('addJerryXP function not found');
             }
+            
+            window.saveGameState();
+            
+            if (typeof window.updateUI === 'function') {
+                window.updateUI();
+            }
+            
+            // Play quiz won sound
+            if (window.audioManager) {
+                window.audioManager.playSound('quiz_won', 0.8);
+            }
+            
             alert(`✅ Correct! +${this.activeQuest.xpReward} XP`);
         } else {
             // Deduct XP
@@ -584,6 +688,13 @@ class QuestGiver {
             window.audioManager.stopMusic();
         }
         
+        // REVEAL MAIN APP UI after Quest Giver is dismissed
+        // This ensures no flickering - UI only shows after Quest Giver is handled
+        if (document.documentElement.style.visibility === 'hidden') {
+            document.documentElement.style.visibility = 'visible';
+            console.log('✅ Main app UI revealed after Quest Giver dismissed');
+        }
+        
         this.activeQuest = null;
     }
 }
@@ -630,22 +741,58 @@ function checkExpiredQuests() {
 // Check for expired quests every minute
 setInterval(checkExpiredQuests, 60000);
 
-// Trigger quest giver twice daily
+// Trigger quest giver every hour
 function triggerQuestGiver() {
     if (window.questGiver && window.questGiver.shouldAppear()) {
         window.questGiver.show();
     }
 }
 
-// Check every 30 minutes to see if it's time
-setInterval(triggerQuestGiver, 1800000);
-
-// Also check on page load (after a delay)
-setTimeout(() => {
-    if (window.questGiver && window.questGiver.shouldAppear()) {
-        window.questGiver.show();
+// Trigger Merlin quest from task completion
+function triggerMerlinQuestFromTaskCompletion() {
+    console.log('[Merlin] Trigger requested from task completion');
+    
+    // Check if battle is currently active
+    if (window.battleManager && window.battleManager.inBattle) {
+        console.log('[Merlin] Battle is active, quest giver will not trigger');
+        return;
     }
-}, 5000);
+    
+    if (!window.questGiver) {
+        console.log('[Merlin] Quest giver not initialized yet');
+        return;
+    }
+    
+    if (!window.questGiver.shouldAppear()) {
+        console.log('[Merlin] Quest giver not ready or cooldown active');
+        return;
+    }
+    
+    console.log('[Merlin] Showing quest giver from task completion');
+    setTimeout(() => {
+        // Double-check battle status before showing
+        if (window.battleManager && window.battleManager.inBattle) {
+            console.log('[Merlin] Battle started during delay, cancelling quest');
+            return;
+        }
+        window.questGiver.show();
+    }, 3000); // Show after 3 seconds (after confetti and battle check)
+}
+
+// Expose to global scope
+window.triggerMerlinQuestFromTaskCompletion = triggerMerlinQuestFromTaskCompletion;
+
+// Check every 30 minutes to see if it's time
+setInterval(triggerQuestGiver, 1800000); // 30 minutes
+
+// GATING LOGIC: Check immediately on page load (no delay)
+// This will be called by app initialization after DOM is ready
+window.checkQuestGiverOnLoad = function() {
+    if (window.questGiver && window.questGiver.shouldAppear()) {
+        return true; // Quest giver is due
+    }
+    return false; // No quest giver needed
+};
 
 
 // Quest prompt modal handlers
@@ -666,6 +813,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.classList.add('hidden');
             }
             
+            // ENSURE MAIN APP UI IS VISIBLE before showing quest giver
+            if (document.documentElement.style.visibility !== 'visible') {
+                document.documentElement.style.visibility = 'visible';
+                console.log('✅ Main app UI revealed before showing quest giver');
+            }
+            
             // Show quest giver
             if (window.questGiver) {
                 window.questGiver.showQuestGiverDirect();
@@ -683,6 +836,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Clear active quest
             if (window.questGiver) {
                 window.questGiver.activeQuest = null;
+            }
+            
+            // REVEAL MAIN APP UI after user declines Quest Giver
+            if (document.documentElement.style.visibility === 'hidden') {
+                document.documentElement.style.visibility = 'visible';
+                console.log('✅ Main app UI revealed after Quest Giver declined');
             }
             
             // Extend habit tracker visibility by 2 minutes

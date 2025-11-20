@@ -795,13 +795,19 @@ class BattleManager {
         }
         
         addBattleLog('🤟🏻 Invisibility Cloak activated! You will evade the next attack.');
+        
+        // Play hero roll animation
+        if (window.playHeroRollAnimation) {
+            await window.playHeroRollAnimation();
+        }
+        
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
         // Save game state
         saveGameState();
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         await this.enemyTurn();
     }
 
@@ -1390,9 +1396,14 @@ class BattleManager {
         if (result === 'victory') {
             addBattleLog(`🎉 VICTORY! You defeated the ${this.enemy.name}!`);
             
-            // Play victory sound
+            // Play victory sound effect
             if (window.audioManager) {
                 window.audioManager.playSound('battle_victory', 0.8);
+            }
+            
+            // Play battle win music
+            if (window.audioManager) {
+                window.audioManager.playBattleWinMusic();
             }
             
             // Calculate XP reward based on enemy level
@@ -1448,6 +1459,11 @@ class BattleManager {
             
         } else if (result === 'defeat') {
             addBattleLog('💫 DEFEAT! You were defeated...');
+            
+            // Play battle lose music
+            if (window.audioManager) {
+                window.audioManager.playBattleLoseMusic();
+            }
             
             // Calculate XP loss (smaller penalty)
             xpLost = Math.floor(5 + (this.enemy.level * 2));
@@ -1516,8 +1532,9 @@ class BattleManager {
 
 
 
-        // Ensure all music is stopped
+        // Ensure all battle music is stopped
         if (window.audioManager) {
+            window.audioManager.stopAllBattleMusic();
             window.audioManager.stopMusic();
         }
 
@@ -1539,7 +1556,7 @@ class BattleManager {
         const container = enemySprite.parentElement;
         const containerRect = container.getBoundingClientRect();
         
-        // Hide enemy sprite
+        // Temporarily hide enemy sprite for dust animation
         enemySprite.style.opacity = '0';
         
         // Create dust sprite element
@@ -1575,6 +1592,10 @@ class BattleManager {
         
         // Wait for animation to complete
         await new Promise(resolve => setTimeout(resolve, frameCount * frameDuration));
+        
+        // CRITICAL: Reset enemy sprite opacity for next battle
+        // This ensures the enemy sprite will be visible when the next battle starts
+        enemySprite.style.opacity = '1';
     }
 }
 

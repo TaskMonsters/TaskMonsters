@@ -45,6 +45,8 @@ class AudioManager {
             defense_boost: "assets/sounds/Defenseboost.mp3",
 
             // UI sounds
+            quest_accepted: "assets/sounds/quest-accepted.mp3",
+            quiz_won: "assets/sounds/quiz-won.mp3",
             quest_complete: "assets/sounds/Quest Giver Task Complete Accepted sound.mp3",
             taskComplete: "assets/sounds/taskComplete.mp3",
             shopPurchase: "assets/sounds/shopPurchase.mp3",
@@ -52,11 +54,31 @@ class AudioManager {
             focus_timer_complete: "assets/audio/FocusTimerSound.mp3",
         };
 
+        // Focus Timer alarm (separate from one-shot sounds)
+        this.focusAlarmAudio = null;
+
+        // Battle outcome music (win/loss)
+        this.battleWinMusic = null;
+        this.battleLoseMusic = null;
+        this.battleOutcomeMusicVolume = 0.7; // Volume for win/loss music
+
         // Music tracks (separate from sound effects)
         this.music = {
             quest_giver: "assets/sounds/Quest Giver Mode music.mp3",
-            battle: "assets/sounds/battlemodemusic.mp3", // New battle music
+            battle_win: "assets/audio/battle_win.mp3", // Battle victory music
+            battle_lose: "assets/sounds/battle-loss.mp3", // Battle defeat music
         };
+        
+        // Battle music rotation system
+        this.battleTracks = [
+            "assets/sounds/battle/Battle Music Default.mp3",
+            "assets/sounds/battle/Battle mode music 1.mp3",
+            "assets/sounds/battle/Battle mode music 2.mp3",
+            "assets/sounds/battle/Battle mode 3.mp3",
+            "assets/sounds/battle/Battle mode music 4.mp3",
+            "assets/sounds/battle/Battle mode music 5.mp3"
+        ];
+        this.currentBattleTrackIndex = 0;
 
         // Current music track
         this.currentMusic = null;
@@ -133,17 +155,51 @@ class AudioManager {
     }
 
     /**
-     * Play battle music
-     * This method starts the battle music, which loops in the background
+     * Get next battle track (rotation system)
+     */
+    getNextBattleTrack() {
+        if (!this.battleTracks || this.battleTracks.length === 0) return null;
+        const track = this.battleTracks[this.currentBattleTrackIndex];
+        this.currentBattleTrackIndex = (this.currentBattleTrackIndex + 1) % this.battleTracks.length;
+        return track;
+    }
+    
+    /**
+     * Stop all battle music tracks
+     */
+    stopAllBattleMusic() {
+        if (this.battleMusicAudio) {
+            try {
+                this.battleMusicAudio.pause();
+                this.battleMusicAudio.currentTime = 0;
+                this.battleMusicAudio = null;
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping battle music:", error.message);
+            }
+        }
+    }
+
+    /**
+     * Play battle music with rotation
+     * This method starts the next battle music track from the rotation pool
      */
     playBattleMusic() {
-        if (!this.enabled || !this.music.battle) return;
+        if (!this.enabled) return;
 
-        // Stop any currently playing music
+        // Stop any currently playing battle music
+        this.stopAllBattleMusic();
+        
+        // Stop any other music
         this.stopMusic();
 
         try {
-            this.battleMusicAudio = new Audio(this.music.battle);
+            const trackPath = this.getNextBattleTrack();
+            if (!trackPath) {
+                console.warn("[AudioManager] No battle tracks available");
+                return;
+            }
+            
+            this.battleMusicAudio = new Audio(trackPath);
             this.battleMusicAudio.volume = this.battleMusicVolume;
             this.battleMusicAudio.loop = true;
 
@@ -152,7 +208,7 @@ class AudioManager {
                 this.battleMusicAudio = null;
             });
 
-            console.log("[AudioManager] Battle music started");
+            console.log(`[AudioManager] Battle music started: Track ${this.currentBattleTrackIndex}/${this.battleTracks.length}`);
         } catch (error) {
             console.warn("[AudioManager] Error playing battle music:", error.message);
         }
@@ -208,6 +264,154 @@ class AudioManager {
                 console.warn("[AudioManager] Error stopping battle music:", error.message);
             }
         }
+
+        // Stop battle outcome music (win/loss)
+        this.stopBattleOutcomeMusic();
+    }
+
+    /**
+     * Play Focus Timer alarm (looping)
+     * This starts the repeating alarm when timer reaches 00:00
+     */
+    playFocusAlarm() {
+        if (!this.enabled) return;
+
+        // Stop any existing alarm first to prevent overlaps
+        this.stopFocusAlarm();
+
+        try {
+            this.focusAlarmAudio = new Audio("assets/audio/focus-timer-alarm.mp3");
+            this.focusAlarmAudio.volume = 0.7;
+            this.focusAlarmAudio.loop = true; // Loop indefinitely
+
+            this.focusAlarmAudio.play().catch((err) => {
+                console.warn("[AudioManager] Focus alarm playback failed:", err.message);
+                this.focusAlarmAudio = null;
+            });
+
+            console.log("[AudioManager] Focus Timer alarm started (looping)");
+        } catch (error) {
+            console.warn("[AudioManager] Error playing focus alarm:", error.message);
+        }
+    }
+
+    /**
+     * Stop Focus Timer alarm
+     * Called when user stops/resets timer or starts new session
+     */
+    stopFocusAlarm() {
+        if (this.focusAlarmAudio) {
+            try {
+                this.focusAlarmAudio.pause();
+                this.focusAlarmAudio.currentTime = 0;
+                this.focusAlarmAudio = null;
+                console.log("[AudioManager] Focus Timer alarm stopped");
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping focus alarm:", error.message);
+            }
+        }
+    }
+
+    /**
+     * Play battle win music (one-time, non-looping)
+     * Called when player wins a battle
+     */
+    playBattleWinMusic() {
+        if (!this.enabled || !this.music.battle_win) return;
+
+        // Stop any currently playing battle outcome music
+        this.stopBattleOutcomeMusic();
+
+        // Stop battle music if playing
+        if (this.battleMusicAudio) {
+            try {
+                this.battleMusicAudio.pause();
+                this.battleMusicAudio.currentTime = 0;
+                this.battleMusicAudio = null;
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping battle music:", error.message);
+            }
+        }
+
+        try {
+            this.battleWinMusic = new Audio(this.music.battle_win);
+            this.battleWinMusic.volume = this.battleOutcomeMusicVolume;
+            this.battleWinMusic.loop = false; // Play once only
+
+            this.battleWinMusic.play().catch((err) => {
+                console.warn("[AudioManager] Battle win music playback failed:", err.message);
+                this.battleWinMusic = null;
+            });
+
+            console.log("[AudioManager] Battle win music started");
+        } catch (error) {
+            console.warn("[AudioManager] Error playing battle win music:", error.message);
+        }
+    }
+
+    /**
+     * Play battle lose music (one-time, non-looping)
+     * Called when player loses a battle
+     */
+    playBattleLoseMusic() {
+        if (!this.enabled || !this.music.battle_lose) return;
+
+        // Stop any currently playing battle outcome music
+        this.stopBattleOutcomeMusic();
+
+        // Stop battle music if playing
+        if (this.battleMusicAudio) {
+            try {
+                this.battleMusicAudio.pause();
+                this.battleMusicAudio.currentTime = 0;
+                this.battleMusicAudio = null;
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping battle music:", error.message);
+            }
+        }
+
+        try {
+            this.battleLoseMusic = new Audio(this.music.battle_lose);
+            this.battleLoseMusic.volume = this.battleOutcomeMusicVolume;
+            this.battleLoseMusic.loop = false; // Play once only
+
+            this.battleLoseMusic.play().catch((err) => {
+                console.warn("[AudioManager] Battle lose music playback failed:", err.message);
+                this.battleLoseMusic = null;
+            });
+
+            console.log("[AudioManager] Battle lose music started");
+        } catch (error) {
+            console.warn("[AudioManager] Error playing battle lose music:", error.message);
+        }
+    }
+
+    /**
+     * Stop battle outcome music (win/loss)
+     * Called when battle ends or user exits battle mode
+     */
+    stopBattleOutcomeMusic() {
+        if (this.battleWinMusic) {
+            try {
+                this.battleWinMusic.pause();
+                this.battleWinMusic.currentTime = 0;
+                this.battleWinMusic = null;
+                console.log("[AudioManager] Battle win music stopped");
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping battle win music:", error.message);
+            }
+        }
+
+        if (this.battleLoseMusic) {
+            try {
+                this.battleLoseMusic.pause();
+                this.battleLoseMusic.currentTime = 0;
+                this.battleLoseMusic = null;
+                console.log("[AudioManager] Battle lose music stopped");
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping battle lose music:", error.message);
+            }
+        }
     }
 
     /**
@@ -228,6 +432,9 @@ class AudioManager {
 
         // Stop music
         this.stopMusic();
+
+        // Stop focus alarm
+        this.stopFocusAlarm();
     }
 
     /**

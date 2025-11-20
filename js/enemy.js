@@ -302,6 +302,19 @@ const OGRE_DATA = {
 
 const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA, FIRE_SKULL_DATA, OGRE_DATA];
 
+// Enemy rotation system
+let currentEnemyRotationIndex = 0;
+
+function getNextEnemyFromRotation(availableEnemies) {
+    if (!availableEnemies || availableEnemies.length === 0) return null;
+    
+    // Use round-robin rotation
+    const enemy = availableEnemies[currentEnemyRotationIndex % availableEnemies.length];
+    currentEnemyRotationIndex++;
+    
+    return enemy;
+}
+
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
     // Filter enemies available at current level
@@ -312,10 +325,8 @@ function createRandomEnemy(playerLevel) {
         availableEnemies = availableEnemies.filter(e => e.name !== 'Octopus');
     }
     
-    // Use weighted selection if AI system is available
-    const enemyData = window.enemyAI 
-        ? window.enemyAI.selectWeightedEnemy(playerLevel, availableEnemies)
-        : availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+    // Use rotation system for enemy selection
+    const enemyData = getNextEnemyFromRotation(availableEnemies);
     
     const enemy = new Enemy(
         enemyData.name,
