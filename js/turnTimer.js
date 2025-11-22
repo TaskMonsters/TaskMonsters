@@ -1,48 +1,44 @@
-// Turn Timer System for Battle Mode
+// Turn Timer System for Battle Mode - Battle Log Version
 
 // Start turn timer
 function startTurnTimer(duration = 5000) {
-    const timerElement = document.getElementById('turnTimer');
-    const timerBar = document.getElementById('timerBar');
-    const timerText = document.getElementById('timerText');
-    
-    if (!timerElement || !timerBar || !timerText) {
-        console.error('Turn timer elements not found');
-        return;
-    }
-    
     // Stop any existing timer
     stopTurnTimer();
     
-    // Show timer
-    timerElement.classList.remove('hidden');
-    timerElement.classList.remove('warning');
-    
-    // Set initial values
-    const durationSeconds = Math.ceil(duration / 1000);
-    timerText.textContent = durationSeconds;
-    timerBar.style.width = '100%';
-    
     // Store start time and duration
+    if (!window.battleManager) {
+        console.error('BattleManager not found');
+        return;
+    }
+    
     window.battleManager.turnTimerStartTime = Date.now();
     window.battleManager.turnTimerDuration = duration;
+    window.battleManager.turnTimerLastSecond = Math.ceil(duration / 1000);
     
-    // Update timer every 50ms for smooth animation
+    // Add initial timer message to battle log
+    const initialSeconds = Math.ceil(duration / 1000);
+    addBattleLog(`⏱️ Your turn! (${initialSeconds}s remaining)`);
+    
+    // Update timer every second
     window.battleManager.turnTimerInterval = setInterval(() => {
         const elapsed = Date.now() - window.battleManager.turnTimerStartTime;
         const remaining = Math.max(0, duration - elapsed);
-        const progress = remaining / duration;
-        
-        // Update bar width
-        timerBar.style.width = (progress * 100) + '%';
-        
-        // Update text (show seconds remaining)
         const secondsRemaining = Math.ceil(remaining / 1000);
-        timerText.textContent = secondsRemaining;
         
-        // Add warning style when 1 second or less remaining
-        if (remaining <= 1000 && !timerElement.classList.contains('warning')) {
-            timerElement.classList.add('warning');
+        // Update battle log when second changes
+        if (secondsRemaining !== window.battleManager.turnTimerLastSecond && secondsRemaining > 0) {
+            window.battleManager.turnTimerLastSecond = secondsRemaining;
+            
+            // Different message based on time remaining
+            if (secondsRemaining === 1) {
+                addBattleLog(`⏰ 1 second left!`);
+                // Play warning sound
+                if (window.audioManager) {
+                    window.audioManager.play('error');
+                }
+            } else if (secondsRemaining <= 3) {
+                addBattleLog(`⏱️ ${secondsRemaining}s remaining...`);
+            }
         }
         
         // Time's up!
@@ -50,21 +46,15 @@ function startTurnTimer(duration = 5000) {
             stopTurnTimer();
             onTurnTimerExpired();
         }
-    }, 50);
+    }, 100);  // Check every 100ms for accuracy
 }
 
 // Stop turn timer
 function stopTurnTimer() {
-    const timerElement = document.getElementById('turnTimer');
-    
     if (window.battleManager && window.battleManager.turnTimerInterval) {
         clearInterval(window.battleManager.turnTimerInterval);
         window.battleManager.turnTimerInterval = null;
-    }
-    
-    if (timerElement) {
-        timerElement.classList.add('hidden');
-        timerElement.classList.remove('warning');
+        window.battleManager.turnTimerLastSecond = null;
     }
 }
 
@@ -78,18 +68,38 @@ function onTurnTimerExpired() {
         
         // Play timeout sound
         if (window.audioManager) {
-            window.audioManager.playSound('error', 0.5);
+            window.audioManager.play('error');
         }
         
-        // Force enemy turn
-        window.battleManager.state = BattleState.ANIMATING;
+        // Trigger enemy turn after a short delay
         setTimeout(() => {
-            window.battleManager.enemyTurn();
+            if (window.battleManager && window.battleManager.state === BattleState.PLAYER_TURN) {
+                window.battleManager.enemyTurn();
+            }
         }, 500);
     }
 }
 
-// Export functions to window
-window.startTurnTimer = startTurnTimer;
-window.stopTurnTimer = stopTurnTimer;
-window.onTurnTimerExpired = onTurnTimerExpired;
+// Reduce timer (for Time Sting ability)
+function reduceTimer(newDuration) {
+    if (!window.battleManager || !window.battleManager.turnTimerStartTime) {
+        console.warn('No active timer to reduce');
+        return;
+    }
+    
+    // Calculate how much time has already elapsed
+    const elapsed = Date.now() - window.battleManager.turnTimerStartTime;
+    
+    // If new duration is less than elapsed time, expire immediately
+    if (newDuration <= elapsed) {
+        stopTurnTimer();
+        onTurnTimerExpired();
+    } else {
+        // Adjust the start time so remaining time equals newDuration
+        window.battleManager.turnTimerStartTime = Date.now() - (window.battleManager.turnTimerDuration - newDuration);
+        window.battleManager.turnTimerDuration = newDuration;
+        
+        const secondsRemaining = Math.ceil((newDuration - elapsed) / 1000);
+        addBattleLog(`⚡ Timer reduced to ${secondsRemaining}s!`);
+    }
+}
