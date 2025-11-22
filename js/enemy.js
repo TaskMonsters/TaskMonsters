@@ -242,6 +242,8 @@ const ALIEN_DATA = {
     tier: 'mid',
     variableDamage: true,
     projectileType: 'alien',
+    timeStingAttack: true,  // FIX: Time Sting ability - reduces player timer to 1 second
+    timeStingChance: 0.25,  // FIX: 25% chance to use Time Sting
     sprites: {
         idle: 'assets/enemies/alien-spritesheet.png',
         attack1: 'assets/enemies/alien-spritesheet.png',

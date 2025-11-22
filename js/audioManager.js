@@ -26,6 +26,7 @@ class AudioManager {
             spark_attack: "assets/sounds/Spark Attack sound.mp3",
             prickler_attack: "assets/sounds/Prickler.mp3",
             freeze_attack: "assets/sounds/Freeze attack sound.mp3",
+            fireball: "assets/sounds/Fireball.mp3",
 
             // Items
             cloak_use: "assets/sounds/Invisibility Cloak sound.mp3",
@@ -227,13 +228,29 @@ class AudioManager {
             this.currentMusic = new Audio(this.music.quest_giver);
             this.currentMusic.volume = 0.4; // Lower volume for background music
             this.currentMusic.loop = true;
+            
+            // FIX: Add ended event handler to ensure continuous looping
+            this.currentMusic.addEventListener('ended', () => {
+                if (this.currentMusic && this.enabled) {
+                    console.log('[AudioManager] Quest music ended, restarting loop');
+                    this.currentMusic.currentTime = 0;
+                    this.currentMusic.play().catch(err => {
+                        console.warn('[AudioManager] Quest music loop restart failed:', err.message);
+                    });
+                }
+            });
+            
+            // FIX: Add error handler to prevent music from stopping on errors
+            this.currentMusic.addEventListener('error', (e) => {
+                console.warn('[AudioManager] Quest music error:', e);
+            });
 
             this.currentMusic.play().catch((err) => {
                 console.warn("[AudioManager] Quest music playback failed:", err.message);
                 this.currentMusic = null;
             });
 
-            console.log("[AudioManager] Quest giver music started");
+            console.log("[AudioManager] Quest giver music started with loop protection");
         } catch (error) {
             console.warn("[AudioManager] Error playing quest music:", error.message);
         }

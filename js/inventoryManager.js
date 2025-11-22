@@ -97,7 +97,8 @@ class InventoryManager {
 
         switch (itemId) {
             case 'health_potion':
-               success = this.useHealthPotion();\n                message = success ? '💚 Health Potion used! +20 HP' : '⚠️ HP already full!';
+                success = this.useHealthPotion();
+                message = success ? '💚 Health Potion used! +20 HP' : '⚠️ HP already full!';
                 break;
 
             case 'energy_drink':
@@ -159,6 +160,7 @@ class InventoryManager {
             return false;
         }
 
+        // FIX: Always ADD health when using potion outside battle
         window.gameState.health = Math.min(maxHP, window.gameState.health + 20);
         
         // Play potion use sound

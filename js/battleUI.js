@@ -400,25 +400,32 @@ function addBattleLog(message) {
 
 // Fireball Projectile Animation
 async function playFireballAnimation(startElement, targetElement) {
-    const projectile = document.getElementById('fireballProjectile');
-    const explosion = document.getElementById('explosionEffect');
+    console.log('🔥 Fireball animation starting');
+    const projectile = document.createElement('div');
+    projectile.className = 'fireball-projectile';
+    projectile.style.width = '50px';
+    projectile.style.height = '50px';
+    projectile.style.position = 'fixed';
+    // FIX: Use correct fireball sprite
+    projectile.style.backgroundImage = 'url("assets/projectiles/FireballAttack.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.backgroundColor = 'rgba(255, 100, 0, 0.2)'; // Fallback orange tint
+    projectile.style.borderRadius = '50%';
+    projectile.style.zIndex = '10000';
+    projectile.style.pointerEvents = 'none';
+    document.body.appendChild(projectile);
+    console.log('🔥 Fireball projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
-
-    // Make fireball larger
-    projectile.style.width = '80px';
-    projectile.style.height = '80px';
     
     // Position projectile at start
-    projectile.style.left = startRect.left + startRect.width / 2 - 40 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 40 + 'px';
-    projectile.classList.remove('hidden');
-
-    // Use new single fireball sprite
-    projectile.style.backgroundImage = 'url("assets/projectiles/fireball.png")';
-    projectile.style.backgroundSize = 'contain';
+    const startX = startRect.left + startRect.width / 2 - 25;
+    const startY = startRect.top + startRect.height / 2 - 25;
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
     
     // Rotate fireball for effect
     let rotation = 0;
@@ -440,8 +447,8 @@ async function playFireballAnimation(startElement, targetElement) {
             const eased = 1 - Math.pow(1 - progress, 3);
 
             // Calculate position
-            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 40;
-            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 40;
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 25;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 25;
 
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
@@ -452,8 +459,8 @@ async function playFireballAnimation(startElement, targetElement) {
                 // Stop frame animation
                 clearInterval(frameInterval);
 
-                // Hide projectile
-                projectile.classList.add('hidden');
+                // Remove projectile
+                projectile.remove();
 
                 // Play explosion
                 playExplosionAnimation(targetRect).then(resolve);
@@ -512,17 +519,31 @@ async function playWaveformAnimation(startElement, targetElement) {
 
 // Spark Projectile Animation (Player level 7+ attack)
 async function playSparkAnimation(startElement, targetElement) {
+    console.log('⚡ Spark animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'spark-projectile';
+    projectile.style.width = '40px';
+    projectile.style.height = '40px';
+    projectile.style.position = 'fixed';
+    projectile.style.backgroundImage = 'url("assets/projectiles/SparkAttack.png")';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.backgroundColor = 'rgba(255, 200, 0, 0.2)'; // Fallback yellow tint
+    projectile.style.borderRadius = '50%';
+    projectile.style.zIndex = '10000';
+    projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('⚡ Spark projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
     
     // Position projectile at start
-    projectile.style.left = startRect.left + startRect.width / 2 - 16 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 16 + 'px';
+    const startX = startRect.left + startRect.width / 2 - 20;
+    const startY = startRect.top + startRect.height / 2 - 20;
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
 
     // Animate projectile movement
     const duration = 600;
@@ -537,8 +558,8 @@ async function playSparkAnimation(startElement, targetElement) {
             const eased = 1 - Math.pow(1 - progress, 3);
 
             // Calculate position
-            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 16;
-            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 16;
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 20;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 20;
 
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
@@ -546,9 +567,9 @@ async function playSparkAnimation(startElement, targetElement) {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Remove projectile
+                // Remove projectile and show explosion
                 projectile.remove();
-                resolve();
+                playSparkExplosion(targetRect).then(resolve);
             }
         }
 
@@ -556,26 +577,72 @@ async function playSparkAnimation(startElement, targetElement) {
     });
 }
 
+// Spark Explosion Animation - 9 frames
+async function playSparkExplosion(targetRect) {
+    const explosion = document.createElement('div');
+    explosion.style.width = '90px';
+    explosion.style.height = '90px';
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 45 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 45 + 'px';
+    explosion.style.backgroundSize = 'contain';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    explosion.style.zIndex = '1001';
+    document.body.appendChild(explosion);
+
+    const explosionFrames = [
+        'assets/explosions/Spark Explosion/_0000_Layer-1.png',
+        'assets/explosions/Spark Explosion/_0001_Layer-2.png',
+        'assets/explosions/Spark Explosion/_0002_Layer-3.png',
+        'assets/explosions/Spark Explosion/_0003_Layer-4.png',
+        'assets/explosions/Spark Explosion/_0004_Layer-5.png',
+        'assets/explosions/Spark Explosion/_0005_Layer-6.png',
+        'assets/explosions/Spark Explosion/_0006_Layer-7.png',
+        'assets/explosions/Spark Explosion/_0007_Layer-8.png',
+        'assets/explosions/Spark Explosion/_0008_Layer-9.png'
+    ];
+
+    for (let i = 0; i < explosionFrames.length; i++) {
+        explosion.style.backgroundImage = `url('${explosionFrames[i]}')`;
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    explosion.remove();
+}
+
 // Asteroid Projectile Animation
 async function playAsteroidAnimation(startElement, targetElement) {
+    console.log('🪨 Asteroid animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'asteroid-projectile';
-    projectile.style.width = '50px';
-    projectile.style.height = '50px';
+    projectile.style.width = '45px';
+    projectile.style.height = '45px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/projectiles/asteroid.png")';
+    // FIX: Use correct asteroid sprite
+    projectile.style.backgroundImage = 'url("assets/projectiles/AsteroidAttack.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
-    projectile.style.zIndex = '1000';
+    projectile.style.backgroundColor = 'rgba(139, 69, 19, 0.3)'; // Fallback brown tint
+    projectile.style.borderRadius = '50%';
+    projectile.style.zIndex = '10000';
+    projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('🪨 Asteroid projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
     
+    console.log('🪨 Start position:', startRect);
+    console.log('🪨 Target position:', targetRect);
+    
     // Position projectile at start
-    projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
+    const startX = startRect.left + startRect.width / 2 - 22.5;
+    const startY = startRect.top + startRect.height / 2 - 22.5;
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
+    
+    console.log('🪨 Projectile positioned at:', startX, startY);
 
     // Animate projectile movement with arc
     const duration = 700;
@@ -603,9 +670,9 @@ async function playAsteroidAnimation(startElement, targetElement) {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Remove projectile
+                // Remove projectile and show explosion
                 projectile.remove();
-                resolve();
+                playAsteroidExplosion(targetRect).then(resolve);
             }
         }
 
@@ -613,26 +680,63 @@ async function playAsteroidAnimation(startElement, targetElement) {
     });
 }
 
+// Asteroid Explosion Animation - 4 frames
+async function playAsteroidExplosion(targetRect) {
+    console.log('💥 Asteroid explosion starting');
+    const explosion = document.createElement('div');
+    explosion.style.width = '80px';
+    explosion.style.height = '80px';
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 40 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 40 + 'px';
+    explosion.style.backgroundSize = 'contain';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    explosion.style.zIndex = '1001';
+    document.body.appendChild(explosion);
+
+    const explosionFrames = [
+        'assets/explosions/Asteroid Explosion/explosion1.png',
+        'assets/explosions/Asteroid Explosion/explosion2.png',
+        'assets/explosions/Asteroid Explosion/explosion3.png',
+        'assets/explosions/Asteroid Explosion/explosion4.png'
+    ];
+
+    for (let i = 0; i < explosionFrames.length; i++) {
+        explosion.style.backgroundImage = `url('${explosionFrames[i]}')`;
+        await new Promise(resolve => setTimeout(resolve, 60));
+    }
+
+    explosion.remove();
+}
+
 // Prickler Projectile Animation
 async function playPricklerAnimation(startElement, targetElement) {
+    console.log('⚛️ Prickler animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'prickler-projectile';
-    projectile.style.width = '40px';
-    projectile.style.height = '40px';
+    projectile.style.width = '45px';
+    projectile.style.height = '45px';
     projectile.style.position = 'fixed';
-    projectile.style.backgroundImage = 'url("assets/projectiles/prickler.png")';
+    // FIX: Use correct prickler sprite
+    projectile.style.backgroundImage = 'url("assets/projectiles/PricklerAttack.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
-    projectile.style.zIndex = '1000';
+    projectile.style.backgroundColor = 'rgba(0, 100, 200, 0.2)'; // Fallback blue tint
+    projectile.style.borderRadius = '50%';
+    projectile.style.zIndex = '10000';
+    projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('⚛️ Prickler projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
     
     // Position projectile at start
-    projectile.style.left = startRect.left + startRect.width / 2 - 20 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 20 + 'px';
+    const startX = startRect.left + startRect.width / 2 - 22.5;
+    const startY = startRect.top + startRect.height / 2 - 22.5;
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
 
     // Animate projectile movement with arc
     const duration = 800;
@@ -647,9 +751,9 @@ async function playPricklerAnimation(startElement, targetElement) {
             const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
             // Calculate position with arc
-            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 20;
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 22.5;
             const arc = Math.sin(progress * Math.PI) * 100; // Arc height
-            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 20 - arc;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 22.5 - arc;
 
             projectile.style.left = currentX + 'px';
             projectile.style.top = currentY + 'px';
@@ -670,7 +774,7 @@ async function playPricklerAnimation(startElement, targetElement) {
     });
 }
 
-// Prickler Nuclear Explosion Animation
+// Prickler Nuclear Explosion Animation - 9 frames
 async function playPricklerExplosion(targetRect) {
     const explosion = document.createElement('div');
     explosion.style.width = '120px';
@@ -683,20 +787,17 @@ async function playPricklerExplosion(targetRect) {
     explosion.style.zIndex = '1001';
     document.body.appendChild(explosion);
 
-    // Nuclear explosion frames from the Prickler folder
+    // Nuclear explosion frames
     const explosionFrames = [
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d1.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d2.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d3.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d4.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d5.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d6.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d7.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d8.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d9.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d10.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d11.png',
-        'assets/battle-items/prickler/Prickler Explosion/explosion-d12.png'
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation1.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation2.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation3.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation4.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation5.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation6.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation7.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation8.png',
+        'assets/explosions/Prickler Explosion/sprites/explosion-animation9.png'
     ];
 
     // Play each frame
@@ -710,26 +811,32 @@ async function playPricklerExplosion(targetRect) {
 
 // Freeze Projectile Animation
 async function playFreezeAnimation(startElement, targetElement) {
+    console.log('❄️ Freeze animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'freeze-projectile';
     projectile.style.width = '50px';
     projectile.style.height = '50px';
     projectile.style.position = 'fixed';
+    // FIX: Use correct freeze sprite
+    projectile.style.backgroundImage = 'url("assets/projectiles/FreezeAttack.png")';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
-    projectile.style.zIndex = '1000';
+    projectile.style.backgroundColor = 'rgba(100, 200, 255, 0.2)'; // Fallback ice blue tint
+    projectile.style.borderRadius = '50%';
+    projectile.style.zIndex = '10000';
+    projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('❄️ Freeze projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
     
     // Position projectile at start
-    projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
-    projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
-
-    // Use single freeze projectile image
-    projectile.style.backgroundImage = 'url("assets/projectiles/freeze.png")';
+    const startX = startRect.left + startRect.width / 2 - 25;
+    const startY = startRect.top + startRect.height / 2 - 25;
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
 
     // Animate projectile movement
     const duration = 700;
@@ -766,7 +873,7 @@ async function playFreezeAnimation(startElement, targetElement) {
     });
 }
 
-// Freeze Impact Animation
+// Freeze Impact Animation - 8 frames
 async function playFreezeImpact(targetRect) {
     const impact = document.createElement('div');
     impact.style.width = '100px';
@@ -779,63 +886,57 @@ async function playFreezeImpact(targetRect) {
     impact.style.zIndex = '1001';
     document.body.appendChild(impact);
 
-    // Impact frames from the freeze folder
+    // Freeze impact frames
     const impactFrames = [
-        'assets/battle-items/freeze/shot-hit copy/shot-hit-1.png',
-        'assets/battle-items/freeze/shot-hit copy/shot-hit-2.png',
-        'assets/battle-items/freeze/shot-hit copy/shot-hit-3.png'
+        'assets/explosions/Freeze Explosion/_0000_Layer-1.png',
+        'assets/explosions/Freeze Explosion/_0001_Layer-2.png',
+        'assets/explosions/Freeze Explosion/_0002_Layer-3.png',
+        'assets/explosions/Freeze Explosion/_0003_Layer-4.png',
+        'assets/explosions/Freeze Explosion/_0004_Layer-5.png',
+        'assets/explosions/Freeze Explosion/_0005_Layer-6.png',
+        'assets/explosions/Freeze Explosion/_0006_Layer-7.png',
+        'assets/explosions/Freeze Explosion/_0007_Layer-8.png'
     ];
 
-    // Play each frame multiple times for freeze effect
-    for (let loop = 0; loop < 2; loop++) {
-        for (let i = 0; i < impactFrames.length; i++) {
-            impact.style.backgroundImage = `url('${impactFrames[i]}')`;
-            await new Promise(resolve => setTimeout(resolve, 80));
-        }
+    // Play each frame
+    for (let i = 0; i < impactFrames.length; i++) {
+        impact.style.backgroundImage = `url('${impactFrames[i]}')`;
+        await new Promise(resolve => setTimeout(resolve, 70));
     }
 
     impact.remove();
 }
 
-// Explosion Animation
+// Fireball Explosion Animation - Uses 6-frame sequence
 async function playExplosionAnimation(targetRect) {
-    const explosion = document.getElementById('explosionEffect');
-
-    // Position explosion at target
-    explosion.style.left = targetRect.left + targetRect.width / 2 - 40 + 'px';
-    explosion.style.top = targetRect.top + targetRect.height / 2 - 40 + 'px';
-    explosion.classList.remove('hidden');
-
-    // Use fireball-explosion3.png as the explosion visual
-    explosion.style.backgroundImage = 'url("assets/battle-items/fireball-explosion3.png")';
+    const explosion = document.createElement('div');
     explosion.style.width = '100px';
     explosion.style.height = '100px';
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 50 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 50 + 'px';
     explosion.style.backgroundSize = 'contain';
     explosion.style.backgroundRepeat = 'no-repeat';
-    
-    // Fade in explosion
-    explosion.style.opacity = '1';
-    explosion.style.transform = 'scale(0.5)';
-    
-    // Animate explosion scale and fade
-    await new Promise(resolve => {
-        let frame = 0;
-        const maxFrames = 8;
-        const interval = setInterval(() => {
-            frame++;
-            const progress = frame / maxFrames;
-            explosion.style.transform = `scale(${0.5 + progress * 0.5})`;
-            explosion.style.opacity = `${1 - progress * 0.5}`;
-            
-            if (frame >= maxFrames) {
-                clearInterval(interval);
-                resolve();
-            }
-        }, 60);
-    });
+    explosion.style.zIndex = '1001';
+    document.body.appendChild(explosion);
 
-    // Hide explosion
-    explosion.classList.add('hidden');
+    // Fireball explosion frames
+    const explosionFrames = [
+        'assets/explosions/Fireball Explosion/Explosion 1.png',
+        'assets/explosions/Fireball Explosion/Explosion 2.png',
+        'assets/explosions/Fireball Explosion/Explosion 3.png',
+        'assets/explosions/Fireball Explosion/Explosion 4.png',
+        'assets/explosions/Fireball Explosion/Explosion 5.png',
+        'assets/explosions/Fireball Explosion/Explosion 6.png'
+    ];
+
+    // Play each frame
+    for (let i = 0; i < explosionFrames.length; i++) {
+        explosion.style.backgroundImage = `url('${explosionFrames[i]}')`;
+        await new Promise(resolve => setTimeout(resolve, 60));
+    }
+
+    explosion.remove();
 }
 
 // Update battle shop display
@@ -1141,75 +1242,172 @@ window.playFireExplosion = playFireExplosion;
 
 // Blue Flame Animation
 async function playBlueFlameAnimation(startElement, targetElement) {
+    console.log('🔵 Blue Flame animation starting');
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
 
     const projectile = document.createElement('div');
     projectile.style.position = 'fixed';
     projectile.style.left = startRect.right + 'px';
-    projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
-    projectile.style.width = '32px';
-    projectile.style.height = '32px';
-    projectile.style.backgroundImage = 'url(assets/projectiles/blue-flame.png)';
-    projectile.style.backgroundSize = '128px 32px'; // 4 frames
+    projectile.style.top = (startRect.top + startRect.height / 2 - 20) + 'px';
+    projectile.style.width = '40px';
+    projectile.style.height = '40px';
+    // FIX: Use correct blue flame sprite
+    projectile.style.backgroundImage = 'url(assets/projectiles/BlueFlame.png)';
+    projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.backgroundColor = 'rgba(20, 30, 80, 0.4)'; // Fallback dark navy tint
+    projectile.style.borderRadius = '50%';
     projectile.style.imageRendering = 'pixelated';
-    projectile.style.zIndex = '1000';
+    projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
-    projectile.style.animation = 'blueFlameMove 0.5s linear, blueFlameAnimate 0.2s steps(4) infinite';
+    console.log('🔵 Blue Flame projectile created');
     
     document.body.appendChild(projectile);
 
-    // Animate to target
-    const deltaX = targetRect.left - startRect.right;
-    const duration = 500;
-    const deltaY = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+    // Animate to target manually
+    const duration = 600;
+    const startTime = Date.now();
+    const startX = startRect.left + startRect.width / 2 - 20;
+    const startY = startRect.top + startRect.height / 2 - 20;
     
-    projectile.style.setProperty('--deltaX', deltaX + 'px');
-    projectile.style.setProperty('--deltaY', deltaY + 'px');
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    projectile.remove();
+    await new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 20;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 20;
+            
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.remove();
+                resolve();
+            }
+        }
+        requestAnimationFrame(animate);
+    });
     
-    // Play fireball explosion on impact (same as Fireball)
-    await playExplosionAnimation(targetRect);
+    // Play blue flame explosion on impact
+    await playBlueFlameExplosion(targetRect);
+}
+
+// Blue Flame Explosion Animation - spritesheet
+async function playBlueFlameExplosion(targetRect) {
+    const explosion = document.createElement('div');
+    explosion.style.width = '26px';
+    explosion.style.height = '32px';
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 13 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 16 + 'px';
+    explosion.style.backgroundImage = 'url("assets/explosions/Blue Flame Explosion/spritesheet.png")';
+    explosion.style.backgroundSize = '78px 32px';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    explosion.style.imageRendering = 'pixelated';
+    explosion.style.zIndex = '1001';
+    document.body.appendChild(explosion);
+
+    // Spritesheet has 3 frames (78px / 26px = 3 frames)
+    for (let i = 0; i < 3; i++) {
+        explosion.style.backgroundPosition = `-${i * 26}px 0`;
+        await new Promise(resolve => setTimeout(resolve, 70));
+    }
+
+    explosion.remove();
 }
 
 // Procrastination Ghost Animation
 async function playProcrastinationGhostAnimation(startElement, targetElement) {
+    console.log('👻 Procrastination Ghost animation starting');
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
 
     const projectile = document.createElement('div');
     projectile.style.position = 'fixed';
-    projectile.style.left = startRect.right + 'px';
-    projectile.style.top = (startRect.top + startRect.height / 2 - 16) + 'px';
-    projectile.style.width = '32px';
-    projectile.style.height = '32px';
-    projectile.style.backgroundImage = 'url(assets/projectiles/ghost.png)';
+    projectile.style.width = '40px';
+    projectile.style.height = '40px';
+    // FIX: Use correct procrastination ghost sprite
+    projectile.style.backgroundImage = 'url(assets/projectiles/ProcrastinationGhostAttack.png)';
     projectile.style.backgroundSize = 'contain';
+    projectile.style.backgroundRepeat = 'no-repeat';
+    projectile.style.backgroundColor = 'rgba(150, 0, 200, 0.2)'; // Fallback purple tint
+    projectile.style.borderRadius = '50%';
     projectile.style.imageRendering = 'pixelated';
-    projectile.style.zIndex = '1000';
+    projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
-    projectile.style.opacity = '0.8';
-    projectile.style.animation = 'ghostFloat 0.6s ease-in-out';
+    projectile.style.opacity = '0.9';
+    console.log('👻 Ghost projectile created');
     
     document.body.appendChild(projectile);
 
     // Animate to target with floating motion
-    const deltaX = targetRect.left - startRect.right;
-    const deltaY = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+    const duration = 700;
+    const startTime = Date.now();
+    const startX = startRect.left + startRect.width / 2 - 20;
+    const startY = startRect.top + startRect.height / 2 - 20;
     
-    projectile.style.setProperty('--deltaX', deltaX + 'px');
-    projectile.style.setProperty('--deltaY', deltaY + 'px');
+    projectile.style.left = startX + 'px';
+    projectile.style.top = startY + 'px';
 
-    await new Promise(resolve => setTimeout(resolve, 600));
+    await new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            
+            const currentX = startRect.left + (targetRect.left - startRect.left) * eased + targetRect.width / 2 - 20;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * eased + targetRect.height / 2 - 20;
+            
+            projectile.style.left = currentX + 'px';
+            projectile.style.top = currentY + 'px';
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.remove();
+                resolve();
+            }
+        }
+        requestAnimationFrame(animate);
+    });
+    
+    // Play poison leaf explosion (ghost uses similar effect)
+    await playPoisonLeafExplosion(targetRect);
+}
 
-    // Ghost effect on impact
-    targetElement.style.filter = 'brightness(0.7) grayscale(0.5)';
-    setTimeout(() => {
-        targetElement.style.filter = '';
-    }, 300);
+// Poison Leaf Explosion Animation - 5 frames
+async function playPoisonLeafExplosion(targetRect) {
+    const explosion = document.createElement('div');
+    explosion.style.width = '100px';
+    explosion.style.height = '100px';
+    explosion.style.position = 'fixed';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 50 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 50 + 'px';
+    explosion.style.backgroundSize = 'contain';
+    explosion.style.backgroundRepeat = 'no-repeat';
+    explosion.style.zIndex = '1001';
+    document.body.appendChild(explosion);
 
-    projectile.remove();
+    const explosionFrames = [
+        'assets/explosions/Poison Leaf Explosion/enemy-death-1.png',
+        'assets/explosions/Poison Leaf Explosion/enemy-death-2.png',
+        'assets/explosions/Poison Leaf Explosion/enemy-death-3.png',
+        'assets/explosions/Poison Leaf Explosion/enemy-death-4.png',
+        'assets/explosions/Poison Leaf Explosion/enemy-death-5.png'
+    ];
+
+    for (let i = 0; i < explosionFrames.length; i++) {
+        explosion.style.backgroundImage = `url('${explosionFrames[i]}')`;
+        await new Promise(resolve => setTimeout(resolve, 70));
+    }
+
+    explosion.remove();
 }

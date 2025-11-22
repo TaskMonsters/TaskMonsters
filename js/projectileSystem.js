@@ -7,14 +7,14 @@
 // Projectile configuration - maps attack types to asset paths
 const PROJECTILE_CONFIG = {
     fireball: {
-        sprite: 'assets/projectiles/Fireball Attack.png',
+        sprite: 'assets/projectiles/FireballAttack.png',
         width: 80,
         height: 80,
         duration: 800,
         rotation: true
     },
     spark: {
-        sprite: 'assets/projectiles/Spark Attack.png',
+        sprite: 'assets/projectiles/SparkAttack.png',
         width: 60,
         height: 60,
         duration: 600,
@@ -37,49 +37,49 @@ const PROJECTILE_CONFIG = {
         rotation: true
     },
     prickler: {
-        sprite: 'assets/projectiles/Prickler Attack.png',
+        sprite: 'assets/projectiles/PricklerAttack.png',
         width: 70,
         height: 70,
         duration: 700,
         rotation: true
     },
     freeze: {
-        sprite: 'assets/projectiles/Freeze Attack.png',
+        sprite: 'assets/projectiles/FreezeAttack.png',
         width: 75,
         height: 75,
         duration: 800,
         rotation: false
     },
     blue_flame: {
-        sprite: 'assets/projectiles/Blue Flame.png',
+        sprite: 'assets/projectiles/BlueFlame.png',
         width: 85,
         height: 85,
         duration: 850,
         rotation: true
     },
     asteroid: {
-        sprite: 'assets/projectiles/Asteroid Attack.png',
+        sprite: 'assets/projectiles/AsteroidAttack.png',
         width: 90,
         height: 90,
         duration: 750,
         rotation: true
     },
     procrastination_ghost: {
-        sprite: 'assets/projectiles/Procrastination Ghost Attack.png',
+        sprite: 'assets/projectiles/ProcrastinationGhostAttack.png',
         width: 80,
         height: 80,
         duration: 900,
         rotation: false
     },
     poison_leaf: {
-        sprite: 'assets/projectiles/Poison Leaf Attack.png',
+        sprite: 'assets/projectiles/PoisonLeafAttack.png',
         width: 65,
         height: 65,
         duration: 750,
         rotation: true
     },
     mirror: {
-        sprite: 'assets/projectiles/Mirror Attack.png',
+        sprite: 'assets/projectiles/MirrorAttack.png',
         width: 70,
         height: 70,
         duration: 800,

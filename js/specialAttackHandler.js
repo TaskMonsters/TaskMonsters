@@ -71,9 +71,13 @@ async function playerSpecialAttack() {
             addBattleLog(`🌙 Luna's Chaos Curse activated! Enemy will damage itself for 3 turns!`);
             break;
         case 'nova':
-            specialEffect = 'Energy Blast';
-            damage = 40; // Nova: Fixed 40 damage
+            specialEffect = 'Energy Blast + Poison';
+            damage = 25; // FIX: Reduced from 40 to 25 base damage
+            // FIX: Add poison effect - 2 HP/turn for 3 turns
+            manager.novaPoisonTurns = 3;
+            manager.novaPoisonDamage = 2;
             addBattleLog(`💥 Nova's Energy Blast dealt ${damage} damage!`);
+            addBattleLog(`☠️ Enemy is poisoned! Will take 2 damage for 3 turns!`);
             break;
         case 'benny':
             specialEffect = 'Life Absorption';

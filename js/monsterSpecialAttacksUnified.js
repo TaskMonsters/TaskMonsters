@@ -9,24 +9,27 @@ const MONSTER_SPECIAL_CONFIG = {
     nova: {
         name: 'Energy Blast',
         type: 'projectile', // Projectile-only, no enemy movement
-        damage: 40,
-        effect: 'none',
+        damage: 25, // FIX: Reduced from 40 to 25 base damage
+        effect: 'poison', // FIX: Added poison effect for 2 HP/turn for 3 turns
+        poisonDamage: 2,
+        poisonTurns: 3,
         frames: [
-            'assets/special-attacks/nova/_0000_Layer-1.png',
-            'assets/special-attacks/nova/_0001_Layer-2.png',
-            'assets/special-attacks/nova/_0002_Layer-3.png',
-            'assets/special-attacks/nova/_0003_Layer-4.png',
-            'assets/special-attacks/nova/_0004_Layer-5.png',
-            'assets/special-attacks/nova/_0005_Layer-6.png',
-            'assets/special-attacks/nova/_0006_Layer-7.png',
-            'assets/special-attacks/nova/_0007_Layer-8.png'
+            // FIX: Updated to use new Nova projectile animation
+            'assets/projectiles/nova_special/_0000_Layer-1.png',
+            'assets/projectiles/nova_special/_0001_Layer-2.png',
+            'assets/projectiles/nova_special/_0002_Layer-3.png',
+            'assets/projectiles/nova_special/_0003_Layer-4.png',
+            'assets/projectiles/nova_special/_0004_Layer-5.png',
+            'assets/projectiles/nova_special/_0005_Layer-6.png',
+            'assets/projectiles/nova_special/_0006_Layer-7.png',
+            'assets/projectiles/nova_special/_0007_Layer-8.png'
         ],
         color: '#ff69b4',
         displayName: 'ENERGY BLAST'
     },
     benny: {
         name: 'Stunning Strike',
-        type: 'melee_drag', // Melee with enemy drag behavior
+        type: 'projectile', // FIX: Changed to projectile-only, no enemy drag
         damage: 20,
         effect: 'life_absorption',
         frames: [

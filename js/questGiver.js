@@ -321,6 +321,12 @@ class QuestGiver {
 
     // Show quest giver UI
     show() {
+        // FIX: Prevent duplicate quest giver triggers
+        if (this.activeQuest) {
+            console.log('[QuestGiver] Quest already active, ignoring duplicate trigger');
+            return;
+        }
+        
         this.lastQuestTime = Date.now();
         // Save to localStorage for persistence
         localStorage.setItem('lastQuestGiverTimestamp', this.lastQuestTime.toString());

@@ -143,10 +143,19 @@ function renderHeroSprite() {
     const spriteRow = appearance?.spriteRow || 0;
     const animationRows = appearance?.animationRows || {};
     
-    // Always use 32x32 as the base size for consistent rendering
+    // FIX: Increase sprite size in battle mode to match screenshot
+    // Skins keep their own dimensions, default monsters get larger scale
     heroSprite.style.width = '32px';
     heroSprite.style.height = '32px';
-    heroSprite.style.transform = 'scale(1.5)';
+    
+    // Check if skin is equipped - skins retain their own scale
+    const isSkinEquipped = appearance && appearance.isSkin;
+    if (isSkinEquipped) {
+        heroSprite.style.transform = 'scale(1.5)'; // Keep skin size unchanged
+    } else {
+        heroSprite.style.transform = 'scale(3.0)'; // Increase default monster size
+    }
+    
     heroSprite.style.imageRendering = 'pixelated';
     
     // Set initial background position (accounting for sprite row if multi-directional)
@@ -262,10 +271,19 @@ function startHeroAnimation(animationType = 'idle') {
         heroSprite.style.backgroundImage = `url('${spritePath}')`;
         heroSprite.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
     }
-    // Always use 32x32 as the base size for consistent rendering across all skins
+    // FIX: Increase sprite size in battle mode to match screenshot
+    // Skins keep their own dimensions, default monsters get larger scale
     heroSprite.style.width = '32px';
     heroSprite.style.height = '32px';
-    heroSprite.style.transform = 'scale(1.5)';
+    
+    // Check if skin is equipped - skins retain their own scale
+    const isSkinEquipped = appearance && appearance.isSkin;
+    if (isSkinEquipped) {
+        heroSprite.style.transform = 'scale(1.5)'; // Keep skin size unchanged
+    } else {
+        heroSprite.style.transform = 'scale(3.0)'; // Increase default monster size
+    }
+    
     heroSprite.style.imageRendering = 'pixelated';
     
     // Ensure hero sprite is visible (remove any hidden classes)

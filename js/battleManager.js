@@ -24,10 +24,31 @@ class BattleManager {
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
         this.reflectTurns = 0;  // Luna's reflect effect turns remaining
         this.reflectActive = false;  // Luna's reflect effect active flag
+        
+        // Turn timer system
+        this.turnTimerDuration = 3000; // Default 3 seconds
+        this.turnTimerInterval = null;
+        this.turnTimerStartTime = null;
+        this.turnTimerReduced = false; // Flag for Time Sting effect
     }
 
     // Initialize battle with hero and enemy
     async startBattle(heroData, enemyData) {
+        // Check if battle tutorial should be shown (first battle only)
+        if (window.battleTutorial && BattleTutorial.shouldShowTutorial()) {
+            console.log('⚔️ First battle detected, showing tutorial');
+            window.battleTutorial.show();
+            // Wait for tutorial to complete before starting battle
+            await new Promise(resolve => {
+                const checkTutorial = setInterval(() => {
+                    if (localStorage.getItem('battleTutorialCompleted') === 'true') {
+                        clearInterval(checkTutorial);
+                        resolve();
+                    }
+                }, 500);
+            });
+        }
+        
         this.state = BattleState.INITIALIZING;
         this.hero = heroData;
         this.enemy = enemyData;
@@ -117,6 +138,11 @@ class BattleManager {
     // Player attacks
     async playerAttack() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
         
         // Process poison effect
         if (this.poisonTurns > 0) {
@@ -244,6 +270,12 @@ class BattleManager {
     // Player uses spark (unlocked at level 7)
     async playerSpark() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.attackGauge < 25) {
             addBattleLog('❌ Need 25 attack gauge for spark!');
             return;
@@ -309,6 +341,11 @@ class BattleManager {
     async playerDefend() {
         if (this.state !== BattleState.PLAYER_TURN) return;
         
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.defendBlocked > 0) {
             addBattleLog(`❌ Defend is blocked for ${this.defendBlocked} more turn(s)!`);
             return;
@@ -339,6 +376,11 @@ class BattleManager {
     // Player uses fireball
     async playerFireball() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
         
         if (this.fireballBlocked) {
             addBattleLog('❌ Fireball is blocked by Drench!');
@@ -406,6 +448,12 @@ class BattleManager {
     // Player uses asteroid attack
     async playerAsteroid() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.attackGauge < 15) {
             addBattleLog('❌ Need 15 attack gauge for asteroid!');
             return;
@@ -465,6 +513,12 @@ class BattleManager {
 
     async playerPrickler() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.attackGauge < 20) {
             addBattleLog('❌ Need 20 attack gauge for prickler!');
             return;
@@ -530,6 +584,12 @@ class BattleManager {
     // Player uses freeze (deals damage and skips enemy turn)
     async playerFreeze() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.attackGauge < 35) {
             addBattleLog('❌ Need 35 attack gauge for freeze!');
             return;
@@ -598,6 +658,13 @@ class BattleManager {
             this.state = BattleState.PLAYER_TURN;
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
+            
+            // FIX: Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
         }
     }
 
@@ -610,6 +677,11 @@ class BattleManager {
         if (this.state !== BattleState.PLAYER_TURN) {
             console.log('❌ Not player turn, state is:', this.state);
             return;
+        }
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
         }
 
         const potionCount = gameState.battleInventory?.health_potion || 0;
@@ -660,6 +732,11 @@ class BattleManager {
             console.log('❌ Not player turn, state is:', this.state);
             return;
         }
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
 
         const hyperPotionCount = gameState.battleInventory?.hyper_potion || 0;
         console.log('Hyper Potion count:', hyperPotionCount);
@@ -703,6 +780,11 @@ class BattleManager {
     // Player flees
     async playerFlee() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
 
         this.state = BattleState.FLED;
         addBattleLog('🏃 You fled from battle!');
@@ -714,6 +796,11 @@ class BattleManager {
     // Player uses attack refill
     async playerAttackRefill() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
 
         const refillCount = gameState.battleInventory?.attack_refill || 0;
         if (refillCount <= 0) {
@@ -746,6 +833,11 @@ class BattleManager {
     // Player uses defense refill
     async playerDefenseRefill() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
 
         const refillCount = gameState.battleInventory?.defense_refill || 0;
         if (refillCount <= 0) {
@@ -778,6 +870,11 @@ class BattleManager {
     // Player uses invisibility cloak
     async playerInvisibilityCloak() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
 
         const cloakCount = gameState.battleInventory?.invisibility_cloak || 0;
         if (cloakCount <= 0) {
@@ -814,6 +911,11 @@ class BattleManager {
     // Player uses Mirror Attack
     async playerMirrorAttack() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
 
         const mirrorCount = gameState.battleInventory?.mirror_attack || 0;
         if (mirrorCount <= 0) {
@@ -844,6 +946,12 @@ class BattleManager {
     // Player uses Blue Flame
     async playerBlueFlame() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.attackGauge < 20) {
             addBattleLog('❌ Need 20 attack gauge for Blue Flame!');
             return;
@@ -895,6 +1003,12 @@ class BattleManager {
     // Player uses Procrastination Ghost
     async playerProcrastinationGhost() {
         if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
         if (this.attackGauge < 25) {
             addBattleLog('❌ Need 25 attack gauge for Procrastination Ghost!');
             return;
@@ -949,6 +1063,13 @@ class BattleManager {
             this.state = BattleState.PLAYER_TURN;
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
+            
+            // FIX: Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
         }
     }
 
@@ -957,6 +1078,28 @@ class BattleManager {
         this.state = BattleState.ENEMY_TURN;
 
         await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // FIX: Apply Nova's poison damage at start of enemy turn
+        if (this.novaPoisonTurns > 0) {
+            const poisonDamage = this.novaPoisonDamage || 2;
+            const isDead = this.enemy.takeDamage(poisonDamage);
+            addBattleLog(`☠️ Poison dealt ${poisonDamage} damage! (${this.novaPoisonTurns} turns left)`);
+            
+            this.novaPoisonTurns--;
+            if (this.novaPoisonTurns <= 0) {
+                addBattleLog('✨ Poison effect ended!');
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (isDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
         
         // === ADAPTIVE HEALING AI ===
         if (window.enemyAI && this.enemy.hp < this.enemy.maxHP) {
@@ -968,6 +1111,13 @@ class BattleManager {
                 updateBattleUI(this.hero, this.enemy);
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 this.state = BattleState.PLAYER_TURN;
+                
+                // FIX: Start turn timer
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
                 return;
             }
         }
@@ -981,6 +1131,13 @@ class BattleManager {
                 updateBattleUI(this.hero, this.enemy);
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 this.state = BattleState.PLAYER_TURN;
+                
+                // FIX: Start turn timer
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
                 return;
             }
         }
@@ -1073,6 +1230,13 @@ class BattleManager {
             updateBattleUI(this.hero, this.enemy);
             await new Promise(resolve => setTimeout(resolve, 1000));
             this.state = BattleState.PLAYER_TURN;
+            
+            // FIX: Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
             return;
         } else if (useHug) {
             // Hug attack
@@ -1085,6 +1249,13 @@ class BattleManager {
             updateBattleUI(this.hero, this.enemy);
             await new Promise(resolve => setTimeout(resolve, 1500));
             this.state = BattleState.PLAYER_TURN;
+            
+            // FIX: Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
             return;
         }
         
@@ -1118,6 +1289,13 @@ class BattleManager {
                     this.state = BattleState.PLAYER_TURN;
                     await new Promise(resolve => setTimeout(resolve, 500));
                     addBattleLog('⚔️ Your turn!');
+                    
+                    // FIX: Start turn timer
+                    if (typeof startTurnTimer === 'function') {
+                        const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                        startTurnTimer(timerDuration);
+                        this.turnTimerReduced = false;
+                    }
                 }
                 return;
             }
@@ -1154,6 +1332,13 @@ class BattleManager {
                     this.state = BattleState.PLAYER_TURN;
                     await new Promise(resolve => setTimeout(resolve, 500));
                     addBattleLog('⚔️ Your turn!');
+                    
+                    // FIX: Start turn timer
+                    if (typeof startTurnTimer === 'function') {
+                        const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                        startTurnTimer(timerDuration);
+                        this.turnTimerReduced = false;
+                    }
                 }
                 return;
             }
@@ -1192,9 +1377,66 @@ class BattleManager {
                     this.state = BattleState.PLAYER_TURN;
                     await new Promise(resolve => setTimeout(resolve, 500));
                     addBattleLog('⚔️ Your turn!');
+                    
+                    // FIX: Start turn timer
+                    if (typeof startTurnTimer === 'function') {
+                        const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                        startTurnTimer(timerDuration);
+                        this.turnTimerReduced = false;
+                    }
                 }
                 return;
             }
+        }
+        
+        // FIX: Alien's Time Sting attack
+        if (this.enemy.timeStingAttack && Math.random() < (this.enemy.timeStingChance || 0.25)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Show alien projectile
+            if (this.enemy.projectileType === 'alien') {
+                const enemySprite = document.getElementById('enemySprite');
+                const heroSprite = document.getElementById('heroSprite');
+                await playAlienProjectile(enemySprite, heroSprite);
+            }
+            
+            // Deal light damage (5-8)
+            const damage = Math.floor(Math.random() * 4) + 5;
+            this.hero.hp = Math.max(0, this.hero.hp - damage);
+            
+            // Set flag to reduce timer on next turn
+            this.turnTimerReduced = true;
+            
+            addBattleLog(`⏱️ ${this.enemy.name} used Time Sting! Dealt ${damage} damage!`);
+            addBattleLog('⚠️ Your next turn will have only 1 second!');
+            
+            // Play time sting sound effect
+            if (window.audioManager) {
+                window.audioManager.playSound('error', 0.6);
+            }
+            
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            startHeroAnimation('idle');
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                this.state = BattleState.PLAYER_TURN;
+                await new Promise(resolve => setTimeout(resolve, 500));
+                addBattleLog('⚔️ Your turn!');
+                
+                // FIX: Start turn timer (will be 1 second due to Time Sting)
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    // Don't reset flag here - it should persist for this turn
+                }
+            }
+            return;
         }
         
         // Normal attack
@@ -1230,6 +1472,13 @@ class BattleManager {
             updateBattleUI(this.hero, this.enemy);
             await new Promise(resolve => setTimeout(resolve, 1500));
             this.state = BattleState.PLAYER_TURN;
+            
+            // FIX: Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
             return;
         }
         
@@ -1256,6 +1505,13 @@ class BattleManager {
             } else {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 this.state = BattleState.PLAYER_TURN;
+                
+                // FIX: Start turn timer
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
             }
             return;
         }
@@ -1289,6 +1545,13 @@ class BattleManager {
             } else {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 this.state = BattleState.PLAYER_TURN;
+                
+                // FIX: Start turn timer
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
             }
             return;
         }
@@ -1385,6 +1648,14 @@ class BattleManager {
             this.state = BattleState.PLAYER_TURN;
             await new Promise(resolve => setTimeout(resolve, 500));
             addBattleLog('⚔️ Your turn!');
+            
+            // FIX: Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                // Reset the reduced flag after applying it
+                this.turnTimerReduced = false;
+            }
         }
     }
 
@@ -1489,8 +1760,8 @@ class BattleManager {
             startHeroAnimation('death');
             await new Promise(resolve => setTimeout(resolve, 1200)); // 8 frames * 150ms
             
-            // Show friendly defeat message
-            alert(`💫 Defeat...\n\nThe ${this.enemy.name} was too strong this time.\n\n📉 -${xpLost} XP lost\n\nDon't give up! Train harder and try again! 🔥`);
+            // Show custom defeat modal (matching victory modal style)
+            this.showDefeatModal(this.enemy.name, xpLost);
             
         } else if (result === 'fled') {
             addBattleLog('🏃 You fled from battle!');
@@ -1532,10 +1803,11 @@ class BattleManager {
 
 
 
-        // Ensure all battle music is stopped
+        // FIX: Only stop battle loop music, NOT win/lose music
+        // Win/lose music will play until user returns to home page
         if (window.audioManager) {
             window.audioManager.stopAllBattleMusic();
-            window.audioManager.stopMusic();
+            // DO NOT stop win/lose music here - it should continue playing
         }
 
         // Fade out after 2 seconds
@@ -1543,6 +1815,9 @@ class BattleManager {
             document.getElementById('battleLog').innerHTML = '';
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
+            
+            // FIX: DO NOT stop music here - it should play until user clicks Continue
+            // Music will be stopped in loot modal Continue button or defeat alert
         }, 2000);
     }
     
@@ -1596,6 +1871,139 @@ class BattleManager {
         // CRITICAL: Reset enemy sprite opacity for next battle
         // This ensures the enemy sprite will be visible when the next battle starts
         enemySprite.style.opacity = '1';
+    }
+    
+    // Show defeat modal (matching victory modal style with sadder tone)
+    showDefeatModal(enemyName, xpLost) {
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'defeatModalOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        `;
+
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 3px solid #666;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 340px;
+            width: 85%;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            animation: scaleIn 0.3s ease-out;
+            color: white;
+            text-align: center;
+        `;
+
+        // Defeat title
+        const title = document.createElement('h2');
+        title.textContent = '💫 Defeat... 💫';
+        title.style.cssText = `
+            font-size: 28px;
+            margin: 0 0 8px 0;
+            color: #888;
+            text-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
+        `;
+
+        // Enemy text
+        const enemyText = document.createElement('p');
+        enemyText.textContent = `The ${enemyName} was too strong this time.`;
+        enemyText.style.cssText = `
+            font-size: 16px;
+            margin: 0 0 12px 0;
+            color: #c0c0c0;
+        `;
+
+        // XP lost
+        const xpText = document.createElement('div');
+        xpText.textContent = `📉 -${xpLost} XP lost`;
+        xpText.style.cssText = `
+            font-size: 20px;
+            margin: 0 0 16px 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        `;
+
+        // Encouragement message
+        const encouragement = document.createElement('p');
+        encouragement.textContent = "Don't give up! Train harder and try again! 🔥";
+        encouragement.style.cssText = `
+            font-size: 15px;
+            margin: 0 0 16px 0;
+            color: #e0e0e0;
+            line-height: 1.4;
+        `;
+
+        // OK button
+        const okButton = document.createElement('button');
+        okButton.textContent = 'OK';
+        okButton.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
+        `;
+
+        okButton.onmouseover = () => {
+            okButton.style.transform = 'translateY(-2px)';
+            okButton.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.4)';
+        };
+
+        okButton.onmouseout = () => {
+            okButton.style.transform = 'translateY(0)';
+            okButton.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+        };
+
+        okButton.onclick = () => {
+            // Stop defeat music
+            if (window.audioManager) {
+                window.audioManager.stopBattleOutcomeMusic();
+            }
+            overlay.remove();
+        };
+
+        modal.appendChild(title);
+        modal.appendChild(enemyText);
+        modal.appendChild(xpText);
+        modal.appendChild(encouragement);
+        modal.appendChild(okButton);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Add animations if not already present
+        if (!document.getElementById('defeatModalAnimations')) {
+            const style = document.createElement('style');
+            style.id = 'defeatModalAnimations';
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.8); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 }
 

@@ -323,6 +323,10 @@ class LootSystem {
         };
 
         continueBtn.onclick = () => {
+            // FIX: Stop victory music when user clicks Continue
+            if (window.audioManager) {
+                window.audioManager.stopBattleOutcomeMusic();
+            }
             overlay.remove();
         };
 
