@@ -32,10 +32,7 @@ class AppInitializer {
             this.isFirstTime = !localStorage.getItem('hasChosenMonster') || 
                                localStorage.getItem('hasChosenMonster') !== 'true';
             
-            // 3. Check if quest giver is due
-            this.questGiverDue = window.checkQuestGiverOnLoad && window.checkQuestGiverOnLoad();
-            
-            console.log('[AppInit] First time:', this.isFirstTime, 'Quest due:', this.questGiverDue);
+            console.log('[AppInit] First time:', this.isFirstTime);
             
             // 4. Wait for loading screen to complete (3 seconds)
             await this.waitForLoadingScreen();
@@ -43,9 +40,9 @@ class AppInitializer {
             // 5. Show appropriate flow based on state
             if (this.isFirstTime) {
                 await this.showOnboardingFlow();
-            } else if (this.questGiverDue) {
-                await this.showQuestGiverFlow();
             } else {
+                // Returning users go straight to main app
+                // Quest giver will appear naturally when triggered
                 this.showMainApp();
             }
             
@@ -78,8 +75,8 @@ class AppInitializer {
     async showOnboardingFlow() {
         console.log('[AppInit] Showing onboarding flow');
         
-        // Keep main app hidden during onboarding (removed - was hiding onboarding overlay too)
-        // document.documentElement.style.visibility = 'hidden';
+        // CRITICAL: Make main app visible so onboarding overlay can be seen
+        document.documentElement.style.visibility = 'visible';
         
         // Show onboarding overlay
         const overlay = document.getElementById('onboardingOverlay');
@@ -96,12 +93,9 @@ class AppInitializer {
         await this.waitForOnboardingComplete();
         console.log('[AppInit] Onboarding completed');
         
-        // After onboarding, check if quest giver is due
-        if (this.questGiverDue) {
-            await this.showQuestGiverFlow();
-        } else {
-            this.showMainApp();
-        }
+        // After onboarding, go straight to main app
+        // Quest giver will appear naturally when triggered by task completion
+        this.showMainApp();
     }
     
     /**
@@ -136,8 +130,18 @@ class AppInitializer {
     async showQuestGiverFlow() {
         console.log('[AppInit] Showing quest giver flow');
         
-        // Keep main app hidden until quest giver is handled
-        document.documentElement.style.visibility = 'hidden';
+        // CRITICAL: Make main app visible
+        document.documentElement.style.visibility = 'visible';
+        
+        // Check if quest giver onboarding should be shown first
+        if (window.questGiverOnboarding && window.QuestGiverOnboarding && window.QuestGiverOnboarding.shouldShow()) {
+            console.log('[AppInit] Showing quest giver onboarding first');
+            window.questGiverOnboarding.start();
+            
+            // Wait for quest giver onboarding to complete
+            await this.waitForQuestGiverOnboardingComplete();
+            console.log('[AppInit] Quest giver onboarding completed');
+        }
         
         // Show quest giver modal (the prompt asking if user wants a quest)
         if (window.questGiver) {
@@ -151,6 +155,32 @@ class AppInitializer {
         // Note: Quest giver will handle:
         // - Showing the quest UI when user clicks "Yes"
         // - Revealing main app when dismissed or "No" is clicked
+    }
+    
+    /**
+     * Wait for quest giver onboarding to be completed
+     */
+    waitForQuestGiverOnboardingComplete() {
+        return new Promise(resolve => {
+            console.log('[AppInit] Waiting for quest giver onboarding completion...');
+            
+            // Poll for quest giver onboarding completion
+            const checkInterval = setInterval(() => {
+                const completed = localStorage.getItem('questGiverOnboardingCompleted');
+                if (completed === 'true') {
+                    clearInterval(checkInterval);
+                    console.log('[AppInit] Quest giver onboarding completion detected');
+                    resolve();
+                }
+            }, 100);
+            
+            // Timeout after 2 minutes
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                console.warn('[AppInit] Quest giver onboarding timeout - proceeding anyway');
+                resolve();
+            }, 120000);
+        });
     }
     
     /**

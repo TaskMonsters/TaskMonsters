@@ -1,63 +1,48 @@
 // ===================================
-// SIMPLE MODAL-BASED ONBOARDING
+// QUEST GIVER ONBOARDING
 // ===================================
-// Clear, focused modals shown AFTER monster selection, BEFORE main app
-// Emphasizes ADHD-friendly features
+// Shows onboarding for quest giver mode on first trigger
 
-class SimpleOnboarding {
+class QuestGiverOnboarding {
     constructor() {
         this.currentPage = 0;
         this.pages = [
             {
-                icon: '🎮',
-                title: 'Welcome to Task Monsters!',
-                content: 'Turn your to-do list into an adventure! Complete tasks to level up your monster and battle enemies.',
-                highlight: 'Perfect for your brain - gamification makes boring tasks fun! 🧠✨'
+                icon: '🦅',
+                title: 'Meet Your Quest Giver!',
+                content: 'A mysterious crow has appeared! This magical bird will offer you special quests and challenges.',
+                highlight: 'Quest Giver appears every 5 minutes when you\'re ready for a new adventure! 🎯'
             },
             {
-                icon: '📝',
-                title: 'Regular Tasks',
-                content: 'Create detailed tasks with due dates, priorities, and categories. Great for important deadlines and complex projects.',
-                highlight: 'Find the "+ Add" button under "Your Tasks" to create one!'
+                icon: '📜',
+                title: 'Quests & Quizzes',
+                content: 'The crow offers two types of encounters:\n\n🎯 Quests - Complete specific tasks for bonus rewards\n🧠 Quizzes - Test your knowledge for instant XP',
+                highlight: 'Both give you extra XP and help you level up faster!'
             },
             {
-                icon: '⚡',
-                title: 'Quick Tasks',
-                content: 'Need something fast? Quick tasks are pre-made and ready to go! Perfect for small to-dos when you don\'t want to overthink it.',
-                highlight: 'ADHD-friendly: Less decision fatigue, more action! 🚀'
+                icon: '⏰',
+                title: 'Time-Limited Challenges',
+                content: 'Some quests have time limits! Complete them before they expire to earn your rewards.',
+                highlight: 'Don\'t worry - you can always decline if you\'re not ready! 😊'
             },
             {
-                icon: '⚔️',
-                title: 'Battle Mode',
-                content: 'Completing tasks triggers random battles! Fight enemies, earn XP, and level up your monster. The more tasks you complete, the stronger you become!',
-                highlight: 'Instant rewards = dopamine boost = motivation! 💪'
-            },
-            {
-                icon: '🎯',
-                title: 'Why This Works for ADHD',
-                content: '✅ Instant feedback (XP, battles, loot)\n✅ Visual progress (levels, gauges)\n✅ Variety (different enemies, abilities)\n✅ Rewards (makes tasks feel worth it!)',
-                useList: true,
-                highlight: 'Your brain will LOVE the dopamine hits! 🎉'
-            },
-            {
-                icon: '🚀',
-                title: 'Ready to Start!',
-                content: 'Remember: Every task you complete makes you stronger. Small wins add up to big victories!',
-                highlight: 'You got this! Let\'s turn tasks into triumphs! 💪'
+                icon: '✨',
+                title: 'Ready for Your First Quest?',
+                content: 'The crow is waiting with your first challenge. Accept it to earn bonus XP and rewards!',
+                highlight: 'Let\'s see what adventure awaits! 🚀'
             }
         ];
     }
 
-    // Check if onboarding should be shown
+    // Check if quest giver onboarding should be shown
     static shouldShow() {
-        const hasChosenMonster = localStorage.getItem('hasChosenMonster') === 'true';
-        const onboardingCompleted = localStorage.getItem('simpleOnboardingCompleted') === 'true';
-        return hasChosenMonster && !onboardingCompleted;
+        const questGiverOnboardingCompleted = localStorage.getItem('questGiverOnboardingCompleted') === 'true';
+        return !questGiverOnboardingCompleted;
     }
 
     // Start onboarding
     start() {
-        console.log('🎓 Starting simple modal onboarding');
+        console.log('🦅 Starting quest giver onboarding');
         this.currentPage = 0;
         this.showPage(0);
     }
@@ -73,10 +58,10 @@ class SimpleOnboarding {
         this.currentPage = pageIndex;
 
         // Get or create overlay (reuse existing to prevent flicker)
-        let overlay = document.getElementById('simpleOnboardingOverlay');
+        let overlay = document.getElementById('questGiverOnboardingOverlay');
         if (!overlay) {
             overlay = document.createElement('div');
-            overlay.id = 'simpleOnboardingOverlay';
+            overlay.id = 'questGiverOnboardingOverlay';
         } else {
             // Clear existing content
             overlay.innerHTML = '';
@@ -93,7 +78,7 @@ class SimpleOnboarding {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                z-index: 10003;
+                z-index: 10004;
             `;
         }
 
@@ -101,12 +86,12 @@ class SimpleOnboarding {
         const modal = document.createElement('div');
         modal.style.cssText = `
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border: 3px solid #667eea;
+            border: 3px solid #f59e0b;
             border-radius: 20px;
             padding: 32px;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 0 40px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
             animation: scaleIn 0.3s ease-out;
             color: white;
             text-align: center;
@@ -138,50 +123,33 @@ class SimpleOnboarding {
         title.style.cssText = `
             font-size: 28px;
             margin: 0 0 16px 0;
-            color: #667eea;
+            color: #f59e0b;
             font-weight: 700;
         `;
 
         // Content
         const content = document.createElement('div');
-        if (page.useList) {
-            // Create proper list with aligned checkmarks
-            const items = page.content.split('\n');
-            content.innerHTML = items.map(item => `
-                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
-                    <span style="font-size: 20px; line-height: 1.7; flex-shrink: 0;">✅</span>
-                    <span style="font-size: 17px; line-height: 1.7; color: rgba(255, 255, 255, 0.9); text-align: left;">${item.replace('✅ ', '')}</span>
-                </div>
-            `).join('');
-            content.style.cssText = `
-                margin: 0 0 16px 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            `;
-        } else {
-            content.textContent = page.content;
-            content.style.cssText = `
-                font-size: 17px;
-                line-height: 1.7;
-                margin: 0 0 16px 0;
-                color: rgba(255, 255, 255, 0.9);
-                white-space: pre-line;
-            `;
-        }
+        content.textContent = page.content;
+        content.style.cssText = `
+            font-size: 17px;
+            line-height: 1.7;
+            margin: 0 0 16px 0;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: pre-line;
+        `;
 
         // Highlight box
         const highlight = document.createElement('div');
         highlight.textContent = page.highlight;
         highlight.style.cssText = `
-            background: rgba(102, 126, 234, 0.2);
-            border: 2px solid rgba(102, 126, 234, 0.5);
+            background: rgba(245, 158, 11, 0.2);
+            border: 2px solid rgba(245, 158, 11, 0.5);
             border-radius: 12px;
             padding: 14px;
             margin: 16px 0 24px 0;
             font-size: 15px;
             line-height: 1.6;
-            color: #a8b5ff;
+            color: #fbbf24;
             font-weight: 600;
         `;
 
@@ -225,27 +193,27 @@ class SimpleOnboarding {
 
         // Next/Start button
         const nextButton = document.createElement('button');
-        nextButton.textContent = pageIndex === this.pages.length - 1 ? 'Start Your Journey! 🚀' : 'Next →';
+        nextButton.textContent = pageIndex === this.pages.length - 1 ? 'Meet the Crow! 🦅' : 'Next →';
         nextButton.style.cssText = `
             padding: 14px 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
             transition: all 0.2s ease;
             flex: 1;
         `;
         nextButton.onmouseover = () => {
             nextButton.style.transform = 'translateY(-2px)';
-            nextButton.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
+            nextButton.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.5)';
         };
         nextButton.onmouseout = () => {
             nextButton.style.transform = 'translateY(0)';
-            nextButton.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+            nextButton.style.boxShadow = '0 4px 15px rgba(245, 158, 11, 0.4)';
         };
         nextButton.onclick = () => {
             // Show next page (overlay will be reused)
@@ -276,9 +244,8 @@ class SimpleOnboarding {
                 skipButton.style.color = 'rgba(255, 255, 255, 0.5)';
             };
             skipButton.onclick = () => {
-                if (confirm('Skip the tutorial? You can always learn as you go!')) {
-                    // Remove modal and complete onboarding
-                    overlay.remove();
+                if (confirm('Skip the quest giver tutorial? You can always learn as you go!')) {
+                    // Complete onboarding (will remove overlay)
                     this.complete();
                 }
             };
@@ -303,9 +270,9 @@ class SimpleOnboarding {
         }
 
         // Add animations if not already present
-        if (!document.getElementById('simpleOnboardingAnimations')) {
+        if (!document.getElementById('questGiverOnboardingAnimations')) {
             const style = document.createElement('style');
-            style.id = 'simpleOnboardingAnimations';
+            style.id = 'questGiverOnboardingAnimations';
             style.textContent = `
                 @keyframes fadeIn {
                     from { opacity: 0; }
@@ -326,58 +293,23 @@ class SimpleOnboarding {
 
     // Complete onboarding
     complete() {
-        localStorage.setItem('simpleOnboardingCompleted', 'true');
-        console.log('🎉 Simple onboarding completed');
+        localStorage.setItem('questGiverOnboardingCompleted', 'true');
+        console.log('🎉 Quest giver onboarding completed');
         
         // Remove overlay now that onboarding is complete
-        const overlay = document.getElementById('simpleOnboardingOverlay');
+        const overlay = document.getElementById('questGiverOnboardingOverlay');
         if (overlay) {
             overlay.remove();
         }
 
         // Show notification
         if (typeof showNotification === 'function') {
-            showNotification('🎉 Welcome aboard! Time to conquer some tasks!', 'success');
+            showNotification('🦅 Quest Giver unlocked! Watch for the crow!', 'success');
         }
     }
 }
 
-// Initialize global simple onboarding
-window.simpleOnboarding = new SimpleOnboarding();
+// Initialize global quest giver onboarding
+window.questGiverOnboarding = new QuestGiverOnboarding();
 
-// Auto-start after monster selection
-// NOTE: This is now handled by appInitializer.js to prevent conflicts with quest giver onboarding
-// The battle mode onboarding will show after:
-// 1. Monster selection onboarding completes
-// 2. Quest giver onboarding completes (if quest giver is due)
-// 3. Main app is visible
-
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        if (SimpleOnboarding.shouldShow()) {
-            // Wait for original onboarding to complete
-            const checkInterval = setInterval(() => {
-                const onboardingOverlay = document.getElementById('onboardingOverlay');
-                const isHidden = !onboardingOverlay || onboardingOverlay.classList.contains('hidden');
-                
-                // Also check that quest giver onboarding is not active
-                const questGiverOnboardingOverlay = document.getElementById('questGiverOnboardingOverlay');
-                const questGiverOnboardingHidden = !questGiverOnboardingOverlay;
-                
-                // Also check that quest giver UI is not active
-                const questGiverUI = document.getElementById('questGiverUI');
-                const questGiverUIHidden = !questGiverUI || questGiverUI.classList.contains('hidden');
-                
-                if (isHidden && questGiverOnboardingHidden && questGiverUIHidden) {
-                    clearInterval(checkInterval);
-                    setTimeout(() => {
-                        window.simpleOnboarding.start();
-                    }, 500);
-                }
-            }, 500);
-
-            // Timeout after 30 seconds (increased to account for quest giver flow)
-            setTimeout(() => clearInterval(checkInterval), 30000);
-        }
-    }, 1000);
-});
+console.log('[QuestGiverOnboarding] Quest giver onboarding system loaded');

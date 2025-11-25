@@ -321,6 +321,40 @@ class QuestGiver {
 
     // Show quest giver UI
     show() {
+        // CRITICAL: Prevent quest giver from appearing during battle
+        if (window.battleManager && window.battleManager.inBattle) {
+            console.log('[QuestGiver] Battle is active, quest giver will not trigger');
+            return;
+        }
+        
+        // Check if quest giver onboarding should be shown first
+        if (window.questGiverOnboarding && window.QuestGiverOnboarding && window.QuestGiverOnboarding.shouldShow()) {
+            console.log('[QuestGiver] Showing quest giver onboarding first');
+            window.questGiverOnboarding.start();
+            
+            // After onboarding completes, show quest giver
+            // We'll use a polling mechanism to wait for completion
+            const checkCompletion = setInterval(() => {
+                if (localStorage.getItem('questGiverOnboardingCompleted') === 'true') {
+                    clearInterval(checkCompletion);
+                    console.log('[QuestGiver] Onboarding completed, showing quest giver');
+                    this.showAfterOnboarding();
+                }
+            }, 100);
+            return;
+        }
+        
+        this.showAfterOnboarding();
+    }
+    
+    // Show quest giver after onboarding (or skip if already completed)
+    showAfterOnboarding() {
+        // CRITICAL: Prevent quest giver from appearing during battle
+        if (window.battleManager && window.battleManager.inBattle) {
+            console.log('[QuestGiver] Battle is active, quest giver will not trigger');
+            return;
+        }
+        
         // FIX: Prevent duplicate quest giver triggers
         if (this.activeQuest) {
             console.log('[QuestGiver] Quest already active, ignoring duplicate trigger');
@@ -412,8 +446,8 @@ class QuestGiver {
             <p class="quest-title">📜 Quest</p>
             <p class="quest-description">${quest.text}</p>
             <p class="quest-details">
-                <span class="quest-category">${quest.category}</span>
-                <span class="quest-difficulty">${quest.difficulty}</span>
+                <span class="quest-category">${quest.category.toLowerCase()}</span>
+                <span class="quest-difficulty">${quest.difficulty.toLowerCase()}</span>
             </p>
             <p class="quest-reward">⭐ Reward: ${quest.xp} XP</p>
             <p class="quest-deadline">⏰ Complete within ${quest.duration} hours</p>

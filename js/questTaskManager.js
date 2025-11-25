@@ -137,8 +137,8 @@ class QuestTaskManager {
                     <div class="quest-task-content">
                         <div class="quest-task-text">${task.text}</div>
                         <div class="quest-task-meta">
-                            <span class="quest-task-badge quest-task-category">${task.category}</span>
-                            <span class="quest-task-badge quest-task-difficulty ${difficultyClass}">${task.difficulty}</span>
+                            <span class="quest-task-badge quest-task-category">${task.category.toLowerCase()}</span>
+                            <span class="quest-task-badge quest-task-difficulty ${difficultyClass}">${task.difficulty.toLowerCase()}</span>
                             <span class="quest-task-xp">⭐ ${task.xp} XP</span>
                             <span class="quest-task-deadline ${isExpired ? 'expired' : ''}">
                                 ⏰ ${isExpired ? 'Expired!' : `${Math.ceil(hoursRemaining)}h remaining`}
@@ -146,7 +146,7 @@ class QuestTaskManager {
                         </div>
                         <div class="quest-task-actions">
                             <button class="quest-task-delete" onclick="questTaskManager.deleteQuestTask('${task.id}')">
-                                🗑️ Abandon Quest
+                                🗑️ Abandon quest
                             </button>
                         </div>
                     </div>

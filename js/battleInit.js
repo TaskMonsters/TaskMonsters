@@ -201,15 +201,21 @@ function startHeroAnimation(animationType = 'idle') {
         const skin = appearance;
         const spriteSize = skin.spriteSize || { width: 32, height: 32 };
         const frameWidth = spriteSize.width;
+        const spriteSheetWidth = skin.spriteSheetWidth || {};
+        
+        // Helper function to get width - use actual sprite sheet width if available, otherwise calculate
+        const getWidth = (animType, frameCount) => {
+            return spriteSheetWidth[animType] || (frameCount * frameWidth);
+        };
         
         animations = {
-            idle: { frames: skin.frameCount.idle || 4, width: (skin.frameCount.idle || 4) * frameWidth, sprite: skin.animations.idle, speed: 200 },
-            attack1: { frames: skin.frameCount.attack || 4, width: (skin.frameCount.attack || 4) * frameWidth, sprite: skin.animations.attack, speed: 150 },
-            'walk-attack': { frames: skin.frameCount.walk || 6, width: (skin.frameCount.walk || 6) * frameWidth, sprite: skin.animations.walk, speed: 150 },
-            throw: { frames: skin.frameCount.attack || 4, width: (skin.frameCount.attack || 4) * frameWidth, sprite: skin.animations.attack, speed: 150 },
-            jump: { frames: skin.frameCount.jump || 4, width: (skin.frameCount.jump || 4) * frameWidth, sprite: skin.animations.jump || skin.animations.idle, speed: 100 },
-            hurt: { frames: skin.frameCount.hurt || 2, width: (skin.frameCount.hurt || 2) * frameWidth, sprite: skin.animations.hurt, speed: 150 },
-            death: { frames: skin.frameCount.death || 4, width: (skin.frameCount.death || 4) * frameWidth, sprite: skin.animations.death, speed: 150 }
+            idle: { frames: skin.frameCount.idle || 4, width: getWidth('idle', skin.frameCount.idle || 4), sprite: skin.animations.idle, speed: 200 },
+            attack1: { frames: skin.frameCount.attack || 4, width: getWidth('attack', skin.frameCount.attack || 4), sprite: skin.animations.attack, speed: 150 },
+            'walk-attack': { frames: skin.frameCount.walk || 6, width: getWidth('walk', skin.frameCount.walk || 6), sprite: skin.animations.walk, speed: 150 },
+            throw: { frames: skin.frameCount.attack || 4, width: getWidth('attack', skin.frameCount.attack || 4), sprite: skin.animations.attack, speed: 150 },
+            jump: { frames: skin.frameCount.jump || 4, width: getWidth('jump', skin.frameCount.jump || 4), sprite: skin.animations.jump || skin.animations.idle, speed: 100 },
+            hurt: { frames: skin.frameCount.hurt || 2, width: getWidth('hurt', skin.frameCount.hurt || 2), sprite: skin.animations.hurt, speed: 150 },
+            death: { frames: skin.frameCount.death || 4, width: getWidth('death', skin.frameCount.death || 4), sprite: skin.animations.death, speed: 150 }
         };
     } else {
         // Use default monster animations

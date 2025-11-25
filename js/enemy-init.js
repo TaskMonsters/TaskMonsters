@@ -98,6 +98,13 @@ function initEnemySprite(enemyData) {
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
         spriteElement.style.transform = 'scale(3)';
+    } else if (enemyData.name === 'Fly') {
+        // Fly: single sprite with procedural animation
+        spriteElement.classList.add('enemy-sprite-small');
+        spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
+        spriteElement.style.backgroundSize = 'contain';
+        spriteElement.style.transform = 'scale(2)';
+        spriteElement.classList.add('procedural-idle');
         spriteElement.style.imageRendering = 'pixelated';
         spriteElement.classList.add('boss-animated');
     } else if (enemyData.name === 'Mushroom') {

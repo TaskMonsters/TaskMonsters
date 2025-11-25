@@ -302,7 +302,32 @@ const OGRE_DATA = {
     }
 };
 
-const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA, FIRE_SKULL_DATA, OGRE_DATA];
+// Fly enemy data (appears at level 5+)
+const FLY_DATA = {
+    name: 'Fly',
+    baseHP: 35,
+    baseAttack: 13,
+    baseDefense: 6,
+    minLevel: 5,
+    tier: 'mid',
+    variableDamage: true,
+    damageValues: [9, 17], // Specific damage values
+    evasionAbility: true,
+    evasionChance: 0.30, // 30% chance to evade player attacks
+    projectileType: 'fly-spit',
+    sprites: {
+        idle: 'assets/enemies/fly/10_killer_fly_green_idle.png',
+        attack1: 'assets/enemies/fly/10_killer_fly_green_attack.png',
+        attack2: 'assets/enemies/fly/10_killer_fly_green_attack.png',
+        hurt: 'assets/enemies/fly/10_killer_fly_green_idle.png',
+        die: 'assets/enemies/fly/10_killer_fly_green_idle.png',
+        run: 'assets/enemies/fly/10_killer_fly_green_walk.png',
+        sleep: 'assets/enemies/fly/10_killer_fly_green_idle.png',
+        wakeup: 'assets/enemies/fly/10_killer_fly_green_idle.png'
+    }
+};
+
+const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA, FIRE_SKULL_DATA, OGRE_DATA, FLY_DATA];
 
 // Enemy rotation system
 let currentEnemyRotationIndex = 0;
@@ -379,6 +404,13 @@ function createRandomEnemy(playerLevel) {
     }
     if (enemyData.variableDamage) {
         enemy.variableDamage = true;
+    }
+    if (enemyData.damageValues) {
+        enemy.damageValues = enemyData.damageValues;
+    }
+    if (enemyData.evasionAbility) {
+        enemy.evasionAbility = true;
+        enemy.evasionChance = enemyData.evasionChance;
     }
     if (enemyData.immunities) {
         enemy.immunities = enemyData.immunities;

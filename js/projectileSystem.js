@@ -84,6 +84,13 @@ const PROJECTILE_CONFIG = {
         height: 70,
         duration: 800,
         rotation: false
+    },
+    'fly-spit': {
+        sprite: 'assets/enemies/fly/10_killer_fly_spit.png',
+        width: 32,
+        height: 32,
+        duration: 700,
+        rotation: false
     }
 };
 

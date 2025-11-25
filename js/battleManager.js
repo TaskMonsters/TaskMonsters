@@ -205,9 +205,10 @@ class BattleManager {
             return;
         }
         
-        // Check if enemy evades (Ghost ability or Sunny Dragon)
-        if (this.enemy.canEvade && Math.random() < this.enemy.evasionChance) {
-            addBattleLog(`👻 ${this.enemy.name} evaded your attack!`);
+        // Check if enemy evades (Ghost ability, Sunny Dragon, or Fly)
+        if ((this.enemy.canEvade || this.enemy.evasionAbility) && Math.random() < this.enemy.evasionChance) {
+            const evasionEmoji = this.enemy.name === 'Fly' ? '🪰' : '👻';
+            addBattleLog(`${evasionEmoji} ${this.enemy.name} evaded your attack!`);
             updateBattleUI(this.hero, this.enemy);
             
             // Reset hero sprite to idle
@@ -1464,6 +1465,15 @@ class BattleManager {
             const heroSprite = document.getElementById('heroSprite');
             await playFireExplosion(enemySprite, heroSprite);
         }
+        
+        // If Fly enemy, shoot fly spit projectile
+        if (this.enemy.projectileType === 'fly-spit') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (window.createProjectile) {
+                await window.createProjectile('fly-spit', enemySprite, heroSprite);
+            }
+        }
 
         // Check if Invisibility Cloak is active
         if (this.hasEvade) {
@@ -1579,8 +1589,12 @@ class BattleManager {
         // Calculate damage
         let damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
         
+        // Fly specific damage values (9 or 17)
+        if (this.enemy.damageValues && this.enemy.damageValues.length === 2) {
+            damage = Math.random() < 0.5 ? this.enemy.damageValues[0] : this.enemy.damageValues[1];
+        }
         // Alien variable damage (5 or 15)
-        if (this.enemy.variableDamage) {
+        else if (this.enemy.variableDamage) {
             damage = Math.random() < 0.5 ? 5 : 15;
         }
         

@@ -2061,6 +2061,28 @@
         padding: 16px 20px;
         background: var(--card-bg);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    .shop-sub-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .shop-sub-tabs::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .shop-sub-tabs::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+    
+    .shop-sub-tabs::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
     }
 
     .pill-tab-shop {
@@ -2073,6 +2095,8 @@
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s;
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 
     .pill-tab-shop.active {
@@ -2222,6 +2246,8 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
             padding: 20px;
+            justify-items: center;
+            justify-content: center;
         }
 
     .owned-item-card {
@@ -2232,6 +2258,8 @@
         text-align: center;
         transition: all 0.2s;
         position: relative;
+        width: 100%;
+        max-width: 280px;
     }
 
     .owned-item-card:hover {
@@ -2862,6 +2890,11 @@
     to { opacity: 1; }
 }
 
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
 @keyframes scaleIn {
     from { transform: scale(0.9); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -2894,12 +2927,28 @@
 /* Battle Container Positioning */
 .battle-container {
     position: relative;
-    display: flex;
-    justify-content: space-between;  /* Maximum spacing */
-    align-items: center;
-    padding: 40px 60px;  /* Increased padding for more space */
+    width: 100%;
+    height: 300px;  /* Fixed height for positioning */
+    padding: 20px;
     margin-bottom: 20px;
-    gap: 80px;  /* Minimum gap between sprites */
+}
+
+/* Hero Container - Left Aligned */
+#heroContainer {
+    position: absolute;
+    left: 10px;  /* Closer to left edge */
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 35%;  /* Limit width to prevent expansion */
+}
+
+/* Enemy Container - Right Aligned */
+#enemyContainer {
+    position: absolute;
+    right: 10px;  /* Closer to right edge */
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 35%;  /* Limit width to prevent expansion */
 }
 
 /* FIX: Turn Timer System - HIDDEN (timer now in battle log) */
@@ -3450,7 +3499,7 @@ input:checked + .toggle-slider:before {
 <div id="battleArena" class="battle-arena hidden">
     <div class="battle-container">
         <!-- Hero Side -->
-        <div class="sprite-container">
+        <div class="sprite-container" id="heroContainer">
             <div class="sprite-wrapper">
                 <div id="heroSprite" class="sprite idle"></div>
             </div>
@@ -3467,7 +3516,7 @@ input:checked + .toggle-slider:before {
 
 
         <!-- Enemy Side -->
-        <div class="sprite-container">
+        <div class="sprite-container" id="enemyContainer">
             <div class="sprite-wrapper">
                 <div id="enemySprite" class="sprite idle" style="background-image: url('assets/enemies/Bat-IdleFly.png');"></div>
             </div>
@@ -3606,7 +3655,7 @@ input:checked + .toggle-slider:before {
     
     <!-- Quest Actions (Accept/Decline) -->
     <div id="questActions" class="quest-actions hidden">
-        <button class="quest-btn quest-btn-accept" onclick="questGiver.acceptQuest()">✨ Accept Quest</button>
+        <button class="quest-btn quest-btn-accept" onclick="questGiver.acceptQuest()">✨ Accept quest</button>
         <button class="quest-btn quest-btn-decline" onclick="questGiver.declineQuest()">Pass</button>
     </div>
     
@@ -9056,8 +9105,8 @@ input:checked + .toggle-slider:before {
     <!-- Quest Tasks CSS -->
     <link rel="stylesheet" href="css/questTasks.css">
     
-    <!-- App Initializer - Disabled: Using inline checkOnboardingStatus instead -->
-    <!-- <script src="js/appInitializer.js"></script> -->
+    <!-- App Initializer - Manages onboarding and quest giver flows -->
+    <script src="js/appInitializer.js"></script>
     
     <!-- Background Manager for time-based backgrounds -->
     <script src="js/backgroundManager.js"></script>
@@ -9093,6 +9142,7 @@ input:checked + .toggle-slider:before {
     <script src="js/recurringTasksManager.js"></script>
     <script src="js/subtasksManager.js"></script>
     <script src="js/simpleOnboarding.js"></script>
+    <script src="js/questGiverOnboarding.js"></script>
     <script src="js/moodFilter.js"></script>
     <script src="js/merlinModal.js"></script>
     <script src="js/notificationManager.js"></script>
@@ -9343,7 +9393,8 @@ input:checked + .toggle-slider:before {
     // Initialize onboarding
     document.addEventListener('DOMContentLoaded', function() {
         // Check if onboarding should be shown
-        checkOnboardingStatus();
+        // NOTE: Onboarding is now handled by appInitializer.js
+        // checkOnboardingStatus();
         
         // Load saved monster if exists
         loadSavedMonster();

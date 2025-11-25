@@ -24,12 +24,21 @@ const SKINS_CONFIG = {
         },
         frameCount: {
             idle: 4,
-            walk: 6,
-            attack: 4,
-            hurt: 2,
-            death: 4,
-            jump: 4,
+            walk: 4,
+            attack: 22,
+            hurt: 10,
+            death: 12,
+            jump: 13,
             sleep: 4
+        },
+        spriteSheetWidth: {
+            idle: 128,
+            walk: 128,
+            attack: 704,
+            hurt: 320,
+            death: 384,
+            jump: 416,
+            sleep: 512
         }
     },
     
@@ -52,12 +61,21 @@ const SKINS_CONFIG = {
         },
         frameCount: {
             idle: 4,
-            walk: 6,
-            attack: 4,
-            hurt: 2,
-            death: 4,
-            jump: 4,
+            walk: 4,
+            attack: 22,
+            hurt: 10,
+            death: 12,
+            jump: 13,
             sleep: 4
+        },
+        spriteSheetWidth: {
+            idle: 128,
+            walk: 128,
+            attack: 704,
+            hurt: 320,
+            death: 384,
+            jump: 416,
+            sleep: 512
         }
     },
     
@@ -80,12 +98,21 @@ const SKINS_CONFIG = {
         },
         frameCount: {
             idle: 4,
-            walk: 6,
-            attack: 4,
-            hurt: 2,
-            death: 4,
-            jump: 4,
+            walk: 4,
+            attack: 22,
+            hurt: 10,
+            death: 12,
+            jump: 13,
             sleep: 4
+        },
+        spriteSheetWidth: {
+            idle: 128,
+            walk: 128,
+            attack: 704,
+            hurt: 320,
+            death: 384,
+            jump: 416,
+            sleep: 512
         }
     },
     
@@ -107,12 +134,21 @@ const SKINS_CONFIG = {
         },
         frameCount: {
             idle: 4,
-            walk: 6,
-            attack: 4,
-            hurt: 2,
-            death: 4,
-            jump: 4,
+            walk: 4,
+            attack: 22,
+            hurt: 10,
+            death: 12,
+            jump: 13,
             sleep: 4
+        },
+        spriteSheetWidth: {
+            idle: 128,
+            walk: 128,
+            attack: 704,
+            hurt: 320,
+            death: 384,
+            jump: 416,
+            sleep: 512
         }
     },
     
@@ -135,12 +171,21 @@ const SKINS_CONFIG = {
         },
         frameCount: {
             idle: 4,
-            walk: 6,
-            attack: 4,
-            hurt: 2,
-            death: 4,
-            jump: 4,
+            walk: 4,
+            attack: 22,
+            hurt: 10,
+            death: 12,
+            jump: 13,
             sleep: 4
+        },
+        spriteSheetWidth: {
+            idle: 128,
+            walk: 128,
+            attack: 704,
+            hurt: 320,
+            death: 384,
+            jump: 416,
+            sleep: 512
         }
     },
     
@@ -162,12 +207,21 @@ const SKINS_CONFIG = {
         },
         frameCount: {
             idle: 4,
-            walk: 6,
-            attack: 4,
-            hurt: 2,
-            death: 4,
-            jump: 4,
+            walk: 4,
+            attack: 22,
+            hurt: 10,
+            death: 12,
+            jump: 13,
             sleep: 4
+        },
+        spriteSheetWidth: {
+            idle: 128,
+            walk: 128,
+            attack: 704,
+            hurt: 320,
+            death: 384,
+            jump: 416,
+            sleep: 512
         }
     },
 
@@ -184,6 +238,7 @@ function getActiveMonsterAppearance(baseMonsterId, equippedSkinId) {
         return {
             animations: skin.animations,
             frameCount: skin.frameCount,
+            spriteSheetWidth: skin.spriteSheetWidth || {}, // Actual sprite sheet widths
             spriteSize: skin.spriteSize || { width: 32, height: 32 }, // Default to 32x32 for cat skins
             spriteRow: skin.spriteRow || 0, // Which row to use for multi-directional sprites (Orc)
             animationRows: skin.animationRows || {}, // Which row for each animation (Blob)
