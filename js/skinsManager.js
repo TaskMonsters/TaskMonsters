@@ -162,6 +162,8 @@ class SkinsManager {
             focusTimerSprite.style.width = '32px';
             focusTimerSprite.style.height = '32px';
             focusTimerSprite.style.objectFit = 'none';
+            focusTimerSprite.style.overflow = 'hidden';
+            focusTimerSprite.style.imageRendering = 'pixelated';
             
             // For multi-directional sprites, set object-position to show front-facing row
             const spriteRow = appearance.spriteRow || 0;
@@ -172,7 +174,12 @@ class SkinsManager {
             const yOffset = rowIndex * (appearance.spriteSize?.height || 32);
             focusTimerSprite.style.objectPosition = `0 -${yOffset}px`;
             
+            // Set proper object-fit to clip the sprite to exactly 32x32
+            focusTimerSprite.style.objectFit = 'none';
+            focusTimerSprite.style.objectPosition = '0 0';
+            
             focusTimerSprite.style.transform = 'scale(4)';
+            focusTimerSprite.style.transformOrigin = 'center center';
             
             // Only animate if there's more than 1 frame
             if (appearance.frameCount.idle > 1) {

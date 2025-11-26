@@ -1881,6 +1881,72 @@
             }
         }
 
+        /* Mobile responsiveness for iPhone 12 mini (375px) and smaller */
+        @media (max-width: 390px) {
+            .modal-content {
+                max-width: 95vw;
+                max-height: 90vh;
+                border-radius: 16px;
+            }
+            
+            .modal-header {
+                padding: 16px 16px 0;
+                margin-bottom: 12px;
+            }
+            
+            .modal-title {
+                font-size: 18px;
+            }
+            
+            .modal-body {
+                padding: 0 16px;
+            }
+            
+            .modal-footer {
+                padding: 12px 16px 16px;
+                display: flex;
+                gap: 8px;
+            }
+            
+            .form-group {
+                margin-bottom: 16px;
+            }
+            
+            .form-input,
+            .form-select,
+            .form-textarea {
+                padding: 10px 12px;
+                font-size: 16px;
+            }
+            
+            .form-label {
+                font-size: 13px;
+                margin-bottom: 6px;
+            }
+            
+            .selection-item {
+                padding: 10px 6px;
+                min-height: 70px;
+            }
+            
+            .selection-item-emoji {
+                font-size: 20px;
+            }
+            
+            .selection-item-text {
+                font-size: 11px;
+            }
+            
+            #recurringOptions {
+                padding: 12px !important;
+            }
+            
+            .day-checkbox {
+                font-size: 12px;
+                padding: 6px 8px;
+            }
+        }
+
         .selection-item {
             background: var(--bg-secondary);
             border: 2px solid var(--border-light);
@@ -3047,6 +3113,47 @@
     cursor: pointer;
 }
 
+/* Subtask styles for create task modal */
+.subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.subtask-item:hover {
+    background: var(--bg-primary);
+    border-color: var(--accent-tertiary);
+}
+
+.subtask-item-text {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.subtask-item-remove {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.subtask-item-remove:hover {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+}
+
 .recurring-task-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border-light);
@@ -3886,7 +3993,7 @@ input:checked + .toggle-slider:before {
                         <label for="focusDuration" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Set Timer (minutes):</label>
                         <input type="number" id="focusDuration" min="1" max="480" value="25" class="form-input" style="margin-bottom: 16px;">
                         <!-- Focus Timer Monster Animation -->
-                        <div id="focusTimerMonsterContainer" style="position: relative; width: 140px; height: 140px; margin: 0 auto 10px auto; display: none; align-items: center; justify-content: center;">
+                        <div id="focusTimerMonsterContainer" style="position: relative; width: 140px; height: 140px; margin: 0 auto 10px auto; display: none; align-items: center; justify-content: center; overflow: hidden;">
                             <img id="focusTimerMonsterSprite" src="assets/heroes/Pink_Monster_Idle_4.png" alt="Monster" style="width: 32px; height: 32px; image-rendering: pixelated; object-fit: none; object-position: 0 0; transform: scale(4); transform-origin: center center; animation: hero-idle-anim 0.8s steps(4) infinite;">
                         </div>
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
@@ -4196,6 +4303,18 @@ input:checked + .toggle-slider:before {
                     <input class="form-input" id="taskDueDate" type="datetime-local" placeholder="Select date and time"/>
                 </div>
                 
+                <!-- Subtasks Section -->
+                <div class="form-group">
+                    <label class="form-label">Subtasks (Optional)</label>
+                    <div id="subtasksList" style="margin-bottom: 12px;">
+                        <!-- Subtasks will be added here dynamically -->
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input class="form-input" id="subtaskInput" type="text" placeholder="Add a subtask..." style="flex: 1;" onkeypress="if(event.key==='Enter'){event.preventDefault();addSubtaskToModal();}">
+                        <button type="button" class="btn-secondary" onclick="addSubtaskToModal()" style="padding: 12px 20px; white-space: nowrap;">+ Add</button>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label class="form-checkbox-label">
                         <input type="checkbox" id="makeRecurring" onchange="toggleRecurringOptions()">
@@ -4281,6 +4400,7 @@ input:checked + .toggle-slider:before {
             health: 100,
             jerryLevel: 1,
             jerryXP: 0,
+            jerryCurrentXP: 0,
             jerryXPToNext: 100,
             taskPoints: 0,
             tasks: [],
@@ -4778,8 +4898,9 @@ input:checked + .toggle-slider:before {
             const currentStreak = gameState.currentStreak || 0;
             const level = gameState.jerryLevel || 1;
             
-            // XP System: XP resets on level-up (prevents negative values)
-            const currentXP = Math.max(0, gameState.jerryXP || 0); // Clamp to prevent negative
+            // XP System: Use jerryCurrentXP for level progress (resets on level-up)
+            // jerryXP is XP Coins (persistent currency, never resets)
+            const currentXP = Math.max(0, gameState.jerryCurrentXP || 0); // Clamp to prevent negative
             const xpToNext = gameState.jerryXPToNext || Math.floor(100 * Math.pow(1.2, level - 1));
             
             // Energy (Health)
@@ -7506,7 +7627,7 @@ input:checked + .toggle-slider:before {
             attack_refill: {
                 id: 'attack_refill',
                 name: 'Power Boost',
-                emoji: '⚡',
+                emoji: '⚔️',
                 description: 'Refills +30 Attack for your gauge',
                 cost: 25,
                 effect: 'attack_gauge',
@@ -8087,6 +8208,72 @@ input:checked + .toggle-slider:before {
             }
         }
 
+        // Subtask management for create task modal
+        let modalSubtasks = [];
+        
+        function addSubtaskToModal() {
+            const input = document.getElementById('subtaskInput');
+            const subtaskTitle = input.value.trim();
+            
+            if (!subtaskTitle) {
+                return;
+            }
+            
+            // Add to temporary array
+            const subtask = {
+                id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                title: subtaskTitle,
+                completed: false
+            };
+            
+            modalSubtasks.push(subtask);
+            
+            // Update display
+            renderModalSubtasks();
+            
+            // Clear input
+            input.value = '';
+            input.focus();
+        }
+        
+        function removeSubtaskFromModal(subtaskId) {
+            modalSubtasks = modalSubtasks.filter(st => st.id !== subtaskId);
+            renderModalSubtasks();
+        }
+        
+        function renderModalSubtasks() {
+            const container = document.getElementById('subtasksList');
+            if (!container) return;
+            
+            if (modalSubtasks.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = modalSubtasks.map(subtask => `
+                <div class="subtask-item">
+                    <span class="subtask-item-text">${subtask.title}</span>
+                    <button type="button" class="subtask-item-remove" onclick="removeSubtaskFromModal('${subtask.id}')" title="Remove subtask">×</button>
+                </div>
+            `).join('');
+        }
+        
+        function loadSubtasksToModal(subtasks) {
+            if (!subtasks || subtasks.length === 0) {
+                modalSubtasks = [];
+                renderModalSubtasks();
+                return;
+            }
+            
+            modalSubtasks = subtasks.map(st => ({
+                id: st.id || `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                title: st.title,
+                completed: st.completed || false
+            }));
+            
+            renderModalSubtasks();
+        }
+
         function resetForm() {
             document.getElementById('taskForm').reset();
             document.querySelectorAll('.selection-item').forEach(el => el.classList.remove('selected'));
@@ -8097,6 +8284,9 @@ input:checked + .toggle-slider:before {
             document.querySelector('.modal-title').textContent = 'Create Task';
             // Reset native datetime-local input
             document.getElementById('taskDueDate').value = '';
+            // Clear subtasks
+            modalSubtasks = [];
+            renderModalSubtasks();
         }
 
         // Date picker now uses native HTML5 datetime-local input
@@ -8183,7 +8373,13 @@ input:checked + .toggle-slider:before {
                     points: pointsMap[selectedDifficulty],
                     dueDate: dueDate || null,
                     createdAt: new Date().toISOString(),
-                    completed: false
+                    completed: false,
+                    subtasks: modalSubtasks.length > 0 ? modalSubtasks.map(st => ({
+                        id: st.id,
+                        title: st.title,
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    })) : []
                 };
                 
                 if (editingTaskIndex !== null) {
@@ -8371,6 +8567,9 @@ input:checked + .toggle-slider:before {
             if (task.category) selectCategory(task.category);
             if (task.difficulty) selectDifficulty(task.difficulty);
             if (task.priority) selectPriority(task.priority);
+            
+            // Load subtasks
+            loadSubtasksToModal(task.subtasks || []);
             
             // Update modal title
             document.querySelector('.modal-title').textContent = 'Edit Task';
@@ -8587,11 +8786,13 @@ input:checked + .toggle-slider:before {
         }
 
         function addJerryXP(xp) {
+            // Add to both XP Coins (persistent currency) and Current XP (level progress)
             gameState.jerryXP += xp;
+            gameState.jerryCurrentXP = (gameState.jerryCurrentXP || 0) + xp;
             
             // Check for level ups
             let leveledUp = false;
-            while (gameState.jerryXP >= gameState.jerryXPToNext) {
+            while (gameState.jerryCurrentXP >= gameState.jerryXPToNext) {
                 levelUpJerry();
                 leveledUp = true;
             }
@@ -8609,14 +8810,15 @@ input:checked + .toggle-slider:before {
         }
 
         function levelUpJerry() {
-            // Deduct XP for level-up (prevents negative XP)
-            gameState.jerryXP -= gameState.jerryXPToNext;
+            // Deduct from Current XP (level progress), but keep XP Coins (jerryXP) intact
+            gameState.jerryCurrentXP -= gameState.jerryXPToNext;
             gameState.jerryLevel++;
             
             // Calculate next level threshold with exponential curve
             gameState.jerryXPToNext = Math.floor(100 * Math.pow(1.2, gameState.jerryLevel - 1));
             
             console.log(`🎉 Level Up! Level ${gameState.jerryLevel}, Next threshold: ${gameState.jerryXPToNext}`);
+            console.log(`XP Coins: ${gameState.jerryXP}, Current XP: ${gameState.jerryCurrentXP}`);
             
             showSuccessMessage(`🎉 ${gameState.rockName} leveled up!`, `Now Level ${gameState.jerryLevel}!`);
             
