@@ -1,22 +1,22 @@
 // Battle System Initialization
 
-// Arena rotation system
+// Arena rotation system with more variety
 const ARENA_POOL = [
-    'assets/backgrounds/forest-road.png',
-    'assets/backgrounds/mountain-dusk.png',
-    'assets/backgrounds/temple-arena.png',
-    'assets/backgrounds/themes/castle.png',
+    'assets/backgrounds/themes/synth-city.png',
     'assets/backgrounds/themes/city.png',
+    'assets/backgrounds/forest-road.png',
     'assets/backgrounds/themes/forest.png',
-    'assets/backgrounds/themes/graveyard.png',
     'assets/backgrounds/themes/underwater.png',
-    'assets/backgrounds/themes/space.png',
-    'assets/backgrounds/themes/synth-city.png'
+    'assets/backgrounds/mountain-dusk.png',
+    'assets/backgrounds/themes/castle.png',
+    'assets/backgrounds/temple-arena.png',
+    'assets/backgrounds/themes/graveyard.png',
+    'assets/backgrounds/themes/space.png'
 ];
 
 let currentArenaIndex = 0;
 let battlesSinceArenaChange = 0;
-const BATTLES_PER_ARENA = 5;
+const BATTLES_PER_ARENA = 1; // Changed from 3 to 1 for maximum variety as requested by user
 
 function getNextArenaBackground() {
     if (!ARENA_POOL || ARENA_POOL.length === 0) return null;
@@ -24,7 +24,7 @@ function getNextArenaBackground() {
     // Increment battle counter
     battlesSinceArenaChange++;
     
-    // Only rotate arena every 5 battles
+    // Only rotate arena every 3 battles
     if (battlesSinceArenaChange >= BATTLES_PER_ARENA) {
         currentArenaIndex = (currentArenaIndex + 1) % ARENA_POOL.length;
         battlesSinceArenaChange = 0;
@@ -507,13 +507,13 @@ function maybeTriggerBattle(sourceType) {
     // Check if Battle Mode is enabled
     if (window.battleModeEnabled === false) {
         console.log('⚙️ Battle Mode is OFF — skipping encounter.');
-        return;
+        return false;
     }
     
     // Safeguard: Check if Battle Manager is initialized
     if (!window.battleManager || !window.battleManager.initialized) {
         console.warn('⚠️ Battle Manager not initialized – skipping battle trigger');
-        return;
+        return false;
     }
     
     let chance = 0;
@@ -525,7 +525,7 @@ function maybeTriggerBattle(sourceType) {
     } else {
         // Any other source should never trigger battle
         console.log(`🚫 Battle trigger blocked for source: ${sourceType}`);
-        return;
+        return false;
     }
     
     // Roll the dice
@@ -535,8 +535,10 @@ function maybeTriggerBattle(sourceType) {
     if (roll < chance) {
         console.log('⚔️ Battle triggered!');
         startTestBattle();
+        return true; // Battle was triggered
     } else {
         console.log('✨ No battle this time');
+        return false; // No battle triggered
     }
 }
 

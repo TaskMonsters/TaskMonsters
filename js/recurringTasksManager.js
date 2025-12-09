@@ -50,6 +50,7 @@ class RecurringTasksManager {
             nextDueDate: this.calculateNextDueDate(taskTemplate.recurrence),
             lastCreated: null,
             createdCount: 0,
+            completions: [], // Track completion timestamps
             active: true
         };
 
@@ -343,16 +344,15 @@ class RecurringTasksManager {
                         Next: ${timeUntil}
                     </div>
                 ` : ''}
-                <div class="recurring-task-stats">
-                    Created ${task.createdCount} times
-                </div>
-                <div class="recurring-task-actions">
-                    <button class="btn-icon" onclick="editRecurringTask('${task.id}')" title="Edit">
+                ${this.renderCompletionHistory(task)}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                    <button class="btn-icon" onclick="editRecurringTask('${task.id}')" title="Edit" style="background: var(--bg-tertiary); border: none; border-radius: 8px; padding: 8px 12px; font-size: 16px; cursor: pointer;">
                         ✏️
                     </button>
-                    <button class="btn-icon" onclick="deleteRecurringTask('${task.id}')" title="Delete">
-                        🗑️
-                    </button>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="action-btn action-complete" onclick="completeRecurringTaskNow('${task.id}')" title="Complete Now">✓</button>
+                        <button class="action-btn action-remove" onclick="deleteRecurringTask('${task.id}')" title="Delete">×</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -373,6 +373,66 @@ class RecurringTasksManager {
         if (hours > 0) return `in ${hours}h ${minutes}m`;
         return `in ${minutes}m`;
     }
+
+    // Render completion history with visual indicators
+    renderCompletionHistory(task) {
+        const completions = task.completions || [];
+        const completionCount = completions.length;
+        
+        if (completionCount === 0) {
+            return `
+                <div class="recurring-task-stats" style="color: var(--text-secondary); font-size: 13px; margin-top: 8px;">
+                    <span style="opacity: 0.7;">No completions yet</span>
+                </div>
+            `;
+        }
+        
+        // Get last 5 completions for display
+        const recentCompletions = completions.slice(-5).reverse();
+        const lastCompletion = new Date(completions[completions.length - 1]);
+        const timeSinceLastCompletion = this.getTimeSince(lastCompletion);
+        
+        // Create visual dots for recent completions
+        const dots = recentCompletions.map((completion, index) => {
+            const date = new Date(completion);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return `<span class="completion-dot" title="Completed on ${dateStr}" style="display: inline-block; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; margin: 0 2px;"></span>`;
+        }).join('');
+        
+        const moreCount = completionCount > 5 ? completionCount - 5 : 0;
+        
+        return `
+            <div class="recurring-task-stats" style="margin-top: 12px; padding: 10px; background: var(--bg-tertiary); border-radius: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">
+                        ✓ ${completionCount} completion${completionCount !== 1 ? 's' : ''}
+                    </span>
+                    <span style="font-size: 12px; color: var(--text-secondary);">
+                        Last: ${timeSinceLastCompletion}
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    ${dots}
+                    ${moreCount > 0 ? `<span style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">+${moreCount} more</span>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Get human-readable time since a date
+    getTimeSince(date) {
+        const now = new Date();
+        const diff = now - date;
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (days > 0) return `${days}d ago`;
+        if (hours > 0) return `${hours}h ago`;
+        if (minutes > 0) return `${minutes}m ago`;
+        return 'just now';
+    }
 }
 
 // Initialize recurring tasks manager
@@ -390,5 +450,121 @@ window.editRecurringTask = function(taskId) {
 window.deleteRecurringTask = function(taskId) {
     if (confirm('Delete this recurring task? Future instances will not be created.')) {
         window.recurringTasksManager.deleteRecurringTask(taskId);
+    }
+};
+
+window.completeRecurringTaskNow = function(taskId) {
+    const task = window.recurringTasksManager.recurringTasks.find(t => t.id === taskId);
+    if (task) {
+        // Create an instance immediately and mark it as completed
+        window.recurringTasksManager.createTaskInstance(task);
+        
+        // Complete the last created task
+        if (window.gameState && window.gameState.tasks.length > 0) {
+            const lastTask = window.gameState.tasks[window.gameState.tasks.length - 1];
+            if (lastTask.recurringTaskId === taskId) {
+                const taskIndex = window.gameState.tasks.length - 1;
+                if (typeof completeTask === 'function') {
+                    completeTask(taskIndex);
+                }
+                
+                // Track completion
+                if (!task.completions) task.completions = [];
+                task.completions.push(new Date().toISOString());
+                window.recurringTasksManager.saveRecurringTasks();
+                window.recurringTasksManager.updateDisplay();
+            }
+        }
+        
+        alert(`✓ Recurring task completed! Points awarded.`);
+    }
+};
+
+window.openRecurringTaskModal = function(task) {
+    if (!task) return;
+    
+    // Open the create task modal
+    if (typeof openCreateTaskModal === 'function') {
+        openCreateTaskModal();
+        
+        // Wait for modal to open, then populate fields
+        setTimeout(() => {
+            // Set editing mode
+            window.editingRecurringTaskId = task.id;
+            
+            // Populate basic fields
+            document.getElementById('taskTitle').value = task.title || '';
+            document.getElementById('taskDescription').value = task.description || '';
+            
+            // Select category, difficulty, priority
+            if (task.category && typeof selectCategory === 'function') selectCategory(task.category);
+            if (task.difficulty && typeof selectDifficulty === 'function') selectDifficulty(task.difficulty);
+            if (task.priority && typeof selectPriority === 'function') selectPriority(task.priority);
+            
+            // Enable recurring options
+            const recurringCheckbox = document.getElementById('makeRecurring');
+            if (recurringCheckbox) {
+                recurringCheckbox.checked = true;
+                if (typeof toggleRecurringOptions === 'function') {
+                    toggleRecurringOptions();
+                }
+                
+                // Populate recurrence fields
+                setTimeout(() => {
+                    const recurrence = task.recurrence || {};
+                    
+                    // Set recurrence type
+                    const typeSelect = document.getElementById('recurrenceType');
+                    if (typeSelect) {
+                        typeSelect.value = recurrence.type || 'daily';
+                        if (typeof updateRecurrenceOptions === 'function') {
+                            updateRecurrenceOptions();
+                        }
+                    }
+                    
+                    // Set time
+                    const timeInput = document.getElementById('recurrenceTime');
+                    if (timeInput) {
+                        timeInput.value = recurrence.time || '09:00';
+                    }
+                    
+                    // Set interval
+                    const intervalInput = document.getElementById('recurrenceInterval');
+                    if (intervalInput) {
+                        intervalInput.value = recurrence.interval || 1;
+                    }
+                    
+                    // Set weekly days
+                    if (recurrence.type === 'weekly' && recurrence.daysOfWeek) {
+                        recurrence.daysOfWeek.forEach(day => {
+                            const checkbox = document.querySelector(`input[name="weekday"][value="${day}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                    }
+                    
+                    // Set monthly day
+                    if (recurrence.type === 'monthly') {
+                        const dayInput = document.getElementById('monthlyDay');
+                        if (dayInput) {
+                            dayInput.value = recurrence.dayOfMonth || 1;
+                        }
+                    }
+                    
+                    // Set custom days
+                    if (recurrence.type === 'custom') {
+                        const customInput = document.getElementById('customDays');
+                        if (customInput) {
+                            customInput.value = recurrence.customDays || 1;
+                        }
+                    }
+                }, 200);
+            }
+            
+            // Update modal title
+            const modalTitle = document.querySelector('.modal-title');
+            if (modalTitle) {
+                modalTitle.textContent = 'Edit Recurring Task';
+            }
+        }, 100);
     }
 };

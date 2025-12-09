@@ -96,16 +96,30 @@ class BattleManager {
 
         // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');
-        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space');
+        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space', 'bg-castle', 'bg-city-neon', 'bg-synth-city');
         
         // Determine available arenas based on level
         const availableArenas = [];
-        if (this.hero.level >= 1) availableArenas.push('bg-city'); // city_sunset at level 1
-        if (this.hero.level >= 2) availableArenas.push('bg-ocean');
-        if (this.hero.level >= 5) availableArenas.push('bg-temple');
-        if (this.hero.level >= 8) availableArenas.push('bg-space'); // New space background at level 8+
-        if (this.hero.level >= 12) availableArenas.push('bg-night-town');
-        if (this.hero.level >= 13) availableArenas.push('bg-skull-gate'); // Skull Gate at level 13+
+        
+        // LEVELS 1-10: Synth City is the primary arena (appears 5x)
+        if (this.hero.level >= 1 && this.hero.level <= 10) {
+            availableArenas.push('bg-synth-city', 'bg-synth-city', 'bg-synth-city', 'bg-synth-city', 'bg-synth-city');
+        }
+        
+        // LEVELS 11+: More variety with multiple arenas
+        if (this.hero.level >= 11) {
+            // Add all arenas for variety
+            availableArenas.push('bg-city', 'bg-city'); // city_sunset 2x
+            availableArenas.push('bg-forest'); // forest_path
+            availableArenas.push('bg-ocean'); // ocean
+            availableArenas.push('bg-castle'); // castle
+            availableArenas.push('bg-temple'); // temple
+            availableArenas.push('bg-space'); // space
+            availableArenas.push('bg-city-neon'); // neon city
+            availableArenas.push('bg-night-town'); // night town
+            availableArenas.push('bg-synth-city'); // synth city still available
+            availableArenas.push('bg-skull-gate'); // skull gate
+        }
         
         // Alternating encounter system: rotate through available arenas
         if (!window.battleArenaIndex) window.battleArenaIndex = 0;

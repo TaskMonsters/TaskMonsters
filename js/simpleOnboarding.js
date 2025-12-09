@@ -339,6 +339,12 @@ class SimpleOnboarding {
         if (typeof showNotification === 'function') {
             showNotification('🎉 Welcome aboard! Time to conquer some tasks!', 'success');
         }
+
+        // --- NEW: Show Name/Email Modal ---
+        if (typeof window.nameEmailModal !== 'undefined') {
+            window.nameEmailModal.show();
+        }
+        // -----------------------------------
     }
 }
 

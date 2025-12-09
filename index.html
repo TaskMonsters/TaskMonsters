@@ -4019,14 +4019,8 @@ input:checked + .toggle-slider:before {
 
             <!-- Recurring Tasks -->
             <div class="card" id="recurringTasksCard" style="display: none;">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div class="card-title">📅 Recurring Tasks</div>
-                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Automated routine tasks</div>
-                    </div>
-                    <button class="btn-icon" onclick="openCreateRecurringTaskModal()" title="Add Recurring Task" style="font-size: 20px;">
-                        ➕
-                    </button>
+                <div class="card-header">
+                    <div class="card-title">📅 Recurring Tasks</div>
                 </div>
                 <div id="recurringTasksList">
                     <!-- Recurring tasks will be populated here -->
@@ -4482,6 +4476,7 @@ input:checked + .toggle-slider:before {
         let selectedInterval = 1;
         let selectedWeekdays = [];
         let editingTaskIndex = null;
+        let editingRecurringTaskId = null;
 
         // Category mapping
         const categoryMap = {
@@ -8281,6 +8276,7 @@ input:checked + .toggle-slider:before {
             selectedDifficulty = null;
             selectedPriority = null;
             editingTaskIndex = null;
+            editingRecurringTaskId = null;
             document.querySelector('.modal-title').textContent = 'Create Task';
             // Reset native datetime-local input
             document.getElementById('taskDueDate').value = '';
@@ -8330,23 +8326,26 @@ input:checked + .toggle-slider:before {
             if (makeRecurring) {
                 // Create recurring task template
                 const recurrenceType = document.getElementById('recurrenceType').value;
+                const recurrenceTime = document.getElementById('recurrenceTime')?.value || '09:00';
+                const recurrenceInterval = parseInt(document.getElementById('recurrenceInterval')?.value) || 1;
+                
                 const recurrence = {
                     type: recurrenceType,
-                    interval: 1,
-                    time: '09:00'
+                    interval: recurrenceInterval,
+                    time: recurrenceTime
                 };
                 
                 if (recurrenceType === 'weekly') {
-                    const selectedDays = Array.from(document.querySelectorAll('#weeklyOptions input:checked'))
+                    const selectedDays = Array.from(document.querySelectorAll('input[name="weekday"]:checked'))
                         .map(cb => parseInt(cb.value));
                     recurrence.daysOfWeek = selectedDays.length > 0 ? selectedDays : [1]; // Default to Monday
                 } else if (recurrenceType === 'monthly') {
-                    recurrence.dayOfMonth = parseInt(document.getElementById('dayOfMonth').value) || 1;
+                    recurrence.dayOfMonth = parseInt(document.getElementById('monthlyDay')?.value) || 1;
                 } else if (recurrenceType === 'custom') {
-                    recurrence.customDays = parseInt(document.getElementById('customDays').value) || 1;
+                    recurrence.customDays = parseInt(document.getElementById('customDays')?.value) || 1;
                 }
                 
-                const recurringTask = {
+                const recurringTaskData = {
                     title,
                     description,
                     category: selectedCategory,
@@ -8357,8 +8356,16 @@ input:checked + .toggle-slider:before {
                 };
                 
                 if (window.recurringTasksManager) {
-                    window.recurringTasksManager.addRecurringTask(recurringTask);
-                    showSuccessMessage('Recurring task created successfully!');
+                    if (editingRecurringTaskId) {
+                        // Update existing recurring task
+                        window.recurringTasksManager.editRecurringTask(editingRecurringTaskId, recurringTaskData);
+                        showSuccessMessage('Recurring task updated successfully!');
+                        editingRecurringTaskId = null;
+                    } else {
+                        // Create new recurring task
+                        window.recurringTasksManager.addRecurringTask(recurringTaskData);
+                        showSuccessMessage('Recurring task created successfully!');
+                    }
                 } else {
                     alert('Recurring tasks system not loaded');
                 }
@@ -8509,21 +8516,24 @@ input:checked + .toggle-slider:before {
             
             // Trigger battle with 50% probability for regular tasks
             setTimeout(() => {
+                let battleTriggered = false;
                 if (typeof window.maybeTriggerBattle === 'function') {
-                    window.maybeTriggerBattle('regularTask');
+                    battleTriggered = window.maybeTriggerBattle('regularTask');
                 } else {
                     console.warn('Battle trigger system not loaded yet');
                 }
-            }, 2000); // Wait 2 seconds after confetti
-            
-            // Trigger Merlin quest giver after task completion
-            setTimeout(() => {
-                if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
-                    window.triggerMerlinQuestFromTaskCompletion();
-                } else {
-                    console.warn('Quest giver trigger system not loaded yet');
+                
+                // Only trigger quest giver if battle did NOT start
+                if (!battleTriggered) {
+                    setTimeout(() => {
+                        if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
+                            window.triggerMerlinQuestFromTaskCompletion();
+                        } else {
+                            console.warn('Quest giver trigger system not loaded yet');
+                        }
+                    }, 3000); // Wait 3 seconds after no battle
                 }
-            }, 5000); // Wait 5 seconds (after battle trigger)
+            }, 2000); // Wait 2 seconds after confetti
             
             // Show dialogue after a brief delay
             setTimeout(() => {
@@ -8721,21 +8731,24 @@ input:checked + .toggle-slider:before {
             
             // Trigger battle with 20% probability for quick tasks
             setTimeout(() => {
+                let battleTriggered = false;
                 if (typeof window.maybeTriggerBattle === 'function') {
-                    window.maybeTriggerBattle('quickTask');
+                    battleTriggered = window.maybeTriggerBattle('quickTask');
                 } else {
                     console.warn('Battle trigger system not loaded yet');
                 }
-            }, 2000); // Wait 2 seconds after confetti
-            
-            // Trigger Merlin quest giver after quick task completion
-            setTimeout(() => {
-                if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
-                    window.triggerMerlinQuestFromTaskCompletion();
-                } else {
-                    console.warn('Quest giver trigger system not loaded yet');
+                
+                // Only trigger quest giver if battle did NOT start
+                if (!battleTriggered) {
+                    setTimeout(() => {
+                        if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
+                            window.triggerMerlinQuestFromTaskCompletion();
+                        } else {
+                            console.warn('Quest giver trigger system not loaded yet');
+                        }
+                    }, 3000); // Wait 3 seconds after no battle
                 }
-            }, 5000); // Wait 5 seconds (after battle trigger)
+            }, 2000); // Wait 2 seconds after confetti
         }
 
         function removeQuickTask(taskId) {
@@ -9344,6 +9357,7 @@ input:checked + .toggle-slider:before {
     <script src="js/recurringTasksManager.js"></script>
     <script src="js/subtasksManager.js"></script>
     <script src="js/simpleOnboarding.js"></script>
+    <script src="js/nameEmailModal.js"></script>
     <script src="js/questGiverOnboarding.js"></script>
     <script src="js/moodFilter.js"></script>
     <script src="js/merlinModal.js"></script>

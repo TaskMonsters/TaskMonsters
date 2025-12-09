@@ -62,7 +62,23 @@
 }
 
 .battle-container.bg-space {
-    background-image: url('../assets/backgrounds/BattleBackground.png');
+    background-image: url('../assets/battle-backgrounds/space.png');
+}
+
+.battle-container.bg-castle {
+    background-image: url('../assets/battle-backgrounds/castle.png');
+}
+
+.battle-container.bg-city-neon {
+    background-image: url('../assets/battle-backgrounds/city.png');
+}
+
+.battle-container.bg-synth-city {
+    background-image: url('../assets/battle-backgrounds/synth-city.png');
+}
+
+.battle-container.bg-skull-gate {
+    background-image: url('../assets/battle-backgrounds/skull-gate-arena.png');
 }
 
 /* Dark overlay for better sprite visibility */

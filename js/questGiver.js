@@ -809,14 +809,7 @@ function triggerMerlinQuestFromTaskCompletion() {
     }
     
     console.log('[Merlin] Showing quest giver from task completion');
-    setTimeout(() => {
-        // Double-check battle status before showing
-        if (window.battleManager && window.battleManager.inBattle) {
-            console.log('[Merlin] Battle started during delay, cancelling quest');
-            return;
-        }
-        window.questGiver.show();
-    }, 3000); // Show after 3 seconds (after confetti and battle check)
+    window.questGiver.show();
 }
 
 // Expose to global scope
