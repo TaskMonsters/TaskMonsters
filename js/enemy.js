@@ -1,4 +1,3 @@
-// Enemy System for Task Monsters Battle Mode
 
 class Enemy {
     constructor(name, baseHP, baseAttack, baseDefense, sprites) {
@@ -60,14 +59,14 @@ const LAZY_BAT_DATA = {
     minLevel: 1,
     tier: 'early',
     sprites: {
-        idle: 'assets/enemies/Bat-IdleFly.png',
-        attack1: 'assets/enemies/Bat-Attack1.png',
-        attack2: 'assets/enemies/Bat-Attack2.png',
-        hurt: 'assets/enemies/Bat-Hurt.png',
-        die: 'assets/enemies/Bat-Die.png',
-        run: 'assets/enemies/Bat-Run.png',
-        sleep: 'assets/enemies/Bat-Sleep.png',
-        wakeup: 'assets/enemies/Bat-WakeUp.png'
+        idle: 'assets/enemies/Lazy Bat/Bat-IdleFly.png',
+        attack1: 'assets/enemies/Lazy Bat/Bat-Attack1.png',
+        attack2: 'assets/enemies/Lazy Bat/Bat-Attack2.png',
+        hurt: 'assets/enemies/Lazy Bat/Bat-Hurt.png',
+        die: 'assets/enemies/Lazy Bat/Bat-Die.png',
+        run: 'assets/enemies/Lazy Bat/Bat-Run.png',
+        sleep: 'assets/enemies/Lazy Bat/Bat-Sleep.png',
+        wakeup: 'assets/enemies/Lazy Bat/Bat-WakeUp.png'
     }
 };
 
@@ -80,14 +79,14 @@ const LAZY_BAT_II_DATA = {
     minLevel: 3,
     tier: 'mid',
     sprites: {
-        idle: 'assets/enemies/LazyBat2-IdleFly.png',
-        attack1: 'assets/enemies/LazyBat2-IdleFly.png',
-        attack2: 'assets/enemies/LazyBat2-IdleFly.png',
-        hurt: 'assets/enemies/LazyBat2-IdleFly.png',
-        die: 'assets/enemies/LazyBat2-IdleFly.png',
-        run: 'assets/enemies/LazyBat2-IdleFly.png',
-        sleep: 'assets/enemies/LazyBat2-IdleFly.png',
-        wakeup: 'assets/enemies/LazyBat2-IdleFly.png'
+        idle: 'assets/enemies/Lazy Bat/Bat-IdleFly.png',
+        attack1: 'assets/enemies/Lazy Bat/Bat-Attack1.png',
+        attack2: 'assets/enemies/Lazy Bat/Bat-Attack2.png',
+        hurt: 'assets/enemies/Lazy Bat/Bat-Hurt.png',
+        die: 'assets/enemies/Lazy Bat/Bat-Die.png',
+        run: 'assets/enemies/Lazy Bat/Bat-Run.png',
+        sleep: 'assets/enemies/Lazy Bat/Bat-Sleep.png',
+        wakeup: 'assets/enemies/Lazy Bat/Bat-WakeUp.png'
     }
 };
 
@@ -104,14 +103,14 @@ const SLIME_DATA = {
     drainDefense: true, // Drains defense on hit
     projectileType: 'slime',
     sprites: {
-        idle: 'assets/enemies/slime-sheet.png',
-        attack1: 'assets/enemies/slime-sheet.png',
-        attack2: 'assets/enemies/slime-sheet.png',
-        hurt: 'assets/enemies/slime-sheet.png',
-        die: 'assets/enemies/slime-sheet.png',
-        run: 'assets/enemies/slime-sheet.png',
-        sleep: 'assets/enemies/slime-sheet.png',
-        wakeup: 'assets/enemies/slime-sheet.png'
+        idle: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        attack1: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        attack2: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        hurt: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        die: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        run: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        sleep: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        wakeup: 'assets/enemies/Slothful Slime/slime-sheet.png'
     }
 };
 
@@ -129,14 +128,14 @@ const SLIME_II_DATA = {
     isAnimated: true, // Uses 4-frame spritesheet
     frameCount: 4,
     sprites: {
-        idle: 'assets/enemies/Slime II/slime-sheet.png',
-        attack1: 'assets/enemies/Slime II/slime-sheet.png',
-        attack2: 'assets/enemies/Slime II/slime-sheet.png',
-        hurt: 'assets/enemies/Slime II/slime-sheet.png',
-        die: 'assets/enemies/Slime II/slime-sheet.png',
-        run: 'assets/enemies/Slime II/slime-sheet.png',
-        sleep: 'assets/enemies/Slime II/slime-sheet.png',
-        wakeup: 'assets/enemies/Slime II/slime-sheet.png'
+        idle: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        attack1: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        attack2: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        hurt: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        die: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        run: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        sleep: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        wakeup: 'assets/enemies/Slothful Slime/slime-sheet.png'
     }
 };
 
@@ -152,14 +151,14 @@ const GHOST_TASK_STOPPER_DATA = {
     evasionChance: 0.25, // 25% chance to evade attacks
     projectileType: 'waveform',
     sprites: {
-        idle: 'assets/enemies/ghost/ghost-idle.png',
-        attack1: 'assets/enemies/ghost/ghost-idle.png',
-        attack2: 'assets/enemies/ghost/ghost-idle.png',
-        hurt: 'assets/enemies/ghost/ghost-idle.png',
-        die: 'assets/enemies/ghost/ghost-idle.png',
-        run: 'assets/enemies/ghost/ghost-idle.png',
-        sleep: 'assets/enemies/ghost/ghost-idle.png',
-        wakeup: 'assets/enemies/ghost/ghost-idle.png'
+        idle: 'assets/enemies/Procrastination Drone/drone-1.png',
+        attack1: 'assets/enemies/Procrastination Drone/Drone Attack.png',
+        attack2: 'assets/enemies/Procrastination Drone/Drone Attack.png',
+        hurt: 'assets/enemies/Procrastination Drone/drone-2.png',
+        die: 'assets/enemies/Procrastination Drone/drone-3.png',
+        run: 'assets/enemies/Procrastination Drone/drone-4.png',
+        sleep: 'assets/enemies/Procrastination Drone/drone-1.png',
+        wakeup: 'assets/enemies/Procrastination Drone/drone-1.png'
     }
 };
 
@@ -176,14 +175,14 @@ const MEDUSA_DATA = {
     petrifyChance: 0.3, // 30% chance to petrify (skip player turn)
     projectileType: 'medusa',
     sprites: {
-        idle: 'assets/enemies/medusa-idle.png',
-        attack1: 'assets/enemies/medusa-idle.png',
-        attack2: 'assets/enemies/medusa-idle.png',
-        hurt: 'assets/enemies/medusa-idle.png',
-        die: 'assets/enemies/medusa-idle.png',
-        run: 'assets/enemies/medusa-idle.png',
-        sleep: 'assets/enemies/medusa-idle.png',
-        wakeup: 'assets/enemies/medusa-idle.png'
+        idle: 'assets/enemies/Medusa/frame1.png',
+        attack1: 'assets/enemies/Medusa/Medusa Attack.png',
+        attack2: 'assets/enemies/Medusa/Medusa Attack.png',
+        hurt: 'assets/enemies/Medusa/frame2.png',
+        die: 'assets/enemies/Medusa/frame3.png',
+        run: 'assets/enemies/Medusa/frame4.png',
+        sleep: 'assets/enemies/Medusa/frame1.png',
+        wakeup: 'assets/enemies/Medusa/frame1.png'
     }
 };
 
@@ -198,14 +197,14 @@ const LAZY_EYE_DATA = {
     specialDefense: true,
     canSleep: true,
     sprites: {
-        idle: 'assets/enemies/Eye-Idle.png',
-        attack1: 'assets/enemies/Eye-Idle.png',
-        attack2: 'assets/enemies/Eye-Idle.png',
-        hurt: 'assets/enemies/Eye-Idle.png',
-        die: 'assets/enemies/Eye-Idle.png',
-        run: 'assets/enemies/Eye-Idle.png',
-        sleep: 'assets/enemies/Eye-Idle.png',
-        wakeup: 'assets/enemies/Eye-Idle.png'
+        idle: 'assets/enemies/Flying Alien/spritesheet.png',
+        attack1: 'assets/enemies/Flying Alien/spritesheet.png',
+        attack2: 'assets/enemies/Flying Alien/spritesheet.png',
+        hurt: 'assets/enemies/Flying Alien/spritesheet.png',
+        die: 'assets/enemies/Flying Alien/spritesheet.png',
+        run: 'assets/enemies/Flying Alien/spritesheet.png',
+        sleep: 'assets/enemies/Flying Alien/spritesheet.png',
+        wakeup: 'assets/enemies/Flying Alien/spritesheet.png'
     }
 };
 
@@ -221,14 +220,14 @@ const OCTOPUS_DATA = {
     hugAttack: true,
     projectileType: 'splash',
     sprites: {
-        idle: 'assets/octopus.png',
-        attack1: 'assets/octopus.png',
-        attack2: 'assets/octopus.png',
-        hurt: 'assets/octopus.png',
-        die: 'assets/octopus.png',
-        run: 'assets/octopus.png',
-        sleep: 'assets/octopus.png',
-        wakeup: 'assets/octopus.png'
+        idle: 'assets/enemies/Little Cthulhu/octopus-1.png',
+        attack1: 'assets/enemies/Little Cthulhu/Octopus Attack II.png',
+        attack2: 'assets/enemies/Little Cthulhu/Octopus Attack II.png',
+        hurt: 'assets/enemies/Little Cthulhu/octopus-2.png',
+        die: 'assets/enemies/Little Cthulhu/octopus-3.png',
+        run: 'assets/enemies/Little Cthulhu/octopus-4.png',
+        sleep: 'assets/enemies/Little Cthulhu/octopus-1.png',
+        wakeup: 'assets/enemies/Little Cthulhu/octopus-1.png'
     }
 };
 
@@ -245,14 +244,14 @@ const ALIEN_DATA = {
     timeStingAttack: true,  // FIX: Time Sting ability - reduces player timer to 1 second
     timeStingChance: 0.25,  // FIX: 25% chance to use Time Sting
     sprites: {
-        idle: 'assets/enemies/alien-spritesheet.png',
-        attack1: 'assets/enemies/alien-spritesheet.png',
-        attack2: 'assets/enemies/alien-spritesheet.png',
-        hurt: 'assets/enemies/alien-spritesheet.png',
-        die: 'assets/enemies/alien-spritesheet.png',
-        run: 'assets/enemies/alien-spritesheet.png',
-        sleep: 'assets/enemies/alien-spritesheet.png',
-        wakeup: 'assets/enemies/alien-spritesheet.png'
+        idle: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
+        attack1: 'assets/enemies/Alien/Spritesheets/alien-enemy-walk.png',
+        attack2: 'assets/enemies/Alien/Spritesheets/alien-enemy-walk.png',
+        hurt: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
+        die: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
+        run: 'assets/enemies/Alien/Spritesheets/alien-enemy-walk.png',
+        sleep: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
+        wakeup: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png'
     }
 };
 
@@ -269,14 +268,14 @@ const FIRE_SKULL_DATA = {
     weaknessDamage: 18,
     projectileType: 'fire-explosion',
     sprites: {
-        idle: 'assets/enemies/fire-skull/fire-skull-idle.png',
-        attack1: 'assets/enemies/fire-skull/fire-skull-explosion.png',
-        attack2: 'assets/enemies/fire-skull/fire-skull-explosion.png',
-        hurt: 'assets/enemies/fire-skull/fire-skull-idle.png',
-        die: 'assets/enemies/fire-skull/fire-skull-idle.png',
-        run: 'assets/enemies/fire-skull/fire-skull-idle.png',
-        sleep: 'assets/enemies/fire-skull/fire-skull-idle.png',
-        wakeup: 'assets/enemies/fire-skull/fire-skull-idle.png'
+        idle: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png',
+        attack1: 'assets/enemies/The Overthinker/Fire skull attack/Sprites.png',
+        attack2: 'assets/enemies/The Overthinker/Fire skull attack/Sprites.png',
+        hurt: 'assets/enemies/The Overthinker/Spritesheets/fire-skull-no-fire.png',
+        die: 'assets/enemies/The Overthinker/Spritesheets/fire-skull-no-fire.png',
+        run: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png',
+        sleep: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png',
+        wakeup: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png'
     }
 };
 
@@ -291,14 +290,14 @@ const OGRE_DATA = {
     specialDefense: true,
     vulnerableToEvasion: true, // After player evades, next 2 attacks miss
     sprites: {
-        idle: 'assets/enemies/ogre/ogre-idle.png',
-        attack1: 'assets/enemies/ogre/ogre-attack.png',
-        attack2: 'assets/enemies/ogre/ogre-attack.png',
-        hurt: 'assets/enemies/ogre/ogre-idle.png',
-        die: 'assets/enemies/ogre/ogre-idle.png',
-        run: 'assets/enemies/ogre/ogre-idle.png',
-        sleep: 'assets/enemies/ogre/ogre-idle.png',
-        wakeup: 'assets/enemies/ogre/ogre-idle.png'
+        idle: 'assets/enemies/Ogre/Spritesheets/ogre-idle.png',
+        attack1: 'assets/enemies/Ogre/Spritesheets/ogre-attack.png',
+        attack2: 'assets/enemies/Ogre/Spritesheets/ogre-attack.png',
+        hurt: 'assets/enemies/Ogre/Spritesheets/ogre-idle-unarmed.png',
+        die: 'assets/enemies/Ogre/Spritesheets/ogre-idle-unarmed.png',
+        run: 'assets/enemies/Ogre/Spritesheets/ogre-walk.png',
+        sleep: 'assets/enemies/Ogre/Spritesheets/ogre-idle.png',
+        wakeup: 'assets/enemies/Ogre/Spritesheets/ogre-idle.png'
     }
 };
 
@@ -316,30 +315,38 @@ const FLY_DATA = {
     evasionChance: 0.30, // 30% chance to evade player attacks
     projectileType: 'fly-spit',
     sprites: {
-        idle: 'assets/enemies/fly/10_killer_fly_green_idle.png',
-        attack1: 'assets/enemies/fly/10_killer_fly_green_attack.png',
-        attack2: 'assets/enemies/fly/10_killer_fly_green_attack.png',
-        hurt: 'assets/enemies/fly/10_killer_fly_green_idle.png',
-        die: 'assets/enemies/fly/10_killer_fly_green_idle.png',
-        run: 'assets/enemies/fly/10_killer_fly_green_walk.png',
-        sleep: 'assets/enemies/fly/10_killer_fly_green_idle.png',
-        wakeup: 'assets/enemies/fly/10_killer_fly_green_idle.png'
+        idle: 'assets/enemies/Chaos Drone/enemy1.png',
+        attack1: 'assets/enemies/Chaos Drone/Robot Attack.png',
+        attack2: 'assets/enemies/Chaos Drone/Robot Attack.png',
+        hurt: 'assets/enemies/Chaos Drone/enemy2.png',
+        die: 'assets/enemies/Chaos Drone/enemy2.png',
+        run: 'assets/enemies/Chaos Drone/enemy1.png',
+        sleep: 'assets/enemies/Chaos Drone/enemy1.png',
+        wakeup: 'assets/enemies/Chaos Drone/enemy1.png'
     }
 };
 
 const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA, FIRE_SKULL_DATA, OGRE_DATA, FLY_DATA];
 
-// Enemy rotation system
+// Enemy rotation system with less frequent alternation
 let currentEnemyRotationIndex = 0;
+let currentEnemyStickCount = 0;
+let currentSelectedEnemy = null;
 
 function getNextEnemyFromRotation(availableEnemies) {
     if (!availableEnemies || availableEnemies.length === 0) return null;
     
-    // Use round-robin rotation
-    const enemy = availableEnemies[currentEnemyRotationIndex % availableEnemies.length];
-    currentEnemyRotationIndex++;
+    // Keep the same enemy for 2-4 battles before changing
+    const stickyBattles = 2 + Math.floor(Math.random() * 3); // Random 2-4
     
-    return enemy;
+    if (!currentSelectedEnemy || currentEnemyStickCount >= stickyBattles) {
+        // Time to change enemy - use random selection for more variety
+        currentSelectedEnemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+        currentEnemyStickCount = 0;
+    }
+    
+    currentEnemyStickCount++;
+    return currentSelectedEnemy;
 }
 
 // Create a scaled enemy for battle
@@ -537,4 +544,3 @@ window.Enemy = Enemy;
 window.createRandomEnemy = createRandomEnemy;
 window.playEnemyAnimation = playEnemyAnimation;
 window.playWakeUpSequence = playWakeUpSequence;
-

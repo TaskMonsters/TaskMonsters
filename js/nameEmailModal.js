@@ -79,7 +79,7 @@ class NameEmailModal {
         const title = '<h2 style="font-size: 24px; margin: 0 0 10px 0; color: #667eea; font-weight: 700;">One Last Thing!</h2>';
         const content = `
             <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: rgba(255, 255, 255, 0.9);">
-                To make your monster feel like a true companion, and to send you exclusive deals on our other tools, please share your name and email.
+                Want exclusive deals on our other tools? Share your email below!
             </p>
         `;
 
@@ -89,18 +89,17 @@ class NameEmailModal {
         form.style.cssText = 'display: flex; flex-direction: column; gap: 15px;';
         form.innerHTML = `
             <div style="text-align: left;">
-                <label for="name" style="display: block; margin-bottom: 5px; font-size: 14px; color: #a8b5ff;">Your Name (for your monster)</label>
-                <input type="text" id="name" name="name" required 
-                    style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #404040; background: #101712; color: white; font-size: 16px;">
-            </div>
-            <div style="text-align: left;">
-                <label for="email" style="display: block; margin-bottom: 5px; font-size: 14px; color: #a8b5ff;">Your Email (for deals)</label>
+                <label for="email" style="display: block; margin-bottom: 5px; font-size: 14px; color: #a8b5ff;">Your Email</label>
                 <input type="email" id="email" name="email" required 
                     style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #404040; background: #101712; color: white; font-size: 16px;">
             </div>
             <button type="submit" id="submitButton"
                 style="padding: 14px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.2s ease; margin-top: 10px;">
                 Let's Go!
+            </button>
+            <button type="button" id="noThanksButton"
+                style="padding: 12px 28px; background: transparent; color: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 10px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; margin-top: 8px;">
+                No thank you
             </button>
         `;
 
@@ -149,6 +148,21 @@ class NameEmailModal {
         modal.appendChild(form);
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
+        
+        // Add No Thanks button handler
+        const noThanksButton = document.getElementById('noThanksButton');
+        if (noThanksButton) {
+            noThanksButton.onclick = () => this.complete(overlay);
+            // Add hover effect
+            noThanksButton.onmouseover = () => {
+                noThanksButton.style.color = 'white';
+                noThanksButton.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+            };
+            noThanksButton.onmouseout = () => {
+                noThanksButton.style.color = 'rgba(255, 255, 255, 0.6)';
+                noThanksButton.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            };
+        }
 
         // Add animations if not already present (reusing simpleOnboarding's animations)
         if (!document.getElementById('simpleOnboardingAnimations')) {

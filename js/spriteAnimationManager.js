@@ -64,7 +64,9 @@ class SpriteAnimationManager {
         // Get animation config
         const spriteSrc = appearance.animations[animationType];
         const frameCount = appearance.frameCount[animationType] || 4;
-        const spriteSize = appearance.spriteSize || { width: 32, height: 32 };
+        // Check for animation-specific sprite size override
+        const spriteSizeOverrides = appearance.spriteSizeOverrides || {};
+        const spriteSize = spriteSizeOverrides[animationType] || appearance.spriteSize || { width: 32, height: 32 };
         const spriteRow = appearance.spriteRow || 0;
         const animationRows = appearance.animationRows || {};
 
@@ -131,7 +133,7 @@ class SpriteAnimationManager {
             // Ensure proper sizing
             mainHeroSprite.style.width = '32px';
             mainHeroSprite.style.height = '32px';
-            mainHeroSprite.style.transform = 'scale(4)';
+            mainHeroSprite.style.transform = 'scale(3)';
             mainHeroSprite.style.transformOrigin = 'center center';
         }
 
@@ -143,7 +145,7 @@ class SpriteAnimationManager {
             // Ensure proper sizing
             focusTimerSprite.style.width = '32px';
             focusTimerSprite.style.height = '32px';
-            focusTimerSprite.style.transform = 'scale(4)';
+            focusTimerSprite.style.transform = 'scale(3)';
             focusTimerSprite.style.transformOrigin = 'center center';
         }
 

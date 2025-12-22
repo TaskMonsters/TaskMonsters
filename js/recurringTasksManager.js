@@ -320,6 +320,24 @@ class RecurringTasksManager {
             creative: '🎨', social: '🤝🏽'
         };
 
+        // Check if task has subtasks
+        const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+        
+        if (hasSubtasks) {
+            return this.renderRecurringTaskWithSubtasks(task, categoryEmojis, recurrenceDesc, timeUntil);
+        } else {
+            return this.renderRecurringTaskSimple(task, categoryEmojis, recurrenceDesc, timeUntil);
+        }
+    }
+    
+    // Render recurring task WITHOUT subtasks
+    renderRecurringTaskSimple(task, categoryEmojis, recurrenceDesc, timeUntil) {
+        // Check if completed today
+        const today = new Date().toDateString();
+        const completedToday = task.completions && task.completions.some(c => {
+            return new Date(c).toDateString() === today;
+        });
+        
         return `
             <div class="recurring-task-card ${task.active ? '' : 'inactive'}">
                 <div class="recurring-task-header">
@@ -344,15 +362,123 @@ class RecurringTasksManager {
                         Next: ${timeUntil}
                     </div>
                 ` : ''}
+                
+                <!-- Today's Completion Section -->
+                <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 16px; margin-top: 12px;">
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">
+                        ${completedToday ? '✓' : '○'} TODAY'S COMPLETION
+                    </div>
+                    ${completedToday ? `
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 12px; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 8px; margin-bottom: 12px;">
+                            <span style="font-size: 20px;">✓</span>
+                            <span style="font-size: 14px; color: #4ade80; font-weight: 600;">Completed today!</span>
+                        </div>
+                    ` : `
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 12px; background: var(--bg-primary); border: 1px dashed var(--text-tertiary); border-radius: 8px; margin-bottom: 12px;">
+                            <span style="font-size: 14px; color: var(--text-secondary);">Not completed yet</span>
+                        </div>
+                        <button onclick="completeRecurringTaskToday('${task.id}')" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <span>Complete Today</span>
+                            <span style="font-size: 12px; opacity: 0.9;">+70 XP</span>
+                        </button>
+                    `}
+                </div>
+                
                 ${this.renderCompletionHistory(task)}
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 8px;">
                     <button class="btn-icon" onclick="editRecurringTask('${task.id}')" title="Edit" style="background: var(--bg-tertiary); border: none; border-radius: 8px; padding: 8px 12px; font-size: 16px; cursor: pointer;">
                         ✏️
                     </button>
-                    <div style="display: flex; gap: 4px;">
-                        <button class="action-btn action-complete" onclick="completeRecurringTaskNow('${task.id}')" title="Complete Now">✓</button>
-                        <button class="action-btn action-remove" onclick="deleteRecurringTask('${task.id}')" title="Delete">×</button>
+                    <button onclick="deleteRecurringTask('${task.id}')" title="Dismiss" style="flex: 1; background: transparent; color: var(--text-secondary); border: 1px solid var(--text-tertiary); border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--text-tertiary)'; this.style.color='var(--text-secondary)'">× Dismiss</button>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Render recurring task WITH subtasks
+    renderRecurringTaskWithSubtasks(task, categoryEmojis, recurrenceDesc, timeUntil) {
+        // Initialize current period subtasks if not exists
+        if (!task.currentPeriodSubtasks) {
+            task.currentPeriodSubtasks = task.subtasks.map(st => ({
+                ...st,
+                completed: false
+            }));
+        }
+        
+        const completedCount = task.currentPeriodSubtasks.filter(st => st.completed).length;
+        const totalCount = task.currentPeriodSubtasks.length;
+        const allComplete = completedCount === totalCount;
+        const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+        
+        return `
+            <div class="recurring-task-card ${task.active ? '' : 'inactive'}">
+                <div class="recurring-task-header">
+                    <div class="recurring-task-icon">${categoryEmojis[task.category] || '📋'}</div>
+                    <div class="recurring-task-info">
+                        <div class="recurring-task-title">${task.title}</div>
+                        <div class="recurring-task-recurrence">${recurrenceDesc}</div>
                     </div>
+                    <label class="recurring-task-toggle">
+                        <input type="checkbox" ${task.active ? 'checked' : ''} 
+                               onchange="window.recurringTasksManager.toggleRecurringTask('${task.id}')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="recurring-task-details">
+                    <span class="recurring-task-badge">${task.difficulty}</span>
+                    <span class="recurring-task-badge">${task.category}</span>
+                    <span class="recurring-task-points">+${task.points} pts</span>
+                </div>
+                ${task.active ? `
+                    <div class="recurring-task-next">
+                        Next: ${timeUntil}
+                    </div>
+                ` : ''}
+                
+                <!-- This Period's Progress Section -->
+                <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 16px; margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">THIS PERIOD'S PROGRESS</span>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--accent-primary);">${completedCount}/${totalCount}</span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div style="height: 4px; background: var(--bg-primary); border-radius: 2px; overflow: hidden; margin-bottom: 12px;">
+                        <div style="height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); width: ${progressPercent}%; transition: width 0.3s ease;"></div>
+                    </div>
+                    
+                    <!-- Subtasks List -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                        ${task.currentPeriodSubtasks.map((subtask, index) => `
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-primary); border-radius: 6px; ${subtask.completed ? 'opacity: 0.6;' : ''}">
+                                <input type="checkbox" ${subtask.completed ? 'checked' : ''} 
+                                       onchange="toggleRecurringSubtask('${task.id}', ${index})" 
+                                       style="width: 18px; height: 18px; cursor: pointer;">
+                                <span style="flex: 1; font-size: 14px; color: var(--text-primary); ${subtask.completed ? 'text-decoration: line-through; color: var(--text-secondary);' : ''}">
+                                    ${subtask.title}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Complete All Button -->
+                    <button onclick="completeRecurringTaskWithSubtasks('${task.id}')" 
+                            ${!allComplete ? 'disabled' : ''}
+                            style="width: 100%; background: ${allComplete ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'var(--bg-primary)'}; color: ${allComplete ? 'white' : 'var(--text-tertiary)'}; border: none; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: ${allComplete ? 'pointer' : 'not-allowed'}; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;" 
+                            ${allComplete ? "onmouseover=\"this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'\" onmouseout=\"this.style.transform=''; this.style.boxShadow=''\"" : ''}>
+                        <span>${allComplete ? 'Complete All' : 'Complete All Subtasks First'}</span>
+                        ${allComplete ? '<span style="font-size: 12px; opacity: 0.9;">+70 XP</span>' : ''}
+                    </button>
+                </div>
+                
+                ${this.renderCompletionHistory(task)}
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 8px;">
+                    <button class="btn-icon" onclick="editRecurringTask('${task.id}')" title="Edit" style="background: var(--bg-tertiary); border: none; border-radius: 8px; padding: 8px 12px; font-size: 16px; cursor: pointer;">
+                        ✏️
+                    </button>
+                    <button onclick="deleteRecurringTask('${task.id}')" title="Dismiss" style="flex: 1; background: transparent; color: var(--text-secondary); border: 1px solid var(--text-tertiary); border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.borderColor='var(--text-secondary)'; this.style.color='var(--text-primary)'" onmouseout="this.style.borderColor='var(--text-tertiary)'; this.style.color='var(--text-secondary)'">× Dismiss</button>
                 </div>
             </div>
         `;
@@ -411,9 +537,12 @@ class RecurringTasksManager {
                         Last: ${timeSinceLastCompletion}
                     </span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 4px;">
-                    ${dots}
-                    ${moreCount > 0 ? `<span style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">+${moreCount} more</span>` : ''}
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        ${dots}
+                        ${moreCount > 0 ? `<span style="font-size: 11px; color: var(--text-secondary); margin-left: 4px;">+${moreCount} more</span>` : ''}
+                    </div>
+                    <button class="action-btn action-complete" onclick="completeRecurringTaskNow('${task.id}')" title="Complete Now" style="background: #4ade80; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 32px; height: 32px;">✓</button>
                 </div>
             </div>
         `;
@@ -448,35 +577,29 @@ window.editRecurringTask = function(taskId) {
 };
 
 window.deleteRecurringTask = function(taskId) {
-    if (confirm('Delete this recurring task? Future instances will not be created.')) {
-        window.recurringTasksManager.deleteRecurringTask(taskId);
+    // Close the card without completing it
+    const card = event?.target?.closest('.recurring-task-card');
+    if (card) {
+        card.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => card.remove(), 300);
     }
 };
 
 window.completeRecurringTaskNow = function(taskId) {
     const task = window.recurringTasksManager.recurringTasks.find(t => t.id === taskId);
-    if (task) {
-        // Create an instance immediately and mark it as completed
-        window.recurringTasksManager.createTaskInstance(task);
-        
-        // Complete the last created task
-        if (window.gameState && window.gameState.tasks.length > 0) {
-            const lastTask = window.gameState.tasks[window.gameState.tasks.length - 1];
-            if (lastTask.recurringTaskId === taskId) {
-                const taskIndex = window.gameState.tasks.length - 1;
-                if (typeof completeTask === 'function') {
-                    completeTask(taskIndex);
-                }
-                
-                // Track completion
-                if (!task.completions) task.completions = [];
-                task.completions.push(new Date().toISOString());
-                window.recurringTasksManager.saveRecurringTasks();
-                window.recurringTasksManager.updateDisplay();
-            }
-        }
-        
-        alert(`✓ Recurring task completed! Points awarded.`);
+    if (!task) return;
+    
+    // Track completion (add green dot)
+    if (!task.completions) task.completions = [];
+    task.completions.push(new Date().toISOString());
+    
+    // Save and update display
+    window.recurringTasksManager.saveRecurringTasks();
+    window.recurringTasksManager.updateDisplay();
+    
+    // Show brief success message
+    if (typeof showNotification === 'function') {
+        showNotification('✓ Completion tracked!', 'success');
     }
 };
 
@@ -566,5 +689,193 @@ window.openRecurringTaskModal = function(task) {
                 modalTitle.textContent = 'Edit Recurring Task';
             }
         }, 100);
+    }
+};
+
+// Mark recurring task as complete with 70 XP reward
+window.markRecurringTaskComplete = function(taskId) {
+    const task = window.recurringTasksManager.recurringTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Award 70 XP points
+    if (window.gameState) {
+        window.gameState.xp += 70;
+        
+        // Check for level up
+        if (typeof checkLevelUp === 'function') {
+            checkLevelUp();
+        }
+        
+        // Save game state
+        if (typeof saveGameState === 'function') {
+            saveGameState();
+        }
+        
+        // Update display
+        if (typeof updateDisplay === 'function') {
+            updateDisplay();
+        }
+    }
+    
+    // Track completion
+    if (!task.completions) task.completions = [];
+    task.completions.push(new Date().toISOString());
+    
+    // Calculate next due date
+    window.recurringTasksManager.calculateNextDueDate(task);
+    
+    // Save and update display
+    window.recurringTasksManager.saveRecurringTasks();
+    window.recurringTasksManager.updateDisplay();
+    
+    // Show success message with XP animation
+    if (typeof showSuccessMessage === 'function') {
+        showSuccessMessage(`✓ ${task.title} completed! +70 XP`);
+    }
+    
+    // Add floating XP animation
+    const card = event?.target?.closest('.recurring-task-card');
+    if (card) {
+        const xpFloat = document.createElement('div');
+        xpFloat.textContent = '+70 XP';
+        xpFloat.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ade80;
+            pointer-events: none;
+            animation: xpFloat 1s ease-out forwards;
+            z-index: 1000;
+        `;
+        card.style.position = 'relative';
+        card.appendChild(xpFloat);
+        
+        // Close the card after animation
+        setTimeout(() => {
+            xpFloat.remove();
+            card.style.animation = 'fadeOut 0.3s ease-out forwards';
+            setTimeout(() => card.remove(), 300);
+        }, 1000);
+    }
+};
+
+
+// Complete recurring task today (without subtasks)
+window.completeRecurringTaskToday = function(taskId) {
+    const task = window.recurringTasksManager.recurringTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Check if already completed today
+    const today = new Date().toDateString();
+    const completedToday = task.completions && task.completions.some(c => {
+        return new Date(c).toDateString() === today;
+    });
+    
+    if (completedToday) {
+        alert('Already completed today!');
+        return;
+    }
+    
+    // Award 70 XP points
+    if (window.gameState) {
+        window.gameState.xp += 70;
+        
+        // Check for level up
+        if (typeof checkLevelUp === 'function') {
+            checkLevelUp();
+        }
+        
+        // Save game state
+        if (typeof saveGameState === 'function') {
+            saveGameState();
+        }
+        
+        // Update display
+        if (typeof updateDisplay === 'function') {
+            updateDisplay();
+        }
+    }
+    
+    // Track completion
+    if (!task.completions) task.completions = [];
+    task.completions.push(new Date().toISOString());
+    
+    // Save and update display
+    window.recurringTasksManager.saveRecurringTasks();
+    window.recurringTasksManager.updateDisplay();
+    
+    // Show success message with XP animation
+    if (typeof showSuccessMessage === 'function') {
+        showSuccessMessage(`✓ ${task.title} completed! +70 XP`);
+    }
+};
+
+// Toggle recurring task subtask
+window.toggleRecurringSubtask = function(taskId, subtaskIndex) {
+    const task = window.recurringTasksManager.recurringTasks.find(t => t.id === taskId);
+    if (!task || !task.currentPeriodSubtasks) return;
+    
+    const subtask = task.currentPeriodSubtasks[subtaskIndex];
+    if (!subtask) return;
+    
+    // Toggle completion
+    subtask.completed = !subtask.completed;
+    
+    // Save and update display
+    window.recurringTasksManager.saveRecurringTasks();
+    window.recurringTasksManager.updateDisplay();
+};
+
+// Complete recurring task with all subtasks
+window.completeRecurringTaskWithSubtasks = function(taskId) {
+    const task = window.recurringTasksManager.recurringTasks.find(t => t.id === taskId);
+    if (!task || !task.currentPeriodSubtasks) return;
+    
+    // Check if all subtasks are complete
+    const allComplete = task.currentPeriodSubtasks.every(st => st.completed);
+    if (!allComplete) {
+        alert('Please complete all subtasks first!');
+        return;
+    }
+    
+    // Award 70 XP points
+    if (window.gameState) {
+        window.gameState.xp += 70;
+        
+        // Check for level up
+        if (typeof checkLevelUp === 'function') {
+            checkLevelUp();
+        }
+        
+        // Save game state
+        if (typeof saveGameState === 'function') {
+            saveGameState();
+        }
+        
+        // Update display
+        if (typeof updateDisplay === 'function') {
+            updateDisplay();
+        }
+    }
+    
+    // Track completion
+    if (!task.completions) task.completions = [];
+    task.completions.push(new Date().toISOString());
+    
+    // Reset subtasks for next period
+    task.currentPeriodSubtasks = task.subtasks.map(st => ({
+        ...st,
+        completed: false
+    }));
+    
+    // Save and update display
+    window.recurringTasksManager.saveRecurringTasks();
+    window.recurringTasksManager.updateDisplay();
+    
+    // Show success message with XP animation
+    if (typeof showSuccessMessage === 'function') {
+        showSuccessMessage(`✓ ${task.title} completed! +70 XP`);
     }
 };

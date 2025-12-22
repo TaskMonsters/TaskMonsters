@@ -5,7 +5,7 @@
 <script src="js/instantHydration.js"></script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Task Monsters</title>
+<title>Task Monsters v21</title>
 <!-- PWA Manifest -->
 <link href="manifest.json?v=1757559779" rel="manifest"/>
 <!-- PWA Meta Tags -->
@@ -1745,6 +1745,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            overflow-x: hidden; /* Explicitly lock horizontal scroll */
         }
 
         .modal-header {
@@ -1785,6 +1786,7 @@
         .modal-body {
             padding: 0 24px;
             overflow-y: auto;
+            overflow-x: hidden; /* Lock horizontal scroll */
             flex: 1;
         }
 
@@ -1900,6 +1902,7 @@
             
             .modal-body {
                 padding: 0 16px;
+                overflow-x: hidden; /* Lock horizontal scroll on mobile */
             }
             
             .modal-footer {
@@ -2189,7 +2192,7 @@
     /* Shop Items Grid */
     .shop-items-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* Always 2 columns */
+        grid-template-columns: repeat(2, minmax(0, 1fr)); /* Always 2 columns with equal width */
         gap: 16px;
     }
 
@@ -2200,6 +2203,12 @@
         padding: 16px;
         text-align: center;
         transition: all 0.2s;
+        height: 280px;
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     .shop-item-card:hover {
@@ -2207,10 +2216,26 @@
         border-color: rgba(255, 255, 255, 0.2);
         transform: translateY(-2px);
     }
+    
+    .skin-card {
+        height: 360px;
+        overflow: hidden;
+    }
 
     .shop-item-emoji {
         font-size: 36px;
         margin-bottom: 12px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .shop-item-emoji img {
+        max-width: 60px;
+        max-height: 60px;
+        object-fit: contain;
     }
 
     .shop-item-name {
@@ -3213,7 +3238,20 @@
     height: 26px;
 }
 
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+
 .recurring-task-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
@@ -3625,7 +3663,7 @@ input:checked + .toggle-slider:before {
         <!-- Enemy Side -->
         <div class="sprite-container" id="enemyContainer">
             <div class="sprite-wrapper">
-                <div id="enemySprite" class="sprite idle" style="background-image: url('assets/enemies/Bat-IdleFly.png');"></div>
+                <div id="enemySprite" class="sprite idle" style="background-image: url('assets/enemies/Lazy Bat/Bat-IdleFly.png');"></div>
             </div>
             <div class="hp-bar-container">
                 <div class="hp-label">
@@ -3693,7 +3731,7 @@ input:checked + .toggle-slider:before {
             ⚡ Special Attack
         </button>
         <button id="btnFireball" class="btn-action" onclick="battleManager.playerFireball()">
-            🔥 Fireball <span class="item-count" id="fireballCount">(0)</span>
+            <img src="assets/blue-flame.png" alt="🔥" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 4px;"> Fireball <span class="item-count" id="fireballCount">(0)</span>
         </button>
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
             ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
@@ -4017,15 +4055,7 @@ input:checked + .toggle-slider:before {
                 </div>
             </div>
 
-            <!-- Recurring Tasks -->
-            <div class="card" id="recurringTasksCard" style="display: none;">
-                <div class="card-header">
-                    <div class="card-title">📅 Recurring Tasks</div>
-                </div>
-                <div id="recurringTasksList">
-                    <!-- Recurring tasks will be populated here -->
-                </div>
-            </div>
+
 
             <!-- Your Tasks -->
             <div class="card">
@@ -4297,6 +4327,35 @@ input:checked + .toggle-slider:before {
                     <input class="form-input" id="taskDueDate" type="datetime-local" placeholder="Select date and time"/>
                 </div>
                 
+                <!-- Recurring Task Section -->
+                <div class="form-group">
+                    <label class="form-label">Recurring Task</label>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="recurringToggle" onchange="toggleRecurringOptions()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span style="color: var(--text-secondary); font-size: 14px;">Make this a recurring task</span>
+                    </div>
+                    <div id="recurringOptions" style="display: none; margin-top: 12px;">
+                        <label class="form-label" style="font-size: 14px; margin-bottom: 8px;">Repeat Frequency</label>
+                        <div class="selection-grid">
+                            <div class="selection-item" data-recurring="daily" onclick="selectRecurring('daily')">
+                                <div class="selection-item-emoji">📅</div>
+                                <div class="selection-item-text">Daily</div>
+                            </div>
+                            <div class="selection-item" data-recurring="weekly" onclick="selectRecurring('weekly')">
+                                <div class="selection-item-emoji">📆</div>
+                                <div class="selection-item-text">Weekly</div>
+                            </div>
+                            <div class="selection-item" data-recurring="monthly" onclick="selectRecurring('monthly')">
+                                <div class="selection-item-emoji">🗓️</div>
+                                <div class="selection-item-text">Monthly</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Subtasks Section -->
                 <div class="form-group">
                     <label class="form-label">Subtasks (Optional)</label>
@@ -4309,41 +4368,7 @@ input:checked + .toggle-slider:before {
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-checkbox-label">
-                        <input type="checkbox" id="makeRecurring" onchange="toggleRecurringOptions()">
-                        <span>Make this a recurring task</span>
-                    </label>
-                    <div id="recurringOptions" style="display: none; margin-top: 12px; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
-                        <label class="form-label" style="font-size: 14px;">Repeat:</label>
-                        <select class="form-input" id="recurrenceType" onchange="updateRecurrenceOptions()" style="margin-bottom: 12px;">
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                        <div id="weeklyOptions" style="display: none;">
-                            <label class="form-label" style="font-size: 14px;">On days:</label>
-                            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
-                                <label class="day-checkbox"><input type="checkbox" value="0"> Sun</label>
-                                <label class="day-checkbox"><input type="checkbox" value="1"> Mon</label>
-                                <label class="day-checkbox"><input type="checkbox" value="2"> Tue</label>
-                                <label class="day-checkbox"><input type="checkbox" value="3"> Wed</label>
-                                <label class="day-checkbox"><input type="checkbox" value="4"> Thu</label>
-                                <label class="day-checkbox"><input type="checkbox" value="5"> Fri</label>
-                                <label class="day-checkbox"><input type="checkbox" value="6"> Sat</label>
-                            </div>
-                        </div>
-                        <div id="monthlyOptions" style="display: none; margin-top: 12px;">
-                            <label class="form-label" style="font-size: 14px;">Day of month:</label>
-                            <input class="form-input" type="number" id="dayOfMonth" min="1" max="31" value="1">
-                        </div>
-                        <div id="customOptions" style="display: none; margin-top: 12px;">
-                            <label class="form-label" style="font-size: 14px;">Every X days:</label>
-                            <input class="form-input" type="number" id="customDays" min="1" value="1">
-                        </div>
-                    </div>
-                </div>
+
             </form>
         </div>
         <div class="modal-footer">
@@ -4472,9 +4497,6 @@ input:checked + .toggle-slider:before {
         let selectedCategory = null;
         let selectedDifficulty = null;
         let selectedPriority = null;
-        let selectedRecurring = 'none';
-        let selectedInterval = 1;
-        let selectedWeekdays = [];
         let editingTaskIndex = null;
         let editingRecurringTaskId = null;
 
@@ -7000,61 +7022,85 @@ input:checked + .toggle-slider:before {
                 // Show the monster container
                 focusTimerMonsterContainer.style.display = 'flex';
                 
-                // Start with walk animation
+                // For Shadow Monsters, use ONLY walk animation during focus
+                // For Cat skins, use ONLY idle animation to prevent errors
+                // For other skins, cycle through walk, jump, idle
+                const isShadowMonster = appearance && appearance.isSkin && 
+                    (appearance.skinId === 'shadow_mage' || appearance.skinId === 'shadow_morph' || appearance.skinId === 'shadow_sword');
+                
+                // Check if current skin is a cat skin
+                const isCatSkin = appearance && appearance.isSkin && 
+                    (appearance.skinId === 'black_cat' || appearance.skinId === 'white_cat' || 
+                     appearance.skinId === 'brown_cat' || appearance.skinId === 'baby_blue_cat' || 
+                     appearance.skinId === 'rainbow_cat' || appearance.skinId === 'demonic_cat');
+                
                 if (appearance && appearance.isSkin) {
-                    focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
-                    const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
-                    focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
+                    // Cat skins use ONLY idle animation to prevent errors
+                    if (isCatSkin) {
+                        focusTimerMonsterSprite.src = appearance.animations.idle;
+                        const frameCount = appearance.frameCount.idle;
+                        focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
+                        focusAnimationState = 'idle';
+                    } else {
+                        focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
+                        const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
+                        focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
+                        focusAnimationState = 'walk';
+                    }
                 } else {
                     focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
                     focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                    focusAnimationState = 'walk';
                 }
-                focusAnimationState = 'walk';
                 
                 // Clear any existing animation switching loop
                 if (focusAnimationInterval) {
                     clearInterval(focusAnimationInterval);
                 }
                 
-                // Cycle through walk, jump, and idle animations
-                focusAnimationInterval = setInterval(() => {
-                    if (!focusActive) return;
-                    
-                    if (focusAnimationState === 'walk') {
-                        // Switch to jump
-                        if (appearance && appearance.isSkin) {
-                            focusTimerMonsterSprite.src = appearance.animations.jump || appearance.animations.idle;
-                            const frameCount = appearance.frameCount.jump || appearance.frameCount.idle;
-                            focusTimerMonsterSprite.style.animation = `hero-jump-anim 0.8s steps(${frameCount}) infinite`;
+                // Only cycle animations for non-Shadow Monster and non-Cat skins
+                if (!isShadowMonster && !isCatSkin) {
+                    // Cycle through walk, jump, and idle animations
+                    focusAnimationInterval = setInterval(() => {
+                        if (!focusActive) return;
+                        
+                        if (focusAnimationState === 'walk') {
+                            // Switch to jump
+                            if (appearance && appearance.isSkin) {
+                                focusTimerMonsterSprite.src = appearance.animations.jump || appearance.animations.idle;
+                                const frameCount = appearance.frameCount.jump || appearance.frameCount.idle;
+                                focusTimerMonsterSprite.style.animation = `hero-jump-anim 0.8s steps(${frameCount}) infinite`;
+                            } else {
+                                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
+                                focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                            }
+                            focusAnimationState = 'jump';
+                        } else if (focusAnimationState === 'jump') {
+                            // Switch to idle
+                            if (appearance && appearance.isSkin) {
+                                focusTimerMonsterSprite.src = appearance.animations.idle;
+                                const frameCount = appearance.frameCount.idle;
+                                focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
+                            } else {
+                                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                                focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
+                            }
+                            focusAnimationState = 'idle';
                         } else {
-                            focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
-                            focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
+                            // Switch back to walk
+                            if (appearance && appearance.isSkin) {
+                                focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
+                                const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
+                                focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
+                            } else {
+                                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
+                                focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
+                            }
+                            focusAnimationState = 'walk';
                         }
-                        focusAnimationState = 'jump';
-                    } else if (focusAnimationState === 'jump') {
-                        // Switch to idle
-                        if (appearance && appearance.isSkin) {
-                            focusTimerMonsterSprite.src = appearance.animations.idle;
-                            const frameCount = appearance.frameCount.idle;
-                            focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
-                        } else {
-                            focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                            focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
-                        }
-                        focusAnimationState = 'idle';
-                    } else {
-                        // Switch back to walk
-                        if (appearance && appearance.isSkin) {
-                            focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
-                            const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
-                            focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
-                        } else {
-                            focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                            focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
-                        }
-                        focusAnimationState = 'walk';
-                    }
-                }, 2000); // Change animation every 2 seconds
+                    }, 2000); // Change animation every 2 seconds
+                }
+                // Shadow Monsters stay in walk animation continuously
             } else {
                 // Stop animation loop
                 if (focusAnimationInterval) {
@@ -7426,7 +7472,7 @@ input:checked + .toggle-slider:before {
                     name: 'Dark Castle',
                     emoji: '🏰',
                     description: 'Mysterious old castle interior',
-                    cost: 100,
+                    cost: 900,
                     background: 'assets/backgrounds/castle-dark.png'
                 },
                 {
@@ -7434,7 +7480,7 @@ input:checked + .toggle-slider:before {
                     name: 'Night City',
                     emoji: '🌃',
                     description: 'Futuristic cityscape at night',
-                    cost: 120,
+                    cost: 900,
                     background: 'assets/backgrounds/city-night.png'
                 },
                 {
@@ -7442,7 +7488,7 @@ input:checked + .toggle-slider:before {
                     name: 'Ocean Depths',
                     emoji: '🌊',
                     description: 'Deep underwater scene',
-                    cost: 150,
+                    cost: 900,
                     background: 'assets/backgrounds/ocean-deep.png'
                 },
                 {
@@ -7450,7 +7496,7 @@ input:checked + .toggle-slider:before {
                     name: 'Mystic Temple',
                     emoji: '⛩️',
                     description: 'Ancient temple ruins',
-                    cost: 180,
+                    cost: 900,
                     background: 'assets/backgrounds/temple-ruins.png'
                 },
                 {
@@ -7458,7 +7504,7 @@ input:checked + .toggle-slider:before {
                     name: 'Cyber Grid',
                     emoji: '🔮',
                     description: 'Digital cyberspace grid',
-                    cost: 200,
+                    cost: 900,
                     background: 'assets/backgrounds/cyber-grid.png'
                 },
                 {
@@ -7466,7 +7512,7 @@ input:checked + .toggle-slider:before {
                     name: 'Synth City',
                     emoji: '🌆',
                     description: 'Retro synthwave cityscape',
-                    cost: 70,
+                    cost: 900,
                     background: 'assets/backgrounds/themes/synth-city.png'
                 },
                 {
@@ -7474,8 +7520,24 @@ input:checked + .toggle-slider:before {
                     name: 'Space',
                     emoji: '🌌',
                     description: 'Cosmic space vista',
-                    cost: 130,
+                    cost: 900,
                     background: 'assets/backgrounds/themes/space.png'
+                },
+                {
+                    id: 'vampire_castle',
+                    name: 'Vampire Castle',
+                    emoji: '🧛',
+                    description: 'Dark vampire castle at night',
+                    cost: 400,
+                    background: 'assets/backgrounds/themes/vampire-castle.png'
+                },
+                {
+                    id: 'fort_of_illusion',
+                    name: 'Fort of Illusion',
+                    emoji: '🏯',
+                    description: 'Mystical fortress of illusions',
+                    cost: 500,
+                    background: 'assets/backgrounds/themes/fort-of-illusion.png'
                 }
             ];
             
@@ -7531,13 +7593,15 @@ input:checked + .toggle-slider:before {
         // Purchase theme function
         function purchaseTheme(themeId) {
             const themes = [
-                { id: 'dark_castle', cost: 100, background: 'assets/backgrounds/castle-dark.png' },
-                { id: 'night_city', cost: 120, background: 'assets/backgrounds/city-night.png' },
-                { id: 'ocean_depths', cost: 150, background: 'assets/backgrounds/ocean-deep.png' },
-                { id: 'mystic_temple', cost: 180, background: 'assets/backgrounds/temple-ruins.png' },
-                { id: 'cyber_grid', cost: 200, background: 'assets/backgrounds/cyber-grid.png' },
-                { id: 'synth_city', cost: 70, background: 'assets/backgrounds/themes/synth-city.png' },
-                { id: 'space', cost: 130, background: 'assets/backgrounds/themes/space.png' }
+                { id: 'dark_castle', cost: 900, background: 'assets/backgrounds/castle-dark.png' },
+                { id: 'night_city', cost: 900, background: 'assets/backgrounds/city-night.png' },
+                { id: 'ocean_depths', cost: 900, background: 'assets/backgrounds/ocean-deep.png' },
+                { id: 'mystic_temple', cost: 900, background: 'assets/backgrounds/temple-ruins.png' },
+                { id: 'cyber_grid', cost: 900, background: 'assets/backgrounds/cyber-grid.png' },
+                { id: 'synth_city', cost: 900, background: 'assets/backgrounds/themes/synth-city.png' },
+                { id: 'space', cost: 900, background: 'assets/backgrounds/themes/space.png' },
+                { id: 'vampire_castle', cost: 400, background: 'assets/backgrounds/themes/vampire-castle.png' },
+                { id: 'fort_of_illusion', cost: 500, background: 'assets/backgrounds/themes/fort-of-illusion.png' }
             ];
             
             const theme = themes.find(t => t.id === themeId);
@@ -7704,7 +7768,7 @@ input:checked + .toggle-slider:before {
             blue_flame: {
                 id: 'blue_flame',
                 name: 'Blue Flame',
-                emoji: '<img src="assets/blue-flame.png" alt="Blue Flame" style="width: 48px; height: 48px; vertical-align: middle;">',
+                emoji: '🔥',
                 description: 'Fire-type attack dealing 20 damage (Max: 20)',
                 cost: 50,
                 effect: 'attack',
@@ -8043,37 +8107,15 @@ input:checked + .toggle-slider:before {
         // Modal functions
         function openCreateTaskModal() {
             document.getElementById('createTaskModal').classList.add('active');
-            resetForm();
+            // Only reset form if not editing (editingTaskIndex is null)
+            if (editingTaskIndex === null) {
+                resetForm();
+            }
         }
 
         function closeModal() {
             document.getElementById('createTaskModal').classList.remove('active');
             resetForm();
-        }
-        
-        function toggleRecurringOptions() {
-            const checkbox = document.getElementById('makeRecurring');
-            const options = document.getElementById('recurringOptions');
-            options.style.display = checkbox.checked ? 'block' : 'none';
-            if (checkbox.checked) {
-                updateRecurrenceOptions();
-            }
-        }
-        
-        function updateRecurrenceOptions() {
-            const type = document.getElementById('recurrenceType').value;
-            document.getElementById('weeklyOptions').style.display = type === 'weekly' ? 'block' : 'none';
-            document.getElementById('monthlyOptions').style.display = type === 'monthly' ? 'block' : 'none';
-            document.getElementById('customOptions').style.display = type === 'custom' ? 'block' : 'none';
-        }
-        
-        function openCreateRecurringTaskModal() {
-            // Open regular task modal with recurring checkbox pre-checked
-            openCreateTaskModal();
-            setTimeout(() => {
-                document.getElementById('makeRecurring').checked = true;
-                toggleRecurringOptions();
-            }, 100);
         }
         
         // Update recurring tasks display visibility
@@ -8203,6 +8245,80 @@ input:checked + .toggle-slider:before {
             }
         }
 
+        // Recurring task management
+        let selectedRecurring = null;
+        
+        function toggleRecurringOptions() {
+            const toggle = document.getElementById('recurringToggle');
+            const options = document.getElementById('recurringOptions');
+            
+            if (toggle.checked) {
+                options.style.display = 'block';
+            } else {
+                options.style.display = 'none';
+                selectedRecurring = null;
+                document.querySelectorAll('[data-recurring]').forEach(el => el.classList.remove('selected'));
+            }
+        }
+        
+        function selectRecurring(frequency) {
+            document.querySelectorAll('[data-recurring]').forEach(el => el.classList.remove('selected'));
+            const element = document.querySelector(`[data-recurring="${frequency}"]`);
+            if (element) {
+                element.classList.add('selected');
+                selectedRecurring = frequency;
+            }
+        }
+        
+        function createNextRecurringTask(task) {
+            if (!task.dueDate) {
+                console.warn('Cannot create recurring task without due date');
+                return null;
+            }
+            
+            const currentDueDate = new Date(task.dueDate);
+            let nextDueDate = new Date(currentDueDate);
+            
+            // Calculate next occurrence based on frequency
+            switch (task.recurringFrequency) {
+                case 'daily':
+                    nextDueDate.setDate(nextDueDate.getDate() + 1);
+                    break;
+                case 'weekly':
+                    nextDueDate.setDate(nextDueDate.getDate() + 7);
+                    break;
+                case 'monthly':
+                    nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+                    break;
+                default:
+                    console.warn('Unknown recurring frequency:', task.recurringFrequency);
+                    return null;
+            }
+            
+            // Create new task with same properties but new due date
+            const nextTask = {
+                title: task.title,
+                description: task.description,
+                category: task.category,
+                difficulty: task.difficulty,
+                priority: task.priority,
+                points: task.points,
+                dueDate: nextDueDate.toISOString(),
+                createdAt: new Date().toISOString(),
+                completed: false,
+                recurring: true,
+                recurringFrequency: task.recurringFrequency,
+                subtasks: task.subtasks ? task.subtasks.map(st => ({
+                    id: Date.now() + Math.random(),
+                    title: st.title,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                })) : []
+            };
+            
+            return nextTask;
+        }
+
         // Subtask management for create task modal
         let modalSubtasks = [];
         
@@ -8280,6 +8396,12 @@ input:checked + .toggle-slider:before {
             document.querySelector('.modal-title').textContent = 'Create Task';
             // Reset native datetime-local input
             document.getElementById('taskDueDate').value = '';
+            // Reset recurring task settings
+            const recurringToggle = document.getElementById('recurringToggle');
+            const recurringOptions = document.getElementById('recurringOptions');
+            if (recurringToggle) recurringToggle.checked = false;
+            if (recurringOptions) recurringOptions.style.display = 'none';
+            selectedRecurring = null;
             // Clear subtasks
             modalSubtasks = [];
             renderModalSubtasks();
@@ -8320,58 +8442,12 @@ input:checked + .toggle-slider:before {
             
             const pointsMap = { easy: 2, medium: 5, hard: 10 };
             
-            // Check if this should be a recurring task
-            const makeRecurring = document.getElementById('makeRecurring').checked;
+            // Check if recurring task is enabled
+            const recurringToggle = document.getElementById('recurringToggle');
+            const isRecurring = recurringToggle.checked && selectedRecurring;
             
-            if (makeRecurring) {
-                // Create recurring task template
-                const recurrenceType = document.getElementById('recurrenceType').value;
-                const recurrenceTime = document.getElementById('recurrenceTime')?.value || '09:00';
-                const recurrenceInterval = parseInt(document.getElementById('recurrenceInterval')?.value) || 1;
-                
-                const recurrence = {
-                    type: recurrenceType,
-                    interval: recurrenceInterval,
-                    time: recurrenceTime
-                };
-                
-                if (recurrenceType === 'weekly') {
-                    const selectedDays = Array.from(document.querySelectorAll('input[name="weekday"]:checked'))
-                        .map(cb => parseInt(cb.value));
-                    recurrence.daysOfWeek = selectedDays.length > 0 ? selectedDays : [1]; // Default to Monday
-                } else if (recurrenceType === 'monthly') {
-                    recurrence.dayOfMonth = parseInt(document.getElementById('monthlyDay')?.value) || 1;
-                } else if (recurrenceType === 'custom') {
-                    recurrence.customDays = parseInt(document.getElementById('customDays')?.value) || 1;
-                }
-                
-                const recurringTaskData = {
-                    title,
-                    description,
-                    category: selectedCategory,
-                    difficulty: selectedDifficulty,
-                    priority: selectedPriority,
-                    points: pointsMap[selectedDifficulty],
-                    recurrence
-                };
-                
-                if (window.recurringTasksManager) {
-                    if (editingRecurringTaskId) {
-                        // Update existing recurring task
-                        window.recurringTasksManager.editRecurringTask(editingRecurringTaskId, recurringTaskData);
-                        showSuccessMessage('Recurring task updated successfully!');
-                        editingRecurringTaskId = null;
-                    } else {
-                        // Create new recurring task
-                        window.recurringTasksManager.addRecurringTask(recurringTaskData);
-                        showSuccessMessage('Recurring task created successfully!');
-                    }
-                } else {
-                    alert('Recurring tasks system not loaded');
-                }
-            } else {
-                // Create regular task
-                const task = {
+            // Create regular task
+            const task = {
                     title,
                     description,
                     category: selectedCategory,
@@ -8381,6 +8457,8 @@ input:checked + .toggle-slider:before {
                     dueDate: dueDate || null,
                     createdAt: new Date().toISOString(),
                     completed: false,
+                    recurring: isRecurring,
+                    recurringFrequency: isRecurring ? selectedRecurring : null,
                     subtasks: modalSubtasks.length > 0 ? modalSubtasks.map(st => ({
                         id: st.id,
                         title: st.title,
@@ -8401,11 +8479,10 @@ input:checked + .toggle-slider:before {
                     showSuccessMessage('Task created successfully!');
                 }
                 
-                // Schedule notifications for the new/updated task
-                if (window.notificationManager && task.dueDate) {
-                    const taskIndex = editingTaskIndex !== null ? editingTaskIndex : gameState.tasks.length - 1;
-                    window.notificationManager.scheduleTaskNotifications(task, taskIndex);
-                }
+            // Schedule notifications for the new/updated task
+            if (window.notificationManager && task.dueDate) {
+                const taskIndex = editingTaskIndex !== null ? editingTaskIndex : gameState.tasks.length - 1;
+                window.notificationManager.scheduleTaskNotifications(task, taskIndex);
             }
             
             saveGameState();
@@ -8441,8 +8518,21 @@ input:checked + .toggle-slider:before {
             // Update streak (for tracking only, no multiplier)
             updateStreak();
             
-            // Calculate points (no multiplier)
-            const basePoints = task.points || 5;
+            // Calculate points based on subtask completion (20-80 points)
+            let basePoints = task.points || 5;
+            
+            // If task has subtasks, calculate points based on completion percentage
+            if (task.subtasks && task.subtasks.length > 0) {
+                const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+                const totalSubtasks = task.subtasks.length;
+                const completionPercentage = completedSubtasks / totalSubtasks;
+                
+                // Award 20-80 points based on completion percentage
+                // 0% = 20 points, 100% = 80 points
+                basePoints = Math.round(20 + (completionPercentage * 60));
+                
+                console.log(`📊 Subtask completion: ${completedSubtasks}/${totalSubtasks} (${Math.round(completionPercentage * 100)}%) = ${basePoints} points`);
+            }
             
             // Add points and health
             gameState.taskPoints += basePoints;
@@ -8475,6 +8565,18 @@ input:checked + .toggle-slider:before {
                 window.achievementTracker.trackOnTimeTask(task);
             }
             
+            // Check if this is a quest task
+            const isQuestTask = task.isQuest === true;
+            
+            // Handle recurring tasks - create next occurrence before removing
+            if (task.recurring && task.recurringFrequency) {
+                const nextTask = createNextRecurringTask(task);
+                if (nextTask) {
+                    gameState.tasks.push(nextTask);
+                    console.log('🔁 Recurring task recreated for next occurrence:', nextTask);
+                }
+            }
+            
             // Remove task
             gameState.tasks.splice(index, 1);
             
@@ -8501,9 +8603,15 @@ input:checked + .toggle-slider:before {
             updateTasksDisplay();
             updateQuickTasksDisplay();
             
-            // Play task completion sound
+            // Play task completion sound (different for quest tasks)
             if (window.audioManager) {
-                window.audioManager.playSound('taskComplete', 0.7);
+                if (isQuestTask) {
+                    // Play quest complete sound for quest giver tasks
+                    window.audioManager.playSound('questComplete', 0.7);
+                    console.log('🎯 Quest task completed, playing quest complete sound...');
+                } else {
+                    window.audioManager.playSound('taskComplete', 0.7);
+                }
             }
             
             // Fire confetti
@@ -8577,6 +8685,19 @@ input:checked + .toggle-slider:before {
             if (task.category) selectCategory(task.category);
             if (task.difficulty) selectDifficulty(task.difficulty);
             if (task.priority) selectPriority(task.priority);
+            
+            // Handle recurring task settings
+            const recurringToggle = document.getElementById('recurringToggle');
+            const recurringOptions = document.getElementById('recurringOptions');
+            if (task.recurring && task.recurringFrequency) {
+                recurringToggle.checked = true;
+                recurringOptions.style.display = 'block';
+                selectRecurring(task.recurringFrequency);
+            } else {
+                recurringToggle.checked = false;
+                recurringOptions.style.display = 'none';
+                selectedRecurring = null;
+            }
             
             // Load subtasks
             loadSubtasksToModal(task.subtasks || []);
@@ -9320,6 +9441,9 @@ input:checked + .toggle-slider:before {
     <!-- Quest Tasks CSS -->
     <link rel="stylesheet" href="css/questTasks.css">
     
+    <!-- Shop Fix CSS -->
+    <link rel="stylesheet" href="css/shop-fix.css">
+    
     <!-- App Initializer - Manages onboarding and quest giver flows -->
     <script src="js/appInitializer.js"></script>
     
@@ -9354,7 +9478,7 @@ input:checked + .toggle-slider:before {
     <script src="js/battleInit.js"></script>
     <script src="js/questTaskManager.js"></script>
     <script src="js/questGiver.js?v=7"></script>
-    <script src="js/recurringTasksManager.js"></script>
+
     <script src="js/subtasksManager.js"></script>
     <script src="js/simpleOnboarding.js"></script>
     <script src="js/nameEmailModal.js"></script>
@@ -9582,20 +9706,27 @@ input:checked + .toggle-slider:before {
     function loadSavedMonster() {
         const savedMonster = localStorage.getItem('selectedMonster');
         const savedName = localStorage.getItem('monsterName');
-        const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
         
         if (savedMonster && savedName) {
-            // Update all hero sprites
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (mainHeroSprite) {
-                mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                mainHeroSprite.style.opacity = '1';
-            }
+            // Check if a skin is equipped - if so, skinsManager will handle visuals
+            const equippedSkinId = gameState.equippedSkinId;
             
-            const heroSprite = document.getElementById('heroSprite');
-            if (heroSprite) {
-                heroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+            if (!equippedSkinId) {
+                // No skin equipped, use default monster sprites
+                const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
+                
+                const mainHeroSprite = document.getElementById('mainHeroSprite');
+                if (mainHeroSprite) {
+                    mainHeroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                    mainHeroSprite.style.opacity = '1';
+                }
+                
+                const heroSprite = document.getElementById('heroSprite');
+                if (heroSprite) {
+                    heroSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
+                }
             }
+            // If skin is equipped, skinsManager.init() will apply it
             
             // Update name
             const levelLabel = document.getElementById('levelLabel');

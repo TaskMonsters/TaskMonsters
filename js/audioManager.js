@@ -48,7 +48,8 @@ class AudioManager {
             // UI sounds
             quest_accepted: "assets/sounds/quest-accepted.mp3",
             quiz_won: "assets/sounds/quiz-won.mp3",
-            quest_complete: "assets/sounds/Quest Giver Task Complete Accepted sound.mp3",
+            quest_complete: "assets/sounds/quest-complete.mp3",
+            questComplete: "assets/sounds/quest-complete.mp3", // Alias for consistency
             taskComplete: "assets/sounds/taskComplete.mp3",
             shopPurchase: "assets/sounds/shopPurchase.mp3",
             useItemOutside: "assets/sounds/useItemOutside.mp3",
@@ -77,7 +78,8 @@ class AudioManager {
             "assets/sounds/battle/Battle mode music 2.mp3",
             "assets/sounds/battle/Battle mode 3.mp3",
             "assets/sounds/battle/Battle mode music 4.mp3",
-            "assets/sounds/battle/Battle mode music 5.mp3"
+            "assets/sounds/battle/Battle mode music 5.mp3",
+            "assets/sounds/battle/Battle-mode-music-6.mp3"
         ];
         this.currentBattleTrackIndex = 0;
 

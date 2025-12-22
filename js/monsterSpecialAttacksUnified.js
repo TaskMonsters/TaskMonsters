@@ -97,6 +97,12 @@ function getBattlePositions() {
 async function playProjectileSpecialAttack(monsterType, positions, config) {
     console.log(`🌟 ${config.displayName} - Projectile Attack`);
     
+    // Validate positions
+    if (!positions || !positions.arena || !positions.hero || !positions.enemy) {
+        console.error('❌ Invalid positions for projectile attack');
+        return;
+    }
+    
     // Create projectile element
     const projectile = document.createElement('div');
     projectile.style.cssText = `
@@ -138,33 +144,49 @@ async function playProjectileSpecialAttack(monsterType, positions, config) {
     
     return new Promise((resolve) => {
         function animate() {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            // Cycle through frames
-            const frameIndex = Math.floor((elapsed / 200) % config.frames.length);
-            projectile.style.backgroundImage = `url('${config.frames[frameIndex]}')`;
-            
-            // Move from hero to enemy
-            const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 60;
-            const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - 60;
-            projectile.style.left = currentX + 'px';
-            projectile.style.top = currentY + 'px';
-            
-            // Scale up as it travels
-            const scale = 1 + progress * 0.5;
-            projectile.style.transform = `scale(${scale})`;
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // Impact effect
-                projectile.style.filter = `brightness(2) drop-shadow(0 0 40px ${config.color})`;
-                setTimeout(() => {
-                    projectile.remove();
-                    nameDisplay.remove();
+            try {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Cycle through frames with error handling
+                const frameIndex = Math.floor((elapsed / 200) % config.frames.length);
+                if (config.frames && config.frames[frameIndex]) {
+                    projectile.style.backgroundImage = `url('${config.frames[frameIndex]}')`;
+                }
+                
+                // Move from hero to enemy
+                const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 60;
+                const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - 60;
+                projectile.style.left = currentX + 'px';
+                projectile.style.top = currentY + 'px';
+                
+                // Scale up as it travels
+                const scale = 1 + progress * 0.5;
+                projectile.style.transform = `scale(${scale})`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Impact effect with cleanup error handling
+                    projectile.style.filter = `brightness(2) drop-shadow(0 0 40px ${config.color})`;
+                    setTimeout(() => {
+                        try {
+                            if (projectile && projectile.parentNode) projectile.remove();
+                            if (nameDisplay && nameDisplay.parentNode) nameDisplay.remove();
+                        } catch (e) {
+                            console.error('Error cleaning up projectile animation:', e);
+                        }
+                        resolve();
+                    }, 250);
+                }
+            } catch (e) {
+                console.error('Error in projectile animation loop:', e);
+                // Ensure animation completes even on error
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
                     resolve();
-                }, 250);
+                }
             }
         }
         requestAnimationFrame(animate);
@@ -177,6 +199,12 @@ async function playProjectileSpecialAttack(monsterType, positions, config) {
  */
 async function playMeleeDragSpecialAttack(monsterType, positions, config) {
     console.log(`💨 ${config.displayName} - Melee Drag Attack`);
+    
+    // Validate positions
+    if (!positions || !positions.arena || !positions.hero || !positions.enemy || !positions.enemyElement) {
+        console.error('❌ Invalid positions for melee drag attack');
+        return;
+    }
     
     const enemySprite = positions.enemyElement;
     
@@ -228,42 +256,58 @@ async function playMeleeDragSpecialAttack(monsterType, positions, config) {
     
     return new Promise((resolve) => {
         function animate() {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            // Cycle through frames
-            const frameIndex = Math.floor((elapsed / 200) % config.frames.length);
-            projectile.style.backgroundImage = `url('${config.frames[frameIndex]}')`;
-            
-            // Move projectile from hero to enemy
-            const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 50;
-            const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - 50;
-            projectile.style.left = currentX + 'px';
-            projectile.style.top = currentY + 'px';
-            
-            // Rotate and scale projectile
-            const rotation = progress * 720;
-            const scale = 1 + progress * 0.5;
-            projectile.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
-            
-            // DRAG ENEMY TOWARD HERO (Benny-specific behavior)
-            const enemyDragProgress = Math.sin(progress * Math.PI); // Smooth in-out
-            const enemyOffset = -dragDistance * enemyDragProgress;
-            enemySprite.style.transform = `translateX(${enemyOffset}px)`;
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // Impact effect
-                projectile.style.filter = `brightness(2) drop-shadow(0 0 35px ${config.color})`;
+            try {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
                 
-                // Return enemy to original position
-                setTimeout(() => {
-                    enemySprite.style.transform = originalTransform;
-                    projectile.remove();
-                    nameDisplay.remove();
+                // Cycle through frames with error handling
+                const frameIndex = Math.floor((elapsed / 200) % config.frames.length);
+                if (config.frames && config.frames[frameIndex]) {
+                    projectile.style.backgroundImage = `url('${config.frames[frameIndex]}')`;
+                }
+                
+                // Move projectile from hero to enemy
+                const currentX = positions.hero.x + (positions.enemy.x - positions.hero.x) * progress - 50;
+                const currentY = positions.hero.y + (positions.enemy.y - positions.hero.y) * progress - 50;
+                projectile.style.left = currentX + 'px';
+                projectile.style.top = currentY + 'px';
+                
+                // Rotate and scale projectile
+                const rotation = progress * 720;
+                const scale = 1 + progress * 0.5;
+                projectile.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+                
+                // DRAG ENEMY TOWARD HERO (Benny-specific behavior)
+                const enemyDragProgress = Math.sin(progress * Math.PI); // Smooth in-out
+                const enemyOffset = -dragDistance * enemyDragProgress;
+                enemySprite.style.transform = `translateX(${enemyOffset}px)`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Impact effect
+                    projectile.style.filter = `brightness(2) drop-shadow(0 0 35px ${config.color})`;
+                    
+                    // Return enemy to original position with error handling
+                    setTimeout(() => {
+                        try {
+                            enemySprite.style.transform = originalTransform;
+                            if (projectile && projectile.parentNode) projectile.remove();
+                            if (nameDisplay && nameDisplay.parentNode) nameDisplay.remove();
+                        } catch (e) {
+                            console.error('Error cleaning up melee drag animation:', e);
+                        }
+                        resolve();
+                    }, 250);
+                }
+            } catch (e) {
+                console.error('Error in melee drag animation loop:', e);
+                // Ensure animation completes even on error
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
                     resolve();
-                }, 250);
+                }
             }
         }
         requestAnimationFrame(animate);
@@ -298,6 +342,34 @@ async function playSpecialAttackForMonster(monsterType, heroElement, enemyElemen
     }
 }
 
+/**
+ * Preload all special attack frames to ensure smooth animations
+ */
+function preloadSpecialAttackFrames() {
+    console.log('🎨 Preloading special attack frames...');
+    
+    Object.keys(MONSTER_SPECIAL_CONFIG).forEach(monsterType => {
+        const config = MONSTER_SPECIAL_CONFIG[monsterType];
+        if (config.frames && Array.isArray(config.frames)) {
+            config.frames.forEach(framePath => {
+                const img = new Image();
+                img.src = framePath;
+                // Silently preload, no need to track completion
+            });
+        }
+    });
+    
+    console.log('✅ Special attack frames preloaded');
+}
+
+// Preload frames when script loads
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', preloadSpecialAttackFrames);
+} else {
+    preloadSpecialAttackFrames();
+}
+
 // Export to window
 window.playSpecialAttackForMonster = playSpecialAttackForMonster;
 window.MONSTER_SPECIAL_CONFIG = MONSTER_SPECIAL_CONFIG;
+window.preloadSpecialAttackFrames = preloadSpecialAttackFrames;

@@ -223,7 +223,7 @@ const SKINS_CONFIG = {
             jump: 416,
             sleep: 512
         }
-    },
+    }
 
 };
 

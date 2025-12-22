@@ -13,6 +13,7 @@ const BattleState = {
 class BattleManager {
     constructor() {
         this.initialized = false;  // Track initialization state
+        this.inBattle = false;  // Track if battle is currently active (for quest giver prevention)
         this.state = BattleState.INITIALIZING;
         this.hero = null;
         this.enemy = null;
@@ -34,6 +35,22 @@ class BattleManager {
 
     // Initialize battle with hero and enemy
     async startBattle(heroData, enemyData) {
+        // CRITICAL: Prevent battle from starting if quest giver is active
+        if (window.questGiver && window.questGiver.activeQuest) {
+            console.log('[Battle] Quest giver is active, battle will not start');
+            return;
+        }
+        
+        const questGiverUI = document.getElementById('questGiverUI');
+        if (questGiverUI && !questGiverUI.classList.contains('hidden')) {
+            console.log('[Battle] Quest giver UI is visible, battle will not start');
+            return;
+        }
+        
+        // Set battle active flag
+        this.inBattle = true;
+        console.log('[Battle] Battle started, inBattle flag set to true');
+        
         // Check if battle tutorial should be shown (first battle only)
         if (window.battleTutorial && BattleTutorial.shouldShowTutorial()) {
             console.log('⚔️ First battle detected, showing tutorial');
@@ -101,6 +118,13 @@ class BattleManager {
         // Determine available arenas based on level
         const availableArenas = [];
         
+        // Check for level 20+ theme unlock
+        if (this.hero.level >= 20) {
+            const allShopThemes = ['bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space', 'bg-castle', 'bg-city-neon', 'bg-synth-city'];
+            // All shop themes are available for battle mode
+            availableArenas.push(...allShopThemes);
+        }
+        
         // LEVELS 1-10: Synth City is the primary arena (appears 5x)
         if (this.hero.level >= 1 && this.hero.level <= 10) {
             availableArenas.push('bg-synth-city', 'bg-synth-city', 'bg-synth-city', 'bg-synth-city', 'bg-synth-city');
@@ -109,22 +133,29 @@ class BattleManager {
         // LEVELS 11+: More variety with multiple arenas
         if (this.hero.level >= 11) {
             // Add all arenas for variety
-            availableArenas.push('bg-city', 'bg-city'); // city_sunset 2x
+            availableArenas.push('bg-city', 'bg-city', 'bg-city', 'bg-city'); // city_sunset 4x
             availableArenas.push('bg-forest'); // forest_path
             availableArenas.push('bg-ocean'); // ocean
             availableArenas.push('bg-castle'); // castle
             availableArenas.push('bg-temple'); // temple
             availableArenas.push('bg-space'); // space
-            availableArenas.push('bg-city-neon'); // neon city
+            // // availableArenas.push('bg-city-neon'); // neon city (Removed as per user request to remove city.png) (Removed as per user request to remove city.png)
             availableArenas.push('bg-night-town'); // night town
             availableArenas.push('bg-synth-city'); // synth city still available
             availableArenas.push('bg-skull-gate'); // skull gate
         }
         
-        // Alternating encounter system: rotate through available arenas
+        // Random arena selection (less frequent alternation)
+        // Keep the same arena for 3-5 battles before potentially changing
         if (!window.battleArenaIndex) window.battleArenaIndex = 0;
-        const arenaClass = availableArenas[window.battleArenaIndex % availableArenas.length];
-        battleContainer.classList.add(arenaClass);
+        if (!window.battleArenaStickCount) window.battleArenaStickCount = 0;
+        if (!window.currentArenaClass || window.battleArenaStickCount >= (3 + Math.floor(Math.random() * 3))) {
+            // Time to potentially change arena
+            window.currentArenaClass = availableArenas[Math.floor(Math.random() * availableArenas.length)];
+            window.battleArenaStickCount = 0;
+        }
+        battleContainer.classList.add(window.currentArenaClass);
+        window.battleArenaStickCount++;
         window.battleArenaIndex++;
         
         // Play alternating battle music
@@ -1838,6 +1869,10 @@ class BattleManager {
             // DO NOT stop win/lose music here - it should continue playing
         }
 
+        // Reset battle active flag
+        this.inBattle = false;
+        console.log('[Battle] Battle ended, inBattle flag set to false');
+        
         // Fade out after 2 seconds
         setTimeout(() => {
             document.getElementById('battleLog').innerHTML = '';

@@ -2,8 +2,11 @@
 
 // Arena rotation system with more variety
 const ARENA_POOL = [
-    'assets/backgrounds/themes/synth-city.png',
-    'assets/backgrounds/themes/city.png',
+    'assets/backgrounds/NeonCity.png',
+    'assets/backgrounds/NeonCity.png',
+    'assets/backgrounds/NeonCity.png',
+    'assets/backgrounds/NeonCity.png',
+    'assets/backgrounds/NeonCity.png',
     'assets/backgrounds/forest-road.png',
     'assets/backgrounds/themes/forest.png',
     'assets/backgrounds/themes/underwater.png',
@@ -11,7 +14,9 @@ const ARENA_POOL = [
     'assets/backgrounds/themes/castle.png',
     'assets/backgrounds/temple-arena.png',
     'assets/backgrounds/themes/graveyard.png',
-    'assets/backgrounds/themes/space.png'
+    'assets/backgrounds/themes/space.png',
+    'assets/backgrounds/themes/vampire-castle.png',
+    'assets/backgrounds/themes/fort-of-illusion.png'
 ];
 
 let currentArenaIndex = 0;
@@ -215,7 +220,10 @@ function startHeroAnimation(animationType = 'idle') {
             throw: { frames: skin.frameCount.attack || 4, width: getWidth('attack', skin.frameCount.attack || 4), sprite: skin.animations.attack, speed: 150 },
             jump: { frames: skin.frameCount.jump || 4, width: getWidth('jump', skin.frameCount.jump || 4), sprite: skin.animations.jump || skin.animations.idle, speed: 100 },
             hurt: { frames: skin.frameCount.hurt || 2, width: getWidth('hurt', skin.frameCount.hurt || 2), sprite: skin.animations.hurt, speed: 150 },
-            death: { frames: skin.frameCount.death || 4, width: getWidth('death', skin.frameCount.death || 4), sprite: skin.animations.death, speed: 150 }
+            death: { frames: skin.frameCount.death || 4, width: getWidth('death', skin.frameCount.death || 4), sprite: skin.animations.death, speed: 150 },
+            dash: { frames: skin.frameCount.dash || 4, width: getWidth('dash', skin.frameCount.dash || 4), sprite: skin.animations.dash || skin.animations.walk, speed: 100 },
+            special: { frames: skin.frameCount.special || 4, width: getWidth('special', skin.frameCount.special || 4), sprite: skin.animations.special || skin.animations.attack, speed: 150 },
+            walk: { frames: skin.frameCount.walk || 4, width: getWidth('walk', skin.frameCount.walk || 4), sprite: skin.animations.walk, speed: 150 }
         };
     } else {
         // Use default monster animations
@@ -519,9 +527,9 @@ function maybeTriggerBattle(sourceType) {
     let chance = 0;
     
     if (sourceType === 'quickTask') {
-        chance = 0.20; // 20% probability for quick tasks
+        chance = 0.10; // 10% probability for quick tasks (reduced from 20%)
     } else if (sourceType === 'regularTask') {
-        chance = 0.50; // 50% probability for regular tasks
+        chance = 0.25; // 25% probability for regular tasks (reduced from 50%)
     } else {
         // Any other source should never trigger battle
         console.log(`🚫 Battle trigger blocked for source: ${sourceType}`);

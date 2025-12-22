@@ -28,6 +28,12 @@ class SkinsManager {
             equippedSkinId: this.equippedSkinId,
             baseMonster: this.currentBaseMonster
         });
+        
+        // Apply equipped skin visuals if a skin is equipped
+        if (this.equippedSkinId) {
+            console.log('[SkinsManager] Applying equipped skin on init:', this.equippedSkinId);
+            this.updateAllMonsterVisuals();
+        }
     }
     
     /**
@@ -132,8 +138,8 @@ class SkinsManager {
         const mainHeroSprite = document.getElementById('mainHeroSprite');
         if (mainHeroSprite) {
             mainHeroSprite.src = appearance.animations.idle;
-            mainHeroSprite.style.width = '32px';
-            mainHeroSprite.style.height = '32px';
+            mainHeroSprite.style.width = `${spriteSize.width}px`;
+            mainHeroSprite.style.height = `${spriteSize.height}px`;
             mainHeroSprite.style.objectFit = 'none';
             
             // For multi-directional sprites, set object-position to show front-facing row
@@ -142,10 +148,15 @@ class SkinsManager {
             
             // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
             const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-            const yOffset = rowIndex * (appearance.spriteSize?.height || 32);
+            const yOffset = rowIndex * spriteSize.height;
             mainHeroSprite.style.objectPosition = `0 -${yOffset}px`;
             
-            mainHeroSprite.style.transform = 'scale(4)';
+            // Calculate scale to make Hero Knight same visual size as default monsters
+            // Default monsters are 32x32 scaled by 4 = 128px visual size
+            // Hero Knight is 100x55, so we scale to match 128px width
+            const targetVisualSize = 128;
+            const scale = targetVisualSize / spriteSize.width;
+            mainHeroSprite.style.transform = `scale(${scale})`;
             
             // Only animate if there's more than 1 frame
             if (appearance.frameCount.idle > 1) {
@@ -159,8 +170,8 @@ class SkinsManager {
         const focusTimerSprite = document.getElementById('focusTimerMonsterSprite');
         if (focusTimerSprite) {
             focusTimerSprite.src = appearance.animations.idle;
-            focusTimerSprite.style.width = '32px';
-            focusTimerSprite.style.height = '32px';
+            focusTimerSprite.style.width = `${spriteSize.width}px`;
+            focusTimerSprite.style.height = `${spriteSize.height}px`;
             focusTimerSprite.style.objectFit = 'none';
             focusTimerSprite.style.overflow = 'hidden';
             focusTimerSprite.style.imageRendering = 'pixelated';
@@ -171,14 +182,13 @@ class SkinsManager {
             
             // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
             const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-            const yOffset = rowIndex * (appearance.spriteSize?.height || 32);
+            const yOffset = rowIndex * spriteSize.height;
             focusTimerSprite.style.objectPosition = `0 -${yOffset}px`;
             
-            // Set proper object-fit to clip the sprite to exactly 32x32
-            focusTimerSprite.style.objectFit = 'none';
-            focusTimerSprite.style.objectPosition = '0 0';
-            
-            focusTimerSprite.style.transform = 'scale(4)';
+            // Calculate scale to match default monster visual size
+            const targetVisualSize = 128;
+            const scale = targetVisualSize / spriteSize.width;
+            focusTimerSprite.style.transform = `scale(${scale})`;
             focusTimerSprite.style.transformOrigin = 'center center';
             
             // Only animate if there's more than 1 frame
@@ -237,7 +247,7 @@ class SkinsManager {
             const isOwned = this.ownedSkins.includes(skin.id);
             const isEquipped = this.equippedSkinId === skin.id;
             const purchaseCheck = window.canPurchaseSkin(skin.id, userLevel, userXP, this.ownedSkins);
-            const isLocked = skin.levelRequired > userLevel;
+            const isLocked = !isOwned && (skin.levelRequired > userLevel);
             
             const card = document.createElement('div');
             card.className = 'shop-item-card skin-card';
@@ -288,7 +298,7 @@ class SkinsManager {
                                         top: 0; 
                                         left: 0; 
                                         width: ${(skin.spriteSize?.width || 32) * 4}px; 
-                                        height: ${(skin.spriteSize?.height || 32) * (skin.animationRows ? 6 : 1)}px; 
+                                        height: ${(skin.spriteSize?.height || 32) * (skin.totalAnimationRows || 6)}px; 
                                         object-fit: none; 
                                         object-position: 0 ${(skin.animationRows?.idle || 0) * (skin.spriteSize?.height || 32)}px; 
                                         image-rendering: pixelated; 
@@ -299,11 +309,9 @@ class SkinsManager {
                     </div>
                 </div>
                 <div style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${skin.name}</div>
-                <div style="font-size: 14px; color: #4CAF50; font-weight: 700; margin-top: 8px;">${skin.price} XP Coins</div>
+                <div style="font-size: 14px; color: #4CAF50; font-weight: 700; margin-top: 8px; margin-bottom: 8px;">${skin.price} XP Coins</div>
                 ${equippedBadge}
-                <div style="margin-top: 12px;">
-                    ${buttonHTML}
-                </div>
+                ${buttonHTML}
             `;
             
             grid.appendChild(card);
@@ -349,7 +357,16 @@ class SkinsManager {
             
             card.innerHTML = `
                 <div style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; overflow: hidden;">
-                    <img src="${skin.thumbnail}" alt="${skin.name}" style="max-width: 100%; max-height: 100%; image-rendering: pixelated; transform: scale(2);">
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+    <img src="${skin.thumbnail}" alt="${skin.name}" 
+         style="width: ${skin.spriteSize?.width || 32}px; 
+                height: ${skin.spriteSize?.height || 32}px; 
+                object-fit: none; 
+                object-position: 0 0; 
+                image-rendering: pixelated; 
+                transform: scale(3); 
+                transform-origin: center center;">
+</div>
                 </div>
                 <div style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${skin.name}</div>
                 ${isEquipped ? '<div style="background: rgba(76, 175, 80, 0.2); color: #4CAF50; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-top: 8px;">✓ Currently Equipped</div>' : ''}
