@@ -4,6 +4,85 @@
  */
 
 const SKINS_CONFIG = {
+    // IMP SKIN - Level 2, Early game skin with fireball attack
+    imp: {
+        id: 'imp',
+        name: 'Fire Imp',
+        price: 200,
+        levelRequired: 2,
+        tier: 'standard',
+        emoji: '👹',
+        thumbnail: 'assets/skins/imp/thumbnail.png',
+        animations: {
+            idle: 'assets/skins/imp/idle_animated.gif',
+            walk: 'assets/skins/imp/idle_animated.gif',
+            attack: 'assets/skins/imp/idle_animated.gif',
+            hurt: 'assets/skins/imp/idle_animated.gif',
+            death: 'assets/skins/imp/idle_animated.gif',
+            jump: 'assets/skins/imp/idle_animated.gif',
+            sleep: 'assets/skins/imp/idle_animated.gif'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 32,
+            walk: 32,
+            attack: 32,
+            hurt: 32,
+            death: 32,
+            jump: 32,
+            sleep: 32
+        },
+        seamlessImage: true,  // Flag to indicate this is a seamless animated sprite
+        hasFireball: true  // Special flag for fireball attack
+    },
+
+    // PIG SKIN - Level 2, Early game skin
+    pig: {
+        id: 'pig',
+        name: 'Fire Pig',
+        price: 300,
+        levelRequired: 2,
+        tier: 'standard',
+        emoji: '🐷',
+        thumbnail: 'assets/skins/pig/thumbnail.png',
+        animations: {
+            idle: 'assets/skins/pig/idle_animated.gif',
+            walk: 'assets/skins/pig/idle_animated.gif',
+            attack: 'assets/skins/pig/idle_animated.gif',
+            hurt: 'assets/skins/pig/idle_animated.gif',
+            death: 'assets/skins/pig/idle_animated.gif',
+            jump: 'assets/skins/pig/idle_animated.gif',
+            sleep: 'assets/skins/pig/idle_animated.gif'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 32,
+            walk: 32,
+            attack: 32,
+            hurt: 32,
+            death: 32,
+            jump: 32,
+            sleep: 32
+        },
+        seamlessImage: true  // Flag to indicate this is a seamless animated sprite
+    },
+
     // CAT SKINS - Level 15+ required for most, Level 20+ for premium
     black_cat: {
         id: 'black_cat',
@@ -223,7 +302,86 @@ const SKINS_CONFIG = {
             jump: 416,
             sleep: 512
         }
+    },
+    
+    // TASK TOAD - Level 30+ required
+    task_toad: {
+        id: 'task_toad',
+        name: 'Task Toad',
+        price: 900,
+        levelRequired: 30,
+        tier: 'premium',
+        emoji: '🐸',
+        thumbnail: 'assets/skins/task-toad/idle.png',
+        animations: {
+            idle: 'assets/skins/task-toad/idle.png',
+            walk: 'assets/skins/task-toad/idle.png',
+            attack: 'assets/skins/task-toad/attack.png',
+            hurt: 'assets/skins/task-toad/idle.png',
+            death: 'assets/skins/task-toad/idle.png',
+            jump: 'assets/skins/task-toad/jump.png',
+            sleep: 'assets/skins/task-toad/idle.png'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 32,
+            walk: 32,
+            attack: 32,
+            hurt: 32,
+            death: 32,
+            jump: 32,
+            sleep: 32
+        },
+        seamlessImage: true  // Flag to indicate this is a single seamless image
+    },
+    
+    // TASK PHANTOM - Level 30+ required
+    task_phantom: {
+        id: 'task_phantom',
+        name: 'Task Phantom',
+        price: 1100,
+        levelRequired: 30,
+        tier: 'premium',
+        emoji: '👻',
+        thumbnail: 'assets/skins/task-phantom/idle.png',
+        animations: {
+            idle: 'assets/skins/task-phantom/idle.png',
+            walk: 'assets/skins/task-phantom/idle.png',
+            attack: 'assets/skins/task-phantom/idle.png',
+            hurt: 'assets/skins/task-phantom/idle.png',
+            death: 'assets/skins/task-phantom/idle.png',
+            jump: 'assets/skins/task-phantom/idle.png',
+            sleep: 'assets/skins/task-phantom/idle.png'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 32,
+            walk: 32,
+            attack: 32,
+            hurt: 32,
+            death: 32,
+            jump: 32,
+            sleep: 32
+        },
+        seamlessImage: true  // Flag to indicate this is a single seamless image
     }
+
 
 };
 

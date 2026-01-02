@@ -24,8 +24,10 @@ class Enemy {
             scaling = window.enemyAI.getDifficultyScaling(playerLevel);
         }
         
-        this.attack = this.baseAttack + playerLevel * 2;
-        this.defense = this.baseDefense + playerLevel * 1.5;
+        // ENHANCED: Increase attack scaling to make enemies hit harder as player levels up
+        // This creates more challenge and makes defense/items more valuable
+        this.attack = this.baseAttack + Math.floor(playerLevel * 2.5); // Increased from 2 to 2.5
+        this.defense = this.baseDefense + Math.floor(playerLevel * 1.5);
         this.maxHP = Math.floor((this.baseHP + playerLevel * 5) * (1 + scaling.hpBonus));
         this.hp = this.maxHP;
     }
@@ -39,7 +41,45 @@ class Enemy {
         }
         
         this.hp = Math.max(0, this.hp - amount);
+        
+        // Show damage animation above enemy
+        this.showDamageAnimation(amount);
+        
         return this.hp <= 0;
+    }
+    
+    // Show damage animation above enemy sprite
+    showDamageAnimation(damage) {
+        const enemySprite = document.getElementById('enemySprite');
+        if (!enemySprite) return;
+        
+        const damageText = document.createElement('div');
+        damageText.textContent = `-${damage}`;
+        damageText.style.position = 'absolute';
+        damageText.style.left = '50%';
+        damageText.style.top = '-20px';
+        damageText.style.transform = 'translateX(-50%)';
+        damageText.style.fontSize = '24px';
+        damageText.style.fontWeight = 'bold';
+        damageText.style.color = '#ff4444';
+        damageText.style.textShadow = '0 0 10px rgba(255, 68, 68, 0.8), 0 0 20px rgba(255, 68, 68, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
+        damageText.style.pointerEvents = 'none';
+        damageText.style.zIndex = '1000';
+        damageText.style.animation = 'damageFloat 1.5s ease-out forwards';
+        
+        // Add to enemy sprite's parent container
+        const enemyContainer = enemySprite.parentElement;
+        if (enemyContainer) {
+            enemyContainer.style.position = 'relative';
+            enemyContainer.appendChild(damageText);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                if (damageText.parentElement) {
+                    damageText.parentElement.removeChild(damageText);
+                }
+            }, 1500);
+        }
     }
 
     // Update sprite
@@ -303,7 +343,7 @@ const OGRE_DATA = {
 
 // Fly enemy data (appears at level 5+)
 const FLY_DATA = {
-    name: 'Fly',
+    name: 'Fly Drone',
     baseHP: 35,
     baseAttack: 13,
     baseDefense: 6,
@@ -328,25 +368,30 @@ const FLY_DATA = {
 
 const ENEMY_TYPES = [LAZY_BAT_DATA, LAZY_BAT_II_DATA, OCTOPUS_DATA, ALIEN_DATA, SLIME_DATA, GHOST_TASK_STOPPER_DATA, MEDUSA_DATA, LAZY_EYE_DATA, FIRE_SKULL_DATA, OGRE_DATA, FLY_DATA];
 
-// Enemy rotation system with less frequent alternation
+// Enemy rotation system - 7-level tier rotation
+// Enemies change every 7 levels, all previous enemies remain available
 let currentEnemyRotationIndex = 0;
-let currentEnemyStickCount = 0;
-let currentSelectedEnemy = null;
+let lastLevelTier = 0;
 
-function getNextEnemyFromRotation(availableEnemies) {
+function getNextEnemyFromRotation(availableEnemies, playerLevel) {
     if (!availableEnemies || availableEnemies.length === 0) return null;
     
-    // Keep the same enemy for 2-4 battles before changing
-    const stickyBattles = 2 + Math.floor(Math.random() * 3); // Random 2-4
+    // Calculate current level tier (0-6, 7-13, 14-20, etc.)
+    const currentLevelTier = Math.floor((playerLevel - 1) / 7);
     
-    if (!currentSelectedEnemy || currentEnemyStickCount >= stickyBattles) {
-        // Time to change enemy - use random selection for more variety
-        currentSelectedEnemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
-        currentEnemyStickCount = 0;
+    // Reset rotation index when entering a new 7-level tier
+    if (currentLevelTier !== lastLevelTier) {
+        currentEnemyRotationIndex = 0;
+        lastLevelTier = currentLevelTier;
     }
     
-    currentEnemyStickCount++;
-    return currentSelectedEnemy;
+    // Get current enemy from rotation
+    const selectedEnemy = availableEnemies[currentEnemyRotationIndex];
+    
+    // Move to next enemy in rotation
+    currentEnemyRotationIndex = (currentEnemyRotationIndex + 1) % availableEnemies.length;
+    
+    return selectedEnemy;
 }
 
 // Create a scaled enemy for battle
@@ -359,8 +404,8 @@ function createRandomEnemy(playerLevel) {
         availableEnemies = availableEnemies.filter(e => e.name !== 'Octopus');
     }
     
-    // Use rotation system for enemy selection
-    const enemyData = getNextEnemyFromRotation(availableEnemies);
+    // Use rotation system for enemy selection (7-level tier rotation)
+    const enemyData = getNextEnemyFromRotation(availableEnemies, playerLevel);
     
     const enemy = new Enemy(
         enemyData.name,
@@ -449,12 +494,14 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
     return new Promise((resolve) => {
         const spriteElement = document.getElementById('enemySprite');
         
-        // Update sprite sheet source
-        enemy.setSprite(animationKey);
-        spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+        // Update sprite sheet source (skip for Fly Drone - it uses projectile only)
+        if (enemy.name !== 'Fly Drone') {
+            enemy.setSprite(animationKey);
+            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+        }
         
         // Remove all animation classes
-        spriteElement.classList.remove('bat-idle', 'bat-attack', 'bat-hurt', 'bat2-idle', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle', 'procedural-idle', 'procedural-attack');
+        spriteElement.classList.remove('bat-idle', 'bat-attack', 'bat-hurt', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle', 'procedural-idle', 'procedural-attack');
         
         // Add appropriate animation class based on enemy type
         const isBat = enemy.name === 'Lazy Bat';
@@ -464,24 +511,33 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
         const isMedusa = enemy.name === 'Medusa';
         const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
         const isProcedural = enemy.name === 'Octopus' || enemy.name === 'Alien' || enemy.name === 'Fire Skull' || enemy.name === 'Ogre';
+        const isFly = enemy.name === 'Fly Drone';
         
         if (animationKey === 'attack1' || animationKey === 'attack2') {
             if (isBat) spriteElement.classList.add('bat-attack');
-            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isBat2) spriteElement.classList.add('bat-attack');
             else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
             else if (isMedusa) spriteElement.classList.add('medusa-idle');
             else if (isProcedural) spriteElement.classList.add('procedural-attack');
+            else if (isFly) { /* Fly keeps idle sprite, projectile animates separately */ }
         } else if (animationKey === 'hurt') {
             if (isBat) spriteElement.classList.add('bat-hurt');
-            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isBat2) spriteElement.classList.add('bat-hurt');
             else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
             else if (isMedusa) spriteElement.classList.add('medusa-idle');
-            else if (isProcedural) spriteElement.classList.add('procedural-idle');
+            else if (isProcedural) {
+                // Static enemies: add hurt flash effect
+                spriteElement.classList.add('procedural-hurt');
+            }
+            else if (isFly) {
+                // Fly Drone: add hurt flash effect
+                spriteElement.classList.add('enemy-hurt-flash');
+            }
         } else {
             if (isBat) spriteElement.classList.add('bat-idle');
-            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isBat2) spriteElement.classList.add('bat-idle');
             else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isEye) spriteElement.classList.add('eye-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
@@ -490,9 +546,12 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
         }
 
         setTimeout(() => {
-            enemy.setSprite('idle');
-            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-            spriteElement.classList.remove('bat-attack', 'bat-hurt', 'bat2-idle', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle');
+            // Reset sprite to idle (skip for Fly Drone - it stays idle)
+            if (enemy.name !== 'Fly Drone') {
+                enemy.setSprite('idle');
+                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            }
+            spriteElement.classList.remove('bat-attack', 'bat-hurt', 'slime-idle', 'medusa-idle', 'eye-idle', 'ghost-idle', 'procedural-hurt', 'enemy-hurt-flash', 'procedural-attack');
             
             const isBat = enemy.name === 'Lazy Bat';
             const isBat2 = enemy.name === 'Lazy Bat II';
@@ -501,11 +560,17 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
             const isMedusa = enemy.name === 'Medusa';
             const isEye = enemy.name === 'Flying Eye Demon' || enemy.name === 'Lazy Eye';
             if (isBat) spriteElement.classList.add('bat-idle');
-            else if (isBat2) spriteElement.classList.add('bat2-idle');
+            else if (isBat2) spriteElement.classList.add('bat-idle');
             else if (isSlime) spriteElement.classList.add('slime-idle');
             else if (isEye) spriteElement.classList.add('eye-idle');
             else if (isGhost) spriteElement.classList.add('ghost-idle');
             else if (isMedusa) spriteElement.classList.add('medusa-idle');
+            
+            // Re-add procedural-idle for static enemies after hurt animation
+            const isProcedural = enemy.name === 'Octopus' || enemy.name === 'Alien' || enemy.name === 'Fire Skull' || enemy.name === 'Ogre';
+            if (isProcedural) {
+                spriteElement.classList.add('procedural-idle');
+            }
             
             resolve();
         }, duration);

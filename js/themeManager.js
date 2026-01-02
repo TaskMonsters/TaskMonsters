@@ -6,23 +6,23 @@ const availableThemes = {
         name: 'Dark Castle',
         emoji: '🏰',
         description: 'Mysterious old castle interior',
-        price: 100,
+        price: 400,
         preview: 'assets/backgrounds/themes/castle.png'
     },
-    city: {
-        id: 'city',
-        name: 'Neon City',
-        emoji: '🌃',
-        description: 'Futuristic cityscape at night',
-        price: 120,
-        preview: 'assets/backgrounds/themes/city.png'
+    dark_gothic_castle: {
+        id: 'dark_gothic_castle',
+        name: 'Dark Gothic Castle',
+        emoji: '🏰',
+        description: 'Ominous castle on a cliff at twilight',
+        price: 1000,
+        preview: 'assets/backgrounds/themes/DarkGothicCastle.png'
     },
     forest: {
         id: 'forest',
         name: 'Misty Forest',
         emoji: '🌲',
         description: 'Enchanted forest with mist',
-        price: 80,
+        price: 450,
         preview: 'assets/backgrounds/themes/forest.png'
     },
     underwater: {
@@ -30,7 +30,7 @@ const availableThemes = {
         name: 'Underwater Fantasy',
         emoji: '🌊',
         description: 'Deep ocean wonderland',
-        price: 150,
+        price: 600,
         preview: 'assets/backgrounds/themes/underwater.png'
     },
     graveyard: {
@@ -38,7 +38,7 @@ const availableThemes = {
         name: 'Ship Graveyard',
         emoji: '⚓',
         description: 'Abandoned ships in the mist',
-        price: 90,
+        price: 550,
         preview: 'assets/backgrounds/themes/graveyard.png'
     },
     synth_city: {
@@ -46,7 +46,7 @@ const availableThemes = {
         name: 'Synth City',
         emoji: '🌆',
         description: 'Retro synthwave cityscape',
-        price: 70,
+        price: 650,
         preview: 'assets/backgrounds/themes/synth-city.png'
     },
     space: {
@@ -54,8 +54,32 @@ const availableThemes = {
         name: 'Space',
         emoji: '🌌',
         description: 'Cosmic space vista',
-        price: 130,
+        price: 700,
         preview: 'assets/backgrounds/themes/space.png'
+    },
+    vamp_castle_bg: {
+        id: 'vamp_castle_bg',
+        name: 'Vampire Castle Night',
+        emoji: '🦇',
+        description: 'Gothic castle under moonlight',
+        price: 700,
+        preview: 'assets/backgrounds/themes/vamp-castle-bg.png'
+    },
+    neon_city_sunset: {
+        id: 'neon_city_sunset',
+        name: 'Neon City Sunset',
+        emoji: '🌇',
+        description: 'Cyberpunk cityscape at dusk',
+        price: 800,
+        preview: 'assets/backgrounds/themes/neon-city-sunset.png'
+    },
+    skull_gates: {
+        id: 'skull_gates',
+        name: 'Skull Gates',
+        emoji: '💀',
+        description: 'Haunted dungeon entrance with skull gateway',
+        price: 1100,
+        preview: 'assets/backgrounds/themes/SkullGates.png'
     }
 };
 

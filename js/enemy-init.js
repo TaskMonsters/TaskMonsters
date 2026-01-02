@@ -22,11 +22,11 @@ function initEnemySprite(enemyData) {
         spriteElement.style.backgroundSize = '576px 64px'; // 9 frames × 64px = 576px
         spriteElement.classList.add('bat-idle');
     } else if (enemyData.name === 'Lazy Bat II') {
-        // Lazy Bat II sprites: 32×32 frames, 4 frames
-        spriteElement.classList.add('enemy-sprite-small');
+        // Lazy Bat II sprites: 64×64 frames, 9 frames (same as Lazy Bat I)
+        spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
-        spriteElement.style.backgroundSize = '128px 32px'; // 4 frames × 32px = 128px
-        spriteElement.classList.add('bat2-idle');
+        spriteElement.style.backgroundSize = '576px 64px'; // 9 frames × 64px = 576px
+        spriteElement.classList.add('bat-idle');
     } else if (enemyData.name === 'Slime') {
         // Slime sprites: 118×79 frames, 4 frames
         spriteElement.classList.add('enemy-sprite-slime');
@@ -98,7 +98,7 @@ function initEnemySprite(enemyData) {
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
         spriteElement.style.transform = 'scale(3)';
-    } else if (enemyData.name === 'Fly') {
+    } else if (enemyData.name === 'Fly Drone') {
         // Fly: single sprite with procedural animation
         spriteElement.classList.add('enemy-sprite-small');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;

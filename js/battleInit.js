@@ -21,7 +21,7 @@ const ARENA_POOL = [
 
 let currentArenaIndex = 0;
 let battlesSinceArenaChange = 0;
-const BATTLES_PER_ARENA = 1; // Changed from 3 to 1 for maximum variety as requested by user
+const BATTLES_PER_ARENA = 5; // Rotate arena every 5 battles as requested by user
 
 function getNextArenaBackground() {
     if (!ARENA_POOL || ARENA_POOL.length === 0) return null;
@@ -148,17 +148,21 @@ function renderHeroSprite() {
     const spriteRow = appearance?.spriteRow || 0;
     const animationRows = appearance?.animationRows || {};
     
-    // FIX: Increase sprite size in battle mode to match screenshot
-    // Skins keep their own dimensions, default monsters get larger scale
-    heroSprite.style.width = '32px';
-    heroSprite.style.height = '32px';
+    // FIX: Don't scale the sprite element itself - scale the wrapper instead
+    // This prevents multi-frame display and flickering
+    heroSprite.style.width = `${spriteSize.width}px`;
+    heroSprite.style.height = `${spriteSize.height}px`;
+    heroSprite.style.transform = 'none'; // No scaling on sprite element
     
-    // Check if skin is equipped - skins retain their own scale
-    const isSkinEquipped = appearance && appearance.isSkin;
-    if (isSkinEquipped) {
-        heroSprite.style.transform = 'scale(1.5)'; // Keep skin size unchanged
-    } else {
-        heroSprite.style.transform = 'scale(3.0)'; // Increase default monster size
+    // Scale the wrapper instead to maintain visual size
+    const spriteWrapper = heroSprite.parentElement;
+    if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
+        const isSkinEquipped = appearance && appearance.isSkin;
+        if (isSkinEquipped) {
+            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for skins
+        } else {
+            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for default monsters
+        }
     }
     
     heroSprite.style.imageRendering = 'pixelated';
@@ -285,17 +289,21 @@ function startHeroAnimation(animationType = 'idle') {
         heroSprite.style.backgroundImage = `url('${spritePath}')`;
         heroSprite.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
     }
-    // FIX: Increase sprite size in battle mode to match screenshot
-    // Skins keep their own dimensions, default monsters get larger scale
-    heroSprite.style.width = '32px';
-    heroSprite.style.height = '32px';
+    // FIX: Don't scale the sprite element itself - scale the wrapper instead
+    // This prevents multi-frame display and flickering
+    heroSprite.style.width = `${spriteSize.width}px`;
+    heroSprite.style.height = `${spriteSize.height}px`;
+    heroSprite.style.transform = 'none'; // No scaling on sprite element
     
-    // Check if skin is equipped - skins retain their own scale
-    const isSkinEquipped = appearance && appearance.isSkin;
-    if (isSkinEquipped) {
-        heroSprite.style.transform = 'scale(1.5)'; // Keep skin size unchanged
-    } else {
-        heroSprite.style.transform = 'scale(3.0)'; // Increase default monster size
+    // Scale the wrapper instead to maintain visual size
+    const spriteWrapper = heroSprite.parentElement;
+    if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
+        const isSkinEquipped = appearance && appearance.isSkin;
+        if (isSkinEquipped) {
+            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for skins
+        } else {
+            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for default monsters
+        }
     }
     
     heroSprite.style.imageRendering = 'pixelated';

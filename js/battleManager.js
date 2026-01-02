@@ -25,6 +25,8 @@ class BattleManager {
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
         this.reflectTurns = 0;  // Luna's reflect effect turns remaining
         this.reflectActive = false;  // Luna's reflect effect active flag
+        this.enemyFrozenTurns = 0;  // Freeze effect turns remaining
+        this.focusAttackUsed = false;  // Track if focus timer special attack has been used this battle
         
         // Turn timer system
         this.turnTimerDuration = 3000; // Default 3 seconds
@@ -102,6 +104,19 @@ class BattleManager {
             window.initSpecialAttackGauge();
         }
         
+        // Hide special attack gauge and button if below Level 7
+        const userLevel = parseInt(localStorage.getItem('level')) || 1;
+        const specialGaugeContainer = document.getElementById('specialAttackGaugeContainer');
+        const specialAttackBtn = document.getElementById('btnSpecialAttack');
+        
+        if (userLevel < 7) {
+            if (specialGaugeContainer) specialGaugeContainer.style.display = 'none';
+            if (specialAttackBtn) specialAttackBtn.style.display = 'none';
+        } else {
+            if (specialGaugeContainer) specialGaugeContainer.style.display = 'block';
+            if (specialAttackBtn) specialAttackBtn.style.display = 'block';
+        }
+        
         // Boss status effects
         this.poisonTurns = 0;
         this.poisonDamage = 0;
@@ -115,48 +130,61 @@ class BattleManager {
         const battleContainer = document.querySelector('.battle-container');
         battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space', 'bg-castle', 'bg-city-neon', 'bg-synth-city');
         
-        // Determine available arenas based on level
-        const availableArenas = [];
+        // Determine available arenas based on level - TRUE ALTERNATION SYSTEM
+        let availableArenas = [];
         
-        // Check for level 20+ theme unlock
-        if (this.hero.level >= 20) {
-            const allShopThemes = ['bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space', 'bg-castle', 'bg-city-neon', 'bg-synth-city'];
-            // All shop themes are available for battle mode
-            availableArenas.push(...allShopThemes);
+        // LEVELS 1-10: Synth City only
+        if (this.hero.level >= 1 && this.hero.level < 11) {
+            availableArenas = ['bg-synth-city'];
+        }
+        // LEVELS 11-19: Multiple arenas rotate
+        else if (this.hero.level >= 11 && this.hero.level < 20) {
+            availableArenas = [
+                'bg-city',        // city_sunset
+                'bg-forest',      // forest_path
+                'bg-ocean',       // ocean
+                'bg-castle',      // castle
+                'bg-temple',      // temple
+                'bg-space',       // space
+                'bg-night-town',  // night town
+                'bg-synth-city',  // synth city
+                'bg-skull-gate'   // skull gate
+            ];
+        }
+        // LEVELS 20+: All shop themes available
+        else if (this.hero.level >= 20) {
+            availableArenas = [
+                'bg-forest',      // forest_path
+                'bg-night-town',  // night town
+                'bg-city',        // city_sunset
+                'bg-temple',      // temple
+                'bg-ocean',       // ocean
+                'bg-skull-gate',  // skull gate
+                'bg-space',       // space
+                'bg-castle',      // castle
+                'bg-city-neon',   // neon city
+                'bg-synth-city'   // synth city
+            ];
         }
         
-        // LEVELS 1-10: Synth City is the primary arena (appears 5x)
-        if (this.hero.level >= 1 && this.hero.level <= 10) {
-            availableArenas.push('bg-synth-city', 'bg-synth-city', 'bg-synth-city', 'bg-synth-city', 'bg-synth-city');
+        // True alternation system - cycle through arenas in order
+        if (!window.battleArenaRotationIndex) window.battleArenaRotationIndex = 0;
+        if (!window.lastArenaPoolSize) window.lastArenaPoolSize = 0;
+        
+        // Reset rotation if arena pool changed (level up unlocked new arenas)
+        if (availableArenas.length !== window.lastArenaPoolSize) {
+            window.battleArenaRotationIndex = 0;
+            window.lastArenaPoolSize = availableArenas.length;
         }
         
-        // LEVELS 11+: More variety with multiple arenas
-        if (this.hero.level >= 11) {
-            // Add all arenas for variety
-            availableArenas.push('bg-city', 'bg-city', 'bg-city', 'bg-city'); // city_sunset 4x
-            availableArenas.push('bg-forest'); // forest_path
-            availableArenas.push('bg-ocean'); // ocean
-            availableArenas.push('bg-castle'); // castle
-            availableArenas.push('bg-temple'); // temple
-            availableArenas.push('bg-space'); // space
-            // // availableArenas.push('bg-city-neon'); // neon city (Removed as per user request to remove city.png) (Removed as per user request to remove city.png)
-            availableArenas.push('bg-night-town'); // night town
-            availableArenas.push('bg-synth-city'); // synth city still available
-            availableArenas.push('bg-skull-gate'); // skull gate
-        }
+        // Get current arena from rotation
+        const selectedArena = availableArenas[window.battleArenaRotationIndex];
         
-        // Random arena selection (less frequent alternation)
-        // Keep the same arena for 3-5 battles before potentially changing
-        if (!window.battleArenaIndex) window.battleArenaIndex = 0;
-        if (!window.battleArenaStickCount) window.battleArenaStickCount = 0;
-        if (!window.currentArenaClass || window.battleArenaStickCount >= (3 + Math.floor(Math.random() * 3))) {
-            // Time to potentially change arena
-            window.currentArenaClass = availableArenas[Math.floor(Math.random() * availableArenas.length)];
-            window.battleArenaStickCount = 0;
-        }
-        battleContainer.classList.add(window.currentArenaClass);
-        window.battleArenaStickCount++;
-        window.battleArenaIndex++;
+        // Move to next arena in rotation
+        window.battleArenaRotationIndex = (window.battleArenaRotationIndex + 1) % availableArenas.length;
+        
+        // Apply selected arena
+        battleContainer.classList.add(selectedArena);
         
         // Play alternating battle music
         if (window.audioManager) {
@@ -192,6 +220,7 @@ class BattleManager {
         // Process poison effect
         if (this.poisonTurns > 0) {
             this.hero.hp = Math.max(0, this.hero.hp - this.poisonDamage);
+            this.showHeroDamageAnimation(this.poisonDamage);
             this.attackGauge = Math.max(0, this.attackGauge - this.poisonGaugeDrain);
             this.defenseGauge = Math.max(0, this.defenseGauge - this.poisonGaugeDrain);
             addBattleLog(`☠️ Poison drained ${this.poisonDamage} HP and ${this.poisonGaugeDrain} from each gauge!`);
@@ -252,7 +281,7 @@ class BattleManager {
         
         // Check if enemy evades (Ghost ability, Sunny Dragon, or Fly)
         if ((this.enemy.canEvade || this.enemy.evasionAbility) && Math.random() < this.enemy.evasionChance) {
-            const evasionEmoji = this.enemy.name === 'Fly' ? '🪰' : '👻';
+            const evasionEmoji = this.enemy.name === 'Fly Drone' ? '🪰' : '👻';
             addBattleLog(`${evasionEmoji} ${this.enemy.name} evaded your attack!`);
             updateBattleUI(this.hero, this.enemy);
             
@@ -264,11 +293,50 @@ class BattleManager {
             return;
         }
         
-        // Calculate damage using base attack (level-based)
+        // Calculate damage using base attack (level-based with random variance)
         // Enemy defense reduces damage slightly but not too much
-        const baseDamage = this.hero.attack;
+        const level = window.gameState?.jerryLevel || 1;
+        let minDamage, maxDamage;
+        
+        // Level-based damage ranges
+        if (level >= 30) {
+            minDamage = 10;
+            maxDamage = 18;
+        } else if (level >= 15) {
+            minDamage = 9;
+            maxDamage = 15;
+        } else if (level >= 10) {
+            minDamage = 8;
+            maxDamage = 13;
+        } else if (level >= 7) {
+            minDamage = 5;
+            maxDamage = 10;
+        } else {
+            // Below level 7, use fixed damage
+            minDamage = 3;
+            maxDamage = 6;
+        }
+        
+        // Random damage within the range
+        const baseDamage = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
+        
         const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
         let damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
+        
+        // Focus Timer Special Attack: Random chance to trigger overpowered attack
+        const focusMinutes = window.gameState?.totalFocusMinutes || 0;
+        const maxFocusAttack = Math.min(Math.floor(focusMinutes / 10), 35); // Max 35 damage at 350 minutes
+        const hasFocusAttack = maxFocusAttack >= 25 && !this.focusAttackUsed;
+        
+        if (hasFocusAttack) {
+            // 30% chance to trigger focus attack on regular attack
+            const triggerChance = Math.random();
+            if (triggerChance <= 0.3) {
+                this.focusAttackUsed = true;
+                damage = maxFocusAttack; // Override with focus attack damage
+                addBattleLog(`🔥 FOCUS POWER UNLEASHED! Massive ${damage} damage!`);
+            }
+        }
         
         const isDead = this.enemy.takeDamage(damage);
         
@@ -693,8 +761,9 @@ class BattleManager {
             this.state = BattleState.VICTORY;
             await this.endBattle('victory');
         } else {
-            // Enemy is frozen, skip their turn and go back to player turn
-            addBattleLog('❄️ Enemy is frozen and cannot move!');
+            // Set enemy frozen for 2 turns
+            this.enemyFrozenTurns = 2;
+            addBattleLog('❄️ Enemy is frozen for 2 turns!');
             await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Refill gauges slightly for next turn
@@ -1028,6 +1097,10 @@ class BattleManager {
         // Calculate damage (20 base damage)
         const damage = 20;
         const isDead = this.enemy.takeDamage(damage);
+        
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+        
         addBattleLog(`🔵🔥 Blue Flame dealt ${damage} damage!`);
         updateBattleUI(this.hero, this.enemy);
 
@@ -1085,6 +1158,10 @@ class BattleManager {
         // Calculate variable damage (18-22 range, skips 1 turn)
         const damage = Math.floor(Math.random() * 5) + 18; // Random between 18-22
         const isDead = this.enemy.takeDamage(damage);
+        
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+        
         addBattleLog(`👻 Procrastination Ghost dealt ${damage} damage and made enemy skip next turn!`);
         updateBattleUI(this.hero, this.enemy);
 
@@ -1124,6 +1201,31 @@ class BattleManager {
         this.state = BattleState.ENEMY_TURN;
 
         await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Check if enemy is frozen
+        if (this.enemyFrozenTurns > 0) {
+            this.enemyFrozenTurns--;
+            addBattleLog(`❄️ Enemy is frozen! (${this.enemyFrozenTurns} turns remaining)`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Skip enemy turn and return to player turn
+            this.state = BattleState.PLAYER_TURN;
+            
+            // Refill gauges slightly
+            this.attackGauge = Math.min(100, this.attackGauge + 15);
+            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
+            
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            
+            // Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
         
         // FIX: Apply Nova's poison damage at start of enemy turn
         if (this.novaPoisonTurns > 0) {
@@ -1265,6 +1367,7 @@ class BattleManager {
             
             // Apply drench effect: 10 damage + block fireball for 1 turn
             this.hero.hp = Math.max(0, this.hero.hp - 10);
+            this.showHeroDamageAnimation(10);
             this.fireballBlocked = true;
             addBattleLog(`💦 ${this.enemy.name}'s Drench attack dealt 10 damage and blocked fireball!`);
             
@@ -1313,6 +1416,7 @@ class BattleManager {
                 
                 const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
+                this.showHeroDamageAnimation(damage);
                 
                 // Apply poison effect for 2 turns
                 this.poisonTurns = this.enemy.poisonDuration;
@@ -1358,6 +1462,7 @@ class BattleManager {
                 // Variable damage 18-40
                 const damage = Math.floor(Math.random() * 23) + 18;
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
+                this.showHeroDamageAnimation(damage);
                 
                 // Drain attack gauge to 5%
                 this.attackGauge = 5;
@@ -1400,6 +1505,7 @@ class BattleManager {
                 
                 const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
+                this.showHeroDamageAnimation(damage);
                 
                 // Apply mushroom effect for 2 turns
                 this.mushroomTurns = this.enemy.mushroomEffectDuration;
@@ -1449,6 +1555,7 @@ class BattleManager {
             // Deal light damage (5-8)
             const damage = Math.floor(Math.random() * 4) + 5;
             this.hero.hp = Math.max(0, this.hero.hp - damage);
+            this.showHeroDamageAnimation(damage);
             
             // Set flag to reduce timer on next turn
             this.turnTimerReduced = true;
@@ -1655,6 +1762,7 @@ class BattleManager {
             const remainingDamage = damage - gaugeUsed;
             if (remainingDamage > 0) {
                 this.hero.hp = Math.max(0, this.hero.hp - remainingDamage);
+                this.showHeroDamageAnimation(remainingDamage);
                 addBattleLog(`🛡️ Blocked ${gaugeUsed} damage! Took ${remainingDamage} damage!`);
             } else {
                 addBattleLog(`🛡️ Blocked all ${damage} damage!`);
@@ -1662,6 +1770,7 @@ class BattleManager {
             this.defendActive = false;
         } else {
             this.hero.hp = Math.max(0, this.hero.hp - damage);
+            this.showHeroDamageAnimation(damage);
         }
 
         // Play hero hurt animation if took damage
@@ -1879,8 +1988,12 @@ class BattleManager {
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
             
-            // FIX: DO NOT stop music here - it should play until user clicks Continue
-            // Music will be stopped in loot modal Continue button or defeat alert
+            // FIXED: Stop all battle music when arena is hidden
+            // This ensures music stops even if user navigates away without clicking Continue
+            if (window.audioManager) {
+                window.audioManager.stopAllBattleMusic();
+                window.audioManager.stopBattleOutcomeMusic();
+            }
         }, 2000);
     }
     
@@ -2066,6 +2179,40 @@ class BattleManager {
                 }
             `;
             document.head.appendChild(style);
+        }
+    }
+    
+    // Show damage animation above hero sprite
+    showHeroDamageAnimation(damage) {
+        const heroSprite = document.getElementById('heroBattleSprite');
+        if (!heroSprite) return;
+        
+        const damageText = document.createElement('div');
+        damageText.textContent = `-${damage}`;
+        damageText.style.position = 'absolute';
+        damageText.style.left = '50%';
+        damageText.style.top = '-20px';
+        damageText.style.transform = 'translateX(-50%)';
+        damageText.style.fontSize = '24px';
+        damageText.style.fontWeight = 'bold';
+        damageText.style.color = '#ff4444';
+        damageText.style.textShadow = '0 0 10px rgba(255, 68, 68, 0.8), 0 0 20px rgba(255, 68, 68, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
+        damageText.style.pointerEvents = 'none';
+        damageText.style.zIndex = '1000';
+        damageText.style.animation = 'damageFloat 1.5s ease-out forwards';
+        
+        // Add to hero sprite's parent container
+        const heroContainer = heroSprite.parentElement;
+        if (heroContainer) {
+            heroContainer.style.position = 'relative';
+            heroContainer.appendChild(damageText);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                if (damageText.parentElement) {
+                    damageText.parentElement.removeChild(damageText);
+                }
+            }, 1500);
         }
     }
 }

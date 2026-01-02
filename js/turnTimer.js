@@ -1,7 +1,7 @@
-// Turn Timer System for Battle Mode - Battle Log Version
+// Enemy Attack Timer - 3 seconds for enemy to attack if player delays
 
-// Start turn timer
-function startTurnTimer(duration = 5000) {
+// Start enemy attack countdown (3 seconds)
+function startTurnTimer(duration = 3000) {
     // Stop any existing timer
     stopTurnTimer();
     
@@ -15,33 +15,17 @@ function startTurnTimer(duration = 5000) {
     window.battleManager.turnTimerDuration = duration;
     window.battleManager.turnTimerLastSecond = Math.ceil(duration / 1000);
     
-    // Add initial timer message to battle log
-    const initialSeconds = Math.ceil(duration / 1000);
-    addBattleLog(`⏱️ Your turn! (${initialSeconds}s remaining)`);
+    // NO initial timer message - timer is invisible to user
     
-    // Update timer every second
+    // Update timer every 100ms
     window.battleManager.turnTimerInterval = setInterval(() => {
         const elapsed = Date.now() - window.battleManager.turnTimerStartTime;
         const remaining = Math.max(0, duration - elapsed);
         const secondsRemaining = Math.ceil(remaining / 1000);
         
-        // Update battle log when second changes
-        if (secondsRemaining !== window.battleManager.turnTimerLastSecond && secondsRemaining > 0) {
-            window.battleManager.turnTimerLastSecond = secondsRemaining;
-            
-            // Different message based on time remaining
-            if (secondsRemaining === 1) {
-                addBattleLog(`⏰ 1 second left!`);
-                // Play warning sound
-                if (window.audioManager) {
-                    window.audioManager.play('error');
-                }
-            } else if (secondsRemaining <= 3) {
-                addBattleLog(`⏱️ ${secondsRemaining}s remaining...`);
-            }
-        }
+        // NO battle log updates - timer is silent
         
-        // Time's up!
+        // Time's up! Enemy attacks
         if (remaining <= 0) {
             stopTurnTimer();
             onTurnTimerExpired();
@@ -58,25 +42,25 @@ function stopTurnTimer() {
     }
 }
 
-// Handle timer expiration
+// Handle timer expiration - enemy attacks automatically
 function onTurnTimerExpired() {
-    console.log('⏰ Turn timer expired!');
+    console.log('⏰ Enemy attack timer expired - enemy attacks!');
     
-    // Only auto-skip if still in player turn
+    // Only auto-attack if still in player turn
     if (window.battleManager && window.battleManager.state === BattleState.PLAYER_TURN) {
-        addBattleLog('⏰ Time\'s up! Turn skipped.');
+        addBattleLog('💥 Enemy attacks while you hesitate!');
         
-        // Play timeout sound
+        // Play warning sound
         if (window.audioManager) {
             window.audioManager.play('error');
         }
         
-        // Trigger enemy turn after a short delay
+        // Trigger enemy turn immediately
         setTimeout(() => {
             if (window.battleManager && window.battleManager.state === BattleState.PLAYER_TURN) {
                 window.battleManager.enemyTurn();
             }
-        }, 500);
+        }, 300);
     }
 }
 
@@ -98,8 +82,5 @@ function reduceTimer(newDuration) {
         // Adjust the start time so remaining time equals newDuration
         window.battleManager.turnTimerStartTime = Date.now() - (window.battleManager.turnTimerDuration - newDuration);
         window.battleManager.turnTimerDuration = newDuration;
-        
-        const secondsRemaining = Math.ceil((newDuration - elapsed) / 1000);
-        addBattleLog(`⚡ Timer reduced to ${secondsRemaining}s!`);
     }
 }

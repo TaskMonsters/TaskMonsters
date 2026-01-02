@@ -201,20 +201,30 @@ function updateActionButtons(hero) {
     // Defend requires 20 defense gauge
     btnDefend.disabled = battleManager.defenseGauge < 20;
     
-    // Special Attack requires full special gauge (100)
+    // Special Attack requires full special gauge (100) AND Level 7+
     if (btnSpecialAttack) {
         const specialGauge = window.gameState.specialAttackGauge || 0;
-        btnSpecialAttack.disabled = specialGauge < 100;
-        // Update button text to show actual gauge value
-        btnSpecialAttack.textContent = `⚡ Special Attack (${specialGauge}/100)`;
+        const userLevel = window.gameState.jerryLevel || 1;
         
-        // Highlight button when gauge is full
-        if (specialGauge >= 100) {
-            btnSpecialAttack.style.background = 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%)';
-            btnSpecialAttack.style.boxShadow = '0 0 20px rgba(168, 85, 247, 0.6)';
-        } else {
+        // Disable if level < 7 or gauge not full
+        btnSpecialAttack.disabled = userLevel < 7 || specialGauge < 100;
+        
+        // Update button text based on level
+        if (userLevel < 7) {
+            btnSpecialAttack.textContent = `⚡ Special Attack (Lv7)`;
             btnSpecialAttack.style.background = '';
             btnSpecialAttack.style.boxShadow = '';
+        } else {
+            btnSpecialAttack.textContent = `⚡ Special Attack (${specialGauge}/100)`;
+            
+            // Highlight button when gauge is full
+            if (specialGauge >= 100) {
+                btnSpecialAttack.style.background = 'linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f59e0b 100%)';
+                btnSpecialAttack.style.boxShadow = '0 0 20px rgba(168, 85, 247, 0.6)';
+            } else {
+                btnSpecialAttack.style.background = '';
+                btnSpecialAttack.style.boxShadow = '';
+            }
         }
     }
 

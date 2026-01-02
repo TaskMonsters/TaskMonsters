@@ -151,17 +151,20 @@ class SkinsManager {
             const yOffset = rowIndex * spriteSize.height;
             mainHeroSprite.style.objectPosition = `0 -${yOffset}px`;
             
-            // Calculate scale to make Hero Knight same visual size as default monsters
-            // Default monsters are 32x32 scaled by 4 = 128px visual size
-            // Hero Knight is 100x55, so we scale to match 128px width
-            const targetVisualSize = 128;
-            const scale = targetVisualSize / spriteSize.width;
-            mainHeroSprite.style.transform = `scale(${scale})`;
+            // FIX: Don't scale the sprite element - this causes multi-frame display
+            // The sprite should be displayed at its natural size
+            mainHeroSprite.style.transform = 'scale(4)'; // Fixed scale for all skins
             
-            // Only animate if there's more than 1 frame
-            if (appearance.frameCount.idle > 1) {
+            // Only use CSS animation for sprite sheets, NOT for GIF animations
+            const skin = window.SKINS_CONFIG[this.equippedSkinId];
+            if (skin && skin.seamlessImage) {
+                // GIF animation - no CSS animation needed
+                mainHeroSprite.style.animation = 'none';
+            } else if (appearance.frameCount.idle > 1) {
+                // Sprite sheet animation
                 mainHeroSprite.style.animation = `hero-idle-anim 0.8s steps(${appearance.frameCount.idle}) infinite`;
             } else {
+                // Single frame - no animation
                 mainHeroSprite.style.animation = 'none';
             }
         }
@@ -185,16 +188,20 @@ class SkinsManager {
             const yOffset = rowIndex * spriteSize.height;
             focusTimerSprite.style.objectPosition = `0 -${yOffset}px`;
             
-            // Calculate scale to match default monster visual size
-            const targetVisualSize = 128;
-            const scale = targetVisualSize / spriteSize.width;
-            focusTimerSprite.style.transform = `scale(${scale})`;
+            // FIX: Use fixed scale to prevent multi-frame display
+            focusTimerSprite.style.transform = 'scale(4)';
             focusTimerSprite.style.transformOrigin = 'center center';
             
-            // Only animate if there's more than 1 frame
-            if (appearance.frameCount.idle > 1) {
+            // Only use CSS animation for sprite sheets, NOT for GIF animations
+            const skinFocus = window.SKINS_CONFIG[this.equippedSkinId];
+            if (skinFocus && skinFocus.seamlessImage) {
+                // GIF animation - no CSS animation needed
+                focusTimerSprite.style.animation = 'none';
+            } else if (appearance.frameCount.idle > 1) {
+                // Sprite sheet animation
                 focusTimerSprite.style.animation = `hero-idle-anim 0.8s steps(${appearance.frameCount.idle}) infinite`;
             } else {
+                // Single frame - no animation
                 focusTimerSprite.style.animation = 'none';
             }
         }
@@ -235,11 +242,8 @@ class SkinsManager {
         const userLevel = window.gameState.jerryLevel || 1;
         const userXP = window.gameState.jerryXP || 0;
         
-        // Get all skins sorted by level requirement and price
+        // Get all skins sorted by price (lowest to highest)
         const allSkins = Object.values(window.SKINS_CONFIG).sort((a, b) => {
-            if (a.levelRequired !== b.levelRequired) {
-                return a.levelRequired - b.levelRequired;
-            }
             return a.price - b.price;
         });
         
@@ -261,17 +265,22 @@ class SkinsManager {
             }
             
             // Tier badge
-            const tierBadge = skin.tier === 'premium' 
-                ? '<div style="position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700;">PREMIUM</div>'
-                : '';
+            // Premium badge removed per user request
+            const tierBadge = '';
             
             // Unified button state logic
             let buttonHTML = '';
             let equippedBadge = '';
+            let lockSectionHTML = '';
             
             if (isLocked) {
-                // State 1: Locked by Level
-                buttonHTML = `<button class="shop-buy-btn" disabled style="background: rgba(50, 50, 50, 0.6); border: 1px solid rgba(80, 80, 80, 0.5); color: rgba(150, 150, 150, 0.7); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: not-allowed; width: 100%; letter-spacing: 0.3px;">🔒 Level ${skin.levelRequired}</button>`;
+                // State 1: Locked by Level - Show lock section instead of button
+                lockSectionHTML = `
+                    <div class="shop-item-lock-section">
+                        <div class="shop-item-lock-icon">🔒</div>
+                        <div class="shop-item-lock-text">Level ${skin.levelRequired}</div>
+                    </div>
+                `;
             } else if (!isOwned) {
                 // State 2: Unlocked, Not Purchased Yet
                 if (userXP >= skin.price) {
@@ -288,10 +297,45 @@ class SkinsManager {
                 buttonHTML = `<button class="shop-buy-btn" onclick="window.skinsManager.equipSkinFromShop('${skin.id}')" style="background: rgba(30, 60, 40, 0.7); border: 1px solid rgba(76, 175, 80, 0.5); color: rgba(139, 195, 74, 0.9); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: all 0.2s ease; letter-spacing: 0.3px;" onmouseover="this.style.background='rgba(40, 80, 50, 0.8)'; this.style.borderColor='rgba(100, 195, 100, 0.6)'" onmouseout="this.style.background='rgba(30, 60, 40, 0.7)'; this.style.borderColor='rgba(76, 175, 80, 0.5)'">Equip</button>`;
             }
             
-            card.innerHTML = `
-                <div style="position: relative;">
-                    ${tierBadge}
-                    <div style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 8px; overflow: hidden; position: relative;">
+            // Determine thumbnail style based on skin type
+            let thumbnailHTML = '';
+            if (skin.id === 'imp') {
+                // For Imp skin: Show thumbnail with rounded corners matching other skins
+                thumbnailHTML = `
+                    <div class="shop-item-emoji" style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden;">
+                        <img src="${skin.thumbnail}" 
+                             style="max-width: 80px; 
+                                    max-height: 80px; 
+                                    width: auto; 
+                                    height: auto; 
+                                    object-fit: contain; 
+                                    image-rendering: pixelated; 
+                                    transform: scale(1.8); 
+                                    border-radius: 8px;" 
+                             alt="${skin.name}">
+                    </div>
+                `;
+            } else if (skin.seamlessImage) {
+                // For seamless single-image skins (Task Toad, Task Phantom)
+                // Task Toad needs vertical adjustment due to transparent space in sprite
+                const translateY = skin.id === 'task-toad' ? ' translateY(-20px)' : '';
+                thumbnailHTML = `
+                    <div class="shop-item-emoji" style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: visible;">
+                        <img src="${skin.thumbnail}" 
+                             style="max-width: 80px; 
+                                    max-height: 80px; 
+                                    width: auto; 
+                                    height: auto; 
+                                    object-fit: contain; 
+                                    image-rendering: pixelated; 
+                                    transform: scale(1.8)${translateY};" 
+                             alt="${skin.name}">
+                    </div>
+                `;
+            } else {
+                // For sprite sheet skins (all other skins)
+                thumbnailHTML = `
+                    <div class="shop-item-emoji" style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; position: relative;">
                         <div style="width: 80px; height: 80px; position: relative; overflow: hidden;">
                             <img src="${skin.thumbnail}" 
                                  style="position: absolute; 
@@ -307,10 +351,18 @@ class SkinsManager {
                                  alt="${skin.name}">
                         </div>
                     </div>
+                `;
+            }
+            
+            card.innerHTML = `
+                <div style="position: relative;">
+                    ${tierBadge}
+                    ${thumbnailHTML}
                 </div>
-                <div style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${skin.name}</div>
-                <div style="font-size: 14px; color: #4CAF50; font-weight: 700; margin-top: 8px; margin-bottom: 8px;">${skin.price} XP Coins</div>
+                <div class="shop-item-name">${skin.name}</div>
+                <div class="shop-item-cost">${skin.price} XP Coins</div>
                 ${equippedBadge}
+                ${lockSectionHTML}
                 ${buttonHTML}
             `;
             

@@ -2093,20 +2093,9 @@
       to { object-position: -256px 0; }
     }
     
-    /* Imp sprite sheet animation - 8 columns × 12 rows, animate row 9 (idle) */
-    @keyframes imp-idle-anim {
-      from { object-position: 0 -256px; }  /* Row 9 starts at 8 * 32px = 256px */
-      to { object-position: -256px -256px; }  /* 8 frames × 32px = 256px */
-    }
-    
     @keyframes hero-walk-anim {
       from { object-position: 0 0; }
       to { object-position: -192px 0; }
-    }
-    
-    @keyframes hero-flicker {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
     }
 
     /* Native datetime-local input styling is handled by browser */
@@ -2200,8 +2189,8 @@
         padding-top: 16px; /* Match the vertical spacing from pill buttons to divider */
     }
 
-    /* Shop Items Grid - MOVED TO shop-refactored.css */
-    /* .shop-items-grid {
+    /* Shop Items Grid */
+    .shop-items-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr)); /* Always 2 columns with equal width */
         gap: 16px;
@@ -2286,7 +2275,7 @@
     .buy-now-btn:hover {
         background: #2a2a2a;
         border-color: rgba(255, 255, 255, 0.3);
-    } */
+    }
 
         /* Owned Items Grid */
         .owned-item-card {
@@ -3026,25 +3015,6 @@
     }
 }
 
-@keyframes damageFloat {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(0) scale(0.5);
-    }
-    20% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(-10px) scale(1.2);
-    }
-    80% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(-40px) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-60px) scale(0.8);
-    }
-}
-
 /* Battle Container Positioning */
 .battle-container {
     position: relative;
@@ -3720,7 +3690,7 @@ input:checked + .toggle-slider:before {
 
     <!-- Gauges -->
     <div class="gauge-container">
-        <div class="gauge" id="specialAttackGaugeContainer">
+        <div class="gauge">
             <div class="gauge-label">
                 <span>⚡ Special Attack</span>
                 <span id="specialGaugeText">0/100</span>
@@ -3761,7 +3731,7 @@ input:checked + .toggle-slider:before {
             ⚡ Special Attack
         </button>
         <button id="btnFireball" class="btn-action" onclick="battleManager.playerFireball()">
-            🔥 Fireball <span class="item-count" id="fireballCount">(0)</span>
+            <img src="assets/blue-flame.png" alt="🔥" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 4px;"> Fireball <span class="item-count" id="fireballCount">(0)</span>
         </button>
         <button id="btnSpark" class="btn-action" onclick="battleManager.playerSpark()" style="display: none;">
             ⚡ Spark <span class="item-count" id="sparkCount">(0)</span>
@@ -3794,7 +3764,7 @@ input:checked + .toggle-slider:before {
             🪞 Mirror <span class="item-count" id="mirrorAttackCount">(0)</span>
         </button>
         <button id="btnBlueFlame" class="btn-action" onclick="battleManager.playerBlueFlame()" style="display: none;">
-            <img src="assets/blue-flame-icon.png" alt="Blue Flame" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 4px;"> Blue Flame <span class="item-count" id="blueFlameCount">(0)</span>
+            🔵🔥 Blue Flame <span class="item-count" id="blueFlameCount">(0)</span>
         </button>
         <button id="btnProcrastinationGhost" class="btn-action" onclick="battleManager.playerProcrastinationGhost()" style="display: none;">
             👻 Ghost <span class="item-count" id="procrastinationGhostCount">(0)</span>
@@ -4058,19 +4028,10 @@ input:checked + .toggle-slider:before {
                 </div>
                 <div class="daily-challenge-content" id="focusTimerContent" style="display: none;">
                     <div style="padding: 16px 20px;">
-                        <!-- Instructional text about attack bonus -->
-                        <div id="focusTimerInfoBox" style="display: none; background: linear-gradient(135deg, rgba(255, 69, 0, 0.15) 0%, rgba(255, 140, 0, 0.15) 100%); border: 2px solid rgba(255, 69, 0, 0.4); border-radius: 8px; padding: 14px 50px 14px 14px; margin-bottom: 16px; text-align: center; box-shadow: 0 0 15px rgba(255, 69, 0, 0.2); position: relative;">
-                            <button id="toggleFocusInfo" onclick="toggleFocusTimerInfo()" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255, 69, 0, 0.5); color: var(--text-primary); border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; z-index: 10;" onmouseover="this.style.background='rgba(0,0,0,0.5)'" onmouseout="this.style.background='rgba(0,0,0,0.3)'">Hide</button>
-                            <div style="font-size: 14px; color: var(--text-primary); line-height: 1.6; font-weight: 500;">
-                                🔥 <strong style="color: #ff6b35;">FOCUS POWER:</strong> Temporarily increases your monster's <strong style="color: #ff4500;">attack strength</strong> in battle!<br>
-                                <span style="font-size: 12px; opacity: 0.9;">Using the Focus Timer builds up power that randomly triggers during battle for a devastating <strong>25-35 damage</strong> special attack (one-time use per battle)</span>
-                            </div>
-                        </div>
-                        <button id="showFocusInfo" onclick="toggleFocusTimerInfo()" style="display: block; background: rgba(255, 69, 0, 0.2); border: 2px solid rgba(255, 69, 0, 0.4); color: var(--text-primary); border-radius: 8px; padding: 10px; margin-bottom: 16px; font-size: 13px; cursor: pointer; width: 100%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 69, 0, 0.3)'" onmouseout="this.style.background='rgba(255, 69, 0, 0.2)'">ℹ️ Show Focus Power Info</button>
                         <label for="focusDuration" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Set Timer (minutes):</label>
                         <input type="number" id="focusDuration" min="1" max="480" value="25" class="form-input" style="margin-bottom: 16px;">
                         <!-- Focus Timer Monster Animation -->
-                        <div id="focusTimerMonsterContainer" style="position: relative; width: 140px; height: 160px; margin: 0 auto 10px auto; display: none; align-items: center; justify-content: center; overflow: visible; padding-top: 20px;">
+                        <div id="focusTimerMonsterContainer" style="position: relative; width: 140px; height: 140px; margin: 0 auto 10px auto; display: none; align-items: center; justify-content: center; overflow: hidden;">
                             <img id="focusTimerMonsterSprite" src="assets/heroes/Pink_Monster_Idle_4.png" alt="Monster" style="width: 32px; height: 32px; image-rendering: pixelated; object-fit: none; object-position: 0 0; transform: scale(4); transform-origin: center center; animation: hero-idle-anim 0.8s steps(4) infinite;">
                         </div>
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
@@ -4148,7 +4109,7 @@ input:checked + .toggle-slider:before {
                         <div class="card-title">🛍️ Shop</div>
                         <span id="shopItemCount" class="item-count-badge">0 items</span>
                     </div>
-                    <div style="padding: 0 0 20px 0;">
+                    <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Power up your hero with XP!</p>
                         <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsShop">0</span></p>
                         <div id="shopItemsGrid" class="shop-items-grid">
@@ -4165,7 +4126,7 @@ input:checked + .toggle-slider:before {
                         <div class="card-title">🎒 Battle Items</div>
                         <span id="ownedItemCount" class="item-count-badge">0 items</span>
                     </div>
-                    <div style="padding: 0 0 20px 0;">
+                    <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Use your items in battle!</p>
                         <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsOwned">0</span></p>
                     </div>
@@ -4180,9 +4141,9 @@ input:checked + .toggle-slider:before {
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">🎨 Monster Skins - Shop</div>
-                        <span id="skinsShopCount" class="item-count-badge">12 skins</span>
+                        <span id="skinsShopCount" class="item-count-badge">9 skins</span>
                     </div>
-                    <div style="padding: 0 0 20px 0;">
+                    <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Customize your monster's appearance! Most skins unlock at Level 15.</p>
                         <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsSkins">0</span></p>
                         <div id="skinsShopGrid" class="shop-items-grid">
@@ -4199,9 +4160,9 @@ input:checked + .toggle-slider:before {
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">🎨 Background Themes</div>
-                        <span id="themesCount" class="item-count-badge">9 themes</span>
+                        <span id="themesCount" class="item-count-badge">5 themes</span>
                     </div>
-                    <div style="padding: 0 0 20px 0;">
+                    <div style="padding: 20px;">
                         <p style="text-align: center; color: #666; margin-bottom: 10px;">Customize your monster's background!</p>
                         <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsThemes">0</span></p>
                         <div id="themesGrid" class="owned-items-grid">
@@ -4524,8 +4485,6 @@ input:checked + .toggle-slider:before {
             unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'], // Track which items have ever been unlocked (fireball requires level 10)
             xp: 0,
             xpCoins: 0,
-            // Focus timer tracking
-            totalFocusMinutes: 0, // Total minutes spent using focus timer
             // Theme system
             ownedThemes: [], // Array of owned theme IDs
             activeTheme: null // Currently active theme URL
@@ -4964,38 +4923,6 @@ input:checked + .toggle-slider:before {
             // Energy (Health)
             document.getElementById('energyFill').style.width = `${health}%`;
             document.getElementById('energyText').textContent = `${health}/100`;
-            
-            // Add flickering effect to monster sprite when HP < 20
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (mainHeroSprite && window.skinsManager) {
-                const equippedSkinId = window.skinsManager.equippedSkinId;
-                const skin = equippedSkinId ? window.SKINS_CONFIG[equippedSkinId] : null;
-                
-                // Determine base animation based on skin type
-                let baseAnimation = 'none';
-                if (skin && skin.seamlessImage) {
-                    // GIF animation - no CSS animation needed
-                    baseAnimation = 'none';
-                } else if (skin && skin.frameCount && skin.frameCount.idle > 1) {
-                    // Sprite sheet animation
-                    const frameCount = skin.frameCount.idle;
-                    baseAnimation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
-                }
-                
-                // Apply flicker only when HP < 20
-                if (health < 20) {
-                    if (baseAnimation === 'none') {
-                        // GIF-based skin: only add flicker
-                        mainHeroSprite.style.animation = 'hero-flicker 0.5s infinite';
-                    } else {
-                        // Sprite sheet skin: add flicker to existing animation
-                        mainHeroSprite.style.animation = `${baseAnimation}, hero-flicker 0.5s infinite`;
-                    }
-                } else {
-                    // Normal HP: use base animation only
-                    mainHeroSprite.style.animation = baseAnimation;
-                }
-            }
             
             // Attack (fixed at 100)
             const attack = 100;
@@ -6300,7 +6227,6 @@ input:checked + .toggle-slider:before {
                                     <div class="task-meta">
                                         <span class="task-badge priority-${task.priority}">${task.priority} priority</span>
                                         <span class="task-badge difficulty-${task.difficulty}">${task.difficulty} (${task.points}pts)</span>
-                                        ${task.recurring ? '<span class="task-badge" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); border: 1px solid #a78bfa;">🔄 Recurring</span>' : ''}
                                         ${dueDateDisplay}
                                         ${isOverdue && !dueDateDisplay ? `<span style="color: var(--error);">Overdue</span>` : ''}
                                     </div>
@@ -7046,30 +6972,6 @@ input:checked + .toggle-slider:before {
         let focusPaused = false;
         let focusStartTime = 0;
         let focusXPAwarded = 0;
-        
-        // Helper function to safely set animation based on skin type
-        function setSpriteAnimation(spriteElement, animationType, frameCount, skin) {
-            if (!spriteElement) return;
-            
-            // Check if this is a GIF-based skin
-            if (skin && skin.seamlessImage) {
-                // GIF animation - no CSS animation needed
-                spriteElement.style.animation = 'none';
-                return;
-            }
-            
-            // Sprite sheet animation
-            const animationMap = {
-                'idle': `hero-idle-anim 0.8s steps(${frameCount}) infinite`,
-                'walk': `hero-walk-anim 0.6s steps(${frameCount}) infinite`,
-                'jump': `hero-jump-anim 0.8s steps(${frameCount}) infinite`,
-                'attack': `hero-attack-anim 0.6s steps(${frameCount}) infinite`,
-                'hurt': `hero-hurt-anim 0.4s steps(${frameCount}) infinite`,
-                'death': `hero-death-anim 1.2s steps(${frameCount}) forwards`
-            };
-            
-            spriteElement.style.animation = animationMap[animationType] || 'none';
-        }
 
         function toggleFocusTimerExpansion() {
             if (focusActive) return; // Cannot collapse while active
@@ -7085,23 +6987,6 @@ input:checked + .toggle-slider:before {
                 content.style.display = 'none';
                 toggle.textContent = '▼';
                 toggle.classList.remove('expanded');
-            }
-        }
-
-        function toggleFocusTimerInfo() {
-            const infoBox = document.getElementById('focusTimerInfoBox');
-            const showBtn = document.getElementById('showFocusInfo');
-            
-            if (infoBox.style.display === 'none') {
-                infoBox.style.display = 'block';
-                showBtn.style.display = 'none';
-                // Save preference
-                localStorage.setItem('focusTimerInfoVisible', 'true');
-            } else {
-                infoBox.style.display = 'none';
-                showBtn.style.display = 'block';
-                // Save preference
-                localStorage.setItem('focusTimerInfoVisible', 'false');
             }
         }
 
@@ -7143,31 +7028,28 @@ input:checked + .toggle-slider:before {
                 const isShadowMonster = appearance && appearance.isSkin && 
                     (appearance.skinId === 'shadow_mage' || appearance.skinId === 'shadow_morph' || appearance.skinId === 'shadow_sword');
                 
-                // Check if current skin is a cat skin or GIF-based skin
+                // Check if current skin is a cat skin
                 const isCatSkin = appearance && appearance.isSkin && 
                     (appearance.skinId === 'black_cat' || appearance.skinId === 'white_cat' || 
                      appearance.skinId === 'brown_cat' || appearance.skinId === 'baby_blue_cat' || 
                      appearance.skinId === 'rainbow_cat' || appearance.skinId === 'demonic_cat');
                 
-                const currentSkin = appearance && appearance.isSkin && appearance.skinId ? 
-                    window.SKINS_CONFIG[appearance.skinId] : null;
-                
                 if (appearance && appearance.isSkin) {
-                    // Cat skins and GIF skins use ONLY idle animation
-                    if (isCatSkin || (currentSkin && currentSkin.seamlessImage)) {
+                    // Cat skins use ONLY idle animation to prevent errors
+                    if (isCatSkin) {
                         focusTimerMonsterSprite.src = appearance.animations.idle;
                         const frameCount = appearance.frameCount.idle;
-                        setSpriteAnimation(focusTimerMonsterSprite, 'idle', frameCount, currentSkin);
+                        focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
                         focusAnimationState = 'idle';
                     } else {
                         focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
                         const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
-                        setSpriteAnimation(focusTimerMonsterSprite, 'walk', frameCount, currentSkin);
+                        focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
                         focusAnimationState = 'walk';
                     }
                 } else {
                     focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                    setSpriteAnimation(focusTimerMonsterSprite, 'walk', 6, null);
+                    focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
                     focusAnimationState = 'walk';
                 }
                 
@@ -7176,9 +7058,8 @@ input:checked + .toggle-slider:before {
                     clearInterval(focusAnimationInterval);
                 }
                 
-                // Only cycle animations for non-Shadow Monster, non-Cat, and non-GIF skins
-                const isGIFSkin = currentSkin && currentSkin.seamlessImage;
-                if (!isShadowMonster && !isCatSkin && !isGIFSkin) {
+                // Only cycle animations for non-Shadow Monster and non-Cat skins
+                if (!isShadowMonster && !isCatSkin) {
                     // Cycle through walk, jump, and idle animations
                     focusAnimationInterval = setInterval(() => {
                         if (!focusActive) return;
@@ -7188,10 +7069,10 @@ input:checked + .toggle-slider:before {
                             if (appearance && appearance.isSkin) {
                                 focusTimerMonsterSprite.src = appearance.animations.jump || appearance.animations.idle;
                                 const frameCount = appearance.frameCount.jump || appearance.frameCount.idle;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'jump', frameCount, currentSkin);
+                                focusTimerMonsterSprite.style.animation = `hero-jump-anim 0.8s steps(${frameCount}) infinite`;
                             } else {
                                 focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'jump', 8, null);
+                                focusTimerMonsterSprite.style.animation = 'hero-jump-anim 0.8s steps(8) infinite';
                             }
                             focusAnimationState = 'jump';
                         } else if (focusAnimationState === 'jump') {
@@ -7199,10 +7080,10 @@ input:checked + .toggle-slider:before {
                             if (appearance && appearance.isSkin) {
                                 focusTimerMonsterSprite.src = appearance.animations.idle;
                                 const frameCount = appearance.frameCount.idle;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'idle', frameCount, currentSkin);
+                                focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
                             } else {
                                 focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'idle', 4, null);
+                                focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
                             }
                             focusAnimationState = 'idle';
                         } else {
@@ -7210,10 +7091,10 @@ input:checked + .toggle-slider:before {
                             if (appearance && appearance.isSkin) {
                                 focusTimerMonsterSprite.src = appearance.animations.walk || appearance.animations.idle;
                                 const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'walk', frameCount, currentSkin);
+                                focusTimerMonsterSprite.style.animation = `hero-walk-anim 0.6s steps(${frameCount}) infinite`;
                             } else {
                                 focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'walk', 6, null);
+                                focusTimerMonsterSprite.style.animation = 'hero-walk-anim 0.6s steps(6) infinite';
                             }
                             focusAnimationState = 'walk';
                         }
@@ -7228,16 +7109,13 @@ input:checked + .toggle-slider:before {
                 }
                 
                 // Return to idle animation
-                const currentSkin = appearance && appearance.isSkin && appearance.skinId ? 
-                    window.SKINS_CONFIG[appearance.skinId] : null;
-                    
                 if (appearance && appearance.isSkin) {
                     focusTimerMonsterSprite.src = appearance.animations.idle;
                     const frameCount = appearance.frameCount.idle;
-                    setSpriteAnimation(focusTimerMonsterSprite, 'idle', frameCount, currentSkin);
+                    focusTimerMonsterSprite.style.animation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
                 } else {
                     focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                    setSpriteAnimation(focusTimerMonsterSprite, 'idle', 4, null);
+                    focusTimerMonsterSprite.style.animation = 'hero-idle-anim 0.8s steps(4) infinite';
                 }
                 
                 // Hide the monster container
@@ -7250,46 +7128,16 @@ input:checked + .toggle-slider:before {
             if (!focusTimerMonsterContainer) return;
             
             // Create XP text element
-            const xpText = document.createElement('div');
-            xpText.textContent = '+1 XP';
-            xpText.style.position = 'absolute';
-            xpText.style.left = '50%';
-            xpText.style.top = '-10px';
-            xpText.style.transform = 'translateX(-50%)';
-            xpText.style.fontSize = '20px';
-            xpText.style.fontWeight = 'bold';
-            xpText.style.color = '#34d399';
-            xpText.style.textShadow = '0 0 10px rgba(52, 211, 153, 0.8), 0 0 20px rgba(52, 211, 153, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
-            xpText.style.pointerEvents = 'none';
-            xpText.style.zIndex = '1000';
-            xpText.style.animation = 'xpFloat 2s ease-out forwards';
-            
-            // Add to focus timer monster container
-            focusTimerMonsterContainer.appendChild(xpText);
-            
-            // Remove after animation completes
-            setTimeout(() => {
-                if (xpText.parentElement) {
-                    xpText.parentElement.removeChild(xpText);
-                }
-            }, 2000);
-        }
-        
-        function showFocusHPAnimation(hpAmount) {
-            const focusTimerMonsterContainer = document.getElementById('focusTimerMonsterContainer');
-            if (!focusTimerMonsterContainer) return;
-            
-            // Create HP text element
             const hpText = document.createElement('div');
-            hpText.textContent = `+${hpAmount} HP`;
+            hpText.textContent = '+1 XP';
             hpText.style.position = 'absolute';
             hpText.style.left = '50%';
             hpText.style.top = '-10px';
             hpText.style.transform = 'translateX(-50%)';
             hpText.style.fontSize = '20px';
             hpText.style.fontWeight = 'bold';
-            hpText.style.color = '#ff6b6b';
-            hpText.style.textShadow = '0 0 10px rgba(255, 107, 107, 0.8), 0 0 20px rgba(255, 107, 107, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
+            hpText.style.color = '#34d399';
+            hpText.style.textShadow = '0 0 10px rgba(52, 211, 153, 0.8), 0 0 20px rgba(52, 211, 153, 0.5), 0 2px 4px rgba(0, 0, 0, 0.5)';
             hpText.style.pointerEvents = 'none';
             hpText.style.zIndex = '1000';
             hpText.style.animation = 'xpFloat 2s ease-out forwards';
@@ -7356,12 +7204,8 @@ input:checked + .toggle-slider:before {
                 if (minutesElapsed > focusXPAwarded) {
                     focusXPAwarded = minutesElapsed;
                     addJerryXP(1);
-                    // Track total focus minutes
-                    if (!gameState.totalFocusMinutes) gameState.totalFocusMinutes = 0;
-                    gameState.totalFocusMinutes++;
-                    saveGameState();
                     showXPGainAnimation();
-                    console.log(`⏱️ Focus Timer: +1 XP awarded (${focusXPAwarded} minutes elapsed, total: ${gameState.totalFocusMinutes})`);
+                    console.log(`⏱️ Focus Timer: +1 XP awarded (${focusXPAwarded} minutes elapsed)`);
                 }
 
                 if (focusRemaining <= 0) {
@@ -7425,12 +7269,8 @@ input:checked + .toggle-slider:before {
                 if (minutesElapsed > focusXPAwarded) {
                     focusXPAwarded = minutesElapsed;
                     addJerryXP(1);
-                    // Track total focus minutes
-                    if (!gameState.totalFocusMinutes) gameState.totalFocusMinutes = 0;
-                    gameState.totalFocusMinutes++;
-                    saveGameState();
                     showXPGainAnimation();
-                    console.log(`⏱️ Focus Timer: +1 XP awarded (${focusXPAwarded} minutes elapsed, total: ${gameState.totalFocusMinutes})`);
+                    console.log(`⏱️ Focus Timer: +1 XP awarded (${focusXPAwarded} minutes elapsed)`);
                 }
 
                 if (focusRemaining <= 0) {
@@ -7525,18 +7365,6 @@ input:checked + .toggle-slider:before {
             if (stopBtn) {
                 stopBtn.addEventListener('click', () => stopFocusTimer(false));
             }
-            
-            // Restore focus timer info visibility preference
-            const focusInfoVisible = localStorage.getItem('focusTimerInfoVisible');
-            const infoBox = document.getElementById('focusTimerInfoBox');
-            const showBtn = document.getElementById('showFocusInfo');
-            
-            // If user has explicitly set it to visible, show it
-            if (focusInfoVisible === 'true' && infoBox && showBtn) {
-                infoBox.style.display = 'block';
-                showBtn.style.display = 'none';
-            }
-            // Otherwise keep default hidden state (no action needed)
             
             // Update display when duration changes
             if (durationInput) {
@@ -7710,22 +7538,6 @@ input:checked + .toggle-slider:before {
                     description: 'Mystical fortress of illusions',
                     cost: 500,
                     background: 'assets/backgrounds/themes/fort-of-illusion.png'
-                },
-                {
-                    id: 'vamp_castle_bg',
-                    name: 'Vampire Castle Night',
-                    emoji: '🦇',
-                    description: 'Gothic castle under moonlight',
-                    cost: 700,
-                    background: 'assets/backgrounds/themes/vamp-castle-bg.png'
-                },
-                {
-                    id: 'neon_city_sunset',
-                    name: 'Neon City Sunset',
-                    emoji: '🌇',
-                    description: 'Cyberpunk cityscape at dusk',
-                    cost: 800,
-                    background: 'assets/backgrounds/themes/neon-city-sunset.png'
                 }
             ];
             
@@ -7789,9 +7601,7 @@ input:checked + .toggle-slider:before {
                 { id: 'synth_city', cost: 900, background: 'assets/backgrounds/themes/synth-city.png' },
                 { id: 'space', cost: 900, background: 'assets/backgrounds/themes/space.png' },
                 { id: 'vampire_castle', cost: 400, background: 'assets/backgrounds/themes/vampire-castle.png' },
-                { id: 'fort_of_illusion', cost: 500, background: 'assets/backgrounds/themes/fort-of-illusion.png' },
-                { id: 'vamp_castle_bg', cost: 700, background: 'assets/backgrounds/themes/vamp-castle-bg.png' },
-                { id: 'neon_city_sunset', cost: 800, background: 'assets/backgrounds/themes/neon-city-sunset.png' }
+                { id: 'fort_of_illusion', cost: 500, background: 'assets/backgrounds/themes/fort-of-illusion.png' }
             ];
             
             const theme = themes.find(t => t.id === themeId);
@@ -7848,13 +7658,12 @@ input:checked + .toggle-slider:before {
         const battleItems = {
             health_potion: {
                 id: 'health_potion',
-                name: 'Health Potion',
+                name: 'Potion',
                 emoji: '🧪',
                 description: 'Instantly restores 20 HP in battle',
                 cost: 20,
                 effect: 'heal',
-                value: 20,
-                levelRequired: 1
+                value: 20
             },
             hyper_potion: {
                 id: 'hyper_potion',
@@ -7863,8 +7672,7 @@ input:checked + .toggle-slider:before {
                 description: 'Instantly restores 50 HP in battle',
                 cost: 40,
                 effect: 'heal',
-                value: 50,
-                levelRequired: 7
+                value: 50
             },
             defense_refill: {
                 id: 'defense_refill',
@@ -7873,8 +7681,7 @@ input:checked + .toggle-slider:before {
                 description: 'Adds +20 Defense in next battle',
                 cost: 25,
                 effect: 'defense',
-                value: 20,
-                levelRequired: 3
+                value: 20
             },
             attack_refill: {
                 id: 'attack_refill',
@@ -7883,8 +7690,7 @@ input:checked + .toggle-slider:before {
                 description: 'Refills +30 Attack for your gauge',
                 cost: 25,
                 effect: 'attack_gauge',
-                value: 30,
-                levelRequired: 3
+                value: 30
             },
             asteroid_attack: {
                 id: 'asteroid_attack',
@@ -7894,7 +7700,7 @@ input:checked + .toggle-slider:before {
                 cost: 20,
                 effect: 'attack',
                 value: 12,
-                levelRequired: 3,
+                levelRequired: 1,
                 maxQuantity: 15
             },
             prickler: {
@@ -7905,7 +7711,7 @@ input:checked + .toggle-slider:before {
                 cost: 35,
                 effect: 'attack',
                 value: 15,
-                levelRequired: 7,
+                levelRequired: 3,
                 maxQuantity: 15
             },
             fireball: {
@@ -7916,7 +7722,7 @@ input:checked + .toggle-slider:before {
                 cost: 45,
                 effect: 'attack',
                 value: 18,
-                levelRequired: 10,
+                levelRequired: 4,
                 maxQuantity: 10
             },
             spark: {
@@ -7927,7 +7733,7 @@ input:checked + .toggle-slider:before {
                 cost: 50,
                 effect: 'attack',
                 value: 20,
-                levelRequired: 15,
+                levelRequired: 7,
                 maxQuantity: 10
             },
             freeze: {
@@ -7938,7 +7744,7 @@ input:checked + .toggle-slider:before {
                 cost: 65,
                 effect: 'freeze',
                 value: 10,
-                levelRequired: 20,
+                levelRequired: 8,
                 maxQuantity: 8
             },
             invisibility_cloak: {
@@ -7948,7 +7754,7 @@ input:checked + .toggle-slider:before {
                 description: 'Allows your monster to evade the next enemy attack',
                 cost: 40,
                 effect: 'evade',
-                levelRequired: 10
+                levelRequired: 3
             },
             mirror_attack: {
                 id: 'mirror_attack',
@@ -7962,12 +7768,12 @@ input:checked + .toggle-slider:before {
             blue_flame: {
                 id: 'blue_flame',
                 name: 'Blue Flame',
-                image: 'assets/blue-flame.png',
+                emoji: '🔥',
                 description: 'Fire-type attack dealing 20 damage (Max: 20)',
                 cost: 50,
                 effect: 'attack',
                 value: 20,
-                levelRequired: 15,
+                levelRequired: 12,
                 maxQuantity: 12
             },
             procrastination_ghost: {
@@ -7978,7 +7784,7 @@ input:checked + .toggle-slider:before {
                 cost: 70,
                 effect: 'ghost_attack',
                 value: 13,
-                levelRequired: 20,
+                levelRequired: 15,
                 maxQuantity: 8
             },
             poison_leaf: {
@@ -8053,33 +7859,15 @@ input:checked + .toggle-slider:before {
                 // Show quantity if item has max quantity
                 const quantityDisplay = item.maxQuantity ? `<div style="font-size: 12px; color: #999; margin-top: 4px;">${currentQuantity}/${item.maxQuantity} owned</div>` : '';
                 
-                // Build lock section HTML if locked
-                const lockSectionHTML = isLocked ? `
-                    <div class="shop-item-lock-section">
-                        <div class="shop-item-lock-icon">🔒</div>
-                        <div class="shop-item-lock-text">Level ${item.levelRequired}</div>
-                    </div>
-                ` : '';
-                
-                // Build button HTML if not locked
-                const buttonHTML = !isLocked ? `
-                    <button class="buy-now-btn" data-item-id="${item.id}" ${buttonDisabled}>
-                        ${buttonText}
-                    </button>
-                ` : '';
-                
-                const iconHTML = item.image 
-                    ? `<div class="shop-item-emoji"><img src="${item.image}" style="width: 48px; height: 48px; object-fit: contain;"></div>` 
-                    : `<div class="shop-item-emoji">${item.emoji}</div>`;
-                
                 card.innerHTML = `
-                    ${iconHTML}
+                    <div class="shop-item-emoji">${item.emoji}</div>
                     <div class="shop-item-name">${item.name}</div>
                     <div class="shop-item-description">${item.description}</div>
                     ${quantityDisplay}
-                    <div class="shop-item-cost">${item.cost} XP Coins</div>
-                    ${lockSectionHTML}
-                    ${buttonHTML}
+                    <div class="shop-item-cost">${item.cost} XP</div>
+                    <button class="buy-now-btn" data-item-id="${item.id}" ${buttonDisabled}>
+                        ${buttonText}
+                    </button>
                 `;
                 
                 // Add event listener to button
@@ -8133,12 +7921,8 @@ input:checked + .toggle-slider:before {
                     // Show quantity display
                     const quantityDisplay = item.maxQuantity ? `<div style="font-size: 12px; color: #999; margin-top: 4px;">${count}/${item.maxQuantity} owned</div>` : `<div style="font-size: 12px; color: #999; margin-top: 4px;">${count} owned</div>`;
                     
-                    const iconHTML = item.image 
-                        ? `<div class="shop-item-emoji"><img src="${item.image}" style="width: 48px; height: 48px; object-fit: contain;"></div>` 
-                        : `<div class="shop-item-emoji">${item.emoji}</div>`;
-                    
                     card.innerHTML = `
-                        ${iconHTML}
+                        <div class="shop-item-emoji">${item.emoji}</div>
                         <div class="shop-item-name">${item.name}</div>
                         <div class="shop-item-description">${item.description}</div>
                         ${quantityDisplay}
@@ -9657,14 +9441,15 @@ input:checked + .toggle-slider:before {
     <!-- Quest Tasks CSS -->
     <link rel="stylesheet" href="css/questTasks.css">
     
-    <!-- Shop Reference Design CSS - Matches reference image layout -->
-    <link rel="stylesheet" href="css/shop-reference-design.css?v=6">    
+    <!-- Shop Fix CSS -->
+    <link rel="stylesheet" href="css/shop-fix.css">
+    
     <!-- App Initializer - Manages onboarding and quest giver flows -->
     <script src="js/appInitializer.js"></script>
     
     <!-- Background Manager for time-based backgrounds -->
     <script src="js/backgroundManager.js"></script>
-    <script src="js/themeManager.js?v=2"></script>
+    <script src="js/themeManager.js"></script>
     
     <!-- Audio Manager -->
     <script src="js/audioManager.js"></script>

@@ -59,6 +59,14 @@ class QuestTaskManager {
             window.audioManager.playSound('quest_complete', 0.8);
         }
         
+        // Fire confetti animation (same as regular tasks)
+        console.log('🎉 Quest task completed, firing confetti...');
+        if (window.fireConfetti) {
+            window.fireConfetti();
+        } else {
+            console.warn('Confetti function not available');
+        }
+        
         // Award XP using the proper function
         if (typeof window.addJerryXP === 'function') {
             window.addJerryXP(task.xp);

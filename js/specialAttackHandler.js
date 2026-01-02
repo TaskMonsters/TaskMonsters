@@ -17,6 +17,13 @@ async function playerSpecialAttack() {
         return;
     }
     
+    // Check level requirement (Level 7+)
+    const userLevel = window.gameState.jerryLevel || 1;
+    if (userLevel < 7) {
+        addBattleLog('❌ Special attacks unlock at Level 7!');
+        return;
+    }
+    
     // Check if special attack gauge is full (100)
     const specialGauge = window.gameState.specialAttackGauge || 0;
     if (specialGauge < 100) {
