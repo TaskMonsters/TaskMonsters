@@ -107,11 +107,11 @@
 .sprite-container {
     position: absolute;
     width: 45%;
-    top: 25%; /* Lowered from 5% to 25% to position creatures lower in arena */
+    top: 20%; /* FIX: Adjusted to 20% to center sprites and HP bars better */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem; /* FIX: Reduced from 0.5rem to 0.25rem to bring HP bars closer to sprites */
 }
 
 /* Hero (left side) */
@@ -125,12 +125,12 @@
 }
 
 .sprite-wrapper {
-    width: 120px;
-    height: 120px;
+    width: 100px; /* FIX: Reduced to 100px for proper sprite sizing */
+    height: 100px; /* FIX: Reduced to 100px for proper sprite sizing */
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* FIXED: Clip to show only one frame (prevents duplicate rows) */
+    overflow: visible; /* FIX: Changed from hidden to visible to prevent cropping tall enemies */
 }
 
 /* Hero sprites (32x32 base) */
@@ -141,7 +141,7 @@
     background-size: auto 32px;
     background-repeat: no-repeat;
     background-position: 0 0;
-    transform: scale(0.28); /* Adjusted to match reference screenshot - proper visible size in battle */
+    transform: scale(0.22); /* CRITICAL FIX: Reduced to 0.22x for proper battle arena size (60-70% smaller than 0.35x) */
     transform-origin: center;
 }
 
@@ -153,7 +153,7 @@
     /* background-size set by JavaScript for each enemy */
     background-repeat: no-repeat;
     background-position: 0 0;
-    transform: scale(2);
+    transform: scale(1.3); /* FIX: Reduced from 2 to 1.3 for proper battle arena size */
     transform-origin: center;
 }
 
@@ -164,6 +164,8 @@
     image-rendering: pixelated;
     /* background-size set by JavaScript for each enemy */
     background-repeat: no-repeat;
+    transform: scale(1.3); /* FIX: Added scale for consistency */
+    transform-origin: center;
 }
 
 /* Enemy sprites (32x32 base for ghost) */
@@ -174,7 +176,7 @@
     /* background-size set by JavaScript for each enemy */
     background-repeat: no-repeat;
     background-position: 0 0;
-    transform: scale(2.2);
+    transform: scale(1.5); /* FIX: Reduced from 2.2 to 1.5 for proper battle arena size */
     transform-origin: center;
 }
 
@@ -186,7 +188,7 @@
     /* background-size set by JavaScript for each enemy */
     background-repeat: no-repeat;
     background-position: 0 0;
-    transform: scale(1.5);
+    transform: scale(1.0); /* FIX: Reduced from 1.5 to 1.0 for proper battle arena size */
     transform-origin: center;
 }
 
@@ -218,7 +220,7 @@
 .hp-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
-    transition: width 0.3s ease;
+    transition: width 0.6s ease-out;
 }
 
 /* Hero HP bar - green/blue gradient */

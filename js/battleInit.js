@@ -53,7 +53,36 @@ let heroFrameWidth = 32;
  */
 function getActiveHeroAppearance() {
     const baseMonsterId = localStorage.getItem('selectedMonster') || 'nova';
-    const equippedSkinId = window.gameState ? window.gameState.equippedSkinId : null;
+    
+    // CRITICAL FIX: Read equippedSkinId from multiple sources to ensure persistence
+    // Priority: gameState > skinsManager > localStorage gameState backup
+    let equippedSkinId = null;
+    
+    if (window.gameState && window.gameState.equippedSkinId) {
+        equippedSkinId = window.gameState.equippedSkinId;
+    } else if (window.skinsManager && window.skinsManager.equippedSkinId) {
+        equippedSkinId = window.skinsManager.equippedSkinId;
+    } else {
+        // Last resort: read from localStorage gameState
+        try {
+            const savedState = localStorage.getItem('taskMonsterGameState');
+            if (savedState) {
+                const parsed = JSON.parse(savedState);
+                equippedSkinId = parsed.equippedSkinId || null;
+            }
+        } catch (e) {
+            console.error('[Battle] Failed to parse gameState from localStorage:', e);
+        }
+    }
+    
+    console.log('[Battle] getActiveHeroAppearance called:', {
+        baseMonsterId,
+        equippedSkinId,
+        hasGameState: !!window.gameState,
+        hasSKINS_CONFIG: !!window.SKINS_CONFIG,
+        hasSkinsManager: !!window.skinsManager,
+        skinExists: equippedSkinId && window.SKINS_CONFIG ? !!window.SKINS_CONFIG[equippedSkinId] : false
+    });
     
     // Try to use skin if equipped
     if (equippedSkinId && window.SKINS_CONFIG && window.SKINS_CONFIG[equippedSkinId]) {

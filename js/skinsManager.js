@@ -17,7 +17,12 @@ class SkinsManager {
         // Load from gameState
         if (window.gameState) {
             this.ownedSkins = window.gameState.ownedSkins || [];
+            // CRITICAL FIX: Always sync equippedSkinId from gameState (authoritative source)
             this.equippedSkinId = window.gameState.equippedSkinId || null;
+            // Ensure gameState is also synced (in case it was cleared)
+            if (this.equippedSkinId && !window.gameState.equippedSkinId) {
+                window.gameState.equippedSkinId = this.equippedSkinId;
+            }
         }
         
         // Get current base monster
@@ -504,9 +509,6 @@ class SkinsManager {
 // Initialize global skins manager
 window.skinsManager = new SkinsManager();
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.skinsManager) {
-        window.skinsManager.init();
-    }
-});
+// DO NOT auto-initialize on DOMContentLoaded - this causes race condition
+// skinsManager.init() must be called AFTER gameState is loaded
+// It will be called from loadGameState() or appInitializer

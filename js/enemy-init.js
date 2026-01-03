@@ -62,48 +62,48 @@ function initEnemySprite(enemyData) {
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(2.5)';
+        spriteElement.style.transform = 'scale(1.5)'; // FIX: Reduced from 2.5 to 1.5
         spriteElement.classList.add('procedural-idle');
     } else if (enemyData.name === 'Ogre') {
         // Ogre: large enemy with procedural animation
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(3)';
+        spriteElement.style.transform = 'scale(1.5)'; // FIX: Reduced to 1.5 for proper battle arena size
         spriteElement.classList.add('procedural-idle');
     } else if (enemyData.name === 'Octopus') {
         // Octopus: single sprite with procedural animation
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(2)';
+        spriteElement.style.transform = 'scale(1.3)'; // FIX: Reduced from 2 to 1.3
         spriteElement.classList.add('procedural-idle');
     } else if (enemyData.name === 'Alien') {
         // Alien: 8-frame spritesheet animation (83×64 per frame)
         spriteElement.classList.add('enemy-sprite-alien');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = '664px 64px'; // 8 frames × 83px = 664px
-        spriteElement.style.transform = 'scale(1.5)';
+        spriteElement.style.transform = 'scale(1.0)'; // FIX: Reduced from 1.5 to 1.0
         spriteElement.classList.add('alien-idle-animated');
     } else if (enemyData.name === 'Treant') {
         // Treant Boss: single animated sprite
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(3.5)';
+        spriteElement.style.transform = 'scale(1.5)'; // FIX: Reduced to 1.5 for proper battle arena size
         spriteElement.classList.add('procedural-idle');
     } else if (enemyData.name === 'Sunny Dragon') {
         // Sunny Dragon Boss: GIF animation
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(3)';
+        spriteElement.style.transform = 'scale(1.5)'; // FIX: Reduced to 1.5 for proper battle arena size
     } else if (enemyData.name === 'Fly Drone') {
         // Fly: single sprite with procedural animation
         spriteElement.classList.add('enemy-sprite-small');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(2)';
+        spriteElement.style.transform = 'scale(1.3)'; // FIX: Reduced from 2 to 1.3
         spriteElement.classList.add('procedural-idle');
         spriteElement.style.imageRendering = 'pixelated';
         spriteElement.classList.add('boss-animated');
@@ -112,14 +112,14 @@ function initEnemySprite(enemyData) {
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(3.5)';
+        spriteElement.style.transform = 'scale(1.5)'; // FIX: Reduced to 1.5 for proper battle arena size
         spriteElement.classList.add('procedural-idle');
     } else {
         // Default fallback with procedural animation
         spriteElement.classList.add('enemy-sprite-large');
         spriteElement.style.backgroundImage = `url('${enemyData.sprites.idle}')`;
         spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.transform = 'scale(2)';
+        spriteElement.style.transform = 'scale(1.3)'; // FIX: Reduced from 2 to 1.3
         spriteElement.classList.add('procedural-idle');
     }
 }

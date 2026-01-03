@@ -4685,7 +4685,24 @@ input:checked + .toggle-slider:before {
             { id: 'priority_pro', name: 'Priority Pro', desc: 'Complete 10 high-priority tasks total', icon: '🔴', requirement: 10, type: 'high_priority_total', tier: 'intermediate' },
             { id: 'xp_master', name: 'XP Master', desc: 'Earn 1000 XP total', icon: '💫', requirement: 1000, type: 'xp', tier: 'advanced' },
             { id: 'quest_collector', name: 'Quest Collector', desc: 'Accept 10 Merlin quests', icon: '📜', requirement: 10, type: 'quest_accepted', tier: 'intermediate' },
-            { id: 'dedication_master', name: 'Dedication Master', desc: 'Complete tasks 14 days in a row', icon: '🔥', requirement: 14, type: 'streak', tier: 'advanced' }
+            { id: 'dedication_master', name: 'Dedication Master', desc: 'Complete tasks 14 days in a row', icon: '🔥', requirement: 14, type: 'streak', tier: 'advanced' },
+
+            // NEW ACHIEVEMENTS - Focus Timer, Quests, and Merlin (15 new)
+            { id: 'focus_starter', name: 'Focus Starter', desc: 'Use the Focus Timer for the first time', icon: '⏲️', requirement: 1, type: 'focus_timer_first', tier: 'starter' },
+            { id: 'deep_focus', name: 'Deep Focus', desc: 'Use the Focus Timer for 50 minutes total', icon: '🧘', requirement: 50, type: 'focus_timer_total', tier: 'intermediate' },
+            { id: 'focus_marathon', name: 'Focus Marathon', desc: 'Use the Focus Timer for 2 hours total', icon: '🏃‍♂️', requirement: 120, type: 'focus_timer_total', tier: 'advanced' },
+            { id: 'quest_explorer', name: 'Quest Explorer', desc: 'Complete your first Merlin quest task', icon: '🗺️', requirement: 1, type: 'quest_task_completed', tier: 'starter' },
+            { id: 'quest_warrior', name: 'Quest Warrior', desc: 'Complete 5 Merlin quest tasks', icon: '⚔️', requirement: 5, type: 'quest_task_completed', tier: 'intermediate' },
+            { id: 'quest_legend', name: 'Quest Legend', desc: 'Complete 15 Merlin quest tasks', icon: '👑', requirement: 15, type: 'quest_task_completed', tier: 'advanced' },
+            { id: 'merlin_apprentice', name: 'Merlin\'s Apprentice', desc: 'Accept 5 quests from Merlin', icon: '🧙', requirement: 5, type: 'quest_accepted', tier: 'starter' },
+            { id: 'merlin_disciple', name: 'Merlin\'s Disciple', desc: 'Accept 20 quests from Merlin', icon: '🔮', requirement: 20, type: 'quest_accepted', tier: 'intermediate' },
+            { id: 'quiz_perfectionist', name: 'Quiz Perfectionist', desc: 'Pass 10 Merlin quizzes in a row', icon: '💯', requirement: 10, type: 'quiz_perfect', tier: 'advanced' },
+            { id: 'knowledge_seeker', name: 'Knowledge Seeker', desc: 'Pass 30 Merlin quizzes total', icon: '📚', requirement: 30, type: 'quests', tier: 'advanced' },
+            { id: 'focus_consistency', name: 'Focus Consistency', desc: 'Use the Focus Timer 3 days in a row', icon: '🎯', requirement: 3, type: 'focus_timer_streak', tier: 'intermediate' },
+            { id: 'quest_speedrun', name: 'Quest Speedrun', desc: 'Complete a Merlin quest within 1 hour of accepting', icon: '⚡', requirement: 1, type: 'quest_fast', tier: 'intermediate' },
+            { id: 'focus_master', name: 'Focus Master', desc: 'Use the Focus Timer 10 times in one day', icon: '🧠', requirement: 10, type: 'focus_timer_daily', tier: 'advanced' },
+            { id: 'quest_collector_pro', name: 'Quest Collector Pro', desc: 'Have 3 active Merlin quests at once', icon: '📋', requirement: 3, type: 'quest_active_multi', tier: 'intermediate' },
+            { id: 'merlin_champion', name: 'Merlin\'s Champion', desc: 'Complete 25 Merlin quest tasks', icon: '🏆', requirement: 25, type: 'quest_task_completed', tier: 'advanced' }
         ];
         
         // Make achievements accessible globally
@@ -4877,6 +4894,13 @@ input:checked + .toggle-slider:before {
                     mainHeroSprite.style.opacity = '1';
                 }
             }
+            
+            // CRITICAL FIX: Initialize skinsManager AFTER gameState is fully loaded
+            // This ensures equippedSkinId is available when skinsManager.init() runs
+            if (window.skinsManager) {
+                window.skinsManager.init();
+                console.log('[LoadGameState] SkinsManager initialized with equippedSkinId:', gameState.equippedSkinId);
+            }
         }
 
         // Save game state to localStorage
@@ -4966,34 +4990,39 @@ input:checked + .toggle-slider:before {
             document.getElementById('energyText').textContent = `${health}/100`;
             
             // Add flickering effect to monster sprite when HP < 20
+            // FIX: Use spriteAnimationManager to properly handle animations
             const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (mainHeroSprite && window.skinsManager) {
+            if (mainHeroSprite && window.skinsManager && window.spriteAnimationManager) {
                 const equippedSkinId = window.skinsManager.equippedSkinId;
                 const skin = equippedSkinId ? window.SKINS_CONFIG[equippedSkinId] : null;
+                const baseMonster = window.gameState.baseMonster || 'cat';
                 
-                // Determine base animation based on skin type
-                let baseAnimation = 'none';
-                if (skin && skin.seamlessImage) {
-                    // GIF animation - no CSS animation needed
-                    baseAnimation = 'none';
-                } else if (skin && skin.frameCount && skin.frameCount.idle > 1) {
-                    // Sprite sheet animation
-                    const frameCount = skin.frameCount.idle;
-                    baseAnimation = `hero-idle-anim 0.8s steps(${frameCount}) infinite`;
+                // Restart the idle animation using sprite animation manager
+                // This ensures the animation doesn't freeze after task completion
+                const appearance = window.getActiveMonsterAppearance(baseMonster, equippedSkinId);
+                if (appearance) {
+                    window.spriteAnimationManager.startAnimation('mainHeroSprite', appearance, 'idle', 800);
+                    
+                    // Ensure proper sizing
+                    mainHeroSprite.style.width = '32px';
+                    mainHeroSprite.style.height = '32px';
+                    mainHeroSprite.style.transform = 'scale(3)';
+                    mainHeroSprite.style.transformOrigin = 'center center';
                 }
                 
-                // Apply flicker only when HP < 20
+                // Apply flicker effect only when HP < 20 (on top of sprite animation)
                 if (health < 20) {
-                    if (baseAnimation === 'none') {
-                        // GIF-based skin: only add flicker
-                        mainHeroSprite.style.animation = 'hero-flicker 0.5s infinite';
-                    } else {
-                        // Sprite sheet skin: add flicker to existing animation
-                        mainHeroSprite.style.animation = `${baseAnimation}, hero-flicker 0.5s infinite`;
+                    // Add flicker as an additional CSS animation
+                    const currentAnimation = mainHeroSprite.style.animation || '';
+                    if (!currentAnimation.includes('hero-flicker')) {
+                        mainHeroSprite.style.animation = currentAnimation ? `${currentAnimation}, hero-flicker 0.5s infinite` : 'hero-flicker 0.5s infinite';
                     }
                 } else {
-                    // Normal HP: use base animation only
-                    mainHeroSprite.style.animation = baseAnimation;
+                    // Remove flicker if HP >= 20
+                    const currentAnimation = mainHeroSprite.style.animation || '';
+                    if (currentAnimation.includes('hero-flicker')) {
+                        mainHeroSprite.style.animation = currentAnimation.replace(/, hero-flicker 0\.5s infinite|hero-flicker 0\.5s infinite,? ?/, '');
+                    }
                 }
             }
             

@@ -17,10 +17,10 @@ async function playerSpecialAttack() {
         return;
     }
     
-    // Check level requirement (Level 7+)
+    // Check level requirement (Level 10+)
     const userLevel = window.gameState.jerryLevel || 1;
-    if (userLevel < 7) {
-        addBattleLog('❌ Special attacks unlock at Level 7!');
+    if (userLevel < 10) {
+        addBattleLog('❌ Special attacks unlock at Level 10!');
         return;
     }
     
@@ -147,6 +147,13 @@ function initSpecialAttackGauge() {
 function increaseSpecialGauge(amount) {
     if (typeof window.gameState.specialAttackGauge === 'undefined') {
         window.gameState.specialAttackGauge = 0;
+    }
+    
+    // Only increase gauge if level 10 or higher
+    const userLevel = window.gameState.jerryLevel || 1;
+    if (userLevel < 10) {
+        console.log(`⚡ Special gauge locked until Level 10 (current: Level ${userLevel})`);
+        return;
     }
     
     window.gameState.specialAttackGauge = Math.min(100, window.gameState.specialAttackGauge + amount);

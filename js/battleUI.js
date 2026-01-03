@@ -201,17 +201,17 @@ function updateActionButtons(hero) {
     // Defend requires 20 defense gauge
     btnDefend.disabled = battleManager.defenseGauge < 20;
     
-    // Special Attack requires full special gauge (100) AND Level 7+
+    // Special Attack requires full special gauge (100) AND Level 10+
     if (btnSpecialAttack) {
         const specialGauge = window.gameState.specialAttackGauge || 0;
         const userLevel = window.gameState.jerryLevel || 1;
         
-        // Disable if level < 7 or gauge not full
-        btnSpecialAttack.disabled = userLevel < 7 || specialGauge < 100;
+        // Disable if level < 10 or gauge not full
+        btnSpecialAttack.disabled = userLevel < 10 || specialGauge < 100;
         
         // Update button text based on level
-        if (userLevel < 7) {
-            btnSpecialAttack.textContent = `⚡ Special Attack (Lv7)`;
+        if (userLevel < 10) {
+            btnSpecialAttack.textContent = `⚡ Special Attack (Lv10)`;
             btnSpecialAttack.style.background = '';
             btnSpecialAttack.style.boxShadow = '';
         } else {

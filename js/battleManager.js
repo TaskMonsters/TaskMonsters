@@ -104,18 +104,17 @@ class BattleManager {
             window.initSpecialAttackGauge();
         }
         
-        // Hide special attack gauge and button if below Level 7
-        const userLevel = parseInt(localStorage.getItem('level')) || 1;
+        // Always show special attack gauge and button, but disable if below Level 10
+        const userLevel = window.gameState.jerryLevel || 1;
         const specialGaugeContainer = document.getElementById('specialAttackGaugeContainer');
         const specialAttackBtn = document.getElementById('btnSpecialAttack');
         
-        if (userLevel < 7) {
-            if (specialGaugeContainer) specialGaugeContainer.style.display = 'none';
-            if (specialAttackBtn) specialAttackBtn.style.display = 'none';
-        } else {
-            if (specialGaugeContainer) specialGaugeContainer.style.display = 'block';
-            if (specialAttackBtn) specialAttackBtn.style.display = 'block';
-        }
+        // Always show the gauge and button
+        if (specialGaugeContainer) specialGaugeContainer.style.display = 'block';
+        if (specialAttackBtn) specialAttackBtn.style.display = 'block';
+        
+        // Disable button if below level 10 (will be handled in updateActionButtons)
+        // Gauge will remain empty until level 10
         
         // Boss status effects
         this.poisonTurns = 0;
@@ -322,6 +321,12 @@ class BattleManager {
         
         const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
         let damage = Math.max(baseDamage - defenseReduction, Math.floor(baseDamage * 0.8)); // At least 80% of base damage
+        
+        // FIX: 3rd Attack Bonus - every 3rd attack deals +5 damage
+        if (this.attackCount % 3 === 0 && this.attackCount > 0) {
+            damage += 5;
+            addBattleLog(`💥 3RD ATTACK BONUS! +5 damage!`);
+        }
         
         // Focus Timer Special Attack: Random chance to trigger overpowered attack
         const focusMinutes = window.gameState?.totalFocusMinutes || 0;
@@ -1420,7 +1425,7 @@ class BattleManager {
                 
                 // Apply poison effect for 2 turns
                 this.poisonTurns = this.enemy.poisonDuration;
-                this.poisonDamage = 5; // HP drain per turn
+                this.poisonDamage = 3; // FIX: Reduced from 5 to 3 HP drain per turn for balance
                 this.poisonGaugeDrain = 10; // Gauge drain per turn
                 
                 addBattleLog(`🌳 ${this.enemy.name} dealt ${damage} damage and poisoned you!`);
@@ -1948,9 +1953,9 @@ class BattleManager {
             updateBattleUI(this.hero, this.enemy);
             saveGameState();
         } else if (result === 'defeat') {
-            // Defeat: restore HP/attack/defense to full
+            // Defeat: preserve current HP (don't reset to 100)
             if (window.gameState) {
-                window.gameState.health = 100;
+                window.gameState.health = this.hero.hp;
                 const level = window.gameState.jerryLevel || 1;
                 // Restore attack based on level
                 let baseDamage;
@@ -2154,6 +2159,21 @@ class BattleManager {
                 window.audioManager.stopBattleOutcomeMusic();
             }
             overlay.remove();
+            
+            // FIX: Restart main app monster animation after battle
+            if (window.spriteAnimationManager && window.skinsManager) {
+                const baseMonster = window.gameState.baseMonster || 'cat';
+                // FIX: Always get equippedSkinId from gameState to prevent skin unequip bug
+                const equippedSkinId = window.gameState.equippedSkinId || window.skinsManager.equippedSkinId;
+                // Sync skinsManager with gameState
+                window.skinsManager.equippedSkinId = equippedSkinId;
+                window.spriteAnimationManager.updateAllMonsterVisuals(baseMonster, equippedSkinId);
+            }
+            
+            // FIX: Update HP display after battle
+            if (typeof updateJerryDisplay === 'function') {
+                updateJerryDisplay();
+            }
         };
 
         modal.appendChild(title);

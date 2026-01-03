@@ -328,6 +328,21 @@ class LootSystem {
                 window.audioManager.stopBattleOutcomeMusic();
             }
             overlay.remove();
+            
+            // FIX: Restart main app monster animation after battle
+            if (window.spriteAnimationManager && window.skinsManager) {
+                const baseMonster = window.gameState.baseMonster || 'cat';
+                // FIX: Always get equippedSkinId from gameState to prevent skin unequip bug
+                const equippedSkinId = window.gameState.equippedSkinId || window.skinsManager.equippedSkinId;
+                // Sync skinsManager with gameState
+                window.skinsManager.equippedSkinId = equippedSkinId;
+                window.spriteAnimationManager.updateAllMonsterVisuals(baseMonster, equippedSkinId);
+            }
+            
+            // FIX: Update HP display after battle
+            if (typeof updateJerryDisplay === 'function') {
+                updateJerryDisplay();
+            }
         };
 
         modal.appendChild(continueBtn);

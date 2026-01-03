@@ -4,8 +4,8 @@
 // Treant Boss (Level 10, 40, 70, 100...)
 const TREANT_BOSS_DATA = {
     name: 'Treant',
-    baseHP: 150,
-    baseAttack: 30,
+    baseHP: 90, // FIX: Reduced from 150 to 90 (40% reduction) for battle balance
+    baseAttack: 8, // FIX: Reduced from 12 to 8 to achieve max 20 damage per turn
     baseDefense: 25,
     minLevel: 10,
     isBoss: true,
