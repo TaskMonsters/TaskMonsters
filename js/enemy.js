@@ -192,15 +192,16 @@ const GHOST_TASK_STOPPER_DATA = {
     canEvade: true,
     evasionChance: 0.25, // 25% chance to evade attacks
     projectileType: 'waveform',
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Procrastination Drone/drone-1.png',
-        attack1: 'assets/enemies/Procrastination Drone/Drone Attack.png',
-        attack2: 'assets/enemies/Procrastination Drone/Drone Attack.png',
-        hurt: 'assets/enemies/Procrastination Drone/drone-2.png',
-        die: 'assets/enemies/Procrastination Drone/drone-3.png',
-        run: 'assets/enemies/Procrastination Drone/drone-4.png',
-        sleep: 'assets/enemies/Procrastination Drone/drone-1.png',
-        wakeup: 'assets/enemies/Procrastination Drone/drone-1.png'
+        idle: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        attack1: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        attack2: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        hurt: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        die: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        run: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        sleep: 'assets/enemies/Procrastination Drone/drone-animated.gif',
+        wakeup: 'assets/enemies/Procrastination Drone/drone-animated.gif'
     }
 };
 
@@ -216,15 +217,16 @@ const MEDUSA_DATA = {
     canPetrify: true, // Can use petrify attack
     petrifyChance: 0.3, // 30% chance to petrify (skip player turn)
     projectileType: 'medusa',
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Medusa/frame1.png',
-        attack1: 'assets/enemies/Medusa/Medusa Attack.png',
-        attack2: 'assets/enemies/Medusa/Medusa Attack.png',
-        hurt: 'assets/enemies/Medusa/frame2.png',
-        die: 'assets/enemies/Medusa/frame3.png',
-        run: 'assets/enemies/Medusa/frame4.png',
-        sleep: 'assets/enemies/Medusa/frame1.png',
-        wakeup: 'assets/enemies/Medusa/frame1.png'
+        idle: 'assets/enemies/Medusa/medusa-animated.gif',
+        attack1: 'assets/enemies/Medusa/medusa-animated.gif',
+        attack2: 'assets/enemies/Medusa/medusa-animated.gif',
+        hurt: 'assets/enemies/Medusa/medusa-animated.gif',
+        die: 'assets/enemies/Medusa/medusa-animated.gif',
+        run: 'assets/enemies/Medusa/medusa-animated.gif',
+        sleep: 'assets/enemies/Medusa/medusa-animated.gif',
+        wakeup: 'assets/enemies/Medusa/medusa-animated.gif'
     }
 };
 
@@ -238,15 +240,16 @@ const LAZY_EYE_DATA = {
     tier: 'boss',
     specialDefense: true,
     canSleep: true,
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Flying Alien/spritesheet.png',
-        attack1: 'assets/enemies/Flying Alien/spritesheet.png',
-        attack2: 'assets/enemies/Flying Alien/spritesheet.png',
-        hurt: 'assets/enemies/Flying Alien/spritesheet.png',
-        die: 'assets/enemies/Flying Alien/spritesheet.png',
-        run: 'assets/enemies/Flying Alien/spritesheet.png',
-        sleep: 'assets/enemies/Flying Alien/spritesheet.png',
-        wakeup: 'assets/enemies/Flying Alien/spritesheet.png'
+        idle: 'assets/enemies/Flying Alien/alien-animated.gif',
+        attack1: 'assets/enemies/Flying Alien/alien-animated.gif',
+        attack2: 'assets/enemies/Flying Alien/alien-animated.gif',
+        hurt: 'assets/enemies/Flying Alien/alien-animated.gif',
+        die: 'assets/enemies/Flying Alien/alien-animated.gif',
+        run: 'assets/enemies/Flying Alien/alien-animated.gif',
+        sleep: 'assets/enemies/Flying Alien/alien-animated.gif',
+        wakeup: 'assets/enemies/Flying Alien/alien-animated.gif'
     }
 };
 
@@ -261,15 +264,16 @@ const OCTOPUS_DATA = {
     drenchAttack: true,
     hugAttack: true,
     projectileType: 'splash',
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Little Cthulhu/octopus-1.png',
-        attack1: 'assets/enemies/Little Cthulhu/Octopus Attack II.png',
-        attack2: 'assets/enemies/Little Cthulhu/Octopus Attack II.png',
-        hurt: 'assets/enemies/Little Cthulhu/octopus-2.png',
-        die: 'assets/enemies/Little Cthulhu/octopus-3.png',
-        run: 'assets/enemies/Little Cthulhu/octopus-4.png',
-        sleep: 'assets/enemies/Little Cthulhu/octopus-1.png',
-        wakeup: 'assets/enemies/Little Cthulhu/octopus-1.png'
+        idle: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        attack1: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        attack2: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        hurt: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        die: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        run: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        sleep: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
+        wakeup: 'assets/enemies/Little Cthulhu/octopus-animated.gif'
     }
 };
 
@@ -285,15 +289,16 @@ const ALIEN_DATA = {
     projectileType: 'alien',
     timeStingAttack: true,  // FIX: Time Sting ability - reduces player timer to 1 second
     timeStingChance: 0.25,  // FIX: 25% chance to use Time Sting
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
-        attack1: 'assets/enemies/Alien/Spritesheets/alien-enemy-walk.png',
-        attack2: 'assets/enemies/Alien/Spritesheets/alien-enemy-walk.png',
-        hurt: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
-        die: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
-        run: 'assets/enemies/Alien/Spritesheets/alien-enemy-walk.png',
-        sleep: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png',
-        wakeup: 'assets/enemies/Alien/Spritesheets/alien-enemy-idle.png'
+        idle: 'assets/enemies/Alien/alien-idle-animated.gif',
+        attack1: 'assets/enemies/Alien/alien-walk-animated.gif',
+        attack2: 'assets/enemies/Alien/alien-walk-animated.gif',
+        hurt: 'assets/enemies/Alien/alien-idle-animated.gif',
+        die: 'assets/enemies/Alien/alien-idle-animated.gif',
+        run: 'assets/enemies/Alien/alien-walk-animated.gif',
+        sleep: 'assets/enemies/Alien/alien-idle-animated.gif',
+        wakeup: 'assets/enemies/Alien/alien-idle-animated.gif'
     }
 };
 
@@ -309,15 +314,16 @@ const FIRE_SKULL_DATA = {
     weakness: 'freeze',
     weaknessDamage: 18,
     projectileType: 'fire-explosion',
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png',
-        attack1: 'assets/enemies/The Overthinker/Fire skull attack/Sprites.png',
-        attack2: 'assets/enemies/The Overthinker/Fire skull attack/Sprites.png',
-        hurt: 'assets/enemies/The Overthinker/Spritesheets/fire-skull-no-fire.png',
-        die: 'assets/enemies/The Overthinker/Spritesheets/fire-skull-no-fire.png',
-        run: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png',
-        sleep: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png',
-        wakeup: 'assets/enemies/The Overthinker/Spritesheets/fire-skull.png'
+        idle: 'assets/enemies/The Overthinker/fire-skull-animated.gif',
+        attack1: 'assets/enemies/The Overthinker/fire-skull-animated.gif',
+        attack2: 'assets/enemies/The Overthinker/fire-skull-animated.gif',
+        hurt: 'assets/enemies/The Overthinker/fire-skull-no-fire-animated.gif',
+        die: 'assets/enemies/The Overthinker/fire-skull-no-fire-animated.gif',
+        run: 'assets/enemies/The Overthinker/fire-skull-animated.gif',
+        sleep: 'assets/enemies/The Overthinker/fire-skull-animated.gif',
+        wakeup: 'assets/enemies/The Overthinker/fire-skull-animated.gif'
     }
 };
 
@@ -331,15 +337,16 @@ const OGRE_DATA = {
     tier: 'boss',
     specialDefense: true,
     vulnerableToEvasion: true, // After player evades, next 2 attacks miss
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Ogre/Spritesheets/ogre-idle.png',
-        attack1: 'assets/enemies/Ogre/Spritesheets/ogre-attack.png',
-        attack2: 'assets/enemies/Ogre/Spritesheets/ogre-attack.png',
-        hurt: 'assets/enemies/Ogre/Spritesheets/ogre-idle-unarmed.png',
-        die: 'assets/enemies/Ogre/Spritesheets/ogre-idle-unarmed.png',
-        run: 'assets/enemies/Ogre/Spritesheets/ogre-walk.png',
-        sleep: 'assets/enemies/Ogre/Spritesheets/ogre-idle.png',
-        wakeup: 'assets/enemies/Ogre/Spritesheets/ogre-idle.png'
+        idle: 'assets/enemies/Ogre/ogre-idle-animated.gif',
+        attack1: 'assets/enemies/Ogre/ogre-attack-animated.gif',
+        attack2: 'assets/enemies/Ogre/ogre-attack-animated.gif',
+        hurt: 'assets/enemies/Ogre/ogre-idle-unarmed-animated.gif',
+        die: 'assets/enemies/Ogre/ogre-idle-unarmed-animated.gif',
+        run: 'assets/enemies/Ogre/ogre-walk-animated.gif',
+        sleep: 'assets/enemies/Ogre/ogre-idle-animated.gif',
+        wakeup: 'assets/enemies/Ogre/ogre-idle-animated.gif'
     }
 };
 
@@ -356,15 +363,16 @@ const FLY_DATA = {
     evasionAbility: true,
     evasionChance: 0.30, // 30% chance to evade player attacks
     projectileType: 'fly-spit',
+    isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Chaos Drone/enemy1.png',
-        attack1: 'assets/enemies/Chaos Drone/Robot Attack.png',
-        attack2: 'assets/enemies/Chaos Drone/Robot Attack.png',
-        hurt: 'assets/enemies/Chaos Drone/enemy2.png',
-        die: 'assets/enemies/Chaos Drone/enemy2.png',
-        run: 'assets/enemies/Chaos Drone/enemy1.png',
-        sleep: 'assets/enemies/Chaos Drone/enemy1.png',
-        wakeup: 'assets/enemies/Chaos Drone/enemy1.png'
+        idle: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        attack1: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        attack2: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        hurt: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        die: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        run: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        sleep: 'assets/enemies/Chaos Drone/fly-animated.gif',
+        wakeup: 'assets/enemies/Chaos Drone/fly-animated.gif'
     }
 };
 

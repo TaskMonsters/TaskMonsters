@@ -88,7 +88,7 @@ const SKINS_CONFIG = {
         id: 'black_cat',
         name: 'Shadow Cat',
         price: 400,
-        levelRequired: 1,  // Starter skin - available from the beginning
+        levelRequired: 10,  // Unlocks at Level 10
         tier: 'standard',
         emoji: '🐈‍⬛',
         thumbnail: 'assets/skins/BlackCatSlimePaid/PNG/Idle.png',
