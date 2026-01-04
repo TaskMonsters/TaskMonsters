@@ -339,6 +339,7 @@ class SkinsManager {
                 `;
             } else {
                 // For sprite sheet skins (all other skins)
+                // CRITICAL FIX: Ensure thumbnails show only the first frame without animation
                 thumbnailHTML = `
                     <div class="shop-item-emoji" style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; position: relative;">
                         <div style="width: 80px; height: 80px; position: relative; overflow: hidden;">
@@ -352,7 +353,8 @@ class SkinsManager {
                                         object-position: 0 ${(skin.animationRows?.idle || 0) * (skin.spriteSize?.height || 32)}px; 
                                         image-rendering: pixelated; 
                                         transform: scale(2.5); 
-                                        transform-origin: top left;" 
+                                        transform-origin: top left; 
+                                        animation: none !important;" 
                                  alt="${skin.name}">
                         </div>
                     </div>

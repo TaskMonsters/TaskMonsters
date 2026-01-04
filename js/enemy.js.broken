@@ -90,8 +90,7 @@ class Enemy {
     }
 }
 
-// Lazy Bat enemy data
-const LAZY_BAT_DATA = {
+// Lazy Bat enemy dataconst LAZY_BAT_DATA = {
     name: 'Lazy Bat',
     baseHP: 50,
     baseAttack: 15,
@@ -105,9 +104,10 @@ const LAZY_BAT_DATA = {
         attack2: 'assets/enemies/Lazy Bat/Bat-Attack1-animated.gif',
         hurt: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
         die: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
-        run: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
-        sleep: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
-        wakeup: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif'
+    }
+}; run: 'assets/enemies/Lazy Bat/Bat-Run.png',
+        sleep: 'assets/enemies/Lazy Bat/Bat-Sleep.png',
+        wakeup: 'assets/enemies/Lazy Bat/Bat-WakeUp.png'
     }
 };
 
@@ -126,19 +126,19 @@ const LAZY_BAT_II_DATA = {
         attack2: 'assets/enemies/Lazy Bat/Bat-Attack1-animated.gif',
         hurt: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
         die: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
-        run: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
-        sleep: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif',
-        wakeup: 'assets/enemies/Lazy Bat/Bat-IdleFly-animated.gif'
+    }
+};run: 'assets/enemies/Lazy Bat/Bat-Run.png',
+        sleep: 'assets/enemies/Lazy Bat/Bat-Sleep.png',
+        wakeup: 'assets/enemies/Lazy Bat/Bat-WakeUp.png'
     }
 };
 
-// Slime enemy data (appears at level 5+)
-const SLIME_DATA = {
+// Slime enemy data (appears at level 5+const SLIME_DATA = {
     name: 'Slime',
-    baseHP: 40,
-    baseAttack: 8,
-    baseDefense: 5,
-    minLevel: 5,
+    baseHP: 50,
+    baseAttack: 15,
+    baseDefense: 10,
+    minLevel: 1,
     tier: 'early',
     maxDamage: 10, // Cap damage at 10
     drainEnergy: true, // Drains energy on hit
@@ -151,19 +151,19 @@ const SLIME_DATA = {
         attack2: 'assets/enemies/Slothful Slime/slime-animated.gif',
         hurt: 'assets/enemies/Slothful Slime/slime-animated.gif',
         die: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        run: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        sleep: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        wakeup: 'assets/enemies/Slothful Slime/slime-animated.gif'
+    }
+};run: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        sleep: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        wakeup: 'assets/enemies/Slothful Slime/slime-sheet.png'
     }
 };
 
-// Slime II enemy data (appears at level 6+) - 4-frame animated spritesheet
-const SLIME_II_DATA = {
+// Slime II enemy data (appears at level 6+) - 4-frame animated spriteshconst SLIME_II_DATA = {
     name: 'Slime II',
     baseHP: 50,
-    baseAttack: 12,
-    baseDefense: 8,
-    minLevel: 6,
+    baseAttack: 15,
+    baseDefense: 10,
+    minLevel: 5,
     tier: 'mid',
     maxDamage: 15,
     drainEnergy: true,
@@ -175,9 +175,10 @@ const SLIME_II_DATA = {
         attack2: 'assets/enemies/Slothful Slime/slime-animated.gif',
         hurt: 'assets/enemies/Slothful Slime/slime-animated.gif',
         die: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        run: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        sleep: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        wakeup: 'assets/enemies/Slothful Slime/slime-animated.gif'
+    }
+};   run: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        sleep: 'assets/enemies/Slothful Slime/slime-sheet.png',
+        wakeup: 'assets/enemies/Slothful Slime/slime-sheet.png'
     }
 };
 
@@ -495,19 +496,6 @@ function createRandomEnemy(playerLevel) {
 function playEnemyAnimation(enemy, animationKey, duration = 500) {
     return new Promise((resolve) => {
         const spriteElement = document.getElementById('enemySprite');
-        
-        // CRITICAL FIX: For GIF-animated enemies, just update the sprite source without CSS animations
-        if (enemy.isAnimatedGif) {
-            enemy.setSprite(animationKey);
-            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-            // No CSS animation classes needed for GIFs
-            setTimeout(() => {
-                enemy.setSprite('idle');
-                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-                resolve();
-            }, duration);
-            return;
-        }
         
         // Update sprite sheet source (skip for Fly Drone - it uses projectile only)
         if (enemy.name !== 'Fly Drone') {
