@@ -25,18 +25,12 @@ function initEnemySprite(enemyData) {
     let isSpriteSheet = false;
     let spriteSheetConfig = null;
     
-    // PRIORITY 1: Check if this is The Overthinker (uses sprite sheet)
-    if (enemyData.name === 'The Overthinker' && enemyData.frameCount) {
-        imageToUse = 'assets/enemies/overthinker/overthinker-idle-sheet.png';
-        isSpriteSheet = true;
+    // PRIORITY 1: Check if this is The Overthinker (now uses GIF)
+    if (enemyData.name === 'The Overthinker') {
+        imageToUse = 'assets/enemies/OverthinkerEnemy.gif';
+        isAnimatedGif = true;
         enemySize = 'large';
-        spriteSheetConfig = {
-            frameCount: enemyData.frameCount || 8,
-            frameWidth: 96,
-            frameHeight: 112,
-            totalWidth: 768 // 96 * 8
-        };
-        console.log(`[Enemy] Using sprite sheet for ${enemyData.name}`);
+        console.log(`[Enemy] Using animated GIF for ${enemyData.name}`);
     }
     
     // PRIORITY 2: Use animated GIF if enemy has isAnimatedGif flag and sprites.idle is a GIF
@@ -53,7 +47,7 @@ function initEnemySprite(enemyData) {
             imageToUse = 'assets/enemies/Lazy Bat/Bat-IdleFly.png';
             enemySize = 'large';
         } else if (enemyData.name === 'Slime' || enemyData.name === 'Slime II') {
-            imageToUse = 'assets/enemies/Slothful Slime/slime-animated.gif';
+            imageToUse = 'assets/enemies/Slime.gif';
             isAnimatedGif = true;
             enemySize = 'slime';
         } else if (enemyData.name === 'Ghost Task Stopper') {
@@ -73,8 +67,9 @@ function initEnemySprite(enemyData) {
             imageToUse = 'assets/enemies/Ogre/Sprites/Idle/ogre-idle1.png';
             enemySize = 'large';
         } else if (enemyData.name === 'Octopus') {
-            imageToUse = 'assets/enemies/octopus.png';
-            enemySize = 'large';
+            imageToUse = 'assets/enemies/Octopus.gif';
+            isAnimatedGif = true;
+            enemySize = 'medium';
         } else if (enemyData.name === 'Alien') {
             // Use the animated GIF for Alien
             imageToUse = 'assets/enemies/Alien/alien-idle-animated.gif';
@@ -90,8 +85,9 @@ function initEnemySprite(enemyData) {
         } else if (enemyData.name === 'Sunny Dragon') {
             imageToUse = 'assets/enemies/dragon.png';
             enemySize = 'large';
-        } else if (enemyData.name === 'Fly Drone') {
-            imageToUse = 'assets/enemies/fly.png';
+        } else if (enemyData.name === 'Fly Drone' || enemyData.name === 'Fly') {
+            imageToUse = 'assets/enemies/Fly.gif';
+            isAnimatedGif = true;
             enemySize = 'small';
         } else if (enemyData.name === 'Mushroom') {
             imageToUse = 'assets/enemies/mushroom.png';

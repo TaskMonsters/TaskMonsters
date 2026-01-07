@@ -314,13 +314,13 @@ const SKINS_CONFIG = {
         emoji: '🐸',
         thumbnail: 'assets/skins/task-toad/idle.png',
         animations: {
-            idle: 'assets/skins/task-toad/idle.png',
-            walk: 'assets/skins/task-toad/idle.png',
-            attack: 'assets/skins/task-toad/attack.png',
-            hurt: 'assets/skins/task-toad/idle.png',
-            death: 'assets/skins/task-toad/idle.png',
-            jump: 'assets/skins/task-toad/jump.png',
-            sleep: 'assets/skins/task-toad/idle.png'
+            idle: 'assets/skins/task-toad/Idle.gif',
+            walk: 'assets/skins/task-toad/Idle.gif',
+            attack: 'assets/skins/task-toad/Attack.gif',
+            hurt: 'assets/skins/task-toad/Idle.gif',
+            death: 'assets/skins/task-toad/Idle.gif',
+            jump: 'assets/skins/task-toad/Jump.gif',
+            sleep: 'assets/skins/task-toad/Idle.gif'
         },
         frameCount: {
             idle: 1,
@@ -353,13 +353,13 @@ const SKINS_CONFIG = {
         emoji: '👻',
         thumbnail: 'assets/skins/task-phantom/idle.png',
         animations: {
-            idle: 'assets/skins/task-phantom/idle.png',
-            walk: 'assets/skins/task-phantom/idle.png',
-            attack: 'assets/skins/task-phantom/idle.png',
-            hurt: 'assets/skins/task-phantom/idle.png',
-            death: 'assets/skins/task-phantom/idle.png',
-            jump: 'assets/skins/task-phantom/idle.png',
-            sleep: 'assets/skins/task-phantom/idle.png'
+            idle: 'assets/skins/task-phantom/Idle.gif',
+            walk: 'assets/skins/task-phantom/Idle.gif',
+            attack: 'assets/skins/task-phantom/Idle.gif',
+            hurt: 'assets/skins/task-phantom/Idle.gif',
+            death: 'assets/skins/task-phantom/Idle.gif',
+            jump: 'assets/skins/task-phantom/Idle.gif',
+            sleep: 'assets/skins/task-phantom/Idle.gif'
         },
         frameCount: {
             idle: 1,
@@ -499,50 +499,14 @@ const SKINS_CONFIG = {
         seamlessImage: true  // Animated GIF
     },
 
-    // FUN BIRD - Level 9+ (300 XP)
-    fun_bird: {
-        id: 'fun_bird',
-        name: 'Fun Bird',
-        price: 300,
-        levelRequired: 9,
-        tier: 'standard',
-        emoji: '🐦',
-        thumbnail: 'assets/skins/fun-bird/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/fun-bird/idle.png',
-            walk: 'assets/skins/fun-bird/walk.png',
-            attack: 'assets/skins/fun-bird/attack.png',
-            hurt: 'assets/skins/fun-bird/hurt.png',
-            death: 'assets/skins/fun-bird/death.png',
-            jump: 'assets/skins/fun-bird/jump.png',
-            sleep: 'assets/skins/fun-bird/sleep.png'
-        },
-        frameCount: {
-            idle: 7,
-            walk: 7,
-            attack: 7,
-            hurt: 7,
-            death: 7,
-            jump: 7,
-            sleep: 7
-        },
-        spriteSheetWidth: {
-            idle: 224,
-            walk: 224,
-            attack: 224,
-            hurt: 224,
-            death: 224,
-            jump: 224,
-            sleep: 224
-        }
-    },
+    // FUN BIRD - REMOVED FROM SHOP (still exists for users who already own it)
 
-    // HUMAN KNIGHT - Level 12 (800 XP)
+    // HUMAN KNIGHT - Level 11 (800 XP)
     human_knight: {
         id: 'human_knight',
         name: 'Human Knight',
         price: 800,
-        levelRequired: 12,
+        levelRequired: 11,
         tier: 'standard',
         emoji: '⚔️',
         thumbnail: 'assets/skins/human-knight/thumbnail.png',
@@ -581,12 +545,12 @@ const SKINS_CONFIG = {
         scaleFactor: 0.85  // Scale to 85% of default size
     },
 
-    // HUMAN RANGER - Level 12 (800 XP)
+    // HUMAN RANGER - Level 11 (800 XP)
     human_ranger: {
         id: 'human_ranger',
         name: 'Human Ranger',
         price: 800,
-        levelRequired: 12,
+        levelRequired: 11,
         tier: 'standard',
         emoji: '🏹',
         thumbnail: 'assets/skins/human-ranger/thumbnail.png',
@@ -625,45 +589,7 @@ const SKINS_CONFIG = {
         scaleFactor: 0.85  // Scale to 85% of default size
     },
 
-    // LADY IMP - Level 16 (900 XP)
-    lady_imp: {
-        id: 'lady_imp',
-        name: 'Lady Imp',
-        price: 900,
-        levelRequired: 16,
-        tier: 'premium',
-        emoji: '👿',
-        thumbnail: 'assets/skins/lady-imp/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/lady-imp/Idle.gif',
-            walk: 'assets/skins/lady-imp/Walk.gif',
-            attack: 'assets/skins/lady-imp/Attack.gif',
-            hurt: 'assets/skins/lady-imp/Hurt.gif',
-            death: 'assets/skins/lady-imp/Die.gif',
-            jump: 'assets/skins/lady-imp/Idle.gif',
-            sleep: 'assets/skins/lady-imp/Idle.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
-        },
-        seamlessImage: true,  // Animated GIF
-        spriteSize: { width: 32, height: 32 }
-    },
+    // LADY IMP - REMOVED FROM SHOP (still exists for users who already own it)
 
     // EYE MONSTER - Level 17 (1000 XP)
     eye_monster: {

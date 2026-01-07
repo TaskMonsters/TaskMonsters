@@ -4568,9 +4568,9 @@ input:checked + .toggle-slider:before {
 
             <!-- Your Tasks -->
             <div class="card">
-                <div class="card-header">
-                    <div class="card-title">📝 Your Tasks</div>
-                    <button class="btn-primary" onclick="openCreateTaskModal()">+ Add</button>
+                <div class="card-header" style="cursor: pointer;" onclick="toggleYourTasksExpansion(event)">
+                    <div class="card-title">📝 Your Tasks <span id="yourTasksToggleIcon">▼</span></div>
+                    <button class="btn-primary" onclick="event.stopPropagation(); openCreateTaskModal()">+ Add</button>
                 </div>
                 <div id="tasksList">
                     <!-- Tasks will be populated here -->
@@ -4579,9 +4579,9 @@ input:checked + .toggle-slider:before {
 
             <!-- Quick Tasks -->
             <div class="card">
-                <div class="card-header">
-                    <div class="card-title">⚡ Quick Tasks</div>
-                    <button class="btn-primary" onclick="openQuickTaskModal()">+ Add</button>
+                <div class="card-header" style="cursor: pointer;" onclick="toggleQuickTasksExpansion(event)">
+                    <div class="card-title">⚡ Quick Tasks <span id="quickTasksToggleIcon">▼</span></div>
+                    <button class="btn-primary" onclick="event.stopPropagation(); openQuickTaskModal()">+ Add</button>
                 </div>
                 <div id="quickTasksList">
                     <!-- Quick tasks will be populated here -->
@@ -8164,6 +8164,36 @@ input:checked + .toggle-slider:before {
                 content.style.display = 'none';
                 toggle.textContent = '▼';
                 toggle.classList.remove('expanded');
+            }
+        }
+
+        function toggleYourTasksExpansion(event) {
+            if (event && event.target.tagName === 'BUTTON') return; // Don't toggle if clicking the Add button
+            
+            const content = document.getElementById('tasksList');
+            const toggle = document.getElementById('yourTasksToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+
+        function toggleQuickTasksExpansion(event) {
+            if (event && event.target.tagName === 'BUTTON') return; // Don't toggle if clicking the Add button
+            
+            const content = document.getElementById('quickTasksList');
+            const toggle = document.getElementById('quickTasksToggleIcon');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
             }
         }
 

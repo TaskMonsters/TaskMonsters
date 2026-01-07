@@ -24,10 +24,10 @@ class Enemy {
             scaling = window.enemyAI.getDifficultyScaling(playerLevel);
         }
         
-        // ENHANCED: Increase attack scaling to make enemies hit harder as player levels up
-        // This creates more challenge and makes defense/items more valuable
-        this.attack = this.baseAttack + Math.floor(playerLevel * 2.5); // Increased from 2 to 2.5
-        this.defense = this.baseDefense + Math.floor(playerLevel * 1.5);
+        // BALANCED: Moderate attack scaling for fair difficulty progression
+        // Lower scaling at early levels, increases gradually
+        this.attack = this.baseAttack + Math.floor(playerLevel * 1.5); // Reduced from 2.5 to 1.5
+        this.defense = this.baseDefense + Math.floor(playerLevel * 1.0); // Reduced from 1.5 to 1.0
         this.maxHP = Math.floor((this.baseHP + playerLevel * 5) * (1 + scaling.hpBonus));
         this.hp = this.maxHP;
     }
@@ -94,7 +94,7 @@ class Enemy {
 const LAZY_BAT_DATA = {
     name: 'Lazy Bat',
     baseHP: 50,
-    baseAttack: 15,
+    baseAttack: 8,  // Reduced from 15 to 8 for easier start
     baseDefense: 10,
     minLevel: 1,
     tier: 'early',
@@ -115,7 +115,7 @@ const LAZY_BAT_DATA = {
 const LAZY_BAT_II_DATA = {
     name: 'Lazy Bat II',
     baseHP: 50,
-    baseAttack: 15,
+    baseAttack: 10,  // Reduced from 15 to 10
     baseDefense: 10,
     minLevel: 3,
     tier: 'mid',
@@ -136,7 +136,7 @@ const LAZY_BAT_II_DATA = {
 const SLIME_DATA = {
     name: 'Slime',
     baseHP: 40,
-    baseAttack: 8,
+    baseAttack: 6,  // Reduced from 8 to 6
     baseDefense: 5,
     minLevel: 5,
     tier: 'early',
@@ -146,14 +146,14 @@ const SLIME_DATA = {
     projectileType: 'slime',
     isAnimatedGif: true,  // Flag to indicate this uses GIF animation
     sprites: {
-        idle: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        attack1: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        attack2: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        hurt: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        die: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        run: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        sleep: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        wakeup: 'assets/enemies/Slothful Slime/slime-animated.gif'
+        idle: 'assets/enemies/Slime.gif',
+        attack1: 'assets/enemies/Slime.gif',
+        attack2: 'assets/enemies/Slime.gif',
+        hurt: 'assets/enemies/Slime.gif',
+        die: 'assets/enemies/Slime.gif',
+        run: 'assets/enemies/Slime.gif',
+        sleep: 'assets/enemies/Slime.gif',
+        wakeup: 'assets/enemies/Slime.gif'
     }
 };
 
@@ -170,14 +170,14 @@ const SLIME_II_DATA = {
     drainDefense: true,
     isAnimatedGif: true,  // Flag to indicate this uses GIF animation
     sprites: {
-        idle: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        attack1: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        attack2: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        hurt: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        die: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        run: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        sleep: 'assets/enemies/Slothful Slime/slime-animated.gif',
-        wakeup: 'assets/enemies/Slothful Slime/slime-animated.gif'
+        idle: 'assets/enemies/Slime.gif',
+        attack1: 'assets/enemies/Slime.gif',
+        attack2: 'assets/enemies/Slime.gif',
+        hurt: 'assets/enemies/Slime.gif',
+        die: 'assets/enemies/Slime.gif',
+        run: 'assets/enemies/Slime.gif',
+        sleep: 'assets/enemies/Slime.gif',
+        wakeup: 'assets/enemies/Slime.gif'
     }
 };
 
@@ -257,7 +257,7 @@ const LAZY_EYE_DATA = {
 const OCTOPUS_DATA = {
     name: 'Octopus',
     baseHP: 45,
-    baseAttack: 12,
+    baseAttack: 10,  // Reduced from 12 to 10
     baseDefense: 8,
     minLevel: 2,
     tier: 'mid',
@@ -266,14 +266,14 @@ const OCTOPUS_DATA = {
     projectileType: 'splash',
     isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        attack1: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        attack2: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        hurt: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        die: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        run: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        sleep: 'assets/enemies/Little Cthulhu/octopus-animated.gif',
-        wakeup: 'assets/enemies/Little Cthulhu/octopus-animated.gif'
+        idle: 'assets/enemies/Octopus.gif',
+        attack1: 'assets/enemies/Octopus.gif',
+        attack2: 'assets/enemies/Octopus.gif',
+        hurt: 'assets/enemies/Octopus.gif',
+        die: 'assets/enemies/Octopus.gif',
+        run: 'assets/enemies/Octopus.gif',
+        sleep: 'assets/enemies/Octopus.gif',
+        wakeup: 'assets/enemies/Octopus.gif'
     }
 };
 
@@ -354,25 +354,25 @@ const OGRE_DATA = {
 const FLY_DATA = {
     name: 'Fly Drone',
     baseHP: 35,
-    baseAttack: 13,
+    baseAttack: 9,  // Reduced from 13 to 9
     baseDefense: 6,
     minLevel: 5,
     tier: 'mid',
     variableDamage: true,
-    damageValues: [9, 17], // Specific damage values
+    damageValues: [7, 12], // Reduced from [9, 17] to [7, 12]
     evasionAbility: true,
     evasionChance: 0.30, // 30% chance to evade player attacks
     projectileType: 'fly-spit',
     isAnimatedGif: true,
     sprites: {
-        idle: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        attack1: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        attack2: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        hurt: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        die: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        run: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        sleep: 'assets/enemies/Chaos Drone/fly-animated.gif',
-        wakeup: 'assets/enemies/Chaos Drone/fly-animated.gif'
+        idle: 'assets/enemies/Fly.gif',
+        attack1: 'assets/enemies/Fly.gif',
+        attack2: 'assets/enemies/Fly.gif',
+        hurt: 'assets/enemies/Fly.gif',
+        die: 'assets/enemies/Fly.gif',
+        run: 'assets/enemies/Fly.gif',
+        sleep: 'assets/enemies/Fly.gif',
+        wakeup: 'assets/enemies/Fly.gif'
     }
 };
 
@@ -386,18 +386,16 @@ const OVERTHINKER_DATA = {
     tier: 'special',
     isOverthinker: true, // Special flag for every-4-levels trigger
     specialArena: 'bg-stone-ruins', // Uses Stone Ruins arena
-    frameCount: 8, // 8 frames for idle animation
-    attackFrameCount: 8, // 8 frames for attack animation
-    hurtFrameCount: 4, // 4 frames for hurt animation
+    isAnimatedGif: true,  // Now uses seamless GIF animation
     sprites: {
-        idle: 'assets/enemies/overthinker/idle/frame',
-        attack1: 'assets/enemies/overthinker/attack/explosion-f',
-        attack2: 'assets/enemies/overthinker/attack/explosion-f',
-        hurt: 'assets/enemies/overthinker/hurt/frame',
-        die: 'assets/enemies/overthinker/hurt/frame',
-        run: 'assets/enemies/overthinker/idle/frame',
-        sleep: 'assets/enemies/overthinker/idle/frame',
-        wakeup: 'assets/enemies/overthinker/idle/frame'
+        idle: 'assets/enemies/OverthinkerEnemy.gif',
+        attack1: 'assets/enemies/OverthinkerEnemy.gif',
+        attack2: 'assets/enemies/OverthinkerEnemy.gif',
+        hurt: 'assets/enemies/OverthinkerEnemy.gif',
+        die: 'assets/enemies/OverthinkerEnemy.gif',
+        run: 'assets/enemies/OverthinkerEnemy.gif',
+        sleep: 'assets/enemies/OverthinkerEnemy.gif',
+        wakeup: 'assets/enemies/OverthinkerEnemy.gif'
     }
 };
 
@@ -459,9 +457,9 @@ function getNextEnemyFromRotation(availableEnemies, playerLevel) {
 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
-    // LEVEL OFFSET: Enemies always scale as if player is Level 1 for easier battles
-    // This makes battles consistently easy regardless of player level
-    const effectiveEnemyLevel = 1;
+    // LEVEL OFFSET: Battle mode starts at Level 10, so enemy progression starts from effective Level 1
+    // This ensures Lazy Bat appears first when battle mode unlocks
+    const effectiveEnemyLevel = Math.max(1, playerLevel - 9);
     
     console.log(`[Enemy] Player Level: ${playerLevel}, Effective Enemy Level: ${effectiveEnemyLevel}`);
     

@@ -1918,21 +1918,25 @@ class BattleManager {
             }
         }
 
-        // Calculate damage
-        let damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+        // Calculate damage with VARIABLE DAMAGE for ALL enemies
+        let baseDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
         
         // Disruption Dragon damage range (20-30)
         if (this.enemy.hasSpecialAttack && this.enemy.damageRange) {
             const [minDmg, maxDmg] = this.enemy.damageRange;
             damage = Math.floor(Math.random() * (maxDmg - minDmg + 1)) + minDmg;
         }
-        // Fly specific damage values (9 or 17)
+        // Enemies with specific damage values (Fly, Overthinker)
         else if (this.enemy.damageValues && this.enemy.damageValues.length === 2) {
-            damage = Math.random() < 0.5 ? this.enemy.damageValues[0] : this.enemy.damageValues[1];
+            const [minDmg, maxDmg] = this.enemy.damageValues;
+            damage = Math.floor(Math.random() * (maxDmg - minDmg + 1)) + minDmg;
         }
-        // Alien variable damage (5 or 15)
-        else if (this.enemy.variableDamage) {
-            damage = Math.random() < 0.5 ? 5 : 15;
+        // ALL OTHER ENEMIES: Add ±20% variance to ensure damage varies every turn
+        else {
+            const variance = Math.floor(baseDamage * 0.2); // 20% variance
+            const minDamage = Math.max(3, baseDamage - variance);
+            const maxDamage = baseDamage + variance;
+            damage = Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
         }
         
         // Apply damage cap if enemy has one
