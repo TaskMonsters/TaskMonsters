@@ -1,0 +1,1089 @@
+/* ===================================
+   BATTLE MODE - MOBILE-RESPONSIVE RPG LAYOUT
+   Optimized for iPhone 8 (375×667) and all mobile devices
+   =================================== */
+
+/* Battle Arena Container */
+.battle-arena {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.battle-arena.hidden {
+    display: none;
+}
+
+/* Battle Container - Main Game Frame */
+.battle-container {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 16 / 9;
+    margin: 1rem auto 0.5rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Background variants */
+.battle-container.bg-forest {
+    background-image: url('../assets/battle-backgrounds/forest_path.png');
+}
+
+.battle-container.bg-city {
+    background-image: url('../assets/battle-backgrounds/city_sunset.png');
+}
+
+.battle-container.bg-ocean {
+    background-image: url('../assets/ocean-arena.png');
+}
+
+.battle-container.bg-temple {
+    background-image: url('../assets/backgrounds/temple-arena.png');
+}
+
+.battle-container.bg-night-town {
+    background-image: url('../assets/battle-backgrounds/night_town.png');
+}
+
+.battle-container.bg-space {
+    background-image: url('../assets/battle-backgrounds/space.png');
+}
+
+.battle-container.bg-castle {
+    background-image: url('../assets/battle-backgrounds/castle.png');
+}
+
+.battle-container.bg-city-neon {
+    background-image: url('../assets/battle-backgrounds/city.png');
+}
+
+.battle-container.bg-synth-city {
+    background-image: url('../assets/battle-backgrounds/synth-city.png');
+}
+
+.battle-container.bg-skull-gate {
+    background-image: url('../assets/battle-backgrounds/skull-gate-arena.png');
+}
+
+.battle-container.bg-stone-ruins {
+    background-image: url('../assets/arenas/stone_ruins.png');
+}
+
+/* Dark overlay for better sprite visibility */
+.battle-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 0;
+}
+
+/* Ensure sprites are above overlay */
+.battle-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Confused Hero Effect - Overthinker special attack */
+.confused-hero {
+    animation: confusedSway 0.5s ease-in-out infinite !important;
+    filter: hue-rotate(180deg) saturate(1.5) !important;
+}
+
+@keyframes confusedSway {
+    0%, 100% { transform: rotate(-5deg) translateX(-3px); }
+    50% { transform: rotate(5deg) translateX(3px); }
+}
+
+/* Frozen Enemy Effect */
+.frozen-enemy {
+    animation-play-state: paused !important;
+    filter: brightness(1.3) saturate(0.5) sepia(0.3) hue-rotate(180deg) !important;
+}
+
+/* ===================================
+   SPRITE POSITIONING (ABSOLUTE)
+   =================================== */
+
+/* Sprite Containers */
+.sprite-container {
+    position: absolute;
+    width: 45%;
+    top: 20%; /* FIX: Adjusted to 20% to center sprites and HP bars better */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem; /* FIX: Reduced from 0.5rem to 0.25rem to bring HP bars closer to sprites */
+}
+
+/* Hero (left side) */
+.sprite-container:first-child {
+    left: 3%;
+}
+
+/* Enemy (right side) */
+.sprite-container:last-child {
+    right: 3%;
+}
+
+.sprite-wrapper {
+    width: 100px; /* FIX: Reduced to 100px for proper sprite sizing */
+    height: 100px; /* FIX: Reduced to 100px for proper sprite sizing */
+    max-height: 120px; /* CRITICAL: Prevent enemies from covering HP bars */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* CRITICAL: Prevent enemies from spilling outside battle arena */
+}
+
+/* Base sprite class - essential for all sprites */
+.sprite {
+    display: block;
+    position: relative;
+}
+
+/* Hero sprites (32x32 base) */
+.sprite.hero-sprite {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+    background-size: auto 32px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    transform: scale(0.11); /* CRITICAL FIX: Reduced by 1x (half of 0.22) for proper battle arena size per user request */
+    transform-origin: center;
+}
+
+/* Low HP flickering animation - triggers when HP < 20 */
+.sprite-wrapper.low-hp-flicker {
+    animation: lowHpFlicker 0.5s ease-in-out infinite;
+}
+
+@keyframes lowHpFlicker {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* SIMPLIFIED ENEMY SPRITES - Static images with hover/lunge animations */
+.sprite.enemy-sprite {
+    display: block;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    max-height: 120px; /* CRITICAL: Prevent enemies from covering HP bars or extending outside arena */
+    max-width: 120px; /* CRITICAL: Prevent enemies from spilling outside battle arena */
+}
+
+/* Enemy size classes */
+.sprite.enemy-size-small {
+    width: 64px;
+    height: 64px;
+    transform: scale(1.5); /* REDUCED from 2.0 to 1.5 to fit within arena */
+    transform-origin: center;
+}
+
+.sprite.enemy-size-medium {
+    width: 80px;
+    height: 80px;
+    transform: scale(1.3); /* REDUCED from 2.0 to 1.3 to fit within arena */
+    transform-origin: center;
+}
+
+.sprite.enemy-size-large {
+    width: 100px;
+    height: 100px;
+    transform: scale(1.2); /* REDUCED from 1.6 to 1.2 to fit within arena */
+    transform-origin: center;
+}
+
+.sprite.enemy-size-slime {
+    width: 118px;
+    height: 79px;
+    transform: scale(1.0); /* REDUCED from 1.5 to 1.0 to fit within arena */
+    transform-origin: center;
+}
+
+/* Hover animation - gentle floating */
+.sprite.enemy-hover {
+    animation: enemyHover 2s ease-in-out infinite;
+}
+
+@keyframes enemyHover {
+    0%, 100% {
+        transform: translateY(0) scale(1.3);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.3);
+    }
+}
+
+/* Large enemy hover - reduced scale */
+.sprite.enemy-size-large.enemy-hover {
+    animation: enemyHoverLarge 2s ease-in-out infinite;
+}
+
+@keyframes enemyHoverLarge {
+    0%, 100% {
+        transform: translateY(0) scale(1.2);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.2);
+    }
+}
+
+/* Slime hover - different scale */
+.sprite.enemy-size-slime.enemy-hover {
+    animation: enemyHoverSlime 2s ease-in-out infinite;
+}
+
+@keyframes enemyHoverSlime {
+    0%, 100% {
+        transform: translateY(0) scale(1.0);
+    }
+    50% {
+        transform: translateY(-10px) scale(1.0);
+    }
+}
+
+/* Lunge animation - for attacks */
+.sprite.enemy-lunge {
+    animation: enemyLunge 0.6s ease-out forwards;
+}
+
+@keyframes enemyLunge {
+    0% {
+        transform: translateX(0) scale(1.3);
+    }
+    50% {
+        transform: translateX(-80px) scale(1.4);
+    }
+    100% {
+        transform: translateX(0) scale(1.3);
+    }
+}
+
+/* Large enemy lunge - reduced scale */
+.sprite.enemy-size-large.enemy-lunge {
+    animation: enemyLungeLarge 0.6s ease-out forwards;
+}
+
+@keyframes enemyLungeLarge {
+    0% {
+        transform: translateX(0) scale(1.2);
+    }
+    50% {
+        transform: translateX(-80px) scale(1.3);
+    }
+    100% {
+        transform: translateX(0) scale(1.2);
+    }
+}
+
+/* Slime lunge - different scale */
+.sprite.enemy-size-slime.enemy-lunge {
+    animation: enemyLungeSlime 0.6s ease-out forwards;
+}
+
+@keyframes enemyLungeSlime {
+    0% {
+        transform: translateX(0) scale(1.0);
+    }
+    50% {
+        transform: translateX(-80px) scale(1.1);
+    }
+    100% {
+        transform: translateX(0) scale(1.0);
+    }
+}
+
+/* ===================================
+   HP BARS
+   =================================== */
+
+.hp-bar-container {
+    width: 100%;
+    max-width: 150px;
+}
+
+.hp-label {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: clamp(10px, 2.2vw, 14px);
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.hp-bar-bg {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.hp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+    transition: width 0.6s ease-out;
+}
+
+/* Hero HP bar - green/blue gradient */
+#heroHPBar {
+    background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+}
+
+/* ===================================
+   BATTLE LOG
+   =================================== */
+
+.battle-log {
+    width: 90%;
+    max-width: 400px;
+    margin: 0.5rem auto;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-size: clamp(11px, 3vw, 14px);
+    max-height: 100px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+}
+
+.battle-log p {
+    margin: 0.25rem 0;
+}
+
+/* ===================================
+   GAUGES
+   =================================== */
+
+.gauge-container {
+    width: 90%;
+    max-width: 380px;
+    margin: 0.5rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gauge {
+    width: 100%;
+}
+
+.gauge-label {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: clamp(10px, 2.5vw, 14px);
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.gauge-bar-bg {
+    height: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.gauge-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.attack-gauge-fill {
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.defense-gauge-fill {
+    background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+}
+
+/* ===================================
+   ACTION BUTTONS
+   =================================== */
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem;
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.btn-action, .btn-flee {
+    padding: 0.6rem 0.4rem;
+    font-size: clamp(11px, 3vw, 14px);
+    font-weight: bold;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-action:hover:not(:disabled):not(.locked),
+.btn-flee:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.btn-action:disabled,
+.btn-action.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-flee {
+    grid-column: 1 / -1;
+    background: rgba(220, 38, 38, 0.3);
+    border-color: rgba(220, 38, 38, 0.5);
+}
+
+.btn-flee:hover:not(:disabled) {
+    background: rgba(220, 38, 38, 0.5);
+}
+
+.item-count {
+    display: block;
+    font-size: clamp(9px, 2.5vw, 11px);
+    margin-top: 2px;
+    opacity: 0.85;
+}
+
+/* ===================================
+   SPRITE ANIMATIONS
+   =================================== */
+
+/* Hero sprite animations */
+.sprite.idle {
+    animation: sprite-idle 0.8s steps(4) infinite;
+}
+
+@keyframes sprite-idle {
+    0% { background-position: 0 0; }
+    25% { background-position: -32px 0; }
+    50% { background-position: -64px 0; }
+    75% { background-position: -96px 0; }
+}
+
+.sprite.attack {
+    animation: sprite-attack 0.6s steps(4) forwards;
+}
+
+@keyframes sprite-attack {
+    0% { background-position: 0 0; }
+    25% { background-position: -32px 0; }
+    50% { background-position: -64px 0; }
+    75% { background-position: -96px 0; }
+}
+
+.sprite.hurt {
+    animation: sprite-hurt 0.4s steps(4) forwards;
+}
+
+@keyframes sprite-hurt {
+    0% { background-position: 0 0; }
+    25% { background-position: -32px 0; }
+    50% { background-position: -64px 0; }
+    75% { background-position: -96px 0; }
+}
+
+/* Lazy Bat animations - 64x64 sprites, 9 frames */
+#enemySprite.bat-idle {
+    animation: batIdle 0.9s steps(9) infinite;
+}
+
+@keyframes batIdle {
+    from { background-position: 0 0; }
+    to { background-position: -576px 0; } /* 9 frames × 64px = 576px */
+}
+
+#enemySprite.bat-attack {
+    animation: batAttack 0.6s steps(8) forwards;
+}
+
+@keyframes batAttack {
+    from { background-position: 0 0; }
+    to { background-position: -512px 0; } /* 8 frames × 64px = 512px */
+}
+
+#enemySprite.bat-hurt {
+    animation: batHurt 0.4s steps(5) forwards;
+}
+
+@keyframes batHurt {
+    from { background-position: 0 0; }
+    to { background-position: -320px 0; } /* 5 frames × 64px = 320px */
+}
+
+/* Flying Eye Demon animations - 48x48 sprites, 8 frames */
+#enemySprite.eye-idle {
+    animation: eyeIdle 0.8s steps(8) infinite;
+}
+
+@keyframes eyeIdle {
+    from { background-position: 0 0; }
+    to { background-position: -384px 0; } /* 8 frames × 48px = 384px */
+}
+
+/* Ghost Task Stopper animations - 32x32 sprites, 6 frames */
+#enemySprite.ghost-idle {
+    animation: ghostIdle 0.6s steps(6) infinite;
+}
+
+@keyframes ghostIdle {
+    from { background-position: 0 0; }
+    to { background-position: -192px 0; } /* 6 frames × 32px = 192px */
+}
+
+/* Lazy Bat II animations - 32x32 sprites, 4 frames */
+#enemySprite.bat2-idle {
+    animation: bat2Idle 0.4s steps(4) infinite;
+}
+
+@keyframes bat2Idle {
+    from { background-position: 0 0; }
+    to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
+}
+
+/* Slime animations - 118x79 sprites, 4 frames */
+#enemySprite.slime-idle {
+    animation: slimeIdle 0.6s steps(4) infinite;
+}
+
+@keyframes slimeIdle {
+    from { background-position: 0 0; }
+    to { background-position: -472px 0; } /* 4 frames × 118px = 472px */
+}
+
+/* Medusa animations - 32x32 sprites, 4 frames */
+#enemySprite.medusa-idle {
+    animation: medusaIdle 0.5s steps(4) infinite;
+}
+
+@keyframes medusaIdle {
+    from { background-position: 0 0; }
+    to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
+}
+
+/* ===================================
+   FIREBALL & EXPLOSION EFFECTS
+   =================================== */
+
+.fireball-projectile {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-image: url('../assets/effects/fireball.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+.fireball-projectile.hidden {
+    display: none;
+}
+
+/* Waveform projectile (Ghost enemy attack) - 4 frames */
+.waveform-projectile {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/projectiles/waveform/waveform-spritesheet.png');
+    background-size: 128px 32px; /* 4 frames × 32px = 128px */
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 10000;
+    animation: waveformAnim 0.4s steps(4) infinite;
+}
+
+@keyframes waveformAnim {
+    from { background-position: 0 0; }
+    to { background-position: -128px 0; }
+}
+
+.waveform-projectile.hidden {
+    display: none;
+}
+
+/* Spark projectile (Player level 7+ attack) - 5 frames */
+.spark-projectile {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/projectiles/spark/spark-spritesheet.png');
+    background-size: 160px 32px; /* 5 frames × 32px = 160px */
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 10000;
+    animation: sparkAnim 0.5s steps(5) infinite;
+}
+
+@keyframes sparkAnim {
+    from { background-position: 0 0; }
+    to { background-position: -160px 0; }
+}
+
+.spark-projectile.hidden {
+    display: none;
+}
+
+.explosion-effect {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 10001;
+}
+
+.explosion-effect.hidden {
+    display: none;
+}
+
+/* ===================================
+   MOBILE RESPONSIVENESS
+   =================================== */
+
+/* Very small screens (iPhone SE, etc.) */
+@media (max-width: 400px) {
+    .battle-container {
+        max-width: 95%;
+        margin: 0.5rem auto;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .sprite.hero-sprite {
+        transform: scale(0.11); /* Keep consistent with desktop - reduced by 1x */
+    }
+    
+    .sprite.enemy-sprite-large,
+    .sprite.enemy-sprite-medium,
+    .sprite.enemy-sprite-small,
+    .sprite.enemy-sprite-slime {
+        /* Enemy sprites maintain their scale on mobile */
+    }
+    
+    .sprite-wrapper {
+        width: 100px;
+        height: 100px;
+        overflow: hidden; /* FIXED: Clip on mobile too */
+    }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    .battle-arena {
+        justify-content: flex-start;
+        padding: 0.5rem;
+    }
+    
+    .battle-container {
+        margin: 0.25rem auto;
+        max-width: 300px;
+    }
+    
+    .gauge-container {
+        margin: 0.25rem auto;
+    }
+    
+    .action-buttons {
+        margin: 0.25rem auto;
+    }
+}
+
+/* Dynamic scaling for very small screens */
+@media (max-width: 375px) {
+    .battle-container {
+        transform: scale(0.95);
+        transform-origin: top center;
+    }
+}
+
+@media (max-width: 320px) {
+    .battle-container {
+        transform: scale(0.85);
+        transform-origin: top center;
+    }
+}
+
+
+/* Procedural idle animation for non-animated enemies */
+#enemySprite.procedural-idle {
+    animation: proceduralIdle 2s ease-in-out infinite;
+}
+
+@keyframes proceduralIdle {
+    0%, 100% { transform: scale(2) translateY(0); }
+    50% { transform: scale(2) translateY(-8px); }
+}
+
+/* Procedural attack lunge */
+#enemySprite.procedural-attack {
+    animation: proceduralAttack 0.4s ease-out forwards;
+}
+
+@keyframes proceduralAttack {
+    0% { transform: scale(2) translateX(0); }
+    50% { transform: scale(2) translateX(-30px); }
+    100% { transform: scale(2) translateX(0); }
+}
+
+/* Skull Gate Arena (Level 13+) */
+.battle-container.bg-skull-gate {
+    background-image: url('../assets/skull-gate-arena.png');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Fire explosion flash animation */
+@keyframes explosionFlash {
+    0% { transform: scale(0.5); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(2); opacity: 0.5; }
+}
+
+/* Blue Flame Animation */
+@keyframes blueFlameMove {
+    from {
+        transform: translate(0, 0);
+    }
+    to {
+        transform: translate(var(--deltaX), var(--deltaY));
+    }
+}
+
+@keyframes blueFlameAnimate {
+    from {
+        background-position-x: 0;
+    }
+    to {
+        background-position-x: -128px;
+    }
+}
+
+/* Procrastination Ghost Animation */
+@keyframes ghostFloat {
+    0% {
+        transform: translate(0, 0);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(calc(var(--deltaX) / 2), calc(var(--deltaY) / 2 - 20px));
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--deltaX), var(--deltaY));
+        opacity: 0.6;
+    }
+}
+
+/* Skull Gate Arena */
+.battle-container.bg-skull-gate {
+    background-image: url('../assets/skull-gate-arena.png');
+}
+
+/* Alien Enemy Sprite */
+.enemy-sprite-alien {
+    width: 83px;
+    height: 64px;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    background-size: 83px 64px;
+}
+
+/* Alien Idle Animation - 8 frames */
+#enemySprite.alien-idle-animated {
+    animation: alienIdleAnim 0.8s steps(8) infinite;
+}
+
+@keyframes alienIdleAnim {
+    from {
+        background-position-x: 0;
+    }
+    to {
+        background-position-x: -664px; /* 8 frames × 83px */
+    }
+}
+
+/* Alien Attack Animation */
+#enemySprite.alien-attack-animated {
+    animation: alienAttackAnim 0.4s steps(8) 1;
+}
+
+@keyframes alienAttackAnim {
+    from {
+        background-position-x: 0;
+    }
+    to {
+        background-position-x: -664px;
+    }
+}
+
+/* ===================================
+   TURN TIMER STYLES
+   =================================== */
+
+.turn-timer {
+    width: 100%;
+    max-width: 420px;
+    margin: 0.5rem auto;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+    border: 2px solid rgba(99, 102, 241, 0.5);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.turn-timer.hidden {
+    display: none;
+}
+
+.turn-timer.warning {
+    animation: timerPulse 0.5s ease-in-out infinite;
+    border-color: rgba(239, 68, 68, 0.8);
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.3) 0%, rgba(239, 68, 68, 0.3) 100%);
+}
+
+@keyframes timerPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.6);
+    }
+}
+
+.timer-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.timer-bar-bg {
+    flex: 1;
+    height: 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.timer-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    border-radius: 12px;
+    transition: width 0.1s linear, background 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.turn-timer.warning .timer-bar-fill {
+    background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+    animation: timerBarPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes timerBarPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.timer-text {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+    min-width: 2rem;
+    text-align: center;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+    font-family: 'Courier New', monospace;
+}
+
+.turn-timer.warning .timer-text {
+    color: #fca5a5;
+    animation: timerTextBlink 0.5s ease-in-out infinite;
+}
+
+@keyframes timerTextBlink {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+    .turn-timer {
+        padding: 0.6rem 0.8rem;
+        gap: 0.5rem;
+    }
+    
+    .timer-label {
+        font-size: 0.8rem;
+    }
+    
+    .timer-bar-bg {
+        height: 20px;
+    }
+    
+    .timer-text {
+        font-size: 1.3rem;
+        min-width: 1.8rem;
+    }
+}
+
+/* Static enemy hurt animation - red flash and shake */
+.enemy-hurt-flash {
+    animation: enemyHurtEffect 0.3s ease-out;
+}
+
+@keyframes enemyHurtEffect {
+    0% { 
+        filter: brightness(2) saturate(2);
+        transform: translateX(0);
+    }
+    25% { 
+        filter: brightness(2) saturate(2);
+        transform: translateX(-5px);
+    }
+    50% { 
+        filter: brightness(1.5) saturate(1.5);
+        transform: translateX(5px);
+    }
+    75% { 
+        filter: brightness(1.2) saturate(1.2);
+        transform: translateX(-3px);
+    }
+    100% { 
+        filter: brightness(1) saturate(1);
+        transform: translateX(0);
+    }
+}
+
+/* Procedural enemy hurt effect - keep idle but add flash */
+#enemySprite.procedural-hurt {
+    animation: proceduralHurtFlash 0.3s ease-out;
+}
+
+@keyframes proceduralHurtFlash {
+    0%, 100% { 
+        filter: brightness(1) saturate(1);
+    }
+    50% { 
+        filter: brightness(2) saturate(2) hue-rotate(-30deg);
+    }
+}
+
+/* Imp sprite animations - 32x32 sprites, 8 frames, row-based */
+#heroSprite.imp-idle {
+    animation: impIdle 0.8s steps(8) infinite;
+    background-position: 0 -256px; /* Row 9 (8 * 32px = 256px) */
+}
+
+@keyframes impIdle {
+    from { background-position: 0 -256px; }
+    to { background-position: -256px -256px; } /* 8 frames × 32px = 256px */
+}
+
+#heroSprite.imp-attack {
+    animation: impAttack 0.6s steps(8) forwards;
+    background-position: 0 -320px; /* Row 11 (10 * 32px = 320px) */
+}
+
+@keyframes impAttack {
+    from { background-position: 0 -320px; }
+    to { background-position: -256px -320px; } /* 8 frames × 32px = 256px */
+}
+
+#heroSprite.imp-hurt {
+    animation: impHurt 0.4s steps(8) forwards;
+    background-position: 0 -256px; /* Row 9 - use idle for hurt */
+}
+
+@keyframes impHurt {
+    from { background-position: 0 -256px; }
+    to { background-position: -256px -256px; }
+}
+
+#heroSprite.imp-death {
+    animation: impDeath 0.8s steps(8) forwards;
+    background-position: 0 -288px; /* Row 10 (9 * 32px = 288px) */
+}
+
+@keyframes impDeath {
+    from { background-position: 0 -288px; }
+    to { background-position: -256px -288px; }
+}

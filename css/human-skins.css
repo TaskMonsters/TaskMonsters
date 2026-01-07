@@ -1,0 +1,28 @@
+/* Human Knight and Human Ranger Skins - Scaled to 85% */
+
+/* Battle Mode - Hero Sprite Scaling */
+#heroSprite.human-knight-skin,
+#heroSprite.human-ranger-skin {
+    transform: scale(0.85) !important;
+    transform-origin: center center;
+}
+
+/* Main App - Monster Sprite Scaling */
+.monster-sprite.human-knight-skin,
+.monster-sprite.human-ranger-skin {
+    transform: scale(2.125) !important;  /* 2.5 * 0.85 = 2.125 */
+}
+
+/* Focus Timer - Monster Sprite Scaling */
+.focus-monster.human-knight-skin,
+.focus-monster.human-ranger-skin {
+    transform: scale(0.85) !important;
+    transform-origin: center center;
+}
+
+/* Ensure GIF animations display properly */
+.human-knight-skin,
+.human-ranger-skin {
+    object-fit: contain !important;
+    image-rendering: auto !important;
+}
