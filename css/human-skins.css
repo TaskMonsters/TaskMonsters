@@ -10,13 +10,14 @@
 /* Main App - Monster Sprite Scaling */
 .monster-sprite.human-knight-skin,
 .monster-sprite.human-ranger-skin {
-    transform: scale(2.125) !important;  /* 2.5 * 0.85 = 2.125 */
+    transform: scale(0.708) !important;  /* 2.125 / 3 = 0.708 (reduced by 3x) */
+    transform-origin: center center;
 }
 
 /* Focus Timer - Monster Sprite Scaling */
 .focus-monster.human-knight-skin,
 .focus-monster.human-ranger-skin {
-    transform: scale(0.85) !important;
+    transform: scale(0.425) !important;  /* 0.85 / 2 = 0.425 (reduced by 1x/50%) */
     transform-origin: center center;
 }
 

@@ -28,6 +28,28 @@ class SkinsManager {
         // Get current base monster
         this.currentBaseMonster = localStorage.getItem('selectedMonster') || 'nova';
         
+        // TEST MODE: Unlock all skins for testing
+        const allSkinIds = [
+            'imp', 'pig', 'black_cat', 'flying_eye', 'white_cat', 'brown_cat',
+            'baby_blue_cat', 'rainbow_cat', 'demonic_cat', 'task_toad', 
+            'task_phantom', 'jerry', 'rocks_anne', 'rock_star', 
+            'human_knight', 'human_ranger', 'eye_monster'
+        ];
+        
+        // Add all skins to ownedSkins if not already there
+        allSkinIds.forEach(skinId => {
+            if (!this.ownedSkins.includes(skinId)) {
+                this.ownedSkins.push(skinId);
+            }
+        });
+        
+        // Save to gameState
+        if (window.gameState) {
+            window.gameState.ownedSkins = this.ownedSkins;
+        }
+        
+        console.log('[TEST MODE] All skins unlocked:', this.ownedSkins);
+        
         console.log('[SkinsManager] Initialized:', {
             ownedSkins: this.ownedSkins,
             equippedSkinId: this.equippedSkinId,
@@ -161,21 +183,41 @@ class SkinsManager {
             mainHeroSprite.src = appearance.animations.idle;
             mainHeroSprite.style.width = `${spriteSize.width}px`;
             mainHeroSprite.style.height = `${spriteSize.height}px`;
+            mainHeroSprite.style.imageRendering = 'pixelated';
             
-            // Check if this is a seamless image (GIF or static image)
+            // Check if this is a seamless image (GIF or static image) or a skin
             const skin = window.SKINS_CONFIG[this.equippedSkinId];
-            if (skin && skin.seamlessImage) {
+            const isSeamlessImage = (skin && skin.seamlessImage) || appearance.seamlessImage === true;
+            if (isSeamlessImage) {
                 // For seamless images (Fire Imp, Fire Pig, Rock skins)
                 // Use contain to show full image without cropping
                 mainHeroSprite.style.objectFit = 'contain';
                 mainHeroSprite.style.objectPosition = 'center';
                 
-                // Rock skins are larger, so use smaller scale
-                const isRockSkin = skin.id === 'task_buddy' || skin.id === 'rae_the_rock' || skin.id === 'rock_star';
-                mainHeroSprite.style.transform = isRockSkin ? 'scale(5)' : 'scale(8)';
+                // Default monsters (no skin) use standard scale
+                if (!skin) {
+                    mainHeroSprite.style.transform = 'scale(4)';
+                } else {
+                    // Rock skins are larger, so use smaller scale
+                    const isRockSkin = skin.id === 'task_buddy' || skin.id === 'rae_the_rock' || skin.id === 'rock_star';
+                    // Rocks Anne and Jerry need 2x smaller scale
+                    const isRocksAnneOrJerry = skin.id === 'rocks_anne' || skin.id === 'jerry';
+                    // Human skins need much smaller scale to prevent overlap with gauges
+                    const isHumanSkin = skin.id === 'human_knight' || skin.id === 'human_ranger';
+                    // Fire imp and fire pig need slightly smaller scale
+                    const isFireImp = skin.id === 'imp';
+                    const isFirePig = skin.id === 'pig';
+                    // Slime Buddy is larger (118x79), needs much smaller scale (reduced by 16x total)
+                    const isSlimeBuddy = skin.id === 'slime_buddy';
+                    // Merlin is medium sized (48x48), needs smaller scale
+                    const isMerlin = skin.id === 'merlin';
+                    // Task Toad increased by 1x (doubled from 4 to 8)
+                    const isTaskToad = skin.id === 'task_toad';
+                    mainHeroSprite.style.transform = isHumanSkin ? 'scale(2.5)' : (isSlimeBuddy ? 'scale(4)' : (isMerlin ? 'scale(2.75)' : (isTaskToad ? 'scale(8)' : (isFireImp ? 'scale(6)' : (isFirePig ? 'scale(6)' : (isRocksAnneOrJerry ? 'scale(3.75)' : (isRockSkin ? 'scale(5)' : 'scale(8)')))))));
+                }
                 
-                // Add hover animation for rock skins
-                if (isRockSkin) {
+                // Add hover animation for rock skins, Rocks Anne, Jerry, and Slime Buddy (only when skin is equipped)
+                if (skin && (isRockSkin || skin.id === 'rocks_anne' || skin.id === 'jerry' || skin.id === 'slime_buddy')) {
                     mainHeroSprite.classList.add('hero-hover-animation');
                 } else {
                     mainHeroSprite.classList.remove('hero-hover-animation');
@@ -200,8 +242,9 @@ class SkinsManager {
             void mainHeroSprite.offsetHeight;
             
             // Only use CSS animation for sprite sheets, NOT for GIF animations
-            // skin variable already declared above, reuse it
-            if (skin && skin.seamlessImage) {
+            // Check if this is a seamless image (GIF) or sprite sheet
+            const isSeamless = (skin && skin.seamlessImage === true);
+            if (isSeamless) {
                 // GIF animation - no CSS animation needed
                 mainHeroSprite.style.animation = 'none';
             } else if (appearance.frameCount.idle > 1) {
@@ -248,7 +291,14 @@ class SkinsManager {
                 
                 // Rock skins are larger, so use smaller scale
                 const isRockSkin = skinFocus.id === 'task_buddy' || skinFocus.id === 'rae_the_rock' || skinFocus.id === 'rock_star';
-                focusTimerSprite.style.transform = isRockSkin ? 'scale(3)' : 'scale(4)';
+                // Human skins need smaller scale in focus timer
+                const isHumanSkin = skinFocus.id === 'human_knight' || skinFocus.id === 'human_ranger';
+                // Fire pig and fire imp need proper scale
+                const isFirePigOrImp = skinFocus.id === 'pig' || skinFocus.id === 'imp';
+                // Slime Buddy and Merlin need appropriate focus timer scale
+                const isSlimeBuddy = skinFocus.id === 'slime_buddy';
+                const isMerlin = skinFocus.id === 'merlin';
+                focusTimerSprite.style.transform = isHumanSkin ? 'scale(2)' : (isSlimeBuddy ? 'scale(2)' : (isMerlin ? 'scale(3)' : (isFirePigOrImp ? 'scale(3)' : (isRockSkin ? 'scale(3)' : 'scale(4)'))));
                 
                 // GIF animation - no CSS animation needed
                 focusTimerSprite.style.animation = 'none';

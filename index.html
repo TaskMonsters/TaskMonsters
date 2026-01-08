@@ -1198,6 +1198,18 @@
             background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
             color: #fff;
             border: none;
+            animation: flash-glow-red 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes flash-glow-red {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(220, 38, 38, 0.8), 0 0 20px rgba(220, 38, 38, 0.6);
+                opacity: 1;
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(220, 38, 38, 1), 0 0 40px rgba(220, 38, 38, 0.8);
+                opacity: 0.9;
+            }
         }
 
         .task-badge {
@@ -4241,6 +4253,9 @@ input:checked + .toggle-slider:before {
         <button id="btnPrickler" class="btn-action" onclick="battleManager.playerPrickler()" style="display: none;">
             💣 Prickler <span class="item-count" id="pricklerCount">(0)</span>
         </button>
+        <button id="btnThrowingStar" class="btn-action" onclick="battleManager.playerThrowingStar()" style="display: none;">
+            ⭐ Throwing Star <span class="item-count" id="throwingStarCount">(0)</span>
+        </button>
         <button id="btnFreeze" class="btn-action" onclick="battleManager.playerFreeze()" style="display: none;">
             ❄️ Freeze <span class="item-count" id="freezeCount">(0)</span>
         </button>
@@ -4323,7 +4338,7 @@ input:checked + .toggle-slider:before {
     <div class="pet-rock-header" style="position: relative; background-image: url('assets/backgrounds/default-bg.png'); background-size: cover; background-position: center; padding: 40px 20px 30px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;">
 
         <div class="creature-container" style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 40px;">
-            <div style="width: 140px; height: 140px; margin: 50px auto 0; overflow: visible; position: relative; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 140px; height: 140px; margin: 30px auto 10px; overflow: visible; position: relative; display: flex; align-items: center; justify-content: center;">
                 <!-- Task Pal Tooltip -->
                 <div id="taskPalTooltip" class="task-pal-tooltip"></div>
                 <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Pink_Monster_Idle_4.png" style="width: 32px; height: 32px; image-rendering: pixelated; object-fit: none; object-position: 0 0; transform: scale(4); transform-origin: center center; animation: hero-idle-anim 0.8s steps(4) infinite; opacity: 0; transition: opacity 0.3s ease; display: block;"/>
@@ -4569,7 +4584,7 @@ input:checked + .toggle-slider:before {
             <!-- Your Tasks -->
             <div class="card">
                 <div class="card-header" style="cursor: pointer;" onclick="toggleYourTasksExpansion(event)">
-                    <div class="card-title">📝 Your Tasks <span id="yourTasksToggleIcon">▼</span></div>
+                    <div class="card-title">📝 Your Tasks <span id="yourTasksToggleIcon">▲</span></div>
                     <button class="btn-primary" onclick="event.stopPropagation(); openCreateTaskModal()">+ Add</button>
                 </div>
                 <div id="tasksList">
@@ -4580,7 +4595,7 @@ input:checked + .toggle-slider:before {
             <!-- Quick Tasks -->
             <div class="card">
                 <div class="card-header" style="cursor: pointer;" onclick="toggleQuickTasksExpansion(event)">
-                    <div class="card-title">⚡ Quick Tasks <span id="quickTasksToggleIcon">▼</span></div>
+                    <div class="card-title">⚡ Quick Tasks <span id="quickTasksToggleIcon">▲</span></div>
                     <button class="btn-primary" onclick="event.stopPropagation(); openQuickTaskModal()">+ Add</button>
                 </div>
                 <div id="quickTasksList">
@@ -5644,7 +5659,8 @@ input:checked + .toggle-slider:before {
                     // New user or existing user with battleInventory - just ensure all item keys exist with 0
                     const allBattleItemKeys = [
                         'fireball', 'spark', 'health_potion', 'attack_refill', 'defense_refill',
-                        'invisibility_cloak', 'prickler', 'freeze', 'blue_flame', 'procrastination_ghost'
+                        'invisibility_cloak', 'prickler', 'freeze', 'blue_flame', 'procrastination_ghost',
+                        'throwing_stars'
                     ];
                     
                     // Only add missing keys with 0 (don't override existing values)
@@ -5731,6 +5747,15 @@ input:checked + .toggle-slider:before {
                     mainHeroSprite.style.opacity = '1';
                 }
             }
+            
+            // TEST MODE: Set level to 50 for testing
+            gameState.jerryLevel = 50;
+            gameState.jerryCurrentXP = 0;
+            gameState.jerryXPToNext = Math.floor(100 * Math.pow(1.2, 50 - 1));
+            gameState.jerryXP = 50000; // Give plenty of XP coins for testing
+            gameState.health = 100; // Full health
+            gameState.isEgg = false; // Not an egg at level 50
+            console.log('[TEST MODE] Level set to 50 with 50000 XP Coins');
             
             // CRITICAL FIX: Initialize skinsManager AFTER gameState is fully loaded
             // This ensures equippedSkinId is available when skinsManager.init() runs
@@ -5822,9 +5847,15 @@ input:checked + .toggle-slider:before {
             const currentXP = Math.max(0, gameState.jerryCurrentXP || 0); // Clamp to prevent negative
             const xpToNext = gameState.jerryXPToNext || Math.floor(100 * Math.pow(1.2, level - 1));
             
-            // Energy (Health) - displays as health/100
-            document.getElementById('energyFill').style.width = `${health}%`;
-            document.getElementById('energyText').textContent = `${health}/100`;
+            // Calculate maxHP based on level (same formula as battleInit.js)
+            const baseHP = 100;
+            const hpPerLevel = 10;
+            const maxHP = baseHP + (level * hpPerLevel);
+            
+            // Energy (Health) - displays as health/maxHP (scaled with level)
+            const healthPercentage = (health / maxHP) * 100;
+            document.getElementById('energyFill').style.width = `${healthPercentage}%`;
+            document.getElementById('energyText').textContent = `${Math.round(health)}/${maxHP}`;
             
             // Add flickering effect to monster sprite when HP < 20
             const mainHeroSprite = document.getElementById('mainHeroSprite');
@@ -5947,40 +5978,8 @@ input:checked + .toggle-slider:before {
                 questAcceptanceEl.textContent = `${acceptanceRate}%`;
             }
             
-            // Apply active theme to background with pixel-perfect rendering and smooth transition
-            const petRockHeader = document.querySelector('.pet-rock-header');
-            if (petRockHeader && gameState.activeTheme) {
-                // Find theme background URL
-                const themeBackgrounds = {
-                    'dark_castle': 'assets/backgrounds/castle-dark.png',
-                    'night_city': 'assets/backgrounds/city-night.png',
-                    'ocean_depths': 'assets/backgrounds/ocean-deep.png',
-                    'mystic_temple': 'assets/backgrounds/temple-ruins.png',
-                    'cyber_grid': 'assets/backgrounds/cyber-grid.png',
-                    'synth_city': 'assets/backgrounds/themes/synth-city.png',
-                    'space': 'assets/backgrounds/themes/space.png',
-                    'vampire_castle': 'assets/backgrounds/themes/vampire-castle.png',
-                    'fort_of_illusion': 'assets/backgrounds/themes/fort-of-illusion.png',
-                    'vamp_castle_bg': 'assets/backgrounds/themes/vamp-castle-bg.png',
-                    'neon_city_sunset': 'assets/backgrounds/themes/neon-city-sunset.png',
-                    'bright_town': 'assets/backgrounds/themes/bright-town.png',
-                    'stone_ruins': 'assets/backgrounds/themes/stone-ruins.png',
-                    'skull_gates': 'assets/backgrounds/themes/skull-gates.png',
-                    'dark_gothic_castle': 'assets/backgrounds/themes/dark-gothic-castle.png'
-                };
-                const bgUrl = themeBackgrounds[gameState.activeTheme] || 'assets/backgrounds/default-bg.png';
-                
-                // Apply pixel-perfect rendering for pixel art themes
-                petRockHeader.style.imageRendering = 'pixelated';
-                petRockHeader.style.imageRendering = '-moz-crisp-edges';
-                petRockHeader.style.imageRendering = 'crisp-edges';
-                
-                // Smooth transition when switching themes
-                petRockHeader.style.transition = 'background-image 0.3s ease-in-out';
-                
-                // Apply background
-                petRockHeader.style.backgroundImage = `url('${bgUrl}')`;
-            }
+            // Theme application is handled by backgroundManager.js via refreshBackground()
+            // DO NOT apply themes here to avoid conflicts
             
             // Update creature image based on equipped items
             updateCreatureImage();
@@ -5993,6 +5992,11 @@ input:checked + .toggle-slider:before {
             
             // Update Task Pal tooltip
             updateTooltip(health, gameState.tasks || []);
+            
+            // Refresh background to ensure custom theme persists
+            if (typeof window.refreshBackground === 'function') {
+                window.refreshBackground();
+            }
         }
 
         // ===============================
@@ -7219,8 +7223,8 @@ input:checked + .toggle-slider:before {
                         const timeDiff = dueDate.getTime() - now.getTime();
                         const minutesDiff = Math.floor(timeDiff / (1000 * 60));
                         
-                        // Check if within warning thresholds
-                        if (minutesDiff <= 20 && minutesDiff > 0 && [20, 15, 10, 5, 2].includes(minutesDiff)) {
+                        // Check if within warning thresholds (20 minutes or less)
+                        if (minutesDiff <= 20 && minutesDiff > 0) {
                             isWarning = true;
                         }
                         
@@ -8175,10 +8179,10 @@ input:checked + .toggle-slider:before {
             
             if (content.style.display === 'none') {
                 content.style.display = 'block';
-                toggle.textContent = '▼';
+                toggle.textContent = '▲'; // Up arrow when expanded
             } else {
                 content.style.display = 'none';
-                toggle.textContent = '▶';
+                toggle.textContent = '▼'; // Down arrow when collapsed
             }
         }
 
@@ -8190,10 +8194,10 @@ input:checked + .toggle-slider:before {
             
             if (content.style.display === 'none') {
                 content.style.display = 'block';
-                toggle.textContent = '▼';
+                toggle.textContent = '▲'; // Up arrow when expanded
             } else {
                 content.style.display = 'none';
-                toggle.textContent = '▶';
+                toggle.textContent = '▼'; // Down arrow when collapsed
             }
         }
 
@@ -9250,6 +9254,22 @@ input:checked + .toggle-slider:before {
                 duration: 4,
                 levelRequired: 30,
                 maxQuantity: 10
+            },
+            throwing_stars: {
+                id: 'throwing_stars',
+                name: 'Throwing Stars',
+                image: 'assets/items/throwing_stars/thumbnail.png',
+                projectileImage: 'assets/items/throwing_stars/projectile.png',
+                description: '15-25 damage + reduces enemy\'s next attack (Max: 12)',
+                cost: 35,
+                effect: 'throwing_star_attack',
+                value: 25,
+                minDamage: 15,
+                maxDamage: 25,
+                weakenNextAttack: true,
+                weakenAmount: 0.5, // Reduces enemy's next attack by 50%
+                levelRequired: 13,
+                maxQuantity: 12
             }
         };
 
@@ -9490,8 +9510,11 @@ input:checked + .toggle-slider:before {
             
             // Handle healing items (can be used outside of battle)
             if (item.effect === 'heal') {
-                // Check if monster needs healing
-                const maxHP = 100;
+                // Calculate maxHP based on level (same formula as battleInit.js and updateUI)
+                const level = gameState.jerryLevel || 1;
+                const baseHP = 100;
+                const hpPerLevel = 10;
+                const maxHP = baseHP + (level * hpPerLevel);
                 
                 // Use the SAME logic as updateUI display: gameState.health || 75
                 // This ensures we read the same HP value that's shown to the user
@@ -9554,14 +9577,15 @@ input:checked + .toggle-slider:before {
                 updateShopDisplay();
                 updateUI();
                 
-                // Force update the health display
+                // Force update the health display (with scaled HP)
                 const healthFill = document.querySelector('.health-fill');
                 const healthText = document.querySelector('.health-text');
                 if (healthFill) {
-                    healthFill.style.width = `${gameState.health}%`;
+                    const healthPercentage = (gameState.health / maxHP) * 100;
+                    healthFill.style.width = `${healthPercentage}%`;
                 }
                 if (healthText) {
-                    healthText.textContent = `${Math.round(gameState.health)}/100`;
+                    healthText.textContent = `${Math.round(gameState.health)}/${maxHP}`;
                 }
                 
                 alert(`${item.emoji} ${item.name} used! Healed ${actualHealed} HP.\n\nBefore: ${currentHP} HP\nAfter: ${gameState.health} HP`);
@@ -10269,6 +10293,13 @@ input:checked + .toggle-slider:before {
             
             // Check energy after completing task (should increase since task is done)
             checkAndUpdateEnergy();
+            
+            // Refresh background to preserve custom theme
+            console.log('[Theme Debug] Active theme before refresh:', gameState.activeTheme);
+            if (typeof window.refreshBackground === 'function') {
+                window.refreshBackground();
+                console.log('[Theme Debug] refreshBackground called after task completion');
+            }
             
             updateUI();
             updateTasksDisplay();
@@ -11561,6 +11592,13 @@ input:checked + .toggle-slider:before {
             // Check energy after completing task (should increase since task is done)
             checkAndUpdateEnergy();
             
+            // Refresh background to preserve custom theme
+            console.log('[Theme Debug] Active theme before refresh:', gameState.activeTheme);
+            if (typeof window.refreshBackground === 'function') {
+                window.refreshBackground();
+                console.log('[Theme Debug] refreshBackground called after task completion');
+            }
+            
             updateUI();
             updateTasksDisplay();
             updateQuickTasksDisplay();
@@ -11682,10 +11720,13 @@ input:checked + .toggle-slider:before {
             console.log(`🎉 Level Up! Level ${gameState.jerryLevel}, Next threshold: ${gameState.jerryXPToNext}`);
             console.log(`XP Coins: ${gameState.jerryXP}, Current XP: ${gameState.jerryCurrentXP}`);
             
-            // Full heal on level up
-            gameState.health = 100;
+            // Full heal on level up (scaled to new maxHP based on level)
+            const baseHP = 100;
+            const hpPerLevel = 10;
+            const newMaxHP = baseHP + (gameState.jerryLevel * hpPerLevel);
+            gameState.health = newMaxHP;
             
-            console.log(`📊 Level up! HP fully restored to 100`);
+            console.log(`📊 Level up! HP fully restored to ${newMaxHP} (Level ${gameState.jerryLevel})`);
             
             // Check if egg should hatch at Level 10
             if (gameState.jerryLevel === 10 && gameState.isEgg) {
@@ -12499,6 +12540,7 @@ input:checked + .toggle-slider:before {
     <script src="js/boss-enemies.js"></script>
     <script src="js/enemy-init.js"></script>
     <script src="js/enemy-animation.js"></script>
+    <script src="js/focusAttackAnimation.js"></script>
     <script src="js/battleUI.js"></script>
     <script src="js/projectileSystem.js"></script>
     <script src="js/heroRollAnimation.js"></script>
@@ -12507,6 +12549,8 @@ input:checked + .toggle-slider:before {
     <script src="js/medusaProjectile.js"></script>
     <script src="js/bossProjectiles.js"></script>
     <script src="js/boltProjectile.js"></script>
+    <script src="js/throwingStarAttack.js"></script>
+    <script src="js/mirrorAttackAnimation.js"></script>
     <script src="js/lootSystem.js"></script>
     <script src="js/battleManager.js"></script>
     <script src="js/battleTutorial.js"></script>

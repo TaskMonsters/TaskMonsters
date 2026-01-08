@@ -225,8 +225,23 @@ class BattleManager {
         await playWakeUpSequence(this.enemy);
         addBattleLog('⚔️ Battle Start!');
 
-        // Enemy attacks first
-        await this.enemyTurn();
+        // Random first turn - 50% chance for player or enemy
+        const playerGoesFirst = Math.random() < 0.5;
+        
+        if (playerGoesFirst) {
+            addBattleLog('👊 You strike first!');
+            this.state = BattleState.PLAYER_TURN;
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            
+            // Start turn timer for player
+            if (typeof startTurnTimer === 'function') {
+                startTurnTimer(3000);
+            }
+        } else {
+            addBattleLog('⚡ Enemy attacks first!');
+            await this.enemyTurn();
+        }
     }
 
     // Player attacks
@@ -418,11 +433,13 @@ class BattleManager {
         const focusMinutes = window.gameState?.totalFocusMinutes || 0;
         const hasFocusAttack = focusMinutes >= 10 && !this.focusAttackUsed;
         
+        let focusAttackTriggered = false;
         if (hasFocusAttack) {
             // 30% chance to trigger focus attack on regular attack
             const triggerChance = Math.random();
             if (triggerChance <= 0.3) {
                 this.focusAttackUsed = true;
+                focusAttackTriggered = true;
                 // Calculate damage: 25 base + 1 per 10 additional minutes, max 35
                 const bonusDamage = Math.min(Math.floor((focusMinutes - 10) / 10), 10);
                 const focusAttackDamage = 25 + bonusDamage;
@@ -457,6 +474,11 @@ class BattleManager {
             }
         }
 
+        // Play focus attack explosion animation if triggered
+        if (focusAttackTriggered && window.playFocusAttackExplosion) {
+            await window.playFocusAttackExplosion();
+        }
+        
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
@@ -1152,6 +1174,12 @@ class BattleManager {
             window.audioManager.playSound('cloak_use', 0.8);
         }
         
+        // Play mirror animation
+        const heroSprite = document.getElementById('heroSprite');
+        if (window.playMirrorAnimation && heroSprite) {
+            await playMirrorAnimation(heroSprite);
+        }
+        
         addBattleLog('🪞 Mirror Attack activated! Enemy\'s next attack will be reflected!');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -1159,7 +1187,7 @@ class BattleManager {
         // Save game state
         saveGameState();
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         await this.enemyTurn();
     }
 
@@ -1595,11 +1623,11 @@ class BattleManager {
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
                 this.showHeroDamageAnimation(damage);
                 
-                // Drain attack gauge to 5%
-                this.attackGauge = 5;
+                // Drain attack gauge to 30% (reduced from 5% for better balance)
+                this.attackGauge = 30;
                 
                 addBattleLog(`🐉 ${this.enemy.name} dealt ${damage} damage!`);
-                addBattleLog(`⚡ Your attack gauge was drained to 5%!`);
+                addBattleLog(`⚡ Your attack gauge was drained to 30%!`);
                 
                 startHeroAnimation('hurt');
                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1920,6 +1948,14 @@ class BattleManager {
 
         // Calculate damage with VARIABLE DAMAGE for ALL enemies
         let baseDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+        
+        // Apply throwing star weaken effect if active
+        if (this.enemyAttackWeakened) {
+            baseDamage = Math.floor(baseDamage * (1 - (this.enemyWeakenAmount || 0.5)));
+            addBattleLog('⭐ Enemy attack weakened by throwing star!');
+            this.enemyAttackWeakened = false; // Reset after one attack
+            this.enemyWeakenAmount = 0;
+        }
         
         // Disruption Dragon damage range (20-30)
         if (this.enemy.hasSpecialAttack && this.enemy.damageRange) {

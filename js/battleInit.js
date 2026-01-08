@@ -20,23 +20,13 @@ const ARENA_POOL = [
 ];
 
 let currentArenaIndex = 0;
-let battlesSinceArenaChange = 0;
-const BATTLES_PER_ARENA = 5; // Rotate arena every 5 battles as requested by user
 
 function getNextArenaBackground() {
     if (!ARENA_POOL || ARENA_POOL.length === 0) return null;
     
-    // Increment battle counter
-    battlesSinceArenaChange++;
-    
-    // Only rotate arena every 3 battles
-    if (battlesSinceArenaChange >= BATTLES_PER_ARENA) {
-        currentArenaIndex = (currentArenaIndex + 1) % ARENA_POOL.length;
-        battlesSinceArenaChange = 0;
-        console.log(`[Arena] Rotating to NEW arena ${currentArenaIndex + 1}/${ARENA_POOL.length}: ${ARENA_POOL[currentArenaIndex]}`);
-    } else {
-        console.log(`[Arena] Keeping current arena (${battlesSinceArenaChange}/${BATTLES_PER_ARENA} battles): ${ARENA_POOL[currentArenaIndex]}`);
-    }
+    // Rotate to next arena background with EVERY battle for maximum variety
+    currentArenaIndex = (currentArenaIndex + 1) % ARENA_POOL.length;
+    console.log(`[Arena] Rotating to arena ${currentArenaIndex + 1}/${ARENA_POOL.length}: ${ARENA_POOL[currentArenaIndex]}`);
     
     return ARENA_POOL[currentArenaIndex];
 }
@@ -426,9 +416,18 @@ function startTestBattle() {
         baseDamage = 6 + Math.floor(level / 3);  // Grows every 3 levels
     }
     
+    // Calculate HP based on level (10 HP per level)
+    const baseHP = 100;
+    const hpPerLevel = 10;
+    const maxHP = baseHP + (level * hpPerLevel);
+    
+    // Use saved health if available, otherwise use full HP
+    // Ensure saved health doesn't exceed new maxHP
+    const currentHP = gameState.health ? Math.min(gameState.health, maxHP) : maxHP;
+    
     const heroData = {
-        hp: gameState.health || 100,
-        maxHP: 100,
+        hp: currentHP,
+        maxHP: maxHP,
         attack: gameState.attack || baseDamage,  // Use saved attack if available
         defense: gameState.defense || (5 + level),  // Use saved defense if available
         level: level,

@@ -295,6 +295,22 @@ function updateActionButtons(hero) {
         }
     }
 
+    // Throwing Star requires 25 attack gauge AND inventory (unlocked at level 13)
+    const btnThrowingStar = document.getElementById('btnThrowingStar');
+    if (btnThrowingStar) {
+        if (gameState.unlockedBattleItems?.includes('throwing_stars')) {
+            btnThrowingStar.style.display = '';
+            const throwingStarCount = gameState.battleInventory?.throwing_stars || 0;
+            const throwingStarCountSpan = btnThrowingStar.querySelector('.item-count');
+            if (throwingStarCountSpan) {
+                throwingStarCountSpan.textContent = `(${throwingStarCount})`;
+            }
+            btnThrowingStar.disabled = battleManager.attackGauge < 25 || throwingStarCount === 0;
+        } else {
+            btnThrowingStar.style.display = 'none';
+        }
+    }
+
     // Freeze requires 35 attack gauge AND inventory (unlocked at level 8)
     const btnFreeze = document.getElementById('btnFreeze');
     if (btnFreeze) {

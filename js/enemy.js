@@ -25,10 +25,10 @@ class Enemy {
         }
         
         // BALANCED: Moderate attack scaling for fair difficulty progression
-        // Lower scaling at early levels, increases gradually
-        this.attack = this.baseAttack + Math.floor(playerLevel * 1.5); // Reduced from 2.5 to 1.5
-        this.defense = this.baseDefense + Math.floor(playerLevel * 1.0); // Reduced from 1.5 to 1.0
-        this.maxHP = Math.floor((this.baseHP + playerLevel * 5) * (1 + scaling.hpBonus));
+        // Further reduced scaling for better balance at high levels
+        this.attack = this.baseAttack + Math.floor(playerLevel * 1.0); // Reduced from 1.5 to 1.0
+        this.defense = this.baseDefense + Math.floor(playerLevel * 0.7); // Reduced from 1.0 to 0.7
+        this.maxHP = Math.floor((this.baseHP + playerLevel * 4) * (1 + scaling.hpBonus)); // Reduced from 5 to 4
         this.hp = this.maxHP;
     }
 
@@ -474,16 +474,13 @@ function createRandomEnemy(playerLevel) {
         return createOverthinkerEnemy(effectiveEnemyLevel);
     }
     
-    // Filter enemies available at effective enemy level (not player level)
-    let availableEnemies = ENEMY_TYPES.filter(e => effectiveEnemyLevel >= e.minLevel);
+    // NEW: Select from ALL enemy types regardless of player level
+    // This provides variety - enemies of all levels can appear
+    const availableEnemies = [...ENEMY_TYPES]; // All enemies available
     
-    // Octopus unlock at effective enemy level 7 (player level 16)
-    if (effectiveEnemyLevel < 7) {
-        availableEnemies = availableEnemies.filter(e => e.name !== 'Octopus');
-    }
-    
-    // Use rotation system for enemy selection (7-level tier rotation)
-    const enemyData = getNextEnemyFromRotation(availableEnemies, playerLevel);
+    // Randomly select an enemy from all available enemies
+    const randomIndex = Math.floor(Math.random() * availableEnemies.length);
+    const enemyData = availableEnemies[randomIndex];
     
     const enemy = new Enemy(
         enemyData.name,

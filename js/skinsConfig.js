@@ -54,13 +54,13 @@ const SKINS_CONFIG = {
         emoji: '🐷',
         thumbnail: 'assets/skins/pig/thumbnail.png',
         animations: {
-            idle: 'assets/skins/pig/Idle.gif',
+            idle: 'assets/skins/pig/idle_animated.gif',
             walk: 'assets/skins/pig/Walk.gif',
             attack: 'assets/skins/pig/Attack.gif',
             hurt: 'assets/skins/pig/Hurt.gif',
             death: 'assets/skins/pig/Die.gif',
-            jump: 'assets/skins/pig/Idle.gif',
-            sleep: 'assets/skins/pig/Idle.gif'
+            jump: 'assets/skins/pig/idle_animated.gif',
+            sleep: 'assets/skins/pig/idle_animated.gif'
         },
         frameCount: {
             idle: 1,
@@ -119,6 +119,45 @@ const SKINS_CONFIG = {
             jump: 416,
             sleep: 512
         }
+    },
+    
+    // FLYING EYE - Level 13, Mid-game skin
+    flying_eye: {
+        id: 'flying_eye',
+        name: 'Flying Eye',
+        price: 700,
+        levelRequired: 13,
+        tier: 'standard',
+        emoji: '👁️',
+        thumbnail: 'assets/skins/flying-eye/thumbnail.png',
+        animations: {
+            idle: 'assets/skins/flying-eye/FlyingEye.gif',
+            walk: 'assets/skins/flying-eye/FlyingEye.gif',
+            attack: 'assets/skins/flying-eye/FlyingEye.gif',
+            hurt: 'assets/skins/flying-eye/FlyingEye.gif',
+            death: 'assets/skins/flying-eye/FlyingEye.gif',
+            jump: 'assets/skins/flying-eye/FlyingEye.gif',
+            sleep: 'assets/skins/flying-eye/FlyingEye.gif'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 32,
+            walk: 32,
+            attack: 32,
+            hurt: 32,
+            death: 32,
+            jump: 32,
+            sleep: 32
+        },
+        seamlessImage: true  // Seamless animated GIF
     },
     
     white_cat: {
@@ -390,7 +429,7 @@ const SKINS_CONFIG = {
         levelRequired: 15,
         tier: 'standard',
         emoji: '🪨',
-        thumbnail: 'assets/skins/Jerry-thumbnail.png',
+        thumbnail: 'assets/skins/jerry-thumbnail.png',
         animations: {
             idle: 'assets/skins/Jerry.gif',
             walk: 'assets/skins/Jerry.gif',
@@ -591,6 +630,86 @@ const SKINS_CONFIG = {
 
     // LADY IMP - REMOVED FROM SHOP (still exists for users who already own it)
 
+    // SLIME BUDDY - Level 40 (1300 XP)
+    slime_buddy: {
+        id: 'slime_buddy',
+        name: 'Slime Buddy',
+        price: 1300,
+        levelRequired: 40,
+        tier: 'premium',
+        emoji: '🟢',
+        thumbnail: 'assets/skins/slime_buddy/thumbnail.png',
+        animations: {
+            idle: 'assets/skins/slime_buddy/idle.gif',
+            walk: 'assets/skins/slime_buddy/idle.gif',
+            attack: 'assets/skins/slime_buddy/attack.gif',
+            hurt: 'assets/skins/slime_buddy/idle.gif',
+            death: 'assets/skins/slime_buddy/idle.gif',
+            jump: 'assets/skins/slime_buddy/idle.gif',
+            sleep: 'assets/skins/slime_buddy/idle.gif'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 118,
+            walk: 118,
+            attack: 26,
+            hurt: 118,
+            death: 118,
+            jump: 118,
+            sleep: 118
+        },
+        seamlessImage: true,  // Animated GIF
+        spriteSize: { width: 118, height: 79 }
+    },
+
+    // MERLIN - Level 50 (2000 XP)
+    merlin: {
+        id: 'merlin',
+        name: 'Merlin',
+        price: 2000,
+        levelRequired: 50,
+        tier: 'legendary',
+        emoji: '🧙',
+        thumbnail: 'assets/skins/merlin/thumbnail.png',
+        animations: {
+            idle: 'assets/skins/merlin/idle.gif',
+            walk: 'assets/skins/merlin/idle.gif',
+            attack: 'assets/skins/merlin/attack.gif',
+            hurt: 'assets/skins/merlin/idle.gif',
+            death: 'assets/skins/merlin/idle.gif',
+            jump: 'assets/skins/merlin/idle.gif',
+            sleep: 'assets/skins/merlin/idle.gif'
+        },
+        frameCount: {
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
+        },
+        spriteSheetWidth: {
+            idle: 48,
+            walk: 48,
+            attack: 48,
+            hurt: 48,
+            death: 48,
+            jump: 48,
+            sleep: 48
+        },
+        seamlessImage: true,  // Animated GIF
+        spriteSize: { width: 48, height: 48 }
+    },
+
     // EYE MONSTER - Level 17 (1000 XP)
     eye_monster: {
         id: 'eye_monster',
@@ -665,19 +784,22 @@ function getActiveMonsterAppearance(baseMonsterId, equippedSkinId) {
     
     return {
         animations: {
-            idle: `assets/heroes/${prefix}_Idle_4.png`,
-            walk: `assets/heroes/${prefix}_Walk_4.png`,
-            attack: `assets/heroes/${prefix}_Attack_4.png`,
-            jump: `assets/heroes/${prefix}_Jump_8.png`,
-            roll: `assets/heroes/${prefix}_Roll.png`
+            idle: `assets/heroes/${prefix}_Idle.gif`,
+            walk: `assets/heroes/${prefix}_Walk.gif`,
+            attack: `assets/heroes/${prefix}_Attack.gif`,
+            jump: `assets/heroes/${prefix}_Jump.gif`,
+            die: `assets/heroes/${prefix}_Die.gif`
         },
         frameCount: {
-            idle: 4,
-            walk: 4,
-            attack: 4,
-            jump: 8,
-            roll: 6
+            idle: 1,  // GIF animations are seamless
+            walk: 1,
+            attack: 1,
+            jump: 1,
+            die: 1
         },
+        spriteSheetWidth: {},  // Not needed for GIF animations
+        spriteSize: { width: 32, height: 32 },
+        seamlessImage: true,  // GIF animations are seamless
         isSkin: false,
         skinId: null
     };
