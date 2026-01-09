@@ -123,12 +123,6 @@ class SpriteAnimationManager {
      * Update all monster visuals with current equipped skin
      */
     async updateAllMonsterVisuals(baseMonster, equippedSkinId) {
-        // CRITICAL: Don't update visuals if monster is in egg form
-        if (window.gameState && window.gameState.isEgg) {
-            console.log('[SpriteAnimationManager] Skipping visual update - monster is in egg form');
-            return;
-        }
-        
         const appearance = window.getActiveMonsterAppearance(baseMonster, equippedSkinId);
         
         // Update main app hero sprite

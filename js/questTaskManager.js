@@ -73,21 +73,6 @@ class QuestTaskManager {
         } else {
             console.error('addJerryXP function not found!');
         }
-        
-        // Track habit completion for quest tasks
-        if (window.trackTaskCompletion) {
-            window.trackTaskCompletion(task, false);
-        }
-        
-        // Update habits display
-        if (window.updateHabitsDisplay) {
-            window.updateHabitsDisplay();
-        }
-        
-        // Track achievement progress for quest tasks
-        if (window.achievementTracker) {
-            window.achievementTracker.trackTaskCompletion(task, false);
-        }
 
         // Remove from quest tasks
         this.questTasks = this.questTasks.filter(t => t.id !== taskId);

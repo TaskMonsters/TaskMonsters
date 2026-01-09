@@ -109,7 +109,7 @@ class QuestGiver {
             { id: 'q67', text: 'Close your eyes and feel your heartbeat', category: 'Grounding', difficulty: 'Easy', xp: 10, duration: 24 },
             { id: 'q68', text: 'Imagine a calm place and picture yourself there', category: 'Mindfulness', difficulty: 'Easy', xp: 15, duration: 24 },
             { id: 'q69', text: 'Wash your face or hands with warm water', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
-            { id: 'q70', text: 'Win a battle with your monster', category: 'Battle', difficulty: 'Medium', xp: 25, duration: 24 },
+            { id: 'q70', text: 'Smile at your Task Monster', category: 'Creative', difficulty: 'Easy', xp: 10, duration: 24 },
 
             // NEW QUESTS - Universal Low-Friction Tasks (q71-q90)
             { id: 'q71', text: 'Take 5 minutes to clean your phone screen', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
@@ -131,19 +131,7 @@ class QuestGiver {
             { id: 'q87', text: 'Reply to one message or email you have been avoiding', category: 'Productivity', difficulty: 'Medium', xp: 20, duration: 48 },
             { id: 'q88', text: 'Make a simple list of three things you want to improve this week', category: 'Productivity', difficulty: 'Easy', xp: 15, duration: 24 },
             { id: 'q89', text: 'Prepare a glass of water and drink it slowly and mindfully', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
-            { id: 'q90', text: 'Step away from all screens for 60 seconds and look around your space', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 },
-
-            // NEW QUESTS - Additional Variety (q91-q100)
-            { id: 'q91', text: 'Complete 3 battles in a row without losing', category: 'Battle', difficulty: 'Hard', xp: 40, duration: 48 },
-            { id: 'q92', text: 'Use the focus timer for 25 minutes straight', category: 'Focus', difficulty: 'Medium', xp: 30, duration: 24 },
-            { id: 'q93', text: 'Defeat an enemy using only special attacks', category: 'Battle', difficulty: 'Hard', xp: 35, duration: 48 },
-            { id: 'q94', text: 'Complete 5 tasks from your task list today', category: 'Productivity', difficulty: 'Medium', xp: 30, duration: 24 },
-            { id: 'q95', text: 'Win a battle without taking any damage', category: 'Battle', difficulty: 'Hard', xp: 50, duration: 48 },
-            { id: 'q96', text: 'Use the focus timer 3 times in one day', category: 'Focus', difficulty: 'Medium', xp: 35, duration: 24 },
-            { id: 'q97', text: 'Equip a new skin for your monster', category: 'Creative', difficulty: 'Easy', xp: 15, duration: 24 },
-            { id: 'q98', text: 'Complete 2 Merlin quests in a row', category: 'Quest', difficulty: 'Medium', xp: 30, duration: 48 },
-            { id: 'q99', text: 'Reach a 3-day task completion streak', category: 'Productivity', difficulty: 'Hard', xp: 40, duration: 72 },
-            { id: 'q100', text: 'Defeat a boss enemy in battle mode', category: 'Battle', difficulty: 'Hard', xp: 45, duration: 48 }
+            { id: 'q90', text: 'Step away from all screens for 60 seconds and look around your space', category: 'Self-Care', difficulty: 'Easy', xp: 10, duration: 24 }
         ];
     }
 
@@ -424,23 +412,15 @@ class QuestGiver {
 
         questGiverUI.classList.remove('hidden');
         
-        // Play quest giver music - CRITICAL: Must play when Quest Giver UI is shown
-        console.log('🎵 [QuestGiver] Attempting to play quest giver music...');
-        console.log('🎵 [QuestGiver] audioManager exists:', !!window.audioManager);
-        console.log('🎵 [QuestGiver] UI hidden:', questGiverUI.classList.contains('hidden'));
-        
-        if (window.audioManager) {
-            // Small delay to ensure UI is rendered and user interaction has occurred
+        // Play quest giver music only if UI is actually visible
+        if (window.audioManager && !questGiverUI.classList.contains('hidden')) {
+            // Small delay to ensure UI is rendered
             setTimeout(() => {
                 if (!questGiverUI.classList.contains('hidden')) {
-                    console.log('🎵 [QuestGiver] Calling playQuestMusic()');
+                    console.log('🎵 Playing quest giver music');
                     window.audioManager.playQuestMusic();
-                } else {
-                    console.warn('🎵 [QuestGiver] UI was hidden, skipping music');
                 }
-            }, 200);
-        } else {
-            console.error('🎵 [QuestGiver] audioManager not found!');
+            }, 100);
         }
     }
 
@@ -856,13 +836,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (yesBtn) {
         yesBtn.addEventListener('click', () => {
-            // Initialize audio on user interaction - CRITICAL for iOS
+            // Initialize audio on user interaction
             if (window.audioManager) {
                 window.audioManager.init();
-                // Retry any pending quest music that was blocked by autoplay
-                if (window.audioManager.retryQuestMusic) {
-                    window.audioManager.retryQuestMusic();
-                }
             }
             
             // Hide modal

@@ -97,6 +97,14 @@
         window.saveGameState();
       }
       updateBackground();
+      
+      // FIX: Restart monster animation after theme change
+      setTimeout(() => {
+        if (window.skinsManager && typeof window.skinsManager.updateAllMonsterVisuals === 'function') {
+          window.skinsManager.updateAllMonsterVisuals();
+          console.log('[BackgroundManager] Monster animations restarted after theme apply');
+        }
+      }, 100);
     }
   };
   
@@ -107,6 +115,14 @@
         window.saveGameState();
       }
       updateBackground();
+      
+      // FIX: Restart monster animation after theme change
+      setTimeout(() => {
+        if (window.skinsManager && typeof window.skinsManager.updateAllMonsterVisuals === 'function') {
+          window.skinsManager.updateAllMonsterVisuals();
+          console.log('[BackgroundManager] Monster animations restarted after theme unapply');
+        }
+      }, 100);
     }
   };
   

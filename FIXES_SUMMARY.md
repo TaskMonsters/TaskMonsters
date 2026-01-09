@@ -1,188 +1,65 @@
-# Task Monsters - Bug Fixes & Enhancements Summary
+# Task Monsters v21 - Shop Container Fixes Summary
 
-## Overview
-All critical bugs have been fixed and new themes have been added to the Task Monsters app.
+## Changes Made
 
----
+### 1. Shop Container Styling Fixes
 
-## ✅ FIXES COMPLETED
+#### Problem
+The right container (Asteroid Attack) in the shop had inconsistent padding and spacing compared to the left container (Potion). The right container used a complex nested flex layout with `flex-grow`, `padding-bottom: 4px`, and extra wrapper divs that caused improper button positioning.
 
-### 1. **Sprite Sheet Animation Bug** ✅
-**Problem:** Sprite sheets showed rows of frames on initial load before animation started
+#### Solution
+- **Simplified HTML Structure**: Removed nested flex containers with `flex-grow` and `padding-bottom: 4px`
+- **Flattened Layout**: Changed from complex nested structure to simple flat structure matching the left container
+- **Consistent Spacing**: All shop items now use the same direct child structure without extra wrapper divs
 
-**Solution:** 
-- Applied CSS animation immediately on page load
-- Added `opacity: 0` initially, then fade in after animation is applied
-- Modified lines 4318 in index.html
+#### Files Modified
+1. `/home/ubuntu/task-monsters-v21-fixed/index.html`
+   - Line ~7868: Fixed E-Store items rendering (Asteroid Attack, etc.)
+   - Line ~7581: Fixed Themes shop rendering
 
-**Status:** FIXED - Sprites now animate smoothly from the start
+2. `/home/ubuntu/task-monsters-v21-fixed/js/skinsManager.js`
+   - Line ~291: Simplified skins card structure to remove nested flex layout
 
----
+3. `/home/ubuntu/task-monsters-v21-fixed/css/shop-fix.css` (NEW FILE)
+   - Added consistent styling for `.shop-item-quantity`
+   - Added consistent styling for `.shop-buy-btn` to match `.buy-now-btn`
+   - Ensures proper spacing and padding across all shop containers
 
-### 2. **Level 1 Egg Display Bug** ✅
-**Problem:** New players at Level 1 saw evolved monster instead of egg
+4. `/home/ubuntu/task-monsters-v21-fixed/index.html`
+   - Line ~9445: Added link to `shop-fix.css` stylesheet
 
-**Root Cause:**
-- DEMO code was setting `isEgg = false` in onboarding
-- Level was not being initialized (null instead of 1)
+### 2. Blue Flame Integration
 
-**Solution:**
-- Removed DEMO code from `completeOnboarding()` function
-- Set proper initialization: `level: 1`, `isEgg: true`
-- Enhanced egg display logic in `loadGameState()`
+#### Problem
+The Fireball button in battle mode used a fire emoji (🔥) instead of the provided blue flame image.
 
-**Files Modified:**
-- `/home/ubuntu/project/index.html` (lines ~12600-12620)
+#### Solution
+- Replaced the fire emoji with the blue flame image that was already in the assets folder
+- Added proper sizing and alignment for the image
 
-**Status:** FIXED - Tested with Benny, egg displays correctly at Level 1
+#### Files Modified
+1. `/home/ubuntu/task-monsters-v21-fixed/index.html`
+   - Line ~3734: Updated Fireball button to use `<img src="assets/blue-flame.png">` instead of emoji
+   - Added inline styles for proper sizing: `width: 20px; height: 20px; vertical-align: middle; margin-right: 4px;`
 
----
+## Before vs After
 
-### 3. **Rock Skins Restored** ✅
-**Problem:** Jerry, Rock Star, and Rocks Anne skins were missing
+### Before
+- **Right Container**: Used nested flex with `flex-grow: 1` and `padding-bottom: 4px`, causing buttons to have inconsistent bottom spacing
+- **Fireball Button**: Used 🔥 emoji
 
-**Solution:**
-- Added all three rock skins to `skinsConfig.js` with animated GIF support
-- Configured proper paths and costs:
-  - Jerry: 900 XP Coins
-  - Rock Star: 1000 XP Coins, Level 18 required
-  - Rocks Anne: 900 XP Coins
+### After
+- **All Containers**: Use flat structure with consistent spacing, matching the left container's layout
+- **Fireball Button**: Uses blue flame image from assets
 
-**Files Modified:**
-- `/home/ubuntu/project/js/skinsConfig.js`
-- Rock skin GIFs placed in `/home/ubuntu/project/assets/skins/`
+## Testing
+The application should now display:
+1. All shop containers (E-Store, Themes, Skins) with consistent button layout and padding
+2. Blue flame image on the Fireball button during battle mode
 
-**Status:** VERIFIED - All three rock skins appear in shop
+## Files Created
+- `/home/ubuntu/task-monsters-v21-fixed/css/shop-fix.css`
 
----
-
-### 4. **Rock Skin Thumbnail Sizes** ✅
-**Problem:** Jerry thumbnail was 3.1MB (2048x2048), much larger than others
-
-**Solution:**
-- Resized all rock skins to consistent 256x256 pixels
-- Jerry: 3.1MB → 69KB
-- Rock Star: 45KB → 19KB  
-- Rocks Anne: 51KB → 20KB
-
-**Status:** FIXED - All thumbnails now consistent size
-
----
-
-## 🎨 NEW THEMES ADDED
-
-### Theme Configuration Complete ✅
-
-**New Themes Added:**
-
-1. **Bright Town** - 1000 XP Coins
-   - Colorful medieval town with orange roofs
-   - File: `bright-town.png` (34KB)
-
-2. **Stone Ruins** - 1200 XP Coins
-   - Purple ruins with ancient castle arches
-   - File: `stone-ruins.png` (230KB)
-
-3. **Skull Gates** - 1500 XP Coins, Level 25+
-   - Haunted dungeon entrance with skull gateway
-   - File: `skull-gates.png` (23KB)
-
-4. **Dark Gothic Castle** - 2000 XP Coins, Level 50+
-   - Majestic dark castle silhouette at dusk
-   - File: `dark-gothic-castle.png` (22KB)
-
-**Implementation Details:**
-- Added themes to display array in `updateThemesDisplay()` (line ~8862-8894)
-- Added themes to purchase array in `purchaseTheme()` (line ~8960-8963)
-- Implemented theme application in `updateUI()` function (line ~5939-5962)
-- Themes now dynamically change the pet-rock-header background
-
-**Files Modified:**
-- `/home/ubuntu/project/index.html`
-- Theme images in `/home/ubuntu/project/assets/backgrounds/themes/`
-
-**Status:** READY FOR TESTING
-
----
-
-## 📋 EXISTING THEMES (Verified Working)
-
-1. Vampire Castle - 400 XP
-2. Fort of Illusion - 500 XP
-3. Vampire Castle Night - 700 XP
-4. Neon City Sunset - 800 XP
-5. Dark Castle - 900 XP
-6. Night City - 900 XP
-7. Ocean Depths - 900 XP
-8. Mystic Temple - 900 XP
-9. Cyber Grid - 900 XP
-10. Synth City - 900 XP
-11. Space - 900 XP
-
-**Total Themes:** 15 (11 existing + 4 new)
-
----
-
-## 🧪 TESTING STATUS
-
-### Completed Tests:
-- ✅ Egg displays correctly at Level 1 (tested with Benny)
-- ✅ Rock skins appear in shop (Jerry, Rock Star, Rocks Anne visible)
-- ✅ Rock skin thumbnails properly sized
-- ✅ Sprite animation bug fixed (no rows of frames)
-
-### Pending Tests:
-- ⏳ All 15 themes display in Themes shop
-- ⏳ Themes can be purchased with XP Coins
-- ⏳ Themes can be equipped and change background
-- ⏳ Level requirements enforced (Skull Gates Level 25+, Dark Gothic Castle Level 50+)
-
----
-
-## 📦 FILES MODIFIED
-
-### Core Files:
-1. `/home/ubuntu/project/index.html`
-   - Sprite animation fix
-   - Egg display logic fix
-   - Theme system implementation
-   - Theme purchase/equip functions
-
-2. `/home/ubuntu/project/js/skinsConfig.js`
-   - Added Jerry, Rock Star, Rocks Anne skins
-
-### Asset Files Added:
-- `/home/ubuntu/project/assets/skins/Jerry.gif` (69KB)
-- `/home/ubuntu/project/assets/skins/rock-star.gif` (19KB)
-- `/home/ubuntu/project/assets/skins/rocks-anne.gif` (20KB)
-- `/home/ubuntu/project/assets/backgrounds/themes/bright-town.png` (34KB)
-- `/home/ubuntu/project/assets/backgrounds/themes/stone-ruins.png` (230KB)
-- `/home/ubuntu/project/assets/backgrounds/themes/skull-gates.png` (23KB)
-- `/home/ubuntu/project/assets/backgrounds/themes/dark-gothic-castle.png` (22KB)
-
----
-
-## 🚀 DEPLOYMENT READY
-
-All fixes have been implemented and are ready for final testing and deployment.
-
-**Next Steps:**
-1. Complete browser testing of all themes
-2. Verify theme purchase and equip functionality
-3. Test level requirements for premium themes
-4. Package for production deployment
-
----
-
-## 📝 NOTES
-
-- Tutorial modal is persistent and requires manual skip - this is expected behavior
-- Browser caching may require hard refresh (Ctrl+Shift+R) to see changes
-- All theme images are optimized and properly sized
-- Theme system is fully functional with purchase, equip, and background application
-
----
-
-**Date:** January 6, 2026  
-**Version:** Task Monsters v21  
-**Status:** ✅ All Critical Bugs Fixed, Ready for Testing
+## Files Modified
+- `/home/ubuntu/task-monsters-v21-fixed/index.html`
+- `/home/ubuntu/task-monsters-v21-fixed/js/skinsManager.js`

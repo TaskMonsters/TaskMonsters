@@ -4,23 +4,23 @@
  */
 
 const SKINS_CONFIG = {
-    // IMP SKIN - Level 10, Mid-game skin with fireball attack
+    // IMP SKIN - Level 2, Early game skin with fireball attack
     imp: {
         id: 'imp',
         name: 'Fire Imp',
-        price: 800,
-        levelRequired: 10,
+        price: 200,
+        levelRequired: 2,
         tier: 'standard',
         emoji: '👹',
         thumbnail: 'assets/skins/imp/thumbnail.png',
         animations: {
-            idle: 'assets/skins/imp/Idle.gif',
-            walk: 'assets/skins/imp/Walk.gif',
-            attack: 'assets/skins/imp/Attack.gif',
-            hurt: 'assets/skins/imp/Hurt.gif',
-            death: 'assets/skins/imp/Die.gif',
-            jump: 'assets/skins/imp/Idle.gif',
-            sleep: 'assets/skins/imp/Idle.gif'
+            idle: 'assets/skins/imp/idle_animated.gif',
+            walk: 'assets/skins/imp/idle_animated.gif',
+            attack: 'assets/skins/imp/idle_animated.gif',
+            hurt: 'assets/skins/imp/idle_animated.gif',
+            death: 'assets/skins/imp/idle_animated.gif',
+            jump: 'assets/skins/imp/idle_animated.gif',
+            sleep: 'assets/skins/imp/idle_animated.gif'
         },
         frameCount: {
             idle: 1,
@@ -44,21 +44,21 @@ const SKINS_CONFIG = {
         hasFireball: true  // Special flag for fireball attack
     },
 
-    // PIG SKIN - Level 12, Mid-game skin
+    // PIG SKIN - Level 2, Early game skin
     pig: {
         id: 'pig',
         name: 'Fire Pig',
-        price: 1000,
-        levelRequired: 12,
+        price: 300,
+        levelRequired: 2,
         tier: 'standard',
         emoji: '🐷',
         thumbnail: 'assets/skins/pig/thumbnail.png',
         animations: {
             idle: 'assets/skins/pig/idle_animated.gif',
-            walk: 'assets/skins/pig/Walk.gif',
-            attack: 'assets/skins/pig/Attack.gif',
-            hurt: 'assets/skins/pig/Hurt.gif',
-            death: 'assets/skins/pig/Die.gif',
+            walk: 'assets/skins/pig/idle_animated.gif',
+            attack: 'assets/skins/pig/idle_animated.gif',
+            hurt: 'assets/skins/pig/idle_animated.gif',
+            death: 'assets/skins/pig/idle_animated.gif',
             jump: 'assets/skins/pig/idle_animated.gif',
             sleep: 'assets/skins/pig/idle_animated.gif'
         },
@@ -83,12 +83,12 @@ const SKINS_CONFIG = {
         seamlessImage: true  // Flag to indicate this is a seamless animated sprite
     },
 
-    // CAT SKINS - Level 13+ required for most, Level 20+ for premium
+    // CAT SKINS - Level 15+ required for most, Level 20+ for premium
     black_cat: {
         id: 'black_cat',
         name: 'Shadow Cat',
-        price: 700,
-        levelRequired: 13,  // Unlocks at Level 13
+        price: 400,
+        levelRequired: 1,  // Starter skin - available from the beginning
         tier: 'standard',
         emoji: '🐈‍⬛',
         thumbnail: 'assets/skins/BlackCatSlimePaid/PNG/Idle.png',
@@ -121,50 +121,11 @@ const SKINS_CONFIG = {
         }
     },
     
-    // FLYING EYE - Level 13, Mid-game skin
-    flying_eye: {
-        id: 'flying_eye',
-        name: 'Flying Eye',
-        price: 700,
-        levelRequired: 13,
-        tier: 'standard',
-        emoji: '👁️',
-        thumbnail: 'assets/skins/flying-eye/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/flying-eye/FlyingEye.gif',
-            walk: 'assets/skins/flying-eye/FlyingEye.gif',
-            attack: 'assets/skins/flying-eye/FlyingEye.gif',
-            hurt: 'assets/skins/flying-eye/FlyingEye.gif',
-            death: 'assets/skins/flying-eye/FlyingEye.gif',
-            jump: 'assets/skins/flying-eye/FlyingEye.gif',
-            sleep: 'assets/skins/flying-eye/FlyingEye.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
-        },
-        seamlessImage: true  // Seamless animated GIF
-    },
-    
     white_cat: {
         id: 'white_cat',
         name: 'Snow Cat',
-        price: 700,
-        levelRequired: 15,  // Unlocks at Level 15
+        price: 400,
+        levelRequired: 15,
         tier: 'standard',
         emoji: '🐈',
         thumbnail: 'assets/skins/WhiteCatSlimePaid/PNG/Idle.png',
@@ -200,8 +161,8 @@ const SKINS_CONFIG = {
     brown_cat: {
         id: 'brown_cat',
         name: 'Brown Cat',
-        price: 800,
-        levelRequired: 18,  // Unlocks at Level 18
+        price: 500,
+        levelRequired: 15,
         tier: 'standard',
         emoji: '🐱',
         thumbnail: 'assets/skins/BrownCat/CatSlimeIdle.png',
@@ -237,8 +198,8 @@ const SKINS_CONFIG = {
     baby_blue_cat: {
         id: 'baby_blue_cat',
         name: 'Sky Cat',
-        price: 800,
-        levelRequired: 19,  // Unlocks at Level 19
+        price: 500,
+        levelRequired: 15,
         tier: 'standard',
         thumbnail: 'assets/skins/BabyBlueCatSlimePaid/PNG/Idle.png',
         animations: {
@@ -274,8 +235,8 @@ const SKINS_CONFIG = {
     rainbow_cat: {
         id: 'rainbow_cat',
         name: 'Rainbow Cat',
-        price: 1100,
-        levelRequired: 20,  // Unlocks at Level 20
+        price: 800,
+        levelRequired: 20,
         tier: 'standard',
         thumbnail: 'assets/skins/RainbowCatSlimePaid/PNG/Idle.png',
         animations: {
@@ -310,8 +271,8 @@ const SKINS_CONFIG = {
     demonic_cat: {
         id: 'demonic_cat',
         name: 'Shadow Demon Cat',
-        price: 1100,
-        levelRequired: 25,  // Unlocks at Level 25
+        price: 800,
+        levelRequired: 20,
         tier: 'standard',
         thumbnail: 'assets/skins/DemonicCatSlimePaid/PNG/Idle.png',
         animations: {
@@ -343,23 +304,23 @@ const SKINS_CONFIG = {
         }
     },
     
-    // TASK TOAD - Level 25+ required
+    // TASK TOAD - Level 30+ required
     task_toad: {
         id: 'task_toad',
         name: 'Task Toad',
-        price: 1200,
-        levelRequired: 25,  // Unlocks at Level 25
+        price: 900,
+        levelRequired: 30,
         tier: 'premium',
         emoji: '🐸',
         thumbnail: 'assets/skins/task-toad/idle.png',
         animations: {
-            idle: 'assets/skins/task-toad/Idle.gif',
-            walk: 'assets/skins/task-toad/Idle.gif',
-            attack: 'assets/skins/task-toad/Attack.gif',
-            hurt: 'assets/skins/task-toad/Idle.gif',
-            death: 'assets/skins/task-toad/Idle.gif',
-            jump: 'assets/skins/task-toad/Jump.gif',
-            sleep: 'assets/skins/task-toad/Idle.gif'
+            idle: 'assets/skins/task-toad/idle.png',
+            walk: 'assets/skins/task-toad/idle.png',
+            attack: 'assets/skins/task-toad/attack.png',
+            hurt: 'assets/skins/task-toad/idle.png',
+            death: 'assets/skins/task-toad/idle.png',
+            jump: 'assets/skins/task-toad/jump.png',
+            sleep: 'assets/skins/task-toad/idle.png'
         },
         frameCount: {
             idle: 1,
@@ -386,19 +347,19 @@ const SKINS_CONFIG = {
     task_phantom: {
         id: 'task_phantom',
         name: 'Task Phantom',
-        price: 1400,
-        levelRequired: 30,  // Unlocks at Level 30
+        price: 1100,
+        levelRequired: 30,
         tier: 'premium',
         emoji: '👻',
         thumbnail: 'assets/skins/task-phantom/idle.png',
         animations: {
-            idle: 'assets/skins/task-phantom/Idle.gif',
-            walk: 'assets/skins/task-phantom/Idle.gif',
-            attack: 'assets/skins/task-phantom/Idle.gif',
-            hurt: 'assets/skins/task-phantom/Idle.gif',
-            death: 'assets/skins/task-phantom/Idle.gif',
-            jump: 'assets/skins/task-phantom/Idle.gif',
-            sleep: 'assets/skins/task-phantom/Idle.gif'
+            idle: 'assets/skins/task-phantom/idle.png',
+            walk: 'assets/skins/task-phantom/idle.png',
+            attack: 'assets/skins/task-phantom/idle.png',
+            hurt: 'assets/skins/task-phantom/idle.png',
+            death: 'assets/skins/task-phantom/idle.png',
+            jump: 'assets/skins/task-phantom/idle.png',
+            sleep: 'assets/skins/task-phantom/idle.png'
         },
         frameCount: {
             idle: 1,
@@ -419,335 +380,6 @@ const SKINS_CONFIG = {
             sleep: 32
         },
         seamlessImage: true  // Flag to indicate this is a single seamless image
-    },
-    
-    // JERRY (TASK BUDDY) - Level 15+ required
-    jerry: {
-        id: 'jerry',
-        name: 'Jerry',
-        price: 1000,
-        levelRequired: 15,
-        tier: 'standard',
-        emoji: '🪨',
-        thumbnail: 'assets/skins/jerry-thumbnail.png',
-        animations: {
-            idle: 'assets/skins/Jerry.gif',
-            walk: 'assets/skins/Jerry.gif',
-            attack: 'assets/skins/Jerry.gif',
-            hurt: 'assets/skins/Jerry.gif',
-            death: 'assets/skins/Jerry.gif',
-            jump: 'assets/skins/Jerry.gif',
-            sleep: 'assets/skins/Jerry.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
-        },
-        seamlessImage: true  // Animated GIF
-    },
-    
-    // ROCKS ANNE - Level 15+ required
-    rocks_anne: {
-        id: 'rocks_anne',
-        name: 'Rocks Anne',
-        price: 1000,
-        levelRequired: 15,
-        tier: 'standard',
-        emoji: '🪨',
-        thumbnail: 'assets/skins/rocks-anne-thumbnail.png',
-        animations: {
-            idle: 'assets/skins/rocks-anne.gif',
-            walk: 'assets/skins/rocks-anne.gif',
-            attack: 'assets/skins/rocks-anne.gif',
-            hurt: 'assets/skins/rocks-anne.gif',
-            death: 'assets/skins/rocks-anne.gif',
-            jump: 'assets/skins/rocks-anne.gif',
-            sleep: 'assets/skins/rocks-anne.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
-        },
-        seamlessImage: true  // Animated GIF
-    },
-    
-    // ROCK STAR - Level 18+ required
-    rock_star: {
-        id: 'rock_star',
-        name: 'Rock Star',
-        price: 1000,
-        levelRequired: 18,
-        tier: 'premium',
-        emoji: '⭐',
-        thumbnail: 'assets/skins/rock-star-thumbnail.png',
-        animations: {
-            idle: 'assets/skins/rock-star.gif',
-            walk: 'assets/skins/rock-star.gif',
-            attack: 'assets/skins/rock-star.gif',
-            hurt: 'assets/skins/rock-star.gif',
-            death: 'assets/skins/rock-star.gif',
-            jump: 'assets/skins/rock-star.gif',
-            sleep: 'assets/skins/rock-star.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
-        },
-        seamlessImage: true  // Animated GIF
-    },
-
-    // FUN BIRD - REMOVED FROM SHOP (still exists for users who already own it)
-
-    // HUMAN KNIGHT - Level 11 (800 XP)
-    human_knight: {
-        id: 'human_knight',
-        name: 'Human Knight',
-        price: 800,
-        levelRequired: 11,
-        tier: 'standard',
-        emoji: '⚔️',
-        thumbnail: 'assets/skins/human-knight/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/human-knight/Idle.gif',
-            walk: 'assets/skins/human-knight/Idle.gif',
-            attack: 'assets/skins/human-knight/Attack.gif',
-            hurt: 'assets/skins/human-knight/Hurt.gif',
-            death: 'assets/skins/human-knight/Die.gif',
-            jump: 'assets/skins/human-knight/Jump.gif',
-            sleep: 'assets/skins/human-knight/Idle.gif',
-            roll: 'assets/skins/human-knight/Roll.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1,
-            roll: 1
-        },
-        spriteSheetWidth: {
-            idle: 100,
-            walk: 100,
-            attack: 100,
-            hurt: 100,
-            death: 100,
-            jump: 100,
-            sleep: 100,
-            roll: 100
-        },
-        seamlessImage: true,  // Animated GIF
-        spriteSize: { width: 100, height: 55 },  // Slightly smaller than main monsters
-        scaleFactor: 0.85  // Scale to 85% of default size
-    },
-
-    // HUMAN RANGER - Level 11 (800 XP)
-    human_ranger: {
-        id: 'human_ranger',
-        name: 'Human Ranger',
-        price: 800,
-        levelRequired: 11,
-        tier: 'standard',
-        emoji: '🏹',
-        thumbnail: 'assets/skins/human-ranger/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/human-ranger/Idle.gif',
-            walk: 'assets/skins/human-ranger/Idle.gif',
-            attack: 'assets/skins/human-ranger/Attack.gif',
-            hurt: 'assets/skins/human-ranger/Hurt.gif',
-            death: 'assets/skins/human-ranger/Die.gif',
-            jump: 'assets/skins/human-ranger/Jump.gif',
-            sleep: 'assets/skins/human-ranger/Idle.gif',
-            roll: 'assets/skins/human-ranger/Roll.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1,
-            roll: 1
-        },
-        spriteSheetWidth: {
-            idle: 100,
-            walk: 100,
-            attack: 220,
-            hurt: 100,
-            death: 100,
-            jump: 100,
-            sleep: 100,
-            roll: 220
-        },
-        seamlessImage: true,  // Animated GIF
-        spriteSize: { width: 100, height: 55 },  // Slightly smaller than main monsters
-        scaleFactor: 0.85  // Scale to 85% of default size
-    },
-
-    // LADY IMP - REMOVED FROM SHOP (still exists for users who already own it)
-
-    // SLIME BUDDY - Level 40 (1300 XP)
-    slime_buddy: {
-        id: 'slime_buddy',
-        name: 'Slime Buddy',
-        price: 1300,
-        levelRequired: 40,
-        tier: 'premium',
-        emoji: '🟢',
-        thumbnail: 'assets/skins/slime_buddy/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/slime_buddy/idle.gif',
-            walk: 'assets/skins/slime_buddy/idle.gif',
-            attack: 'assets/skins/slime_buddy/attack.gif',
-            hurt: 'assets/skins/slime_buddy/idle.gif',
-            death: 'assets/skins/slime_buddy/idle.gif',
-            jump: 'assets/skins/slime_buddy/idle.gif',
-            sleep: 'assets/skins/slime_buddy/idle.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 118,
-            walk: 118,
-            attack: 26,
-            hurt: 118,
-            death: 118,
-            jump: 118,
-            sleep: 118
-        },
-        seamlessImage: true,  // Animated GIF
-        spriteSize: { width: 118, height: 79 }
-    },
-
-    // MERLIN - Level 50 (2000 XP)
-    merlin: {
-        id: 'merlin',
-        name: 'Merlin',
-        price: 2000,
-        levelRequired: 50,
-        tier: 'legendary',
-        emoji: '🧙',
-        thumbnail: 'assets/skins/merlin/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/merlin/idle.gif',
-            walk: 'assets/skins/merlin/idle.gif',
-            attack: 'assets/skins/merlin/attack.gif',
-            hurt: 'assets/skins/merlin/idle.gif',
-            death: 'assets/skins/merlin/idle.gif',
-            jump: 'assets/skins/merlin/idle.gif',
-            sleep: 'assets/skins/merlin/idle.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 48,
-            walk: 48,
-            attack: 48,
-            hurt: 48,
-            death: 48,
-            jump: 48,
-            sleep: 48
-        },
-        seamlessImage: true,  // Animated GIF
-        spriteSize: { width: 48, height: 48 }
-    },
-
-    // EYE MONSTER - Level 17 (1000 XP)
-    eye_monster: {
-        id: 'eye_monster',
-        name: 'Eye Monster',
-        price: 1000,
-        levelRequired: 17,
-        tier: 'premium',
-        emoji: '👁️',
-        thumbnail: 'assets/skins/eye-monster/thumbnail.png',
-        animations: {
-            idle: 'assets/skins/eye-monster/Idle.gif',
-            walk: 'assets/skins/eye-monster/Walk.gif',
-            attack: 'assets/skins/eye-monster/Attack.gif',
-            hurt: 'assets/skins/eye-monster/Hurt.gif',
-            death: 'assets/skins/eye-monster/Die.gif',
-            jump: 'assets/skins/eye-monster/Idle.gif',
-            sleep: 'assets/skins/eye-monster/Idle.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
-        },
-        seamlessImage: true,  // Animated GIF
-        spriteSize: { width: 32, height: 32 }
     }
 
 
@@ -784,22 +416,19 @@ function getActiveMonsterAppearance(baseMonsterId, equippedSkinId) {
     
     return {
         animations: {
-            idle: `assets/heroes/${prefix}_Idle.gif`,
-            walk: `assets/heroes/${prefix}_Walk.gif`,
-            attack: `assets/heroes/${prefix}_Attack.gif`,
-            jump: `assets/heroes/${prefix}_Jump.gif`,
-            die: `assets/heroes/${prefix}_Die.gif`
+            idle: `assets/heroes/${prefix}_Idle_4.png`,
+            walk: `assets/heroes/${prefix}_Walk_4.png`,
+            attack: `assets/heroes/${prefix}_Attack_4.png`,
+            jump: `assets/heroes/${prefix}_Jump_8.png`,
+            roll: `assets/heroes/${prefix}_Roll.png`
         },
         frameCount: {
-            idle: 1,  // GIF animations are seamless
-            walk: 1,
-            attack: 1,
-            jump: 1,
-            die: 1
+            idle: 4,
+            walk: 4,
+            attack: 4,
+            jump: 8,
+            roll: 6
         },
-        spriteSheetWidth: {},  // Not needed for GIF animations
-        spriteSize: { width: 32, height: 32 },
-        seamlessImage: true,  // GIF animations are seamless
         isSkin: false,
         skinId: null
     };

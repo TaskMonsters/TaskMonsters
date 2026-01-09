@@ -81,10 +81,6 @@
     background-image: url('../assets/battle-backgrounds/skull-gate-arena.png');
 }
 
-.battle-container.bg-stone-ruins {
-    background-image: url('../assets/arenas/stone_ruins.png');
-}
-
 /* Dark overlay for better sprite visibility */
 .battle-container::before {
     content: '';
@@ -103,23 +99,6 @@
     z-index: 1;
 }
 
-/* Confused Hero Effect - Overthinker special attack */
-.confused-hero {
-    animation: confusedSway 0.5s ease-in-out infinite !important;
-    filter: hue-rotate(180deg) saturate(1.5) !important;
-}
-
-@keyframes confusedSway {
-    0%, 100% { transform: rotate(-5deg) translateX(-3px); }
-    50% { transform: rotate(5deg) translateX(3px); }
-}
-
-/* Frozen Enemy Effect */
-.frozen-enemy {
-    animation-play-state: paused !important;
-    filter: brightness(1.3) saturate(0.5) sepia(0.3) hue-rotate(180deg) !important;
-}
-
 /* ===================================
    SPRITE POSITIONING (ABSOLUTE)
    =================================== */
@@ -128,11 +107,11 @@
 .sprite-container {
     position: absolute;
     width: 45%;
-    top: 20%; /* FIX: Adjusted to 20% to center sprites and HP bars better */
+    top: 25%; /* Lowered from 5% to 25% to position creatures lower in arena */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem; /* FIX: Reduced from 0.5rem to 0.25rem to bring HP bars closer to sprites */
+    gap: 0.5rem;
 }
 
 /* Hero (left side) */
@@ -146,19 +125,12 @@
 }
 
 .sprite-wrapper {
-    width: 100px; /* FIX: Reduced to 100px for proper sprite sizing */
-    height: 100px; /* FIX: Reduced to 100px for proper sprite sizing */
-    max-height: 120px; /* CRITICAL: Prevent enemies from covering HP bars */
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* CRITICAL: Prevent enemies from spilling outside battle arena */
-}
-
-/* Base sprite class - essential for all sprites */
-.sprite {
-    display: block;
-    position: relative;
+    overflow: hidden; /* FIXED: Clip to show only one frame (prevents duplicate rows) */
 }
 
 /* Hero sprites (32x32 base) */
@@ -169,155 +141,53 @@
     background-size: auto 32px;
     background-repeat: no-repeat;
     background-position: 0 0;
-    transform: scale(0.11); /* CRITICAL FIX: Reduced by 1x (half of 0.22) for proper battle arena size per user request */
+    transform: scale(0.28); /* Adjusted to match reference screenshot - proper visible size in battle */
     transform-origin: center;
 }
 
-/* Low HP flickering animation - triggers when HP < 20 */
-.sprite-wrapper.low-hp-flicker {
-    animation: lowHpFlicker 0.5s ease-in-out infinite;
-}
-
-@keyframes lowHpFlicker {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.3;
-    }
-}
-
-/* SIMPLIFIED ENEMY SPRITES - Static images with hover/lunge animations */
-.sprite.enemy-sprite {
-    display: block;
-    image-rendering: pixelated;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    max-height: 120px; /* CRITICAL: Prevent enemies from covering HP bars or extending outside arena */
-    max-width: 120px; /* CRITICAL: Prevent enemies from spilling outside battle arena */
-}
-
-/* Enemy size classes */
-.sprite.enemy-size-small {
+/* Enemy sprites (64x64 base for bats) */
+.sprite.enemy-sprite-large {
     width: 64px;
     height: 64px;
-    transform: scale(1.5); /* REDUCED from 2.0 to 1.5 to fit within arena */
+    image-rendering: pixelated;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    transform: scale(2);
     transform-origin: center;
 }
 
-.sprite.enemy-size-medium {
-    width: 80px;
-    height: 80px;
-    transform: scale(1.3); /* REDUCED from 2.0 to 1.3 to fit within arena */
+/* Enemy sprites (48x48 base for flying eye) */
+.sprite.enemy-sprite-medium {
+    width: 48px;
+    height: 48px;
+    image-rendering: pixelated;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+}
+
+/* Enemy sprites (32x32 base for ghost) */
+.sprite.enemy-sprite-small {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    transform: scale(2.2);
     transform-origin: center;
 }
 
-.sprite.enemy-size-large {
-    width: 100px;
-    height: 100px;
-    transform: scale(1.2); /* REDUCED from 1.6 to 1.2 to fit within arena */
-    transform-origin: center;
-}
-
-.sprite.enemy-size-slime {
+/* Enemy sprites (118x79 base for slime) */
+.sprite.enemy-sprite-slime {
     width: 118px;
     height: 79px;
-    transform: scale(1.0); /* REDUCED from 1.5 to 1.0 to fit within arena */
+    image-rendering: pixelated;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    transform: scale(1.5);
     transform-origin: center;
-}
-
-/* Hover animation - gentle floating */
-.sprite.enemy-hover {
-    animation: enemyHover 2s ease-in-out infinite;
-}
-
-@keyframes enemyHover {
-    0%, 100% {
-        transform: translateY(0) scale(1.3);
-    }
-    50% {
-        transform: translateY(-10px) scale(1.3);
-    }
-}
-
-/* Large enemy hover - reduced scale */
-.sprite.enemy-size-large.enemy-hover {
-    animation: enemyHoverLarge 2s ease-in-out infinite;
-}
-
-@keyframes enemyHoverLarge {
-    0%, 100% {
-        transform: translateY(0) scale(1.2);
-    }
-    50% {
-        transform: translateY(-10px) scale(1.2);
-    }
-}
-
-/* Slime hover - different scale */
-.sprite.enemy-size-slime.enemy-hover {
-    animation: enemyHoverSlime 2s ease-in-out infinite;
-}
-
-@keyframes enemyHoverSlime {
-    0%, 100% {
-        transform: translateY(0) scale(1.0);
-    }
-    50% {
-        transform: translateY(-10px) scale(1.0);
-    }
-}
-
-/* Lunge animation - for attacks */
-.sprite.enemy-lunge {
-    animation: enemyLunge 0.6s ease-out forwards;
-}
-
-@keyframes enemyLunge {
-    0% {
-        transform: translateX(0) scale(1.3);
-    }
-    50% {
-        transform: translateX(-80px) scale(1.4);
-    }
-    100% {
-        transform: translateX(0) scale(1.3);
-    }
-}
-
-/* Large enemy lunge - reduced scale */
-.sprite.enemy-size-large.enemy-lunge {
-    animation: enemyLungeLarge 0.6s ease-out forwards;
-}
-
-@keyframes enemyLungeLarge {
-    0% {
-        transform: translateX(0) scale(1.2);
-    }
-    50% {
-        transform: translateX(-80px) scale(1.3);
-    }
-    100% {
-        transform: translateX(0) scale(1.2);
-    }
-}
-
-/* Slime lunge - different scale */
-.sprite.enemy-size-slime.enemy-lunge {
-    animation: enemyLungeSlime 0.6s ease-out forwards;
-}
-
-@keyframes enemyLungeSlime {
-    0% {
-        transform: translateX(0) scale(1.0);
-    }
-    50% {
-        transform: translateX(-80px) scale(1.1);
-    }
-    100% {
-        transform: translateX(0) scale(1.0);
-    }
 }
 
 /* ===================================
@@ -348,7 +218,7 @@
 .hp-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
-    transition: width 0.6s ease-out;
+    transition: width 0.3s ease;
 }
 
 /* Hero HP bar - green/blue gradient */
@@ -710,15 +580,8 @@
         grid-template-columns: 1fr;
     }
     
-    .sprite.hero-sprite {
-        transform: scale(0.11); /* Keep consistent with desktop - reduced by 1x */
-    }
-    
-    .sprite.enemy-sprite-large,
-    .sprite.enemy-sprite-medium,
-    .sprite.enemy-sprite-small,
-    .sprite.enemy-sprite-slime {
-        /* Enemy sprites maintain their scale on mobile */
+    .sprite {
+        transform: scale(2);
     }
     
     .sprite-wrapper {

@@ -129,11 +129,9 @@
 }
 
 .shop-item-emoji img {
-    max-width: 80px;
-    max-height: 80px;
+    max-width: 64px;
+    max-height: 64px;
     object-fit: contain;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
 }
 

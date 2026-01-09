@@ -119,81 +119,6 @@ class NotificationManager {
         });
     }
 
-    // Check all tasks and send notifications for those due soon
-    checkAndNotifyDueSoonTasks() {
-        // Check if notifications are enabled
-        if (!window.gameState || !window.gameState.notifications) {
-            return;
-        }
-
-        if (!this.permissionGranted) {
-            return;
-        }
-
-        const now = Date.now();
-        const notificationThresholds = [20, 15, 10, 5, 2]; // minutes
-
-        if (window.gameState && window.gameState.tasks) {
-            window.gameState.tasks.forEach((task, index) => {
-                // Skip completed tasks or tasks without due dates
-                if (task.completed || !task.dueDate) {
-                    return;
-                }
-
-                const dueTime = new Date(task.dueDate).getTime();
-                const timeDiff = dueTime - now;
-                const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-
-                // Check if task is at one of the notification thresholds
-                if (notificationThresholds.includes(minutesDiff)) {
-                    // Check if we already sent this notification
-                    const notificationKey = `${index}-${minutesDiff}`;
-                    if (!this.sentNotifications) {
-                        this.sentNotifications = new Set();
-                    }
-
-                    if (!this.sentNotifications.has(notificationKey)) {
-                        // Send notification
-                        this.sendNotification(
-                            `⏰ Task Reminder: ${minutesDiff} minutes left!`,
-                            `"${task.title}" is due in ${minutesDiff} minutes`,
-                            'assets/logo/favicon.png'
-                        );
-                        // Mark as sent
-                        this.sentNotifications.add(notificationKey);
-                        console.log(`✅ Notification sent for task "${task.title}" - ${minutesDiff} minutes remaining`);
-                    }
-                }
-            });
-        }
-    }
-
-    // Start continuous notification checking
-    startContinuousCheck() {
-        // Check immediately
-        this.checkAndNotifyDueSoonTasks();
-        
-        // Then check every minute
-        if (this.continuousCheckInterval) {
-            clearInterval(this.continuousCheckInterval);
-        }
-        
-        this.continuousCheckInterval = setInterval(() => {
-            this.checkAndNotifyDueSoonTasks();
-        }, 60000); // Check every 60 seconds
-        
-        console.log('✅ Continuous notification check started (checking every minute)');
-    }
-
-    // Stop continuous checking
-    stopContinuousCheck() {
-        if (this.continuousCheckInterval) {
-            clearInterval(this.continuousCheckInterval);
-            this.continuousCheckInterval = null;
-            console.log('🛑 Continuous notification check stopped');
-        }
-    }
-
     // Clear all notifications for a specific task
     clearTaskNotifications(taskIndex) {
         if (this.notificationIntervals.has(taskIndex)) {
@@ -215,11 +140,6 @@ class NotificationManager {
         });
         this.notificationIntervals.clear();
 
-        // Clear sent notifications tracking
-        if (this.sentNotifications) {
-            this.sentNotifications.clear();
-        }
-
         // Reschedule for all active tasks
         if (window.gameState && window.gameState.tasks) {
             window.gameState.tasks.forEach((task, index) => {
@@ -228,9 +148,6 @@ class NotificationManager {
                 }
             });
         }
-        
-        // Start continuous checking
-        this.startContinuousCheck();
     }
 
     // Clear all notifications
@@ -241,14 +158,6 @@ class NotificationManager {
             });
         });
         this.notificationIntervals.clear();
-        
-        // Stop continuous checking
-        this.stopContinuousCheck();
-        
-        // Clear sent notifications tracking
-        if (this.sentNotifications) {
-            this.sentNotifications.clear();
-        }
     }
 }
 
@@ -261,8 +170,6 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (window.gameState && window.gameState.notifications) {
             window.notificationManager.requestPermission();
-            // Start continuous checking if notifications are enabled
-            window.notificationManager.startContinuousCheck();
         }
     }, 1000);
 });

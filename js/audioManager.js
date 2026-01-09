@@ -13,10 +13,6 @@ class AudioManager {
 
         // Track active sounds for cleanup
         this.activeSounds = new Set();
-        this.maxActiveSounds = 20; // Prevent memory leaks
-        
-        // Start periodic cleanup to handle iOS Safari bugs
-        this.startPeriodicCleanup();
 
         // Volume settings
         this.sfxVolume = 1.0; // Full volume for sound effects
@@ -57,7 +53,7 @@ class AudioManager {
             taskComplete: "assets/sounds/taskComplete.mp3",
             shopPurchase: "assets/sounds/shopPurchase.mp3",
             useItemOutside: "assets/sounds/useItemOutside.mp3",
-            focus_timer_complete: "assets/sounds/focustimersound.mp3",
+            focus_timer_complete: "assets/audio/FocusTimerSound.mp3",
         };
 
         // Focus Timer alarm (separate from one-shot sounds)
@@ -97,26 +93,6 @@ class AudioManager {
         this.initialized = false;
     }
 
-    /**
-     * Start periodic cleanup of orphaned sounds
-     * Handles iOS Safari bug where 'ended' event doesn't fire
-     */
-    startPeriodicCleanup() {
-        setInterval(() => {
-            this.activeSounds.forEach(sound => {
-                try {
-                    // If sound has ended but wasn't removed, clean it up
-                    if (sound.ended || sound.paused || sound.currentTime === 0) {
-                        this.activeSounds.delete(sound);
-                    }
-                } catch (e) {
-                    // If we can't access the sound, remove it
-                    this.activeSounds.delete(sound);
-                }
-            });
-        }, 10000); // Clean up every 10 seconds
-    }
-    
     /**
      * Get sound enabled status
      */
@@ -170,27 +146,6 @@ class AudioManager {
             soundInstance.addEventListener("ended", () => {
                 this.activeSounds.delete(soundInstance);
             });
-            
-            // Fallback cleanup for iOS Safari (ended event sometimes doesn't fire)
-            setTimeout(() => {
-                if (this.activeSounds.has(soundInstance)) {
-                    try {
-                        soundInstance.pause();
-                        soundInstance.currentTime = 0;
-                    } catch (e) {}
-                    this.activeSounds.delete(soundInstance);
-                }
-            }, 10000); // Clean up after 10 seconds max
-            
-            // Enforce max active sounds limit
-            if (this.activeSounds.size > this.maxActiveSounds) {
-                const oldestSound = this.activeSounds.values().next().value;
-                try {
-                    oldestSound.pause();
-                    oldestSound.currentTime = 0;
-                } catch (e) {}
-                this.activeSounds.delete(oldestSound);
-            }
 
             // Play asynchronously
             soundInstance.play().catch((err) => {
@@ -266,33 +221,15 @@ class AudioManager {
      * Play quest giver music
      */
     playQuestMusic() {
-        console.log('[AudioManager] playQuestMusic called - enabled:', this.enabled, 'path:', this.music.quest_giver);
-        
-        if (!this.enabled) {
-            console.warn('[AudioManager] Quest music skipped - audio disabled');
-            return;
-        }
-        
-        if (!this.music.quest_giver) {
-            console.warn('[AudioManager] Quest music skipped - no music path');
-            return;
-        }
+        if (!this.enabled || !this.music.quest_giver) return;
 
         // Stop any currently playing music
         this.stopMusic();
 
         try {
             this.currentMusic = new Audio(this.music.quest_giver);
-            this.currentMusic.volume = 0.5; // Slightly higher volume for better audibility
+            this.currentMusic.volume = 0.4; // Lower volume for background music
             this.currentMusic.loop = true;
-            
-            // Preload the audio
-            this.currentMusic.preload = 'auto';
-            
-            // FIX: Add canplaythrough event to ensure audio is ready before playing
-            this.currentMusic.addEventListener('canplaythrough', () => {
-                console.log('[AudioManager] Quest music ready to play');
-            }, { once: true });
             
             // FIX: Add ended event handler to ensure continuous looping
             this.currentMusic.addEventListener('ended', () => {
@@ -307,37 +244,17 @@ class AudioManager {
             
             // FIX: Add error handler to prevent music from stopping on errors
             this.currentMusic.addEventListener('error', (e) => {
-                console.error('[AudioManager] Quest music error:', e.target.error);
+                console.warn('[AudioManager] Quest music error:', e);
             });
 
-            // Use a promise chain for better error handling
-            const playPromise = this.currentMusic.play();
-            
-            if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        console.log('[AudioManager] 🎵 Quest giver music PLAYING successfully');
-                    })
-                    .catch((err) => {
-                        console.error('[AudioManager] Quest music playback failed:', err.message);
-                        // Try to play on next user interaction
-                        this.pendingQuestMusic = true;
-                        this.currentMusic = null;
-                    });
-            }
+            this.currentMusic.play().catch((err) => {
+                console.warn("[AudioManager] Quest music playback failed:", err.message);
+                this.currentMusic = null;
+            });
+
+            console.log("[AudioManager] Quest giver music started with loop protection");
         } catch (error) {
-            console.error('[AudioManager] Error creating quest music audio:', error.message);
-        }
-    }
-    
-    /**
-     * Retry playing quest music (call after user interaction if autoplay was blocked)
-     */
-    retryQuestMusic() {
-        if (this.pendingQuestMusic) {
-            console.log('[AudioManager] Retrying quest music after user interaction');
-            this.pendingQuestMusic = false;
-            this.playQuestMusic();
+            console.warn("[AudioManager] Error playing quest music:", error.message);
         }
     }
 
@@ -372,8 +289,8 @@ class AudioManager {
     }
 
     /**
-     * Play Focus Timer completion sound
-     * This plays when timer reaches 00:00
+     * Play Focus Timer alarm (looping)
+     * This starts the repeating alarm when timer reaches 00:00
      */
     playFocusAlarm() {
         if (!this.enabled) return;
@@ -382,19 +299,18 @@ class AudioManager {
         this.stopFocusAlarm();
 
         try {
-            // Use the new focus timer completion sound
-            this.focusAlarmAudio = new Audio(this.sounds.focus_timer_complete);
-            this.focusAlarmAudio.volume = 0.8;
-            this.focusAlarmAudio.loop = false; // Play once
+            this.focusAlarmAudio = new Audio("assets/audio/focus-timer-alarm.mp3");
+            this.focusAlarmAudio.volume = 0.7;
+            this.focusAlarmAudio.loop = true; // Loop indefinitely
 
             this.focusAlarmAudio.play().catch((err) => {
-                console.warn("[AudioManager] Focus timer sound playback failed:", err.message);
+                console.warn("[AudioManager] Focus alarm playback failed:", err.message);
                 this.focusAlarmAudio = null;
             });
 
-            console.log("[AudioManager] Focus Timer completion sound played");
+            console.log("[AudioManager] Focus Timer alarm started (looping)");
         } catch (error) {
-            console.warn("[AudioManager] Error playing focus timer sound:", error.message);
+            console.warn("[AudioManager] Error playing focus alarm:", error.message);
         }
     }
 

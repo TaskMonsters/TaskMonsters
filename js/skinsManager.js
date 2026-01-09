@@ -17,38 +17,11 @@ class SkinsManager {
         // Load from gameState
         if (window.gameState) {
             this.ownedSkins = window.gameState.ownedSkins || [];
-            // CRITICAL FIX: Always sync equippedSkinId from gameState (authoritative source)
             this.equippedSkinId = window.gameState.equippedSkinId || null;
-            // Ensure gameState is also synced (in case it was cleared)
-            if (this.equippedSkinId && !window.gameState.equippedSkinId) {
-                window.gameState.equippedSkinId = this.equippedSkinId;
-            }
         }
         
         // Get current base monster
         this.currentBaseMonster = localStorage.getItem('selectedMonster') || 'nova';
-        
-        // TEST MODE: Unlock all skins for testing
-        const allSkinIds = [
-            'imp', 'pig', 'black_cat', 'flying_eye', 'white_cat', 'brown_cat',
-            'baby_blue_cat', 'rainbow_cat', 'demonic_cat', 'task_toad', 
-            'task_phantom', 'jerry', 'rocks_anne', 'rock_star', 
-            'human_knight', 'human_ranger', 'eye_monster'
-        ];
-        
-        // Add all skins to ownedSkins if not already there
-        allSkinIds.forEach(skinId => {
-            if (!this.ownedSkins.includes(skinId)) {
-                this.ownedSkins.push(skinId);
-            }
-        });
-        
-        // Save to gameState
-        if (window.gameState) {
-            window.gameState.ownedSkins = this.ownedSkins;
-        }
-        
-        console.log('[TEST MODE] All skins unlocked:', this.ownedSkins);
         
         console.log('[SkinsManager] Initialized:', {
             ownedSkins: this.ownedSkins,
@@ -95,11 +68,6 @@ class SkinsManager {
         window.gameState.ownedSkins = this.ownedSkins;
         window.saveGameState();
         
-        // Play purchase sound
-        if (window.audioManager) {
-            window.audioManager.playSound('purchase', 0.7);
-        }
-        
         console.log('[SkinsManager] Purchased skin:', skinId);
         
         return { 
@@ -117,11 +85,6 @@ class SkinsManager {
         if (!skin) {
             console.error('[SkinsManager] Skin not found:', skinId);
             return { success: false, message: 'Skin not found' };
-        }
-        
-        // Check if monster is in egg form
-        if (window.gameState && window.gameState.isEgg) {
-            return { success: false, message: 'Skins unavailable for eggs! Hatch at Level 10' };
         }
         
         // Check if owned
@@ -168,101 +131,77 @@ class SkinsManager {
      * Update all monster visuals across the app
      */
     updateAllMonsterVisuals() {
-        // CRITICAL: Don't update visuals if monster is in egg form
-        if (window.gameState && window.gameState.isEgg) {
-            console.log('[SkinsManager] Skipping visual update - monster is in egg form');
-            return;
-        }
-        
         const appearance = window.getActiveMonsterAppearance(this.currentBaseMonster, this.equippedSkinId);
         const spriteSize = appearance.spriteSize || { width: 32, height: 32 };
         
         // Update main hero sprite - render all skins at same size as cats
         const mainHeroSprite = document.getElementById('mainHeroSprite');
         if (mainHeroSprite) {
-            mainHeroSprite.src = appearance.animations.idle;
-            mainHeroSprite.style.width = `${spriteSize.width}px`;
-            mainHeroSprite.style.height = `${spriteSize.height}px`;
-            mainHeroSprite.style.imageRendering = 'pixelated';
-            
-            // Check if this is a seamless image (GIF or static image) or a skin
+            // FIX: Force GIF animation restart by adding cache-busting timestamp
             const skin = window.SKINS_CONFIG[this.equippedSkinId];
-            const isSeamlessImage = (skin && skin.seamlessImage) || appearance.seamlessImage === true;
-            if (isSeamlessImage) {
-                // For seamless images (Fire Imp, Fire Pig, Rock skins)
-                // Use contain to show full image without cropping
-                mainHeroSprite.style.objectFit = 'contain';
-                mainHeroSprite.style.objectPosition = 'center';
-                
-                // Default monsters (no skin) use standard scale
-                if (!skin) {
-                    mainHeroSprite.style.transform = 'scale(4)';
-                } else {
-                    // Rock skins are larger, so use smaller scale
-                    const isRockSkin = skin.id === 'task_buddy' || skin.id === 'rae_the_rock' || skin.id === 'rock_star';
-                    // Rocks Anne and Jerry need 2x smaller scale
-                    const isRocksAnneOrJerry = skin.id === 'rocks_anne' || skin.id === 'jerry';
-                    // Human skins need much smaller scale to prevent overlap with gauges
-                    const isHumanSkin = skin.id === 'human_knight' || skin.id === 'human_ranger';
-                    // Fire imp and fire pig need slightly smaller scale
-                    const isFireImp = skin.id === 'imp';
-                    const isFirePig = skin.id === 'pig';
-                    // Slime Buddy is larger (118x79), needs much smaller scale (reduced by 16x total)
-                    const isSlimeBuddy = skin.id === 'slime_buddy';
-                    // Merlin is medium sized (48x48), needs smaller scale
-                    const isMerlin = skin.id === 'merlin';
-                    // Task Toad increased by 1x (doubled from 4 to 8)
-                    const isTaskToad = skin.id === 'task_toad';
-                    mainHeroSprite.style.transform = isHumanSkin ? 'scale(2.5)' : (isSlimeBuddy ? 'scale(4)' : (isMerlin ? 'scale(2.75)' : (isTaskToad ? 'scale(8)' : (isFireImp ? 'scale(6)' : (isFirePig ? 'scale(6)' : (isRocksAnneOrJerry ? 'scale(3.75)' : (isRockSkin ? 'scale(5)' : 'scale(8)')))))));
-                }
-                
-                // Add hover animation for rock skins, Rocks Anne, Jerry, and Slime Buddy (only when skin is equipped)
-                if (skin && (isRockSkin || skin.id === 'rocks_anne' || skin.id === 'jerry' || skin.id === 'slime_buddy')) {
-                    mainHeroSprite.classList.add('hero-hover-animation');
-                } else {
-                    mainHeroSprite.classList.remove('hero-hover-animation');
-                }
+            const isGif = skin && skin.seamlessImage;
+            
+            // Store current src to check if it's changing
+            const currentSrc = mainHeroSprite.src;
+            const newSrc = appearance.animations.idle;
+            const needsReload = currentSrc.split('?')[0] !== newSrc.split('?')[0];
+            
+            // For GIFs, add timestamp to force reload and restart animation
+            if (isGif) {
+                mainHeroSprite.src = newSrc + '?t=' + Date.now();
             } else {
-                // For sprite sheets
-                mainHeroSprite.style.objectFit = 'none';
-                
-                // For multi-directional sprites, set object-position to show front-facing row
-                const spriteRow = appearance.spriteRow || 0;
-                const animationRows = appearance.animationRows || {};
-                
-                // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
-                const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-                const yOffset = rowIndex * spriteSize.height;
-                mainHeroSprite.style.objectPosition = `0 -${yOffset}px`;
-                mainHeroSprite.style.transform = 'scale(4)'; // Fixed scale for sprite sheets
+                mainHeroSprite.src = newSrc;
             }
             
-            // CRITICAL: Force immediate style application to prevent sprite sheet rows showing
-            // Force a reflow to ensure width/height are applied before animation
-            void mainHeroSprite.offsetHeight;
+            mainHeroSprite.style.width = `${spriteSize.width}px`;
+            mainHeroSprite.style.height = `${spriteSize.height}px`;
+            mainHeroSprite.style.objectFit = 'none';
+            
+            // For multi-directional sprites, set object-position to show front-facing row
+            const spriteRow = appearance.spriteRow || 0;
+            const animationRows = appearance.animationRows || {};
+            
+            // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
+            const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
+            const yOffset = rowIndex * spriteSize.height;
+            mainHeroSprite.style.objectPosition = `0 -${yOffset}px`;
+            
+            // FIX: Don't scale the sprite element - this causes multi-frame display
+            // The sprite should be displayed at its natural size
+            mainHeroSprite.style.transform = 'scale(4)'; // Fixed scale for all skins
             
             // Only use CSS animation for sprite sheets, NOT for GIF animations
-            // Check if this is a seamless image (GIF) or sprite sheet
-            const isSeamless = (skin && skin.seamlessImage === true);
-            if (isSeamless) {
+            if (isGif) {
                 // GIF animation - no CSS animation needed
                 mainHeroSprite.style.animation = 'none';
             } else if (appearance.frameCount.idle > 1) {
-                // Sprite sheet animation - apply immediately
+                // Sprite sheet animation - force restart by removing and re-adding
+                mainHeroSprite.style.animation = 'none';
+                // Force reflow to restart animation
+                void mainHeroSprite.offsetWidth;
                 mainHeroSprite.style.animation = `hero-idle-anim 0.8s steps(${appearance.frameCount.idle}) infinite`;
             } else {
                 // Single frame - no animation
                 mainHeroSprite.style.animation = 'none';
             }
             
-            // Force another reflow after animation is set
-            void mainHeroSprite.offsetHeight;
+            console.log('[SkinsManager] Main hero sprite updated, animation restarted');
         }
         
         // Update focus timer sprite - render all skins at same size as cats
         const focusTimerSprite = document.getElementById('focusTimerMonsterSprite');
         if (focusTimerSprite) {
-            focusTimerSprite.src = appearance.animations.idle;
+            // FIX: Force GIF animation restart by adding cache-busting timestamp
+            const skinFocus = window.SKINS_CONFIG[this.equippedSkinId];
+            const isGifFocus = skinFocus && skinFocus.seamlessImage;
+            
+            // For GIFs, add timestamp to force reload and restart animation
+            if (isGifFocus) {
+                focusTimerSprite.src = appearance.animations.idle + '?t=' + Date.now();
+            } else {
+                focusTimerSprite.src = appearance.animations.idle;
+            }
+            
             focusTimerSprite.style.width = `${spriteSize.width}px`;
             focusTimerSprite.style.height = `${spriteSize.height}px`;
             focusTimerSprite.style.objectFit = 'none';
@@ -283,32 +222,21 @@ class SkinsManager {
             focusTimerSprite.style.transformOrigin = 'center center';
             
             // Only use CSS animation for sprite sheets, NOT for GIF animations
-            const skinFocus = window.SKINS_CONFIG[this.equippedSkinId];
-            if (skinFocus && skinFocus.seamlessImage) {
-                // Seamless images (GIF or static) - use contain and adjust scale
-                focusTimerSprite.style.objectFit = 'contain';
-                focusTimerSprite.style.objectPosition = 'center';
-                
-                // Rock skins are larger, so use smaller scale
-                const isRockSkin = skinFocus.id === 'task_buddy' || skinFocus.id === 'rae_the_rock' || skinFocus.id === 'rock_star';
-                // Human skins need smaller scale in focus timer
-                const isHumanSkin = skinFocus.id === 'human_knight' || skinFocus.id === 'human_ranger';
-                // Fire pig and fire imp need proper scale
-                const isFirePigOrImp = skinFocus.id === 'pig' || skinFocus.id === 'imp';
-                // Slime Buddy and Merlin need appropriate focus timer scale
-                const isSlimeBuddy = skinFocus.id === 'slime_buddy';
-                const isMerlin = skinFocus.id === 'merlin';
-                focusTimerSprite.style.transform = isHumanSkin ? 'scale(2)' : (isSlimeBuddy ? 'scale(2)' : (isMerlin ? 'scale(3)' : (isFirePigOrImp ? 'scale(3)' : (isRockSkin ? 'scale(3)' : 'scale(4)'))));
-                
+            if (isGifFocus) {
                 // GIF animation - no CSS animation needed
                 focusTimerSprite.style.animation = 'none';
             } else if (appearance.frameCount.idle > 1) {
-                // Sprite sheet animation
+                // Sprite sheet animation - force restart by removing and re-adding
+                focusTimerSprite.style.animation = 'none';
+                // Force reflow to restart animation
+                void focusTimerSprite.offsetWidth;
                 focusTimerSprite.style.animation = `hero-idle-anim 0.8s steps(${appearance.frameCount.idle}) infinite`;
             } else {
                 // Single frame - no animation
                 focusTimerSprite.style.animation = 'none';
             }
+            
+            console.log('[SkinsManager] Focus timer sprite updated, animation restarted');
         }
         
         // Update battle sprite if in battle
@@ -347,12 +275,8 @@ class SkinsManager {
         const userLevel = window.gameState.jerryLevel || 1;
         const userXP = window.gameState.jerryXP || 0;
         
-        // Get all skins sorted by level requirement (lowest to highest)
+        // Get all skins sorted by price (lowest to highest)
         const allSkins = Object.values(window.SKINS_CONFIG).sort((a, b) => {
-            // Sort by level requirement first, then by price if levels are equal
-            if (a.levelRequired !== b.levelRequired) {
-                return a.levelRequired - b.levelRequired;
-            }
             return a.price - b.price;
         });
         
@@ -425,10 +349,8 @@ class SkinsManager {
                     </div>
                 `;
             } else if (skin.seamlessImage) {
-                // For seamless single-image skins (rock skins, etc.)
-                // Rock skins need smaller scale in shop thumbnails
-                const isRockSkin = skin.id === 'task_buddy' || skin.id === 'rae_the_rock' || skin.id === 'rock_star';
-                const thumbnailScale = isRockSkin ? 'scale(1.0)' : 'scale(1.8)';
+                // For seamless single-image skins (Task Toad, Task Phantom)
+                // Task Toad needs vertical adjustment due to transparent space in sprite
                 const translateY = skin.id === 'task-toad' ? ' translateY(-20px)' : '';
                 thumbnailHTML = `
                     <div class="shop-item-emoji" style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: visible;">
@@ -439,13 +361,12 @@ class SkinsManager {
                                     height: auto; 
                                     object-fit: contain; 
                                     image-rendering: pixelated; 
-                                    transform: ${thumbnailScale}${translateY};" 
+                                    transform: scale(1.8)${translateY};" 
                              alt="${skin.name}">
                     </div>
                 `;
             } else {
                 // For sprite sheet skins (all other skins)
-                // CRITICAL FIX: Ensure thumbnails show only the first frame without animation
                 thumbnailHTML = `
                     <div class="shop-item-emoji" style="width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; position: relative;">
                         <div style="width: 80px; height: 80px; position: relative; overflow: hidden;">
@@ -459,8 +380,7 @@ class SkinsManager {
                                         object-position: 0 ${(skin.animationRows?.idle || 0) * (skin.spriteSize?.height || 32)}px; 
                                         image-rendering: pixelated; 
                                         transform: scale(2.5); 
-                                        transform-origin: top left; 
-                                        animation: none !important;" 
+                                        transform-origin: top left;" 
                                  alt="${skin.name}">
                         </div>
                     </div>
@@ -617,6 +537,9 @@ class SkinsManager {
 // Initialize global skins manager
 window.skinsManager = new SkinsManager();
 
-// DO NOT auto-initialize on DOMContentLoaded - this causes race condition
-// skinsManager.init() must be called AFTER gameState is loaded
-// It will be called from loadGameState() or appInitializer
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.skinsManager) {
+        window.skinsManager.init();
+    }
+});

@@ -80,22 +80,6 @@ const availableThemes = {
         description: 'Haunted dungeon entrance with skull gateway',
         price: 1100,
         preview: 'assets/backgrounds/themes/SkullGates.png'
-    },
-    bright_town: {
-        id: 'bright_town',
-        name: 'Bright Town',
-        emoji: '🏞️',
-        description: 'A peaceful town by a river',
-        price: 1100,
-        preview: 'assets/backgrounds/themes/bright-town.png'
-    },
-    stone_ruins: {
-        id: 'stone_ruins',
-        name: 'Stone Ruins',
-        emoji: '🏛️',
-        description: 'Ancient ruins in a mystical forest',
-        price: 1100,
-        preview: 'assets/backgrounds/themes/stone-ruins.png'
     }
 };
 
@@ -196,11 +180,6 @@ function buyTheme(themeId) {
         window.updateUI();
     }
     updateThemesDisplay();
-    
-    // Play purchase sound
-    if (window.audioManager) {
-        window.audioManager.playSound('purchase', 0.7);
-    }
     
     // Show success message
     alert(`🎉 ${theme.name} purchased!\n\n✨ -${theme.price} XP\n\nYou can now apply this theme to your monster's background!`);
