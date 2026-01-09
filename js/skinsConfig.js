@@ -314,22 +314,22 @@ const SKINS_CONFIG = {
         emoji: '🐸',
         thumbnail: 'assets/skins/task-toad/idle.png',
         animations: {
-            idle: 'assets/skins/task-toad/idle.png',
-            walk: 'assets/skins/task-toad/idle.png',
-            attack: 'assets/skins/task-toad/attack.png',
-            hurt: 'assets/skins/task-toad/idle.png',
-            death: 'assets/skins/task-toad/idle.png',
-            jump: 'assets/skins/task-toad/jump.png',
-            sleep: 'assets/skins/task-toad/idle.png'
+            idle: 'assets/skins/task-toad-idle.gif',
+            walk: 'assets/skins/task-toad-idle.gif',
+            attack: 'assets/skins/task-toad-idle.gif',
+            hurt: 'assets/skins/task-toad-idle.gif',
+            death: 'assets/skins/task-toad-idle.gif',
+            jump: 'assets/skins/task-toad-idle.gif',
+            sleep: 'assets/skins/task-toad-idle.gif'
         },
         frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
+            idle: 4,
+            walk: 4,
+            attack: 4,
+            hurt: 4,
+            death: 4,
+            jump: 4,
+            sleep: 4
         },
         spriteSheetWidth: {
             idle: 32,
@@ -353,22 +353,22 @@ const SKINS_CONFIG = {
         emoji: '👻',
         thumbnail: 'assets/skins/task-phantom/idle.png',
         animations: {
-            idle: 'assets/skins/task-phantom/idle.png',
-            walk: 'assets/skins/task-phantom/idle.png',
-            attack: 'assets/skins/task-phantom/idle.png',
-            hurt: 'assets/skins/task-phantom/idle.png',
-            death: 'assets/skins/task-phantom/idle.png',
-            jump: 'assets/skins/task-phantom/idle.png',
-            sleep: 'assets/skins/task-phantom/idle.png'
+            idle: 'assets/skins/task-phantom-idle.gif',
+            walk: 'assets/skins/task-phantom-idle.gif',
+            attack: 'assets/skins/task-phantom-idle.gif',
+            hurt: 'assets/skins/task-phantom-idle.gif',
+            death: 'assets/skins/task-phantom-idle.gif',
+            jump: 'assets/skins/task-phantom-idle.gif',
+            sleep: 'assets/skins/task-phantom-idle.gif'
         },
         frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
+            idle: 4,
+            walk: 4,
+            attack: 4,
+            hurt: 4,
+            death: 4,
+            jump: 4,
+            sleep: 4
         },
         spriteSheetWidth: {
             idle: 32,

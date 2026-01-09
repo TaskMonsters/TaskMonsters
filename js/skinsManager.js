@@ -153,18 +153,30 @@ class SkinsManager {
                 mainHeroSprite.src = newSrc;
             }
             
-            mainHeroSprite.style.width = `${spriteSize.width}px`;
-            mainHeroSprite.style.height = `${spriteSize.height}px`;
-            mainHeroSprite.style.objectFit = 'none';
-            
-            // For multi-directional sprites, set object-position to show front-facing row
-            const spriteRow = appearance.spriteRow || 0;
-            const animationRows = appearance.animationRows || {};
-            
-            // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
-            const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-            const yOffset = rowIndex * spriteSize.height;
-            mainHeroSprite.style.objectPosition = `0 -${yOffset}px`;
+            // CRITICAL FIX: GIFs need different styling than sprite sheets
+            if (isGif) {
+                // GIF animations: Show full image with contain
+                mainHeroSprite.style.width = 'auto';
+                mainHeroSprite.style.height = 'auto';
+                mainHeroSprite.style.maxWidth = '128px';
+                mainHeroSprite.style.maxHeight = '128px';
+                mainHeroSprite.style.objectFit = 'contain';
+                mainHeroSprite.style.objectPosition = 'center';
+            } else {
+                // Sprite sheets: Crop to single frame
+                mainHeroSprite.style.width = `${spriteSize.width}px`;
+                mainHeroSprite.style.height = `${spriteSize.height}px`;
+                mainHeroSprite.style.objectFit = 'none';
+                
+                // For multi-directional sprites, set object-position to show front-facing row
+                const spriteRow = appearance.spriteRow || 0;
+                const animationRows = appearance.animationRows || {};
+                
+                // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
+                const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
+                const yOffset = rowIndex * spriteSize.height;
+                mainHeroSprite.style.objectPosition = `0 -${yOffset}px`;
+            }
             
             // FIX: Don't scale the sprite element - this causes multi-frame display
             // The sprite should be displayed at its natural size
@@ -202,20 +214,32 @@ class SkinsManager {
                 focusTimerSprite.src = appearance.animations.idle;
             }
             
-            focusTimerSprite.style.width = `${spriteSize.width}px`;
-            focusTimerSprite.style.height = `${spriteSize.height}px`;
-            focusTimerSprite.style.objectFit = 'none';
-            focusTimerSprite.style.overflow = 'hidden';
-            focusTimerSprite.style.imageRendering = 'pixelated';
-            
-            // For multi-directional sprites, set object-position to show front-facing row
-            const spriteRow = appearance.spriteRow || 0;
-            const animationRows = appearance.animationRows || {};
-            
-            // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
-            const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-            const yOffset = rowIndex * spriteSize.height;
-            focusTimerSprite.style.objectPosition = `0 -${yOffset}px`;
+            // CRITICAL FIX: GIFs need different styling than sprite sheets
+            if (isGifFocus) {
+                // GIF animations: Show full image with contain
+                focusTimerSprite.style.width = 'auto';
+                focusTimerSprite.style.height = 'auto';
+                focusTimerSprite.style.maxWidth = '128px';
+                focusTimerSprite.style.maxHeight = '128px';
+                focusTimerSprite.style.objectFit = 'contain';
+                focusTimerSprite.style.objectPosition = 'center';
+            } else {
+                // Sprite sheets: Crop to single frame
+                focusTimerSprite.style.width = `${spriteSize.width}px`;
+                focusTimerSprite.style.height = `${spriteSize.height}px`;
+                focusTimerSprite.style.objectFit = 'none';
+                focusTimerSprite.style.overflow = 'hidden';
+                focusTimerSprite.style.imageRendering = 'pixelated';
+                
+                // For multi-directional sprites, set object-position to show front-facing row
+                const spriteRow = appearance.spriteRow || 0;
+                const animationRows = appearance.animationRows || {};
+                
+                // Determine which row to use (Orc uses spriteRow, Blob uses animationRows.idle)
+                const rowIndex = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
+                const yOffset = rowIndex * spriteSize.height;
+                focusTimerSprite.style.objectPosition = `0 -${yOffset}px`;
+            }
             
             // FIX: Use fixed scale to prevent multi-frame display
             focusTimerSprite.style.transform = 'scale(4)';
@@ -274,6 +298,19 @@ class SkinsManager {
         
         const userLevel = window.gameState.jerryLevel || 1;
         const userXP = window.gameState.jerryXP || 0;
+        const isEgg = window.gameState.isEgg === true;
+        
+        // If player is in egg form, show info banner but still allow viewing skins
+        if (isEgg) {
+            const infoBanner = document.createElement('div');
+            infoBanner.style.cssText = 'text-align: center; padding: 20px; margin-bottom: 20px; background: rgba(255, 152, 0, 0.1); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 12px; color: #FF9800;';
+            infoBanner.innerHTML = `
+                <div style="font-size: 24px; margin-bottom: 8px;">🥚</div>
+                <p style="font-size: 14px; margin: 0;">Your monster is in egg form. Reach <strong>Level 5</strong> to equip skins!</p>
+                <p style="font-size: 12px; margin-top: 5px; opacity: 0.8;">Current Level: ${userLevel}</p>
+            `;
+            grid.appendChild(infoBanner);
+        }
         
         // Get all skins sorted by price (lowest to highest)
         const allSkins = Object.values(window.SKINS_CONFIG).sort((a, b) => {
@@ -324,10 +361,18 @@ class SkinsManager {
             } else if (isEquipped) {
                 // State 4: Owned and Currently Equipped
                 equippedBadge = '<div style="background: rgba(76, 175, 80, 0.15); color: rgba(139, 195, 74, 0.9); padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 500; margin-top: 10px; text-align: center; border: 1px solid rgba(76, 175, 80, 0.3); letter-spacing: 0.5px;">✓ Equipped</div>';
-                buttonHTML = `<button class="shop-buy-btn" onclick="window.skinsManager.unequipSkinFromShop()" style="background: rgba(60, 30, 30, 0.7); border: 1px solid rgba(180, 60, 60, 0.5); color: rgba(239, 83, 80, 0.9); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: all 0.2s ease; letter-spacing: 0.3px;" onmouseover="this.style.background='rgba(80, 40, 40, 0.8)'; this.style.borderColor='rgba(200, 80, 80, 0.6)'" onmouseout="this.style.background='rgba(60, 30, 30, 0.7)'; this.style.borderColor='rgba(180, 60, 60, 0.5)'">Unequip</button>`;
+                if (isEgg) {
+                    buttonHTML = `<button class="shop-buy-btn" disabled style="background: rgba(50, 50, 50, 0.6); border: 1px solid rgba(80, 80, 80, 0.5); color: rgba(150, 150, 150, 0.7); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: not-allowed; width: 100%; letter-spacing: 0.3px;">🥚 Hatch First</button>`;
+                } else {
+                    buttonHTML = `<button class="shop-buy-btn" onclick="window.skinsManager.unequipSkinFromShop()" style="background: rgba(60, 30, 30, 0.7); border: 1px solid rgba(180, 60, 60, 0.5); color: rgba(239, 83, 80, 0.9); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: all 0.2s ease; letter-spacing: 0.3px;" onmouseover="this.style.background='rgba(80, 40, 40, 0.8)'; this.style.borderColor='rgba(200, 80, 80, 0.6)'" onmouseout="this.style.background='rgba(60, 30, 30, 0.7)'; this.style.borderColor='rgba(180, 60, 60, 0.5)'">Unequip</button>`;
+                }
             } else {
                 // State 3: Owned but NOT Equipped
-                buttonHTML = `<button class="shop-buy-btn" onclick="window.skinsManager.equipSkinFromShop('${skin.id}')" style="background: rgba(30, 60, 40, 0.7); border: 1px solid rgba(76, 175, 80, 0.5); color: rgba(139, 195, 74, 0.9); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: all 0.2s ease; letter-spacing: 0.3px;" onmouseover="this.style.background='rgba(40, 80, 50, 0.8)'; this.style.borderColor='rgba(100, 195, 100, 0.6)'" onmouseout="this.style.background='rgba(30, 60, 40, 0.7)'; this.style.borderColor='rgba(76, 175, 80, 0.5)'">Equip</button>`;
+                if (isEgg) {
+                    buttonHTML = `<button class="shop-buy-btn" disabled style="background: rgba(50, 50, 50, 0.6); border: 1px solid rgba(80, 80, 80, 0.5); color: rgba(150, 150, 150, 0.7); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: not-allowed; width: 100%; letter-spacing: 0.3px;">🥚 Hatch First</button>`;
+                } else {
+                    buttonHTML = `<button class="shop-buy-btn" onclick="window.skinsManager.equipSkinFromShop('${skin.id}')" style="background: rgba(30, 60, 40, 0.7); border: 1px solid rgba(76, 175, 80, 0.5); color: rgba(139, 195, 74, 0.9); padding: 14px 28px; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; width: 100%; transition: all 0.2s ease; letter-spacing: 0.3px;" onmouseover="this.style.background='rgba(40, 80, 50, 0.8)'; this.style.borderColor='rgba(100, 195, 100, 0.6)'" onmouseout="this.style.background='rgba(30, 60, 40, 0.7)'; this.style.borderColor='rgba(76, 175, 80, 0.5)'">Equip</button>`;
+                }
             }
             
             // Determine thumbnail style based on skin type

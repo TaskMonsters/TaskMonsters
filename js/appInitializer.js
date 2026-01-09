@@ -77,11 +77,16 @@ class AppInitializer {
         
         // CRITICAL: Make main app visible so onboarding overlay can be seen
         document.documentElement.style.visibility = 'visible';
+        document.body.style.visibility = 'visible';
+        
+        // Small delay to ensure DOM is ready
+        await new Promise(resolve => setTimeout(resolve, 50));
         
         // Show onboarding overlay
         const overlay = document.getElementById('onboardingOverlay');
         if (overlay) {
             overlay.classList.remove('hidden');
+            overlay.style.display = 'flex'; // Force display
             console.log('[AppInit] Onboarding overlay displayed');
         } else {
             console.error('[AppInit] Onboarding overlay not found');
