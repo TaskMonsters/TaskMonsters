@@ -8833,8 +8833,8 @@ input:checked + .toggle-slider:before {
             if (content && toggle) {
                 const isCollapsed = content.style.display === 'none';
                 content.style.display = isCollapsed ? 'block' : 'none';
-                // ▼ = expanded (pointing down), ▲ = collapsed (pointing up)
-                toggle.textContent = isCollapsed ? '▼' : '▲';
+                // ▲ = expanded (pointing up), ▼ = collapsed (pointing down)
+                toggle.textContent = isCollapsed ? '▲' : '▼';
                 
                 // Save state to localStorage
                 const collapsedSections = JSON.parse(localStorage.getItem('habitCollapsedSections') || '{}');
@@ -8852,7 +8852,7 @@ input:checked + .toggle-slider:before {
                 const toggle = document.getElementById('taskCategoriesToggle');
                 if (content && toggle) {
                     content.style.display = 'none';
-                    toggle.textContent = '▲'; // Up arrow when collapsed
+                    toggle.textContent = '▼'; // Down arrow when collapsed
                 }
             }
             
@@ -8861,7 +8861,7 @@ input:checked + .toggle-slider:before {
                 const toggle = document.getElementById('quickTaskCategoriesToggle');
                 if (content && toggle) {
                     content.style.display = 'none';
-                    toggle.textContent = '▲'; // Up arrow when collapsed
+                    toggle.textContent = '▼'; // Down arrow when collapsed
                 }
             }
         }

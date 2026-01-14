@@ -156,7 +156,7 @@ class SkinsManager {
             let thumbnailHTML = '';
             if (isLocked) {
                 // Show question mark for locked skins
-                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon">❓</div></div>`;
+                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon">?</div></div>`;
             } else {
                 // Show actual skin image (unlocked skins only)
                 const skinImage = skin.thumbnail || skin.animations?.idle || `assets/skins/${skin.id}/thumbnail.png`;
