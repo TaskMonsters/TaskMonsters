@@ -342,6 +342,11 @@ class BattleEngine {
         this.enemyTurn();
     }
     
+    playerUseSpecialAttack() {
+        // Alias for playerUseFocusCharge for UI compatibility
+        return this.playerUseFocusCharge();
+    }
+    
     playerUseItem(itemId) {
         if (!this.canPlayerAct()) return;
         
@@ -790,32 +795,64 @@ class BattleEngine {
         
         const battle = this.currentBattle;
         
-        // Update player stats using the correct element IDs from index.html
+        // Update player HP
         this.updateElement('playerHPText', `${Math.ceil(battle.player.hp)}/${battle.player.maxHp}`);
         this.updateGauge('heroHPBar', battle.player.hp, battle.player.maxHp);
         
-        // Update enemy stats using the correct element IDs from index.html
+        // Update enemy HP
         this.updateElement('enemyHPText', `${Math.ceil(battle.enemy.hp)}/${battle.enemy.maxHp}`);
         this.updateGauge('enemyHPBar', battle.enemy.hp, battle.enemy.maxHp);
         
-        // Update log
-        // this.renderLog(); // TODO: Implement battle log rendering
+        // Update Attack Gauge
+        this.updateElement('attackGaugeValue', `${Math.ceil(battle.player.attack)}/${battle.player.maxAttack}`);
+        this.updateGauge('attackGaugeBar', battle.player.attack, battle.player.maxAttack);
         
-        // Update Focus Charge button
-        const focusBtn = document.getElementById('useFocusCharge');
-        if (focusBtn) {
-            if (battle.player.focusCharge >= battle.player.maxFocusCharge) {
-                focusBtn.disabled = false;
-                focusBtn.classList.add('focus-ready');
+        // Update Defense Gauge
+        this.updateElement('defenseGaugeValue', `${Math.ceil(battle.player.defense)}/${battle.player.maxDefense}`);
+        this.updateGauge('defenseGaugeBar', battle.player.defense, battle.player.maxDefense);
+        
+        // Update Special Attack Gauge (Focus Charge)
+        this.updateElement('specialAttackValue', `${Math.ceil(battle.player.focusCharge)}/${battle.player.maxFocusCharge}`);
+        this.updateGauge('specialAttackBar', battle.player.focusCharge, battle.player.maxFocusCharge);
+        
+        // Get the Special Attack UI elements
+        const specialGaugeContainer = document.getElementById('specialAttackGaugeContainer');
+        const specialAttackBtn = document.getElementById('btnSpecialAttack');
+        
+        if (specialGaugeContainer && specialAttackBtn) {
+            const playerLevel = gameState?.jerryLevel || 1;
+            
+            // The requirement is Level 10 to unlock the Special Attack
+            if (playerLevel >= 10) {
+                // Show the gauge and button if the player is level 10 or higher
+                specialGaugeContainer.style.display = 'block';
+                specialAttackBtn.style.display = 'block';
+                
+                // Check if the special attack is ready (gauge is full)
+                const isReady = battle.player.focusCharge >= battle.player.maxFocusCharge;
+                specialAttackBtn.disabled = !isReady;
+                if (isReady) {
+                    specialAttackBtn.classList.add('special-ready');
+                } else {
+                    specialAttackBtn.classList.remove('special-ready');
+                }
+                
             } else {
-                focusBtn.disabled = true;
-                focusBtn.classList.remove('focus-ready');
+                // Hide the gauge and button if the player is below level 10
+                specialGaugeContainer.style.display = 'none';
+                specialAttackBtn.style.display = 'none';
             }
         }
         
-        // Update sprites
-        this.updateSprite('playerSprite', battle.player.name);
-        this.updateSprite('enemySprite', battle.enemy.id);
+        // Update Potion button count
+        const potionCount = document.getElementById('potionCount');
+        if (potionCount) {
+            const count = gameState?.battleInventory?.health_potion || 0;
+            potionCount.textContent = `(${count})`;
+        }
+        
+        // Update battle log
+        this.updateBattleLog();
     }
     
     updateBattleLog() {

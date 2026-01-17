@@ -244,7 +244,7 @@ class SubtasksManager {
         if (progressText) progressText.textContent = `${progress.completed}/${progress.total}`;
 
         // Target all possible completion buttons
-        const buttons = taskCard.querySelectorAll(".action-complete, .finish-whole-task-btn, .green-check-btn");
+        const buttons = taskCard.querySelectorAll(".action-complete, .finish-whole-task-btn, .green-check-btn, .finish-recurring-btn");
         buttons.forEach(button => {
             if (hasIncomplete) {
                 button.disabled = true;

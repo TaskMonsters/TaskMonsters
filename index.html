@@ -3302,84 +3302,6 @@
 
 </head>
 <body>
-<!-- Battle Arena -->
-<div id="battleArena" class="battle-arena hidden">
-    <div class="battle-container" id="battleContainer" style="display: none;">
-        <div class="battle-arena" id="battleArena">
-            <div class="arena-name-badge" id="arenaName">Misty Plains</div>
-            
-            <!-- Player Side -->
-            <div class="sprite-container player-side">
-                <div class="hp-bar-container">
-                    <div class="hp-label">
-                        <span id="playerName">Nova</span>
-                        <span id="playerHPText">100/100</span>
-                    </div>
-                    <div class="hp-bar-bg">
-                        <div id="heroHPBar" class="hp-bar-fill" style="width: 100%;"></div>
-                    </div>
-                </div>
-                <div class="sprite-wrapper">
-                    <img id="battleHeroSprite" class="sprite hero-sprite" src="" alt="Hero">
-                </div>
-            </div>
-            
-            <!-- Enemy Side -->
-            <div class="sprite-container enemy-side">
-                <div class="hp-bar-container">
-                    <div class="hp-label">
-                        <span id="enemyName">Enemy</span>
-                        <span id="enemyHPText">50/50</span>
-                    </div>
-                    <div class="hp-bar-bg">
-                        <div id="enemyHPBar" class="hp-bar-fill" style="width: 100%;"></div>
-                    </div>
-                </div>
-                <div class="sprite-wrapper">
-                    <img id="battleEnemySprite" class="sprite enemy-sprite-large" src="" alt="Enemy">
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Battle Log -->
-    <div id="battleLog" class="battle-log">
-        <p>Battle started!</p>
-    </div>
-    
-    <!-- Player Gauges -->
-    <div class="gauge-container">
-        <div class="gauge">
-            <div class="gauge-label">
-                <span>⚔️ Attack</span>
-                <span id="playerAttackValue">50/100</span>
-            </div>
-            <div class="gauge-bar-bg">
-                <div id="playerAttackGauge" class="gauge-bar-fill attack-gauge-fill" style="width: 50%;"></div>
-            </div>
-        </div>
-        <div class="gauge">
-            <div class="gauge-label">
-                <span>🛡️ Defense</span>
-                <span id="playerDefenseValue">50/100</span>
-            </div>
-            <div class="gauge-bar-bg">
-                <div id="playerDefenseGauge" class="gauge-bar-fill defense-gauge-fill" style="width: 50%;"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-        <button id="btnAttack" class="btn-action" onclick="battleEngine.playerAttack()">⚔️ Attack</button>
-        <button id="btnDefend" class="btn-action" onclick="battleEngine.playerDefend()">🛡️ Defend</button>
-        <button id="btnFocusCharge" class="btn-action" onclick="battleEngine.playerUseFocusCharge()" disabled>⚡ Focus Charge</button>
-        <button id="btnItem1" class="btn-action" onclick="battleEngine.playerUseItem('health_potion')">💚 Health Potion<span class="item-count" id="item1Count">x0</span></button>
-        <button id="btnItem2" class="btn-action" onclick="battleEngine.playerUseItem('attack_boost')">⚔️ Attack Boost<span class="item-count" id="item2Count">x0</span></button>
-        <button id="btnItem3" class="btn-action" onclick="battleEngine.playerUseItem('defense_boost')">🛡️ Defense Boost<span class="item-count" id="item3Count">x0</span></button>
-        <button id="btnFlee" class="btn-flee" onclick="battleEngine.playerFlee()">🏃 Flee</button>
-    </div>
-</div>
 
 <!-- Quest Prompt Modal -->
 <div id="questPromptModal" class="quest-prompt-modal hidden">
@@ -4333,6 +4255,7 @@ input:checked + .toggle-slider:before {
 <canvas id="confetti-canvas" style="position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999;"></canvas>
 
 <!-- Battle Arena -->
+<!-- BATTLE ARENA: Full-Screen Two-Part Layout -->
 <div id="battleArena" class="battle-arena hidden">
     <div class="battle-container">
         <!-- Hero Side -->
@@ -4355,7 +4278,7 @@ input:checked + .toggle-slider:before {
         <!-- Enemy Side -->
         <div class="sprite-container" id="enemyContainer">
             <div class="sprite-wrapper">
-                <div id="enemySprite" class="sprite idle" style="background-image: url('assets/enemies/Lazy Bat/Bat-IdleFly.png');"></div>
+                <div id="enemySprite" class="sprite"></div>
             </div>
             <div class="hp-bar-container">
                 <div class="hp-label">
@@ -4382,7 +4305,7 @@ input:checked + .toggle-slider:before {
 
     <!-- Gauges -->
     <div class="gauge-container">
-        <div class="gauge" id="specialAttackGaugeContainer" style="display: none;">
+        <div class="gauge" id="specialAttackGaugeContainer">
             <div class="gauge-label">
                 <span>⚡ Special Attack</span>
                 <span id="specialGaugeText">0/100</span>
@@ -4419,7 +4342,7 @@ input:checked + .toggle-slider:before {
         <button id="btnDefend" class="btn-action" onclick="battleManager.playerDefend()">
             🪨 Defend
         </button>
-        <button id="btnSpecialAttack" class="btn-action" onclick="playerSpecialAttack()" style="display: none;">
+        <button id="btnSpecialAttack" class="btn-action" onclick="playerSpecialAttack()">
             ⚡ Special Attack
         </button>
         <button id="btnFireball" class="btn-action" onclick="battleManager.playerFireball()">
@@ -4433,9 +4356,6 @@ input:checked + .toggle-slider:before {
         </button>
         <button id="btnPrickler" class="btn-action" onclick="battleManager.playerPrickler()" style="display: none;">
             💣 Prickler <span class="item-count" id="pricklerCount">(0)</span>
-        </button>
-        <button id="btnThrowingStar" class="btn-action" onclick="battleManager.playerThrowingStar()" style="display: none;">
-            ⭐ Throwing Star <span class="item-count" id="throwingStarCount">(0)</span>
         </button>
         <button id="btnFreeze" class="btn-action" onclick="battleManager.playerFreeze()" style="display: none;">
             ❄️ Freeze <span class="item-count" id="freezeCount">(0)</span>
@@ -5256,8 +5176,40 @@ input:checked + .toggle-slider:before {
                     <input class="form-input" id="taskDueDate" type="datetime-local" placeholder="Select date and time" onchange="updateRecurringPreview()"/>
                 </div>
                 
+                <!-- Recurring Task Toggle -->
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="recurringToggle" onchange="toggleRecurringOptions()" style="width: auto; margin: 0;">
+                        <span>🔄 Recurring Task</span>
+                    </label>
+                    <div id="recurringOptions" style="display: none; margin-top: 12px; padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                        <label class="form-label">Frequency</label>
+                        <div class="selection-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;">
+                            <div class="selection-item" data-recurring="daily" onclick="selectRecurring('daily')" style="min-height: 60px;">
+                                <div class="selection-item-text">Daily</div>
+                            </div>
+                            <div class="selection-item" data-recurring="weekly" onclick="selectRecurring('weekly')" style="min-height: 60px;">
+                                <div class="selection-item-text">Weekly</div>
+                            </div>
+                            <div class="selection-item" data-recurring="monthly" onclick="selectRecurring('monthly')" style="min-height: 60px;">
+                                <div class="selection-item-text">Monthly</div>
+                            </div>
+                        </div>
 
-                
+                    </div>
+                </div>
+
+                <!-- Subtasks Section -->
+                <div class="form-group" id="subtasksSection">
+                    <label class="form-label">📋 Subtasks</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <input class="form-input" id="newSubtaskInput" placeholder="Add a subtask" type="text" style="flex: 1;" onkeypress="if(event.key==='Enter'){event.preventDefault();addSubtask();}"/>
+                        <button type="button" onclick="addSubtask()" style="background: var(--accent-primary); color: var(--bg-primary); border: none; border-radius: 12px; padding: 12px 20px; cursor: pointer; font-weight: 600;">+</button>
+                    </div>
+                    <div id="subtasksList" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Subtasks will be rendered here -->
+                    </div>
+                </div>
 
             </form>
         </div>
@@ -7318,12 +7270,13 @@ input:checked + .toggle-slider:before {
                         const dateStr = dueDate.toLocaleDateString();
                         const timeStr = dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         
+                        const recurringIndicator = task.recurring ? ' 🔁' : '';
                         if (isOverdue) {
-                            dueDateDisplay = `<span class="task-due-date warning">📅 ${dateStr} ${timeStr}</span>`;
+                            dueDateDisplay = `<span class="task-due-date warning">📅 ${dateStr} ${timeStr}${recurringIndicator}</span>`;
                         } else if (isWarning) {
-                            dueDateDisplay = `<span class="task-due-date warning">📅 ${dateStr} ${timeStr}</span>`;
+                            dueDateDisplay = `<span class="task-due-date warning">📅 ${dateStr} ${timeStr}${recurringIndicator}</span>`;
                         } else {
-                            dueDateDisplay = `<span class="task-due-date">📅 ${dateStr} ${timeStr}</span>`;
+                            dueDateDisplay = `<span class="task-due-date">📅 ${dateStr} ${timeStr}${recurringIndicator}</span>`;
                         }
                     }
                     
@@ -7348,11 +7301,17 @@ input:checked + .toggle-slider:before {
 	                                    </div>
 	                                </div>
 	                            </div>
-	                            ${task.description ? `<div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">${task.description}</div>` : ''}
-	                            <div class="task-actions">
-	                                <button class="action-btn action-complete" onclick="event.stopPropagation(); completeTask(${taskIndex})" title="Mark Complete">✓</button>
-	                                <button class="action-btn action-remove" onclick="event.stopPropagation(); deleteTask(${taskIndex})" title="Delete">×</button>
-	                            </div>
+                            ${task.description ? `<div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">${task.description}</div>` : ''}
+                            ${task.subtasks && task.subtasks.length > 0 ? (window.subtasksManager ? window.subtasksManager.renderSubtasks(task.id) : '') : ''}
+					                            <div class="task-actions" style="${task.recurring ? 'display: flex; gap: 8px; flex-wrap: wrap;' : ''}">
+				                                ${task.recurring ? `
+				                                    <button class="action-btn action-complete" onclick="event.stopPropagation(); finishRecurringTask(${taskIndex})" title="Complete This Occurrence" style="flex: 1; min-width: 80px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
+				                                    <button class="action-btn finish-recurring-btn" onclick="event.stopPropagation(); completeRecurringTaskPermanently(${taskIndex})" title="Finish Recurring Task" style="flex: 1; min-width: 100px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white !important; font-size: 12px; padding: 8px 4px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>Finish Recurring</button>
+				                                ` : `
+				                                    <button class="action-btn action-complete" onclick="event.stopPropagation(); completeTask(${taskIndex})" title="Mark Complete" style="${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
+				                                `}
+		                                <button class="action-btn action-remove" onclick="event.stopPropagation(); deleteTask(${taskIndex})" title="Delete">×</button>
+		                            </div>
 	                        </div>
 	                    `;
                 }).join('');
@@ -8379,9 +8338,16 @@ input:checked + .toggle-slider:before {
                         focusAnimationState = 'walk';
                     }
                 } else {
-                    focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                    setSpriteAnimation(focusTimerMonsterSprite, 'walk', 6, null);
-                    focusAnimationState = 'walk';
+                    // Use GIF animation for default monsters
+                    const monsterName = baseMonster.charAt(0).toUpperCase() + baseMonster.slice(1);
+                    focusTimerMonsterSprite.src = `assets/heroes/${monsterName}_idle.gif`;
+                    // Clear spritesheet animation styles
+                    focusTimerMonsterSprite.style.animation = '';
+                    focusTimerMonsterSprite.style.objectFit = 'contain';
+                    focusTimerMonsterSprite.style.objectPosition = 'center';
+                    focusTimerMonsterSprite.style.width = '64px';
+                    focusTimerMonsterSprite.style.height = '64px';
+                    focusAnimationState = 'idle';
                 }
                 
                 // Clear any existing animation switching loop
@@ -8402,9 +8368,14 @@ input:checked + .toggle-slider:before {
                                 focusTimerMonsterSprite.src = appearance.animations.jump || appearance.animations.idle;
                                 const frameCount = appearance.frameCount.jump || appearance.frameCount.idle;
                                 setSpriteAnimation(focusTimerMonsterSprite, 'jump', frameCount, currentSkin);
-                            } else {
-                                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Jump_8.png`;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'jump', 8, null);
+                             } else {
+                                const monsterName = baseMonster.charAt(0).toUpperCase() + baseMonster.slice(1);
+                                focusTimerMonsterSprite.src = `assets/heroes/${monsterName}_jump.gif`;
+                                focusTimerMonsterSprite.style.animation = '';
+                                focusTimerMonsterSprite.style.objectFit = 'contain';
+                                focusTimerMonsterSprite.style.objectPosition = 'center';
+                                focusTimerMonsterSprite.style.width = '64px';
+                                focusTimerMonsterSprite.style.height = '64px';
                             }
                             focusAnimationState = 'jump';
                         } else if (focusAnimationState === 'jump') {
@@ -8414,8 +8385,13 @@ input:checked + .toggle-slider:before {
                                 const frameCount = appearance.frameCount.idle;
                                 setSpriteAnimation(focusTimerMonsterSprite, 'idle', frameCount, currentSkin);
                             } else {
-                                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'idle', 4, null);
+                                const monsterName = baseMonster.charAt(0).toUpperCase() + baseMonster.slice(1);
+                                focusTimerMonsterSprite.src = `assets/heroes/${monsterName}_idle.gif`;
+                                focusTimerMonsterSprite.style.animation = '';
+                                focusTimerMonsterSprite.style.objectFit = 'contain';
+                                focusTimerMonsterSprite.style.objectPosition = 'center';
+                                focusTimerMonsterSprite.style.width = '64px';
+                                focusTimerMonsterSprite.style.height = '64px';
                             }
                             focusAnimationState = 'idle';
                         } else {
@@ -8425,8 +8401,13 @@ input:checked + .toggle-slider:before {
                                 const frameCount = appearance.frameCount.walk || appearance.frameCount.idle;
                                 setSpriteAnimation(focusTimerMonsterSprite, 'walk', frameCount, currentSkin);
                             } else {
-                                focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Walk_6.png`;
-                                setSpriteAnimation(focusTimerMonsterSprite, 'walk', 6, null);
+                                const monsterName = baseMonster.charAt(0).toUpperCase() + baseMonster.slice(1);
+                                focusTimerMonsterSprite.src = `assets/heroes/${monsterName}_attack.gif`;
+                                focusTimerMonsterSprite.style.animation = '';
+                                focusTimerMonsterSprite.style.objectFit = 'contain';
+                                focusTimerMonsterSprite.style.objectPosition = 'center';
+                                focusTimerMonsterSprite.style.width = '64px';
+                                focusTimerMonsterSprite.style.height = '64px';
                             }
                             focusAnimationState = 'walk';
                         }
@@ -8449,8 +8430,13 @@ input:checked + .toggle-slider:before {
                     const frameCount = appearance.frameCount.idle;
                     setSpriteAnimation(focusTimerMonsterSprite, 'idle', frameCount, currentSkin);
                 } else {
-                    focusTimerMonsterSprite.src = `assets/heroes/${spritePrefix}_Idle_4.png`;
-                    setSpriteAnimation(focusTimerMonsterSprite, 'idle', 4, null);
+                    const monsterName = baseMonster.charAt(0).toUpperCase() + baseMonster.slice(1);
+                    focusTimerMonsterSprite.src = `assets/heroes/${monsterName}_idle.gif`;
+                    focusTimerMonsterSprite.style.animation = '';
+                    focusTimerMonsterSprite.style.objectFit = 'contain';
+                    focusTimerMonsterSprite.style.objectPosition = 'center';
+                    focusTimerMonsterSprite.style.width = '64px';
+                    focusTimerMonsterSprite.style.height = '64px';
                 }
                 
                 // Hide the monster container
@@ -8833,8 +8819,8 @@ input:checked + .toggle-slider:before {
             if (content && toggle) {
                 const isCollapsed = content.style.display === 'none';
                 content.style.display = isCollapsed ? 'block' : 'none';
-                // ▲ = expanded (pointing up), ▼ = collapsed (pointing down)
-                toggle.textContent = isCollapsed ? '▲' : '▼';
+                // ▼ = expanded (pointing down), ▲ = collapsed (pointing up)
+                toggle.textContent = isCollapsed ? '▼' : '▲';
                 
                 // Save state to localStorage
                 const collapsedSections = JSON.parse(localStorage.getItem('habitCollapsedSections') || '{}');
@@ -8852,7 +8838,7 @@ input:checked + .toggle-slider:before {
                 const toggle = document.getElementById('taskCategoriesToggle');
                 if (content && toggle) {
                     content.style.display = 'none';
-                    toggle.textContent = '▼'; // Down arrow when collapsed
+                    toggle.textContent = '▲'; // Up arrow when collapsed
                 }
             }
             
@@ -8861,7 +8847,7 @@ input:checked + .toggle-slider:before {
                 const toggle = document.getElementById('quickTaskCategoriesToggle');
                 if (content && toggle) {
                     content.style.display = 'none';
-                    toggle.textContent = '▼'; // Down arrow when collapsed
+                    toggle.textContent = '▲'; // Up arrow when collapsed
                 }
             }
         }
@@ -9965,8 +9951,8 @@ input:checked + .toggle-slider:before {
         // Subtask management for create task modal
         let modalSubtasks = [];
         
-        function addSubtaskToModal() {
-            const input = document.getElementById('subtaskInput');
+        function addSubtask() {
+            const input = document.getElementById('newSubtaskInput');
             const subtaskTitle = input.value.trim();
             
             if (!subtaskTitle) {
@@ -10007,10 +9993,10 @@ input:checked + .toggle-slider:before {
                 return;
             }
             
-            // In Create Task modal, checkboxes are for SELECTION (for bulk delete), not completion
+            // In Create Task modal, show simple list without checkboxes
             container.innerHTML = modalSubtasks.map(subtask => `
                 <div class="subtask-item" data-subtask-id="${subtask.id}" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-tertiary); border-radius: 6px; margin-bottom: 6px;">
-                    <input type="checkbox" class="subtask-select-checkbox" data-subtask-id="${subtask.id}" style="cursor: pointer;">
+                    <span style="color: var(--text-secondary); font-size: 18px;">•</span>
                     <span class="subtask-item-text" ondblclick="makeSubtaskEditable('${subtask.id}')" style="flex: 1; cursor: text;" title="Double-click to edit">${subtask.title}</span>
                     <button type="button" class="subtask-item-remove" onclick="removeSubtaskFromModal('${subtask.id}')" title="Remove subtask" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 20px; padding: 0; width: 24px; height: 24px;">×</button>
                 </div>
@@ -11253,8 +11239,8 @@ input:checked + .toggle-slider:before {
             
             // Reset all subtasks to incomplete for the next occurrence
             if (task.subtasks && task.subtasks.length > 0) {
-                task.subtasks = task.subtasks.map(st => ({
-                    id: Date.now() + Math.random(),
+                task.subtasks = task.subtasks.map((st, idx) => ({
+                    id: 'subtask_' + Date.now() + '_' + idx + '_' + Math.random().toString(36).substr(2, 9),
                     title: st.title,
                     completed: false,
                     createdAt: new Date().toISOString()
@@ -11268,6 +11254,13 @@ input:checked + .toggle-slider:before {
             saveGameState();
             updateUI();
             updateTasksDisplay();
+            
+            // Force update subtasks display for the new occurrence
+            if (window.subtasksManager && task.subtasks && task.subtasks.length > 0) {
+                setTimeout(() => {
+                    window.subtasksManager.updateCompletionButtons(task.id);
+                }, 100);
+            }
             
             // Play completion sound
             if (window.audioManager) {
@@ -11284,7 +11277,129 @@ input:checked + .toggle-slider:before {
             }
         }
         
-
+        // Function to permanently complete a recurring task (no next occurrence)
+        function completeRecurringTaskPermanently(index) {
+            const task = gameState.tasks[index];
+            if (!task) return;
+            
+            if (!task.recurring) {
+                showSuccessMessage('⚠️ This is not a recurring task!');
+                return;
+            }
+            
+            // Check if all subtasks are completed
+            if (task.subtasks && task.subtasks.length > 0) {
+                const allCompleted = task.subtasks.every(st => st.completed);
+                if (!allCompleted) {
+                    showSuccessMessage('⚠️ Please complete all subtasks first!');
+                    return;
+                }
+            }
+            
+            // Confirm with user
+            if (!confirm(`Are you sure you want to permanently finish this recurring task?\n\n"${task.title}"\n\nThis will complete it and stop all future occurrences.`)) {
+                return;
+            }
+            
+            // Stop focus timer when any task is completed
+            if (focusActive) {
+                console.log('⏱️ Focus Timer: Recurring task permanently completed - stopping timer');
+                stopFocusTimer(false);
+                showSuccessMessage('⏱️ Focus Timer stopped', 'Task completed!');
+            }
+            
+            // Clear notifications for this task
+            if (window.notificationManager) {
+                window.notificationManager.clearTaskNotifications(index);
+            }
+            
+            // Store old level for level up detection
+            const oldLevel = gameState.level;
+            
+            // Track today's completions
+            const today = new Date().toDateString();
+            if (gameState.lastDayTracked !== today) {
+                gameState.completedTasksToday = 0;
+                gameState.lastDayTracked = today;
+            }
+            gameState.completedTasksToday++;
+            
+            // Update streak
+            updateStreak();
+            
+            // Award 80 points for task completion
+            let basePoints = 80;
+            
+            // Add points and health
+            gameState.taskPoints += basePoints;
+            const oldHealth = gameState.health;
+            gameState.health = Math.min(100, gameState.health + 10);
+            gameState.completedTasks++;
+            
+            // Refill battle gauges
+            if (window.battleManager) {
+                window.battleManager.attackGauge = Math.min(100, window.battleManager.attackGauge + 20);
+                window.battleManager.defenseGauge = Math.min(100, window.battleManager.defenseGauge + 15);
+                console.log(`⚔️ Battle gauges refilled! Attack: ${window.battleManager.attackGauge}/100, Defense: ${window.battleManager.defenseGauge}/100`);
+            }
+            
+            // Add XP
+            let xpToAdd = Math.ceil(basePoints * 0.8);
+            if (gameState.xpBoostActive) {
+                xpToAdd *= 2;
+                gameState.xpBoostActive = false;
+                delete gameState.xpBoostExpiry;
+                showSuccessMessage('⭐ XP Boost consumed! 2x XP earned!');
+            }
+            addJerryXP(xpToAdd);
+            
+            // Track achievement progress
+            if (window.achievementTracker) {
+                window.achievementTracker.trackTaskCompletion(task, false);
+                window.achievementTracker.trackOnTimeTask(task);
+            }
+            
+            // Track habit completion
+            if (window.trackTaskCompletion) {
+                window.trackTaskCompletion(task, false);
+            }
+            
+            // Update habits display
+            if (window.updateHabitsDisplay) {
+                window.updateHabitsDisplay();
+            }
+            
+            // Remove task permanently (no next occurrence)
+            gameState.tasks.splice(index, 1);
+            
+            // Update daily challenge progress
+            updateChallengeProgress(task, false);
+            
+            // Show completion message
+            showSuccessMessage('🏁 Recurring task finished!', `+${basePoints} points earned!`);
+            
+            saveGameState();
+            checkAndUpdateEnergy();
+            
+            // Refresh background
+            if (typeof window.refreshBackground === 'function') {
+                window.refreshBackground();
+            }
+            
+            updateUI();
+            updateTasksDisplay();
+            updateQuickTasksDisplay();
+            
+            // Play completion sound
+            if (window.audioManager) {
+                window.audioManager.playSound('taskComplete', 0.7);
+            }
+            
+            // Fire confetti
+            if (window.fireConfetti) {
+                window.fireConfetti();
+            }
+        }
 
         function addQuickTask(taskId, categoryKey) {
             const category = quickTasksDatabase[categoryKey];
@@ -12458,39 +12573,17 @@ input:checked + .toggle-slider:before {
     
     <!-- Battle System Modules -->
     <!-- New Battle System (v2) -->
-    <script src="js/battleEnemies.js"></script>
-    <script src="js/battleAI.js"></script>
-    <script src="js/battleThreat.js"></script>
-    <script src="js/battleMemory.js"></script>
-    <script src="js/battleSpecial.js"></script>
-    <script src="js/battleAudio.js"></script>
-    <script src="js/battleEffects.js"></script>
-    <script src="js/battleArenas.js"></script>
-    <script src="js/battleEngine.js"></script>
-    <script src="js/battleSystemInit.js"></script>
-    
-    <!-- Old Battle System (Legacy) -->
-    <script src="js/enemyAI.js"></script>
+    <script src="js/battleUI.js"></script>
+    <script src="js/enemy-animations.js"></script>
+    <script src="js/battleHPAnimations.js"></script>
+    <script src="js/specialAttacks.js"></script>
     <script src="js/enemy.js"></script>
+    <script src="js/battleManager.js"></script>
+    <script src="js/battleTutorial.js"></script>
     <script src="js/boss-enemies.js"></script>
-    <script src="js/enemy-init.js"></script>
-    <script src="js/enemy-animation.js"></script>
-    <script src="js/focusAttackAnimation.js"></script>
-    <!-- Removed missing script: js/battleUI.js -->
-    <script src="js/projectileSystem.js"></script>
-    <script src="js/heroRollAnimation.js"></script>
-    <script src="js/monsterSpecialAttacksUnified.js"></script>
-    <script src="js/specialAttackHandler.js"></script>
-    <script src="js/medusaProjectile.js"></script>
-    <script src="js/bossProjectiles.js"></script>
-    <script src="js/boltProjectile.js"></script>
-    <script src="js/throwingStarAttack.js"></script>
-    <script src="js/mirrorAttackAnimation.js"></script>
-    <script src="js/lootSystem.js"></script>
-    <!-- Removed missing script: js/battleManager.js -->
-    <!-- Removed missing script: js/battleTutorial.js -->
-    <script src="js/turnTimer.js"></script>
-    <script src="js/soundIntegration.js"></script>
+    <script src="js/battleInit.js"></script>
+    <script src="js/guardianNarrator.js"></script>
+    
     <!-- Removed missing script: js/battleInit.js -->
     <script src="js/questTaskManager.js"></script>
     <script src="js/questGiver.js?v=7"></script>

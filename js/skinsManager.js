@@ -65,23 +65,30 @@ class SkinsManager {
         // Get appearance (should return GIF paths)
         const appearance = window.getActiveMonsterAppearance(this.currentBaseMonster, this.equippedSkinId);
         const idleGif = appearance.animations.idle;
+        const isSkin = appearance.isSkin || false;
+        
+        // Determine scales based on whether it's a skin or default monster
+        // Skins are 1.5x larger (scale 6 vs 4 for main, 4.5 vs 3 for focus timer)
+        const mainScale = isSkin ? 6 : 4;
+        const focusScale = isSkin ? 4.5 : 3;
+        const battleScale = 3.5; // Battle mode keeps same scale
         
         // 1. Update Main Hero Sprite
         const mainHeroSprite = document.getElementById('mainHeroSprite');
         if (mainHeroSprite) {
-            this.applyGifToElement(mainHeroSprite, idleGif, 4); // Scale 4 for home page
+            this.applyGifToElement(mainHeroSprite, idleGif, mainScale);
         }
         
         // 2. Update Focus Timer Sprite
         const focusTimerSprite = document.getElementById('focusTimerMonsterSprite');
         if (focusTimerSprite) {
-            this.applyGifToElement(focusTimerSprite, idleGif, 3); // Scale 3 for focus timer
+            this.applyGifToElement(focusTimerSprite, idleGif, focusScale);
         }
         
         // 3. Update Battle Sprite (if battle is active)
-        const battleHeroSprite = document.getElementById('battleHeroSprite');
+        const battleHeroSprite = document.getElementById('heroSprite');
         if (battleHeroSprite) {
-            this.applyGifToElement(battleHeroSprite, idleGif, 3.5); // Scale 3.5 for battle
+            this.applyGifToElement(battleHeroSprite, idleGif, battleScale);
         }
     }
     
@@ -156,7 +163,7 @@ class SkinsManager {
             let thumbnailHTML = '';
             if (isLocked) {
                 // Show question mark for locked skins
-                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon">?</div></div>`;
+                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon" style="color: #39FF14; text-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14;">❓</div></div>`;
             } else {
                 // Show actual skin image (unlocked skins only)
                 const skinImage = skin.thumbnail || skin.animations?.idle || `assets/skins/${skin.id}/thumbnail.png`;

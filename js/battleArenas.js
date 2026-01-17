@@ -200,14 +200,13 @@ class BattleArenasManager {
      */
     setArenaBackground(arenaId) {
         const arena = this.getArena(arenaId);
-        const battleContainer = document.getElementById('battleContainer');
+        const battleScene = document.getElementById('battleScene');
         
-        if (battleContainer) {
-            battleContainer.style.backgroundImage = `url('${arena.background}')`;
-            battleContainer.style.backgroundSize = 'cover';
-            battleContainer.style.backgroundPosition = 'center';
-            battleContainer.style.backgroundRepeat = 'no-repeat';
-            battleContainer.style.display = 'flex'; // Ensure it's visible
+        if (battleScene) {
+            battleScene.style.backgroundImage = `url('${arena.background}')`;
+            battleScene.style.backgroundSize = 'cover';
+            battleScene.style.backgroundPosition = 'center bottom';
+            battleScene.style.backgroundRepeat = 'no-repeat';
         }
         
         // Update arena name display
