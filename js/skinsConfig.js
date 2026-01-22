@@ -85,7 +85,7 @@ const SKINS_CONFIG = {
         id: 'pig',
         name: 'Fire Pig',
         price: 300,
-        levelRequired: 2,
+        levelRequired: 10,
         tier: 'standard',
         emoji: '🐷',
         thumbnail: 'assets/skins/pig/thumbnail.png',
@@ -402,13 +402,13 @@ const SKINS_CONFIG = {
             sleep: 'assets/skins/flying_eye/flying-eye-idle.gif'
         },
         frameCount: {
-            idle: 8,
-            walk: 8,
-            attack: 8,
-            hurt: 8,
-            death: 8,
-            jump: 8,
-            sleep: 8
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
         },
         spriteSheetWidth: {
             idle: 80,
@@ -628,13 +628,13 @@ const SKINS_CONFIG = {
             sleep: 'assets/skins/task-phantom-idle.gif'
         },
         frameCount: {
-            idle: 4,
-            walk: 4,
-            attack: 4,
-            hurt: 4,
-            death: 4,
-            jump: 4,
-            sleep: 4
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
         },
         spriteSheetWidth: {
             idle: 32,
@@ -645,7 +645,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true  // Flag to indicate this is a single seamless image
+        seamlessImage: true  // Flag to indicate this is a single seamless GIF animation
     },
 
     task_toad: {
@@ -657,22 +657,22 @@ const SKINS_CONFIG = {
         emoji: '🐸',
         thumbnail: 'assets/skins/task-toad/idle.png',
         animations: {
-            idle: 'assets/skins/task-toad-idle.gif',
-            walk: 'assets/skins/task-toad-idle.gif',
-            attack: 'assets/skins/task-toad-idle.gif',
-            hurt: 'assets/skins/task-toad-idle.gif',
-            death: 'assets/skins/task-toad-idle.gif',
-            jump: 'assets/skins/task-toad-idle.gif',
-            sleep: 'assets/skins/task-toad-idle.gif'
+            idle: 'assets/skins/task-toad/Idle.gif',
+            walk: 'assets/skins/task-toad/Idle.gif',
+            attack: 'assets/skins/task-toad/Attack.gif',
+            hurt: 'assets/skins/task-toad/Idle.gif',
+            death: 'assets/skins/task-toad/Idle.gif',
+            jump: 'assets/skins/task-toad/Jump.gif',
+            sleep: 'assets/skins/task-toad/Idle.gif'
         },
         frameCount: {
-            idle: 4,
-            walk: 4,
-            attack: 4,
-            hurt: 4,
-            death: 4,
-            jump: 4,
-            sleep: 4
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
         },
         spriteSheetWidth: {
             idle: 32,
@@ -706,13 +706,13 @@ const SKINS_CONFIG = {
             sleep: 'assets/skins/merlin/merlin-idle.gif'
         },
         frameCount: {
-            idle: 4,
-            walk: 4,
-            attack: 8,
-            hurt: 3,
-            death: 4,
-            jump: 4,
-            sleep: 4
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            hurt: 1,
+            death: 1,
+            jump: 1,
+            sleep: 1
         },
         spriteSheetWidth: {
             idle: 80,

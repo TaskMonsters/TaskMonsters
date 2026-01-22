@@ -57,11 +57,11 @@ class MoodTracker {
                 transform: translateX(-50%);
                 margin-bottom: 5px;
                 background-color: #2a2a3e;
-                border: 3px solid #8b5cf6;
-                border-radius: 25px;
-                padding: 20px 24px;
-                max-width: 360px;
-                min-width: 280px;
+                border: 2px solid #8b5cf6;
+                border-radius: 17px;
+                padding: 13px 16px;
+                max-width: 240px;
+                min-width: 187px;
                 box-shadow: 0 4px 16px rgba(0,0,0,0.4);
                 opacity: 0;
                 display: none;
@@ -81,7 +81,7 @@ class MoodTracker {
                     background: transparent;
                     border: none;
                     color: #ffffff;
-                    font-size: 20px;
+                    font-size: 14px;
                     cursor: pointer;
                     padding: 4px;
                     line-height: 1;
@@ -92,8 +92,8 @@ class MoodTracker {
                 <h3 style="
                     color: #ffffff;
                     text-align: center;
-                    margin: 0 0 15px 0;
-                    font-size: 18px;
+                    margin: 0 0 10px 0;
+                    font-size: 12px;
                     font-weight: 600;
                 ">How are you feeling?</h3>
                 
@@ -101,16 +101,16 @@ class MoodTracker {
                 <div style="
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
-                    gap: 10px;
-                    margin-bottom: 15px;
+                    gap: 7px;
+                    margin-bottom: 10px;
                 ">
                     ${this.moods.map(mood => `
                         <button class="mood-btn-tooltip" data-mood="${mood.value}" style="
                             background: rgba(255, 255, 255, 0.1);
                             border: 2px solid rgba(139, 92, 246, 0.3);
-                            border-radius: 12px;
-                            padding: 12px 8px;
-                            font-size: 32px;
+                            border-radius: 8px;
+                            padding: 8px 5px;
+                            font-size: 21px;
                             cursor: pointer;
                             transition: all 0.2s;
                             display: flex;
@@ -119,7 +119,7 @@ class MoodTracker {
                             gap: 4px;
                         " onmouseover="this.style.background='rgba(139, 92, 246, 0.2)'; this.style.borderColor='#8b5cf6'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(139, 92, 246, 0.3)'; this.style.transform='scale(1)'">
                             <span>${mood.emoji}</span>
-                            <span style="font-size: 10px; color: #ccc;">${mood.name}</span>
+                            <span style="font-size: 7px; color: #ccc;">${mood.name}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -127,13 +127,13 @@ class MoodTracker {
                 <!-- Optional Note -->
                 <textarea id="moodNoteTooltip" placeholder="Add a note (optional)..." style="
                     width: 100%;
-                    min-height: 60px;
+                    min-height: 40px;
                     background: rgba(255, 255, 255, 0.05);
                     border: 2px solid rgba(139, 92, 246, 0.3);
                     border-radius: 8px;
-                    padding: 10px;
+                    padding: 7px;
                     color: #ffffff;
-                    font-size: 13px;
+                    font-size: 9px;
                     resize: vertical;
                     font-family: inherit;
                     box-sizing: border-box;
@@ -581,3 +581,33 @@ if (document.readyState === 'loading') {
         }
     }, 500);
 }
+
+
+// Reset mood stats function
+function resetMoodStats() {
+    if (confirm('Are you sure you want to reset all mood history? This cannot be undone.')) {
+        // Reset mood history in localStorage
+        localStorage.removeItem('moodHistory');
+        console.log('[MoodTracker] Mood history cleared from localStorage');
+        
+        // Reset mood history in gameState (if it exists)
+        if (window.gameState && window.gameState.moodHistory) {
+            window.gameState.moodHistory = [];
+        }
+        
+        // Update mood display
+        if (typeof window.updateMoodHistoryDisplay === 'function') {
+            window.updateMoodHistoryDisplay();
+        }
+        
+        // Show success message
+        if (typeof window.showSuccessMessage === 'function') {
+            window.showSuccessMessage('🔄 Mood history reset!', 'All mood data has been cleared');
+        } else {
+            alert('✅ Mood history reset successfully!');
+        }
+    }
+}
+
+// Export to global scope
+window.resetMoodStats = resetMoodStats;

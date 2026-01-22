@@ -68,9 +68,9 @@ class SkinsManager {
         const isSkin = appearance.isSkin || false;
         
         // Determine scales based on whether it's a skin or default monster
-        // Skins are 1.5x larger (scale 6 vs 4 for main, 4.5 vs 3 for focus timer)
-        const mainScale = isSkin ? 6 : 4;
-        const focusScale = isSkin ? 4.5 : 3;
+        // Skins are 1x larger (scale 5 vs 4 for main, 4 vs 3 for focus timer)
+        const mainScale = isSkin ? 5 : 4;
+        const focusScale = isSkin ? 4 : 3;
         const battleScale = 3.5; // Battle mode keeps same scale
         
         // 1. Update Main Hero Sprite
@@ -162,8 +162,8 @@ class SkinsManager {
             // Thumbnail display logic
             let thumbnailHTML = '';
             if (isLocked) {
-                // Show question mark for locked skins
-                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon" style="color: #39FF14; text-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14;">❓</div></div>`;
+                // Show custom green question mark image for locked skins
+                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><img src="assets/skins/locked-question-mark-green.png" class="locked-icon-img" style="width: 64px; height: 64px; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6));" /></div>`;
             } else {
                 // Show actual skin image (unlocked skins only)
                 const skinImage = skin.thumbnail || skin.animations?.idle || `assets/skins/${skin.id}/thumbnail.png`;

@@ -68,6 +68,21 @@ class BattleManager {
             });
         }
         
+        // Check if this is a Gloom encounter and show special modal
+        if (enemyData.isGloomEncounter && window.showGloomEncounterModal) {
+            console.log('🌑 Gloom encounter detected! Showing special modal...');
+            window.showGloomEncounterModal();
+            // Wait for modal to be dismissed
+            await new Promise(resolve => {
+                const checkModal = setInterval(() => {
+                    if (!document.getElementById('gloomEncounterModal')) {
+                        clearInterval(checkModal);
+                        resolve();
+                    }
+                }, 100);
+            });
+        }
+        
         this.state = BattleState.INITIALIZING;
         this.hero = heroData;
         this.enemy = enemyData;
@@ -206,11 +221,21 @@ class BattleManager {
 
         // Play wake up sequence
         addBattleLog(`💤 A ${this.enemy.name} appears!`);
-        await playWakeUpSequence(this.enemy);
+        console.log('[Battle] About to call playWakeUpSequence');
+        
+        try {
+            await playWakeUpSequence(this.enemy);
+            console.log('[Battle] playWakeUpSequence completed');
+        } catch (error) {
+            console.error('[Battle] playWakeUpSequence error:', error);
+        }
+        
         addBattleLog('⚔️ Battle Start!');
+        console.log('[Battle] Starting enemy turn');
 
         // Enemy attacks first (stable behavior)
         await this.enemyTurn();
+        console.log('[Battle] Enemy turn completed, state:', this.state);
     }
 
     // Helper: Apply damage to hero with animation
@@ -218,6 +243,20 @@ class BattleManager {
         this.hero.hp = Math.max(0, this.hero.hp - damage);
         if (window.showBattleDamageAnimation) {
             window.showBattleDamageAnimation('heroSprite', damage);
+        }
+        
+        // Add flicker animation when hero takes damage
+        const heroSprite = document.getElementById('heroSprite');
+        if (heroSprite && damage > 0) {
+            let flickerCount = 0;
+            const flickerInterval = setInterval(() => {
+                heroSprite.style.opacity = heroSprite.style.opacity === '0.3' ? '1' : '0.3';
+                flickerCount++;
+                if (flickerCount >= 12) { // 6 flickers (12 opacity changes) over 2 seconds
+                    clearInterval(flickerInterval);
+                    heroSprite.style.opacity = '1'; // Ensure sprite is visible at end
+                }
+            }, 167); // 167ms * 12 = ~2 seconds
         }
     }
     
@@ -251,7 +290,11 @@ class BattleManager {
 
     // Player attacks
     async playerAttack() {
-        if (this.state !== BattleState.PLAYER_TURN) return;
+        console.log('[Battle] playerAttack called, current state:', this.state);
+        if (this.state !== BattleState.PLAYER_TURN) {
+            console.warn('[Battle] playerAttack blocked - not player turn');
+            return;
+        }
         
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
@@ -319,14 +362,46 @@ class BattleManager {
             return;
         }
         
-        // Check if enemy evades (Ghost ability, Sunny Dragon, or Fly)
+        // Check if enemy evades (Ghost ability, Sunny Dragon, Fly, or Gloom)
         if ((this.enemy.canEvade || this.enemy.evasionAbility) && Math.random() < this.enemy.evasionChance) {
-            const evasionEmoji = this.enemy.name === 'Fly Drone' ? '🪰' : '👻';
+            const evasionEmoji = this.enemy.name === 'The Gloom' ? '🌑' : (this.enemy.name === 'Fly Drone' ? '🪰' : '👻');
             addBattleLog(`${evasionEmoji} ${this.enemy.name} evaded your attack!`);
             updateBattleUI(this.hero, this.enemy);
             
             // Reset hero sprite to idle
             startHeroAnimation('idle');
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+            return;
+        }
+        
+        // Check if Gloom deflects the attack (25% chance)
+        if (this.enemy.canDeflect && Math.random() < this.enemy.deflectChance) {
+            addBattleLog(`🛡️ The Gloom deflected your attack back at you!`);
+            
+            // Calculate damage that would have been dealt
+            const baseDamage = this.hero.attack;
+            const maxDamage = baseDamage + 10;
+            const deflectedDamage = Math.floor(Math.random() * (maxDamage - baseDamage + 1)) + baseDamage;
+            
+            // Apply damage to hero instead
+            this.hero.hp = Math.max(0, this.hero.hp - deflectedDamage);
+            if (window.showBattleDamageAnimation) {
+                window.showBattleDamageAnimation('heroSprite', deflectedDamage);
+            }
+            addBattleLog(`💥 You took ${deflectedDamage} damage from your own attack!`);
+            updateBattleUI(this.hero, this.enemy);
+            
+            // Reset hero sprite to idle
+            startHeroAnimation('idle');
+            
+            // Check if hero died from deflected damage
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+                return;
+            }
             
             await new Promise(resolve => setTimeout(resolve, 1000));
             await this.enemyTurn();
@@ -380,6 +455,14 @@ class BattleManager {
             // Play critical hit sound for damage >= 10
             if (damage >= 10) {
                 window.audioManager.playSound('critical_hit', 0.8);
+            }
+        }
+        
+        // Fire Pig Projectile Attack on 3rd attack
+        if (this.attackCount % 3 === 0 && this.attackCount > 0) {
+            const equippedSkin = window.gameState?.equippedSkinId;
+            if (equippedSkin === 'fire_pig') {
+                await this.playFirePigProjectile();
             }
         }
 
@@ -441,8 +524,8 @@ class BattleManager {
             window.audioManager.playSound('spark_attack', 0.8);
         }
 
-        // Calculate damage (35-45 range, melee strike - INCREASED)
-        const damage = Math.floor(Math.random() * 11) + 35; // Random between 35-45
+        // Calculate damage (50-65 range, melee strike - INCREASED)
+        const damage = Math.floor(Math.random() * 16) + 50; // Random between 50-65
         const isDead = this.enemy.takeDamage(damage);
         
         // Play critical hit sound for damage >= 10 (Spark always deals 18-20)
@@ -553,8 +636,8 @@ class BattleManager {
             document.getElementById('enemySprite')
         );
 
-        // Calculate damage (30-40 range - INCREASED)
-        const damage = Math.floor(Math.random() * 11) + 30; // Random between 30-40
+        // Calculate damage (45-60 range - INCREASED)
+        const damage = Math.floor(Math.random() * 16) + 45; // Random between 45-60
         const isDead = this.enemy.takeDamage(damage);
 
         // Play enemy hurt animation
@@ -615,8 +698,8 @@ class BattleManager {
             document.getElementById('enemySprite')
         );
 
-        // Calculate damage (40-50 base damage - INCREASED)
-        const damage = Math.floor(Math.random() * 11) + 40; // 40-50 damage;
+        // Calculate damage (25 damage)
+        const damage = 25;
         const isDead = this.enemy.takeDamage(damage);
         
         // Play critical hit sound for damage >= 10
@@ -685,8 +768,8 @@ class BattleManager {
             window.audioManager.playSound('prickler_attack', 0.8);
         }
 
-        // Calculate damage (20-30 range with nuclear explosion - INCREASED)
-        const damage = Math.floor(Math.random() * 11) + 20; // Random between 20-30
+        // Calculate damage (35-50 range with nuclear explosion - INCREASED)
+        const damage = Math.floor(Math.random() * 16) + 35; // Random between 35-50
         const isDead = this.enemy.takeDamage(damage);
         
         // Play critical hit sound for damage >= 10 (Prickler always deals 10-15)
@@ -756,8 +839,8 @@ class BattleManager {
             window.audioManager.playSound('freeze_attack', 0.8);
         }
 
-        // Calculate damage (30-35 damage, skips 2 turns - INCREASED)
-        const damage = Math.floor(Math.random() * 6) + 30; // 30-35 damage
+        // Calculate damage (45-55 damage, skips 2 turns - INCREASED)
+        const damage = Math.floor(Math.random() * 11) + 45; // 45-55 damage
         const isDead = this.enemy.takeDamage(damage);
         
         // Play critical hit sound for damage >= 10
@@ -839,6 +922,9 @@ class BattleManager {
         // Play hero jump animation
         startHeroAnimation('jump');
         
+        // Play potion visual animation
+        await this.playPotionAnimation();
+        
         const healAmount = 20;
         const oldHp = this.hero.hp;
         this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
@@ -900,10 +986,20 @@ class BattleManager {
         // Play hero jump animation
         startHeroAnimation('jump');
         
-        const healAmount = 50;
-        this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
+        // Play potion visual animation
+        await this.playPotionAnimation();
         
-        addBattleLog(`💚 Hyper Potion healed ${healAmount} HP!`);
+        const healAmount = 50;
+        const oldHp = this.hero.hp;
+        this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
+        const actualHeal = this.hero.hp - oldHp;
+        
+        // Show heal animation
+        if (actualHeal > 0 && window.showBattleHealAnimation) {
+            window.showBattleHealAnimation('heroSprite', actualHeal);
+        }
+        
+        addBattleLog(`💚 Hyper Potion healed ${actualHeal} HP!`);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -958,6 +1054,9 @@ class BattleManager {
             window.audioManager.playSound('potion_use', 0.8);
         }
         
+        // Play attack boost visual animation
+        await this.playAttackBoostAnimation();
+        
         const refillAmount = 50;
         this.attackGauge = Math.min(100, this.attackGauge + refillAmount);
         
@@ -994,6 +1093,9 @@ class BattleManager {
         if (window.audioManager) {
             window.audioManager.playSound('defense_boost', 0.7);
         }
+        
+        // Play defense boost visual animation
+        await this.playDefenseBoostAnimation();
         
         const refillAmount = 50;
         this.defenseGauge = Math.min(100, this.defenseGauge + refillAmount);
@@ -1126,14 +1228,201 @@ class BattleManager {
             window.audioManager.playSound('fireball', 0.7); // Use fireball sound for blue flame
         }
 
-        // Calculate damage (30-40 base damage - INCREASED)
-        const damage = Math.floor(Math.random() * 11) + 30; // 30-40 damage
+        // Calculate damage (50-70 base damage - INCREASED)
+        const damage = Math.floor(Math.random() * 21) + 50; // 50-70 damage
         const isDead = this.enemy.takeDamage(damage);
         
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
         addBattleLog(`🔵🔥 Blue Flame dealt ${damage} damage!`);
+        updateBattleUI(this.hero, this.enemy);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        if (isDead) {
+            this.state = BattleState.VICTORY;
+            await this.endBattle('victory');
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+        }
+    }
+
+    // Player uses Lightning Bolt
+    async playerLightningBolt() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
+        if (this.attackGauge < 25) {
+            addBattleLog('❌ Need 25 attack gauge for Lightning Bolt!');
+            return;
+        }
+
+        const lightningCount = gameState.battleInventory?.lightning_bolt || 0;
+        if (lightningCount <= 0) {
+            addBattleLog('❌ No Lightning Bolts left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 25;
+        gameState.battleInventory.lightning_bolt = Math.max(0, gameState.battleInventory.lightning_bolt - 1);
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero cast animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play lightning animation (reuse spark animation with different effect)
+        await playSparkAnimation(
+            document.getElementById('heroSprite'),
+            document.getElementById('enemySprite')
+        );
+        
+        // Play thunder sound
+        if (window.audioManager) {
+            window.audioManager.playSound('critical_hit', 0.9);
+        }
+
+        // Calculate damage (70-90 damage)
+        const damage = Math.floor(Math.random() * 21) + 70;
+        const isDead = this.enemy.takeDamage(damage);
+        
+        // Restore 20 attack gauge
+        this.attackGauge = Math.min(100, this.attackGauge + 20);
+        
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+        
+        addBattleLog(`⚡ Lightning Bolt dealt ${damage} damage and restored 20 attack gauge!`);
+        updateBattleUI(this.hero, this.enemy);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        if (isDead) {
+            this.state = BattleState.VICTORY;
+            await this.endBattle('victory');
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+        }
+    }
+
+    // Player uses Star Shield
+    async playerStarShield() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
+        if (this.attackGauge < 30) {
+            addBattleLog('❌ Need 30 attack gauge for Star Shield!');
+            return;
+        }
+
+        const starShieldCount = gameState.battleInventory?.star_shield || 0;
+        if (starShieldCount <= 0) {
+            addBattleLog('❌ No Star Shields left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 30;
+        gameState.battleInventory.star_shield = Math.max(0, gameState.battleInventory.star_shield - 1);
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Activate star shield (blocks next 2 attacks)
+        this.starShieldActive = true;
+        this.starShieldCharges = 2;
+
+        // Play hero cast animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+        
+        addBattleLog('🌟 Star Shield activated! (2 charges)');
+        addBattleLog('🛡️ Next 2 enemy attacks will be blocked completely!');
+        
+        // Play shield sound
+        if (window.audioManager) {
+            window.audioManager.playSound('defend', 0.8);
+        }
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        await new Promise(resolve => setTimeout(resolve, 800));
+        await this.enemyTurn();
+    }
+
+    // Player uses Honey Trap
+    async playerHoneyTrap() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
+        if (this.attackGauge < 20) {
+            addBattleLog('❌ Need 20 attack gauge for Honey Trap!');
+            return;
+        }
+
+        const honeyCount = gameState.battleInventory?.honey_trap || 0;
+        if (honeyCount <= 0) {
+            addBattleLog('❌ No Honey Traps left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 20;
+        gameState.battleInventory.honey_trap = Math.max(0, gameState.battleInventory.honey_trap - 1);
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero throw animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play honey projectile animation (reuse prickler animation)
+        await playPricklerAnimation(
+            document.getElementById('heroSprite'),
+            document.getElementById('enemySprite')
+        );
+
+        // Calculate damage (30-40 damage)
+        const damage = Math.floor(Math.random() * 11) + 30;
+        const isDead = this.enemy.takeDamage(damage);
+        
+        // Apply honey slow effect (reduces enemy damage by 30% for 3 turns)
+        this.honeySlowActive = true;
+        this.honeySlowTurns = 3;
+        
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+        
+        addBattleLog(`🍯 Honey Trap dealt ${damage} damage!`);
+        addBattleLog('🐝 Enemy is slowed! Damage reduced by 30% for 3 turns!');
         updateBattleUI(this.hero, this.enemy);
 
         // Reset hero sprite to idle
@@ -1235,6 +1524,7 @@ class BattleManager {
 
     // Enemy turn
     async enemyTurn() {
+        console.log('[Battle] enemyTurn called, setting state to ENEMY_TURN');
         this.state = BattleState.ENEMY_TURN;
 
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -1292,6 +1582,11 @@ class BattleManager {
             const healResult = window.enemyAI.attemptEnemyHeal(this.enemy, playerLevel);
             
             if (healResult.healed) {
+                // Show heal animation above enemy
+                if (window.showBattleHealAnimation) {
+                    window.showBattleHealAnimation('enemySprite', healResult.amount);
+                }
+                
                 addBattleLog(`💚 ${this.enemy.name} regenerates ${healResult.amount} HP!`);
                 updateBattleUI(this.hero, this.enemy);
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -1450,7 +1745,10 @@ class BattleManager {
             if (this.enemy.poisonAttack) {
                 await playEnemyAnimation(this.enemy, 'attack1', 600);
                 
-                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                // Use correct damage range
+                const damage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                    ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                    : Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
                 
                 // Apply poison effect for 2 turns
@@ -1537,7 +1835,10 @@ class BattleManager {
                 const heroSprite = document.getElementById('heroSprite');
                 await playMushroomProjectile(enemySprite, heroSprite);
                 
-                const damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                // Use correct damage range
+                const damage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                    ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                    : Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
                 
                 // Apply mushroom effect for 2 turns
@@ -1681,8 +1982,10 @@ class BattleManager {
             addBattleLog('🪞 Mirror Attack reflected the attack back!');
             this.hasReflect = false;
             
-            // Calculate damage that would have been dealt to hero
-            const reflectedDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+            // Calculate damage that would have been dealt to hero (using correct damage range)
+            const reflectedDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                : Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
             
             // Apply damage to enemy instead
             const isDead = this.enemy.takeDamage(reflectedDamage);
@@ -1714,8 +2017,10 @@ class BattleManager {
         if (this.reflectActive && this.reflectTurns > 0) {
             addBattleLog(`🌙 Chaos Curse active! Enemy damages itself! (${this.reflectTurns} turns left)`);
             
-            // Calculate damage that would have been dealt to hero
-            const reflectedDamage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+            // Calculate damage that would have been dealt to hero (using correct damage range)
+            const reflectedDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                : Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
             
             // Apply damage to enemy instead
             const isDead = this.enemy.takeDamage(reflectedDamage);
@@ -1750,6 +2055,42 @@ class BattleManager {
             return;
         }
         
+        // Check for Gloom self-heal ability (20% chance, max 3 times per battle)
+        if (this.enemy.canSelfHeal && this.enemy.selfHealCount < this.enemy.selfHealMax) {
+            // Only heal if HP is below 50%
+            if (this.enemy.hp < this.enemy.maxHP * 0.5 && Math.random() < 0.20) {
+                this.enemy.selfHealCount++;
+                const healAmount = this.enemy.selfHealAmount;
+                const oldHp = this.enemy.hp;
+                this.enemy.hp = Math.min(this.enemy.maxHP, this.enemy.hp + healAmount);
+                const actualHeal = this.enemy.hp - oldHp;
+                
+                if (actualHeal > 0 && window.showBattleHealAnimation) {
+                    window.showBattleHealAnimation('enemySprite', actualHeal);
+                }
+                
+                addBattleLog(`💜 The Gloom absorbed dark energy and healed ${actualHeal} HP! (${this.enemy.selfHealCount}/${this.enemy.selfHealMax} heals used)`);
+                updateBattleUI(this.hero, this.enemy);
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Gloom still gets to attack after healing
+            }
+        }
+        
+        // Check for Gloom power absorption (20% chance to absorb 30 attack gauge)
+        if (this.enemy.canAbsorbPower && Math.random() < this.enemy.absorbChance) {
+            const absorbAmount = this.enemy.absorbAmount;
+            const oldGauge = this.attackGauge;
+            this.attackGauge = Math.max(0, this.attackGauge - absorbAmount);
+            const actualAbsorbed = oldGauge - this.attackGauge;
+            
+            addBattleLog(`⚡ The Gloom absorbed ${actualAbsorbed} attack power from you!`);
+            updateBattleUI(this.hero, this.enemy);
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
         // Increment enemy attack counter
         this.enemyAttackCount++;
         
@@ -1770,16 +2111,26 @@ class BattleManager {
             }
         }
 
-        // Calculate damage
-        let damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+        // Calculate damage using enemy's damage range (FIXED)
+        let damage;
         
-        // Fly specific damage values (9 or 17)
-        if (this.enemy.damageValues && this.enemy.damageValues.length === 2) {
+        // Use attackDamageMin and attackDamageMax if available (correct approach)
+        if (this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined) {
+            const min = this.enemy.attackDamageMin;
+            const max = this.enemy.attackDamageMax;
+            damage = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        // Fly specific damage values (9 or 17) - legacy support
+        else if (this.enemy.damageValues && this.enemy.damageValues.length === 2) {
             damage = Math.random() < 0.5 ? this.enemy.damageValues[0] : this.enemy.damageValues[1];
         }
-        // Alien variable damage (5 or 15)
+        // Alien variable damage (5 or 15) - legacy support
         else if (this.enemy.variableDamage) {
             damage = Math.random() < 0.5 ? 5 : 15;
+        }
+        // Fallback to old formula (should rarely be used now)
+        else {
+            damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
         }
         
         // Apply damage cap if enemy has one
@@ -1787,20 +2138,45 @@ class BattleManager {
             damage = Math.min(damage, this.enemy.maxDamage);
         }
         
+        // Apply Honey Trap slow effect (reduces damage by 30%)
+        if (this.honeySlowActive && this.honeySlowTurns > 0) {
+            const originalDamage = damage;
+            damage = Math.floor(damage * 0.7); // 30% damage reduction
+            addBattleLog(`🍯 Enemy is slowed! Damage reduced from ${originalDamage} to ${damage}! (${this.honeySlowTurns} turns left)`);
+            this.honeySlowTurns--;
+            
+            if (this.honeySlowTurns <= 0) {
+                this.honeySlowActive = false;
+                addBattleLog('🍯 Honey Trap effect wore off!');
+            }
+        }
+        
+        // Check if Star Shield is active
+        if (this.starShieldActive && this.starShieldCharges > 0) {
+            this.starShieldCharges--;
+            addBattleLog(`🌟 Star Shield blocked all ${damage} damage! (${this.starShieldCharges} charges left)`);
+            
+            if (this.starShieldCharges <= 0) {
+                this.starShieldActive = false;
+                addBattleLog('✨ Star Shield expired!');
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+        }
         // Check if defend was active - use defense gauge instead of HP
-        if (this.defendActive && this.defenseGauge > 0) {
+        else if (this.defendActive && this.defenseGauge > 0) {
             const gaugeUsed = Math.min(damage, this.defenseGauge);
             this.defenseGauge -= gaugeUsed;
             const remainingDamage = damage - gaugeUsed;
             if (remainingDamage > 0) {
-                this.hero.hp = Math.max(0, this.hero.hp - remainingDamage);
+                this.applyHeroDamage(remainingDamage);
                 addBattleLog(`🛡️ Blocked ${gaugeUsed} damage! Took ${remainingDamage} damage!`);
             } else {
                 addBattleLog(`🛡️ Blocked all ${damage} damage!`);
             }
             this.defendActive = false;
         } else {
-            this.hero.hp = Math.max(0, this.hero.hp - damage);
+            this.applyHeroDamage(damage);
         }
 
         // Play hero hurt animation if took damage
@@ -1844,8 +2220,15 @@ class BattleManager {
             }
             
             this.state = BattleState.PLAYER_TURN;
+            console.log('[Battle] State set to PLAYER_TURN');
             await new Promise(resolve => setTimeout(resolve, 500));
             addBattleLog('⚔️ Your turn!');
+            
+            // Update action buttons to enable them
+            if (typeof updateActionButtons === 'function') {
+                updateActionButtons(this.hero);
+                console.log('[Battle] updateActionButtons called');
+            }
             
             // FIX: Start turn timer
             if (typeof startTurnTimer === 'function') {
@@ -1865,6 +2248,17 @@ class BattleManager {
         if (result === 'victory') {
             addBattleLog(`🎉 VICTORY! You defeated the ${this.enemy.name}!`);
             
+            // Check if this was a Gloom victory
+            if (this.enemy.isGloomEncounter) {
+                console.log('🌑 Gloom defeated! Marking as defeated...');
+                if (window.gameState) {
+                    window.gameState.gloomDefeated = true;
+                    if (typeof saveGameState === 'function') {
+                        saveGameState();
+                    }
+                }
+            }
+            
             // Play victory sound effect
             if (window.audioManager) {
                 window.audioManager.playSound('battle_victory', 0.8);
@@ -1876,7 +2270,9 @@ class BattleManager {
             }
             
             // Calculate XP reward based on enemy level
-            xpGained = Math.floor(15 + (this.enemy.level * 5));
+            const enemyLevel = this.enemy.level || this.enemy.baseLevel || 1;
+            xpGained = Math.floor(15 + (enemyLevel * 5));
+            console.log(`[Battle] XP Calculation: enemyLevel=${enemyLevel}, xpGained=${xpGained}`);
             
             // Award XP
             if (window.gameState && typeof window.addJerryXP === 'function') {
@@ -1919,6 +2315,30 @@ class BattleManager {
                 // Update battle UI to reflect new inventory counts
                 updateActionButtons(this.hero);
                 
+                // Ensure xpGained is valid
+                if (isNaN(xpGained) || xpGained === null || xpGained === undefined) {
+                    console.error('[Battle] XP calculation failed, using default');
+                    xpGained = 20; // Default XP
+                }
+                
+                console.log(`[Battle] Showing loot modal with XP: ${xpGained}`);
+                
+                // Show Gloom victory modal first if this was a Gloom encounter
+                if (this.enemy.isGloomEncounter && window.showGloomVictoryModal) {
+                    console.log('🏆 Showing Gloom victory modal...');
+                    window.showGloomVictoryModal();
+                    
+                    // Wait for Gloom victory modal to be dismissed
+                    await new Promise(resolve => {
+                        const checkModal = setInterval(() => {
+                            if (!document.getElementById('gloomVictoryModal')) {
+                                clearInterval(checkModal);
+                                resolve();
+                            }
+                        }, 100);
+                    });
+                }
+                
                 // Show loot modal
                 window.lootSystem.showLootModal(lootDrops, xpGained, this.enemy.name);
                 
@@ -1951,11 +2371,35 @@ class BattleManager {
             }
             
             // Calculate XP loss (smaller penalty)
-            xpLost = Math.floor(5 + (this.enemy.level * 2));
+            const enemyLevel = this.enemy.level || this.enemy.baseLevel || 1;
+            xpLost = Math.floor(5 + (enemyLevel * 2));
+            console.log(`[Battle] XP Loss Calculation: enemyLevel=${enemyLevel}, xpLost=${xpLost}`);
             
             // Deduct XP (but don't go below 0)
             if (window.gameState) {
                 window.gameState.jerryXP = Math.max(0, (window.gameState.jerryXP || 0) - xpLost);
+            }
+            
+            // Calculate and apply loot loss
+            let lootLost = [];
+            if (window.gameState && window.gameState.battleInventory) {
+                const inventory = window.gameState.battleInventory;
+                const lootableItems = ['health_potion', 'hyper_potion', 'attack_refill', 'defense_refill'];
+                
+                // Randomly lose 1-2 items (if available)
+                const itemsToLose = Math.floor(Math.random() * 2) + 1;
+                
+                for (let i = 0; i < itemsToLose; i++) {
+                    // Pick a random item that the player has
+                    const availableItems = lootableItems.filter(item => inventory[item] > 0);
+                    if (availableItems.length > 0) {
+                        const randomItem = availableItems[Math.floor(Math.random() * availableItems.length)];
+                        inventory[randomItem] = Math.max(0, inventory[randomItem] - 1);
+                        lootLost.push(randomItem);
+                    }
+                }
+                
+                console.log('[Battle] Loot lost on defeat:', lootLost);
             }
             
             // Track battle loss
@@ -1975,7 +2419,7 @@ class BattleManager {
             await new Promise(resolve => setTimeout(resolve, 1200)); // 8 frames * 150ms
             
             // Show custom defeat modal (matching victory modal style)
-            this.showDefeatModal(this.enemy.name, xpLost);
+            this.showDefeatModal(this.enemy.name, xpLost, lootLost);
             
         } else if (result === 'fled') {
             addBattleLog('🏃 You fled from battle!');
@@ -2096,7 +2540,7 @@ class BattleManager {
     }
     
     // Show defeat modal (matching victory modal style with sadder tone)
-    showDefeatModal(enemyName, xpLost) {
+    showDefeatModal(enemyName, xpLost, lootLost = []) {
         // Create modal overlay
         const overlay = document.createElement('div');
         overlay.id = 'defeatModalOverlay';
@@ -2153,10 +2597,26 @@ class BattleManager {
         xpText.textContent = `📉 -${xpLost} XP lost`;
         xpText.style.cssText = `
             font-size: 20px;
-            margin: 0 0 16px 0;
+            margin: 0 0 12px 0;
             color: #ff6b6b;
             font-weight: bold;
         `;
+        
+        // Loot lost (if any)
+        let lootText = null;
+        if (lootLost.length > 0) {
+            lootText = document.createElement('div');
+            const lootNames = lootLost.map(item => {
+                return item.replaceAll('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            });
+            lootText.textContent = `💔 Lost: ${lootNames.join(', ')}`;
+            lootText.style.cssText = `
+                font-size: 16px;
+                margin: 0 0 16px 0;
+                color: #ff9999;
+                font-weight: 600;
+            `;
+        }
 
         // Encouragement message
         const encouragement = document.createElement('p');
@@ -2205,6 +2665,9 @@ class BattleManager {
         modal.appendChild(title);
         modal.appendChild(enemyText);
         modal.appendChild(xpText);
+        if (lootText) {
+            modal.appendChild(lootText);
+        }
         modal.appendChild(encouragement);
         modal.appendChild(okButton);
         overlay.appendChild(modal);
@@ -2226,6 +2689,211 @@ class BattleManager {
             `;
             document.head.appendChild(style);
         }
+    }
+    
+    /**
+     * Play Fire Pig Projectile Attack Animation
+     * Triggered on every 3rd attack when Fire Pig skin is equipped
+     */
+    async playFirePigProjectile() {
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+        
+        // Create projectile element
+        const projectile = document.createElement('img');
+        projectile.src = 'assets/projectiles/FirePigProjectileAttack.png';
+        projectile.style.cssText = `
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            left: 20%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            image-rendering: pixelated;
+            pointer-events: none;
+        `;
+        
+        battleContainer.appendChild(projectile);
+        
+        // Animate projectile from hero to enemy
+        const startX = 20;
+        const endX = 75;
+        const duration = 600; // 600ms animation
+        const startTime = Date.now();
+        
+        return new Promise(resolve => {
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease-out cubic for smooth deceleration
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentX = startX + (endX - startX) * easeProgress;
+                
+                projectile.style.left = `${currentX}%`;
+                
+                // Add slight rotation for effect
+                projectile.style.transform = `translate(-50%, -50%) rotate(${progress * 360}deg)`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Create impact effect
+                    projectile.style.opacity = '0';
+                    projectile.style.transform = `translate(-50%, -50%) scale(2)`;
+                    projectile.style.transition = 'all 0.2s ease';
+                    
+                    setTimeout(() => {
+                        projectile.remove();
+                        resolve();
+                    }, 200);
+                }
+            };
+            
+            animate();
+        });
+    }
+
+    /**
+     * Play Potion Animation
+     * Shows a potion effect rising up from the hero
+     */
+    async playPotionAnimation() {
+        const heroSprite = document.getElementById('heroSprite');
+        if (!heroSprite) return;
+        
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+        
+        // Create potion animation element
+        const potionEffect = document.createElement('img');
+        potionEffect.src = 'assets/battle-items/Potion Animation.gif';
+        potionEffect.style.cssText = `
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            left: 25%;
+            top: 60%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            image-rendering: pixelated;
+            pointer-events: none;
+            opacity: 1;
+        `;
+        
+        battleContainer.appendChild(potionEffect);
+        
+        // Animate upward and fade out
+        return new Promise(resolve => {
+            const duration = 800;
+            const startTime = Date.now();
+            const startTop = 60;
+            const endTop = 40;
+            
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentTop = startTop - (startTop - endTop) * progress;
+                potionEffect.style.top = `${currentTop}%`;
+                potionEffect.style.opacity = `${1 - progress}`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    potionEffect.remove();
+                    resolve();
+                }
+            };
+            
+            animate();
+        });
+    }
+
+    /**
+     * Play Attack Boost Animation
+     * Shows attack boost effect on the hero
+     */
+    async playAttackBoostAnimation() {
+        const heroSprite = document.getElementById('heroSprite');
+        if (!heroSprite) return;
+        
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+        
+        // Create attack boost animation element
+        const boostEffect = document.createElement('img');
+        boostEffect.src = 'assets/battle-items/Attack Boost Animation.gif';
+        boostEffect.style.cssText = `
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            left: 25%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            image-rendering: pixelated;
+            pointer-events: none;
+            opacity: 1;
+        `;
+        
+        battleContainer.appendChild(boostEffect);
+        
+        // Show for duration then fade out
+        return new Promise(resolve => {
+            setTimeout(() => {
+                boostEffect.style.transition = 'opacity 0.3s';
+                boostEffect.style.opacity = '0';
+                setTimeout(() => {
+                    boostEffect.remove();
+                    resolve();
+                }, 300);
+            }, 700);
+        });
+    }
+
+    /**
+     * Play Defense Boost Animation
+     * Shows shield effect on the hero
+     */
+    async playDefenseBoostAnimation() {
+        const heroSprite = document.getElementById('heroSprite');
+        if (!heroSprite) return;
+        
+        const battleContainer = document.querySelector('.battle-container');
+        if (!battleContainer) return;
+        
+        // Create defense boost effect (using energy vacuum as shield effect)
+        const shieldEffect = document.createElement('img');
+        shieldEffect.src = 'assets/battle-items/Energy Vacuum.gif';
+        shieldEffect.style.cssText = `
+            position: absolute;
+            width: 96px;
+            height: 96px;
+            left: 25%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            image-rendering: pixelated;
+            pointer-events: none;
+            opacity: 0.9;
+        `;
+        
+        battleContainer.appendChild(shieldEffect);
+        
+        // Pulse and fade out
+        return new Promise(resolve => {
+            setTimeout(() => {
+                shieldEffect.style.transition = 'opacity 0.3s, transform 0.3s';
+                shieldEffect.style.opacity = '0';
+                shieldEffect.style.transform = 'translate(-50%, -50%) scale(1.3)';
+                setTimeout(() => {
+                    shieldEffect.remove();
+                    resolve();
+                }, 300);
+            }, 700);
+        });
     }
 }
 

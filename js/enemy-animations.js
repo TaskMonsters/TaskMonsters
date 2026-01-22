@@ -1,107 +1,79 @@
 /**
  * Enemy Animation System - GIF-based
  * Uses GIF animations instead of sprite sheets for simplicity and reliability
+ * 
+ * NOTE: Enemy class is defined in enemy.js
+ * This file only handles animation playback
  */
-
-// Enemy class definition
-class Enemy {
-    constructor(name, baseHP, baseAttack, baseDefense, sprites) {
-        this.name = name;
-        this.baseHP = baseHP;
-        this.baseAttack = baseAttack;
-        this.baseDefense = baseDefense;
-        this.sprites = sprites;
-
-        // Current battle stats (will be scaled)
-        this.maxHP = baseHP;
-        this.hp = baseHP;
-        this.attack = baseAttack;
-        this.defense = baseDefense;
-
-        this.currentSprite = sprites.idle;
-    }
-
-    // Scale stats based on player level
-    scaleToLevel(playerLevel) {
-        // Apply difficulty scaling if AI system available
-        let scaling = { hpBonus: 0, healBonus: 0, defenseBonus: 0 };
-        if (window.enemyAI) {
-            scaling = window.enemyAI.getDifficultyScaling(playerLevel);
-        }
-        
-        // Scale attack, defense, and HP based on player level
-        this.attack = this.baseAttack + Math.floor(playerLevel * 2);
-        this.defense = this.baseDefense + Math.floor(playerLevel * 1.5);
-        this.maxHP = Math.floor((this.baseHP + playerLevel * 5) * (1 + scaling.hpBonus));
-        this.hp = this.maxHP;
-    }
-
-    // Take damage
-    takeDamage(amount) {
-        // Check if enemy is defending (reduces damage by 50%)
-        if (this.isDefending) {
-            amount = Math.floor(amount * 0.5);
-            this.isDefending = false; // Reset defense after hit
-        }
-        
-        this.hp = Math.max(0, this.hp - amount);
-        return this.hp <= 0;
-    }
-
-    // Update sprite
-    setSprite(spriteKey) {
-        if (this.sprites[spriteKey]) {
-            this.currentSprite = this.sprites[spriteKey];
-        }
-    }
-}
-
-// Export Enemy class to global scope
-window.Enemy = Enemy;
 
 // Play enemy animation using GIF files
 function playEnemyAnimation(enemy, animationKey, duration = 500) {
     return new Promise((resolve) => {
-        const spriteElement = document.getElementById('enemySprite');
+        // Try both possible sprite element IDs
+        let spriteElement = document.getElementById('enemySprite');
+        if (!spriteElement) {
+            spriteElement = document.getElementById('battleEnemySprite');
+        }
+        
         if (!spriteElement || !enemy) {
+            console.warn('[EnemyAnimation] Sprite element or enemy not found');
             resolve();
             return;
         }
         
-        // Get enemy name for file path
-        const enemyName = enemy.name;
-        const basePath = `assets/enemies/${enemyName}/`;
-        
-        // Map animation keys to GIF files
-        let gifFile = '';
-        
-        switch(animationKey) {
-            case 'idle':
-                gifFile = `${enemyName}-IdleFly-animated.gif`;
-                break;
-            case 'attack1':
-            case 'attack2':
-            case 'attack':
-                gifFile = `${enemyName}-Attack-animated.gif`;
-                break;
-            case 'hurt':
-                gifFile = `${enemyName}-Hurt.gif`;
-                break;
-            case 'death':
-            case 'die':
-                gifFile = `${enemyName}-Die.gif`;
-                break;
-            default:
-                // Default to idle
-                gifFile = `${enemyName}-IdleFly-animated.gif`;
+        // Check if enemy has config with assets (new BATTLE_ENEMIES system)
+        let animationPath = null;
+        if (enemy.config && enemy.config.assets) {
+            // Use new BATTLE_ENEMIES config
+            switch(animationKey) {
+                case 'idle':
+                    animationPath = enemy.config.assets.idle;
+                    break;
+                case 'attack1':
+                case 'attack2':
+                case 'attack':
+                    animationPath = enemy.config.assets.attack;
+                    break;
+                case 'hurt':
+                    animationPath = enemy.config.assets.hurt;
+                    break;
+                case 'death':
+                case 'die':
+                    animationPath = enemy.config.assets.die || enemy.config.assets.hurt;
+                    break;
+                default:
+                    animationPath = enemy.config.assets.idle;
+            }
+        } else {
+            // Fallback to old system
+            const enemyName = enemy.name;
+            const basePath = `assets/enemies/${enemyName}/`;
+            
+            switch(animationKey) {
+                case 'idle':
+                    animationPath = `${basePath}${enemyName}-IdleFly-animated.gif`;
+                    break;
+                case 'attack1':
+                case 'attack2':
+                case 'attack':
+                    animationPath = `${basePath}${enemyName}-Attack-animated.gif`;
+                    break;
+                case 'hurt':
+                    animationPath = `${basePath}${enemyName}-Hurt.gif`;
+                    break;
+                case 'death':
+                case 'die':
+                    animationPath = `${basePath}${enemyName}-Die.gif`;
+                    break;
+                default:
+                    animationPath = `${basePath}${enemyName}-IdleFly-animated.gif`;
+            }
         }
         
-        // Set the GIF as background image
-        const fullPath = basePath + gifFile;
-        spriteElement.style.backgroundImage = `url('${fullPath}')`;
-        spriteElement.style.backgroundSize = 'contain';
-        spriteElement.style.backgroundRepeat = 'no-repeat';
-        spriteElement.style.backgroundPosition = 'center';
+        console.log('[EnemyAnimation] Playing', animationKey, 'animation:', animationPath);
+        
+        // Set the animation using img src (not background image)
+        spriteElement.src = animationPath;
         
         // Add hurt flash effect for hurt animation
         if (animationKey === 'hurt') {
@@ -115,8 +87,14 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
         setTimeout(() => {
             // Return to idle after animation completes (except for death)
             if (animationKey !== 'death' && animationKey !== 'die') {
-                const idleGif = `${basePath}${enemyName}-IdleFly-animated.gif`;
-                spriteElement.style.backgroundImage = `url('${idleGif}')`;
+                let idleAnimation = null;
+                if (enemy.config && enemy.config.assets) {
+                    idleAnimation = enemy.config.assets.idle;
+                } else {
+                    const enemyName = enemy.name;
+                    idleAnimation = `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
+                }
+                spriteElement.src = idleAnimation;
             }
             resolve();
         }, duration);
@@ -159,8 +137,16 @@ function initEnemySprite(enemy) {
     spriteElement.style.backgroundSize = 'contain';
     spriteElement.style.backgroundRepeat = 'no-repeat';
     spriteElement.style.backgroundPosition = 'center';
-    spriteElement.style.width = '100px';
-    spriteElement.style.height = '100px';
+    
+    // Apply size-specific classes
+    spriteElement.className = 'sprite'; // Reset classes
+    if (enemyName === 'Sentry Drone') {
+        spriteElement.classList.add('enemy-sprite-sentry-drone');
+    } else {
+        // Default size for other enemies
+        spriteElement.style.width = '100px';
+        spriteElement.style.height = '100px';
+    }
 }
 
 // Export to global scope

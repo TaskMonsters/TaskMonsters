@@ -5,7 +5,7 @@
 <script src="js/instantHydration.js"></script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Task Monsters v21</title>
+<title>Task Monsters v3.25</title>
 <!-- PWA Manifest -->
 <link href="manifest.json?v=1757559779" rel="manifest"/>
 <!-- PWA Meta Tags -->
@@ -222,7 +222,7 @@
         /* Task Pal Tooltip */
         .task-pal-tooltip {
             position: absolute;
-            top: 100%;
+            top: 60%;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 20, 20, 0.98);
@@ -242,7 +242,7 @@
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
             display: none;
-            z-index: 100;
+            z-index: 200;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.1);
             line-height: 1.4;
             margin-top: 8px;
@@ -979,7 +979,7 @@
 
         /* Individual pill tab buttons - Improved spacing and alignment */
         #plannerSection .pill-tab {
-            padding: 12px 10px;
+            padding: 12px 16px;
             border-radius: 16px;
             font-weight: 600;
             font-size: 14px;
@@ -988,18 +988,15 @@
             cursor: pointer;
             color: var(--text-secondary);
             transition: all 0.2s ease;
-            flex: 0 1 auto;
+            flex: 0 0 auto;
             text-align: center;
             white-space: nowrap;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 0;
+            min-width: fit-content;
             line-height: 1.2;
             position: relative;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: fit-content;
         }
 
         /* Selected tab state - Enhanced visual prominence */
@@ -1007,7 +1004,7 @@
             background: var(--accent-primary);
             color: #000000;
             font-weight: 700;
-            padding: 12px 12px;
+            padding: 12px 18px;
             transform: scale(1.02);
             box-shadow: 0 2px 8px rgba(208, 255, 0, 0.3);
         }
@@ -2239,12 +2236,12 @@
             }
             
             #plannerSection .pill-tab {
-                padding: 10px 8px;
+                padding: 10px 12px;
                 font-size: 13px;
             }
             
             #plannerSection .pill-tab[aria-selected="true"] {
-                padding: 12px 10px;
+                padding: 12px 14px;
             }
 
             .task-title,
@@ -2471,9 +2468,21 @@
     
     .locked-icon {
         font-size: 48px;
-        color: #39FF14;
-        text-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14;
+        color: #10b981 !important;
+        text-shadow: 0 0 15px #10b981, 0 0 30px rgba(16, 185, 129, 0.5), 0 0 45px rgba(16, 185, 129, 0.3) !important;
+        filter: drop-shadow(0 0 8px #10b981) !important;
         opacity: 1;
+        -webkit-text-fill-color: #10b981 !important;
+    }
+    
+    /* Force green color on locked skin question marks - highest specificity */
+    .skin-card.locked .locked-thumbnail .locked-icon,
+    .locked-thumbnail .locked-icon,
+    div.locked-icon {
+        color: #10b981 !important;
+        -webkit-text-fill-color: #10b981 !important;
+        text-shadow: 0 0 15px #10b981, 0 0 30px rgba(16, 185, 129, 0.5) !important;
+        filter: drop-shadow(0 0 8px #10b981) !important;
     }
     
     /* Skin Name */
@@ -2787,7 +2796,7 @@
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     z-index: 10000;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     overflow-y: auto;
     padding: 20px;
@@ -2801,7 +2810,7 @@
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
-    padding: 20px 0;
+    padding: 0 0 20px 0;
     max-height: 100vh;
     overflow-y: auto;
 }
@@ -2809,15 +2818,17 @@
 .step-header {
     text-align: center;
     margin-bottom: 20px;
-    margin-top: 0;
+    margin-top: 40px;
     padding-top: 0;
     position: relative;
 }
 
-/* Fix Step 3 header alignment to prevent text cutoff */
+/* Ensure all step headers are at the exact same position from top */
+#step1 .step-header,
+#step2 .step-header,
 #step3 .step-header {
-    margin-top: 0;
-    padding-top: 20px;
+    margin-top: 40px;
+    padding-top: 0;
 }
 
 .step-title {
@@ -2832,7 +2843,10 @@
 .step-subtitle {
     font-size: 16px;
     color: #aaa;
+    margin-top: 0;
     margin-bottom: 20px;
+    min-height: 24px;
+    line-height: 24px;
 }
 
 .step-indicators {
@@ -4185,6 +4199,7 @@ input:checked + .toggle-slider:before {
             
             <div class="step-header">
                 <h1 class="step-title">Name Your Monster</h1>
+                <p class="step-subtitle">&nbsp;</p>
                 <div class="step-indicators">
                     <div class="step-dot"></div>
                     <div class="step-dot active"></div>
@@ -4216,6 +4231,7 @@ input:checked + .toggle-slider:before {
             
             <div class="step-header">
                 <h1 class="step-title">Ready to Start!</h1>
+                <p class="step-subtitle">&nbsp;</p>
                 <div class="step-indicators">
                     <div class="step-dot"></div>
                     <div class="step-dot"></div>
@@ -4380,6 +4396,15 @@ input:checked + .toggle-slider:before {
         </button>
         <button id="btnBlueFlame" class="btn-action" onclick="battleManager.playerBlueFlame()" style="display: none;">
             <img src="assets/blue-flame-icon.png" alt="Blue Flame" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 4px;"> Blue Flame <span class="item-count" id="blueFlameCount">(0)</span>
+        </button>
+        <button id="btnLightningBolt" class="btn-action" onclick="battleManager.playerLightningBolt()" style="display: none;">
+            ⚡ Lightning Bolt <span class="item-count" id="lightningBoltCount">(0)</span>
+        </button>
+        <button id="btnStarShield" class="btn-action" onclick="battleManager.playerStarShield()" style="display: none;">
+            🌟 Star Shield <span class="item-count" id="starShieldCount">(0)</span>
+        </button>
+        <button id="btnHoneyTrap" class="btn-action" onclick="battleManager.playerHoneyTrap()" style="display: none;">
+            🍯 Honey Trap <span class="item-count" id="honeyTrapCount">(0)</span>
         </button>
         <button id="btnProcrastinationGhost" class="btn-action" onclick="battleManager.playerProcrastinationGhost()" style="display: none;">
             👻 Ghost <span class="item-count" id="procrastinationGhostCount">(0)</span>
@@ -4620,6 +4645,7 @@ input:checked + .toggle-slider:before {
             <button class="pill-tab" aria-selected="true" onclick="switchToTab('home')">Home</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('achievements')">Achievements</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('habits')">Habits</button>
+            <button class="pill-tab" aria-selected="false" onclick="switchToTab('moods')">Moods</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('shop')">Shop</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('settings')">Settings</button>
         </div>
@@ -4867,7 +4893,7 @@ input:checked + .toggle-slider:before {
             <div class="card collapsible-card">
                 <div class="card-header collapsible-header" onclick="toggleHabitSection('taskCategories')" style="cursor: pointer;">
                     <div class="card-title">📂 Task Categories</div>
-                    <span id="taskCategoriesToggle" class="collapse-toggle">▼</span>
+                    <span id="taskCategoriesToggle" class="collapse-toggle">▲</span>
                 </div>
                 <div id="habitCategoriesChart" class="collapsible-content" style="padding: 0;">
                     <!-- Category bars will be populated here -->
@@ -4878,7 +4904,7 @@ input:checked + .toggle-slider:before {
             <div class="card collapsible-card">
                 <div class="card-header collapsible-header" onclick="toggleHabitSection('quickTaskCategories')" style="cursor: pointer;">
                     <div class="card-title">⚡ Quick Task Categories</div>
-                    <span id="quickTaskCategoriesToggle" class="collapse-toggle">▼</span>
+                    <span id="quickTaskCategoriesToggle" class="collapse-toggle">▲</span>
                 </div>
                 <div id="habitQuickTaskChart" class="collapsible-content" style="padding: 0;">
                     <!-- Quick task category bars will be populated here -->
@@ -4934,6 +4960,73 @@ input:checked + .toggle-slider:before {
             </div>
 
 
+
+
+
+
+        </div>
+
+        <!-- Moods tab content -->
+        <div id="moodsTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">😊 Moods</div>
+                    <button class="btn-secondary" onclick="resetMoodStats()" style="font-size: 12px; padding: 8px 12px;">Reset Stats</button>
+                </div>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px;">
+                    View your mood history and discover patterns in your emotional well-being!
+                </p>
+            </div>
+            
+            <!-- Filters -->
+            <div class="card">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="display: block; color: var(--text-secondary); font-size: 13px; margin-bottom: 6px;">Filter by Mood</label>
+                        <select id="moodTypeFilter" style="
+                            width: 100%;
+                            padding: 10px;
+                            background: rgba(255, 255, 255, 0.05);
+                            border: 1px solid rgba(139, 92, 246, 0.3);
+                            border-radius: 8px;
+                            color: #fff;
+                            font-size: 14px;
+                            cursor: pointer;
+                        ">
+                            <option value="all">All Moods</option>
+                            <option value="happy">😊 Happy</option>
+                            <option value="sad">😢 Sad</option>
+                            <option value="meh">🫤 Meh</option>
+                            <option value="angry">😡 Angry</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="display: block; color: var(--text-secondary); font-size: 13px; margin-bottom: 6px;">Filter by Date</label>
+                        <select id="moodDateFilter" style="
+                            width: 100%;
+                            padding: 10px;
+                            background: rgba(255, 255, 255, 0.05);
+                            border: 1px solid rgba(139, 92, 246, 0.3);
+                            border-radius: 8px;
+                            color: #fff;
+                            font-size: 14px;
+                            cursor: pointer;
+                        ">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">Past Week</option>
+                            <option value="month">Past Month</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mood History Container -->
+            <div class="card">
+                <div id="moodHistoryContainer" style="max-height: 500px; overflow-y: auto; padding: 4px;">
+                    <!-- Moods will be rendered here -->
+                </div>
+            </div>
         </div>
 
         <!-- Settings tab content -->
@@ -5527,6 +5620,9 @@ input:checked + .toggle-slider:before {
 
         // Load game state from localStorage
         function loadGameState() {
+            // TEST MODE: Unlock all skins and set 50,000 XP
+            const TEST_MODE = true;
+            
             // Use pre-hydrated state if available (prevents flash)
             let parsedState = null;
             
@@ -5715,6 +5811,53 @@ input:checked + .toggle-slider:before {
                 }
                 if (typeof gameState.eggRevertedAt === 'undefined') {
                     gameState.eggRevertedAt = null;
+                }
+            }
+            
+            // TEST MODE: Apply test settings
+            if (TEST_MODE) {
+                console.log('🧪 TEST MODE ENABLED: Unlocking all skins and setting 50,000 XP');
+                
+                // Set 50,000 XP
+                gameState.jerryXP = 50000;
+                
+                // Get all skin IDs from skinsConfig
+                if (window.getAllSkins) {
+                    const allSkins = window.getAllSkins();
+                    gameState.ownedSkins = allSkins.map(skin => skin.id);
+                    console.log('🧪 TEST MODE: Unlocked', gameState.ownedSkins.length, 'skins');
+                } else {
+                    // Fallback: manually list all skin IDs
+                    gameState.ownedSkins = [
+                        'black_cat', 'imp', 'pig', 'human_knight', 'human_ranger', 'skeleton',
+                        'rockstar', 'brown_cat', 'baby_blue_cat', 'orange_cat', 'white_cat',
+                        'pink_cat', 'gray_cat', 'calico_cat', 'tuxedo_cat', 'tabby_cat',
+                        'siamese_cat', 'persian_cat', 'maine_coon', 'ragdoll_cat', 'british_shorthair',
+                        'scottish_fold', 'sphynx_cat', 'bengal_cat', 'russian_blue', 'abyssinian_cat'
+                    ];
+                    console.log('🧪 TEST MODE: Unlocked', gameState.ownedSkins.length, 'skins (fallback)');
+                }
+                
+                // Set high level to access all features
+                if (gameState.jerryLevel < 20) {
+                    gameState.jerryLevel = 20;
+                    console.log('🧪 TEST MODE: Set level to 20');
+                }
+                
+                // Ensure monster is not in egg state
+                gameState.isEgg = false;
+                
+                // Give plenty of battle items for testing
+                if (gameState.battleInventory) {
+                    gameState.battleInventory.health_potion = 99;
+                    gameState.battleInventory.hyper_potion = 99;
+                    gameState.battleInventory.attack_refill = 99;
+                    gameState.battleInventory.defense_refill = 99;
+                    gameState.battleInventory.fireball = 99;
+                    gameState.battleInventory.spark = 99;
+                    gameState.battleInventory.prickler = 99;
+                    gameState.battleInventory.freeze = 99;
+                    console.log('🧪 TEST MODE: Filled battle inventory');
                 }
             }
             
@@ -8802,9 +8945,12 @@ input:checked + .toggle-slider:before {
                 if (window.updateHabitsDisplay) {
                     window.updateHabitsDisplay();
                 }
-                // Update mood history display
-                if (window.updateMoodHistoryDisplay) {
-                    window.updateMoodHistoryDisplay();
+            }
+            
+            // Initialize moods display when switching to moods tab
+            if (tabName === 'moods') {
+                if (window.initMoodHistoryFilters) {
+                    window.initMoodHistoryFilters();
                 }
             }
         }
@@ -8819,8 +8965,8 @@ input:checked + .toggle-slider:before {
             if (content && toggle) {
                 const isCollapsed = content.style.display === 'none';
                 content.style.display = isCollapsed ? 'block' : 'none';
-                // ▼ = expanded (pointing down), ▲ = collapsed (pointing up)
-                toggle.textContent = isCollapsed ? '▼' : '▲';
+                // ▲ = expanded (pointing up), ▼ = collapsed (pointing down)
+                toggle.textContent = isCollapsed ? '▲' : '▼';
                 
                 // Save state to localStorage
                 const collapsedSections = JSON.parse(localStorage.getItem('habitCollapsedSections') || '{}');
@@ -8838,7 +8984,7 @@ input:checked + .toggle-slider:before {
                 const toggle = document.getElementById('taskCategoriesToggle');
                 if (content && toggle) {
                     content.style.display = 'none';
-                    toggle.textContent = '▲'; // Up arrow when collapsed
+                    toggle.textContent = '▼'; // Down arrow when collapsed
                 }
             }
             
@@ -8847,7 +8993,7 @@ input:checked + .toggle-slider:before {
                 const toggle = document.getElementById('quickTaskCategoriesToggle');
                 if (content && toggle) {
                     content.style.display = 'none';
-                    toggle.textContent = '▲'; // Up arrow when collapsed
+                    toggle.textContent = '▼'; // Down arrow when collapsed
                 }
             }
         }
@@ -9201,10 +9347,11 @@ input:checked + .toggle-slider:before {
                 id: 'asteroid_attack',
                 name: 'Asteroid Attack',
                 emoji: '🪨',
-                description: 'Rock projectile dealing 12 damage (Max: 15)',
+                description: 'Rock projectile dealing 25 damage (Max: 15)',
                 cost: 20,
                 effect: 'attack',
-                value: 12,
+                value: 25,
+                damage: 25,
                 levelRequired: 9,
                 maxQuantity: 15
             },
@@ -9212,12 +9359,12 @@ input:checked + .toggle-slider:before {
                 id: 'prickler',
                 name: 'Prickler',
                 emoji: '💣',
-                description: 'Nuclear explosive attack dealing 13-17 damage (Max: 15)',
+                description: 'Nuclear explosive attack dealing 35-50 damage (Max: 15)',
                 cost: 35,
                 effect: 'attack',
-                value: 17,
-                minDamage: 13,
-                maxDamage: 17,
+                value: 50,
+                minDamage: 35,
+                maxDamage: 50,
                 levelRequired: 9,
                 maxQuantity: 15
             },
@@ -9225,12 +9372,12 @@ input:checked + .toggle-slider:before {
                 id: 'fireball',
                 name: 'Fireball',
                 emoji: '🔥',
-                description: 'Explosive projectile dealing 15-20 damage (Max: 10)',
+                description: 'Explosive projectile dealing 45-60 damage (Max: 10)',
                 cost: 45,
                 effect: 'attack',
-                value: 20,
-                minDamage: 15,
-                maxDamage: 20,
+                value: 60,
+                minDamage: 45,
+                maxDamage: 60,
                 levelRequired: 10,
                 maxQuantity: 10
             },
@@ -9238,12 +9385,12 @@ input:checked + .toggle-slider:before {
                 id: 'spark',
                 name: 'Spark',
                 emoji: '⚡',
-                description: 'Melee strike dealing 18-25 damage (Max: 10)',
+                description: 'Melee strike dealing 50-65 damage (Max: 10)',
                 cost: 50,
                 effect: 'attack',
-                value: 25,
-                minDamage: 18,
-                maxDamage: 25,
+                value: 65,
+                minDamage: 50,
+                maxDamage: 65,
                 levelRequired: 15,
                 maxQuantity: 10
             },
@@ -9251,10 +9398,12 @@ input:checked + .toggle-slider:before {
                 id: 'freeze',
                 name: 'Freeze',
                 emoji: '❄️',
-                description: 'Ice attack dealing 20 damage, freezes enemy for 2 turns (Max: 8)',
+                description: 'Ice attack dealing 45-55 damage, freezes enemy for 2 turns (Max: 8)',
                 cost: 65,
                 effect: 'freeze',
-                value: 20,
+                value: 55,
+                minDamage: 45,
+                maxDamage: 55,
                 freezeTurns: 2,
                 levelRequired: 20,
                 maxQuantity: 8
@@ -9281,13 +9430,50 @@ input:checked + .toggle-slider:before {
                 id: 'blue_flame',
                 name: 'Blue Flame',
                 image: 'assets/blue-flame.png',
-                description: 'Fire-type attack dealing 20-35 damage (Max: 12)',
+                description: 'Fire-type attack dealing 50-70 damage (Max: 12)',
                 cost: 50,
                 effect: 'attack',
-                value: 35,
-                minDamage: 20,
-                maxDamage: 35,
+                value: 70,
+                minDamage: 50,
+                maxDamage: 70,
                 levelRequired: 15,
+                maxQuantity: 12
+            },
+            lightning_bolt: {
+                id: 'lightning_bolt',
+                name: 'Lightning Bolt',
+                emoji: '⚡',
+                description: 'Powerful lightning strike dealing 70-90 damage and restoring 20 attack gauge (Max: 10)',
+                cost: 30,
+                effect: 'attack',
+                value: 90,
+                minDamage: 70,
+                maxDamage: 90,
+                levelRequired: 12,
+                maxQuantity: 10
+            },
+            star_shield: {
+                id: 'star_shield',
+                name: 'Star Shield',
+                emoji: '🌟',
+                description: 'Creates a star shield that blocks the next 2 enemy attacks completely (Max: 8)',
+                cost: 35,
+                effect: 'defense',
+                value: 2,
+                levelRequired: 15,
+                maxQuantity: 8
+            },
+            honey_trap: {
+                id: 'honey_trap',
+                name: 'Honey Trap',
+                emoji: '🍯',
+                description: 'Sticky honey dealing 30-40 damage and reducing enemy damage by 30% for 3 turns (Max: 12)',
+                cost: 25,
+                effect: 'debuff',
+                value: 40,
+                minDamage: 30,
+                maxDamage: 40,
+                levelRequired: 10,
                 maxQuantity: 12
             },
             procrastination_ghost: {
@@ -11998,9 +12184,11 @@ input:checked + .toggle-slider:before {
             
             // Initialize mood history filters when opening habits tab
             if (tabName === 'habits') {
-                console.log('[Tabs] Opening habits tab - ensuring mood history filters are initialized.');
-                if (typeof window.initMoodHistoryFilters === 'function') {
-                    window.initMoodHistoryFilters();
+                console.log('[Tabs] Opening habits tab - initializing mood filters');
+                if (typeof window.initHabitMoodFilters === 'function') {
+                    window.initHabitMoodFilters();
+                } else {
+                    console.warn('[Tabs] initHabitMoodFilters not found');
                 }
             }
         }
@@ -12552,10 +12740,12 @@ input:checked + .toggle-slider:before {
     <!-- Quest Giver CSS -->
     <link rel="stylesheet" href="css/questGiver.css?v=1">
     
-    <!-- Quest Tasks CSS -->
-    <link rel="stylesheet" href="css/questTasks.css">
+    <!-- Quest Tasks CSS -->    <link rel="stylesheet" href="css/questTasks.css">
     
-    <!-- Shop Reference Design CSS - Matches reference image layout -->
+    <!-- Guardian of Task World CSS -->
+    <link rel="stylesheet" href="css/guardian.css">
+    
+    <!-- Shop Reference Design CSS -->
     <link rel="stylesheet" href="css/shop-reference-design.css?v=6">    
     <!-- App Initializer - Manages onboarding and quest giver flows -->
     <script src="js/appInitializer.js"></script>
@@ -12573,16 +12763,22 @@ input:checked + .toggle-slider:before {
     
     <!-- Battle System Modules -->
     <!-- New Battle System (v2) -->
-    <script src="js/battleUI.js"></script>
-    <script src="js/enemy-animations.js"></script>
-    <script src="js/battleHPAnimations.js"></script>
-    <script src="js/specialAttacks.js"></script>
-    <script src="js/enemy.js"></script>
-    <script src="js/battleManager.js"></script>
-    <script src="js/battleTutorial.js"></script>
-    <script src="js/boss-enemies.js"></script>
-    <script src="js/battleInit.js"></script>
+    <script src="js/battleEffects.js?v=1768715883"></script>
+    <script src="js/battleEngine.js?v=1768715883"></script>
+    <script src="js/battleSystemInit.js?v=1768715883"></script>
+    <script src="js/battleUI.js?v=1768715883"></script>
+    <script src="js/enemy-animations.js?v=1768715883"></script>
+    <script src="js/battleHPAnimations.js?v=1768715883"></script>
+    <script src="js/specialAttacks.js?v=1768715883"></script>
+    <script src="js/enemy.js?v=1768715883"></script>
+    <script src="js/lootSystem.js"></script>
+    <script src="js/battleManager.js?v=1768715883"></script>
+    <script src="js/gloomModals.js"></script>
+    <script src="js/battleTutorial.js?v=1768715883"></script>
+    <script src="js/boss-enemies.js?v=1768715883"></script>
+    <script src="js/battleInit.js?v=1768715883"></script>
     <script src="js/guardianNarrator.js"></script>
+    <script src="js/guardian.js"></script>
     
     <!-- Removed missing script: js/battleInit.js -->
     <script src="js/questTaskManager.js"></script>
@@ -12600,8 +12796,16 @@ input:checked + .toggle-slider:before {
     <script src="js/habitTrackerUI.js"></script>
     <script src="js/rainbowLevelUpBanner.js"></script>
     
+    <!-- Guardian Narrative System -->
+    <script src="js/guardianNarrative.js"></script>
+    <script src="js/guardianOnboarding.js"></script>
+    <script src="js/taskWorldMap.js"></script>
+    
+    <!-- Mood Dialogue System - Must load before moodTracker -->
+    <script src="js/moodDialogueSystem.js"></script>
+    
     <!-- Mood Tracker - Standalone System -->
-    <script src="js/moodTracker.js"></script>
+    <script src="js/moodTracker.js?v=1768748859"></script>
     
     <!-- Hide loading screen after page loads -->
     <script>

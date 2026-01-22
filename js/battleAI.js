@@ -436,8 +436,16 @@ class BattleAI {
         const player = battle.player;
         const enemy = battle.enemy;
         
-        // Calculate base damage
-        let damage = Math.floor(5 + (enemy.attack * 0.25));
+        // Calculate base damage using correct damage range
+        let damage;
+        if (enemy.config && enemy.config.attackDamageMin !== undefined && enemy.config.attackDamageMax !== undefined) {
+            const min = enemy.config.attackDamageMin;
+            const max = enemy.config.attackDamageMax;
+            damage = Math.floor(Math.random() * (max - min + 1)) + min;
+        } else {
+            // Fallback to old formula
+            damage = Math.floor(5 + (enemy.attack * 0.25));
+        }
         
         // Apply modifiers
         if (options.aggressive) {

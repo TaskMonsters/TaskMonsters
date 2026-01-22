@@ -307,6 +307,15 @@ const MoodDialogueSystem = {
     // Show mood tracker
     showMoodTracker() {
         try {
+            // CRITICAL: Check if in battle mode
+            const battleContainer = document.querySelector('.battle-container');
+            const isBattleActive = battleContainer && battleContainer.style.display !== 'none';
+            
+            if (isBattleActive) {
+                console.log('[MoodDialogueSystem] Battle active, blocking mood tracker');
+                return;
+            }
+            
             // Check if modal already exists
             if (document.getElementById('moodTrackerContainer')) {
                 console.log('[MoodDialogueSystem] Mood tracker already visible');
@@ -321,67 +330,140 @@ const MoodDialogueSystem = {
         moodContainer.id = 'moodTrackerContainer';
         moodContainer.style.cssText = `
             position: fixed;
-            top: 50%;
+            top: 20px;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
             z-index: 10000;
-            background: rgba(0, 0, 0, 0.8);
+            background: linear-gradient(135deg, rgba(55, 48, 163, 0.98), rgba(67, 56, 202, 0.98));
             padding: 0;
             border-radius: 16px;
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(109, 40, 217, 0.8);
+            box-shadow: 0 8px 32px rgba(67, 56, 202, 0.6), 0 0 60px rgba(109, 40, 217, 0.3);
             max-width: 90%;
-            width: 400px;
-            animation: fadeIn 0.3s ease;
+            width: 227px;
+            animation: slideDown 0.3s ease;
         `;
         
+        // Add animation keyframes if not already present
+        if (!document.getElementById('moodTrackerAnimations')) {
+            const style = document.createElement('style');
+            style.id = 'moodTrackerAnimations';
+            style.textContent = `
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
         moodContainer.innerHTML = `
-            <div style="padding: 24px; text-align: center;">
-                <h3 style="color: white; font-size: 18px; margin: 0 0 20px 0; font-weight: 600;">How are you feeling?</h3>
-                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <div style="padding: 24px; position: relative;">
+                <button 
+                    id="closeMoodTracker"
+                    style="
+                        position: absolute;
+                        top: 12px;
+                        right: 12px;
+                        background: transparent;
+                        border: none;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        padding: 4px 8px;
+                        line-height: 1;
+                        z-index: 10;
+                    "
+                >×</button>
+                <h3 style="color: white; font-size: 18px; margin: 0 0 20px 0; font-weight: 600; text-align: center;">How are you feeling?</h3>
+                <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
                     ${Object.entries(this.moods).map(([mood, emoji]) => `
                         <button 
                             class="mood-button" 
                             data-mood="${mood}"
                             style="
-                                background: rgba(255, 255, 255, 0.1);
-                                border: 2px solid rgba(255, 255, 255, 0.3);
+                                background: rgba(99, 102, 241, 0.2);
+                                border: 2px solid rgba(139, 92, 246, 0.5);
                                 border-radius: 12px;
-                                padding: 16px;
-                                font-size: 36px;
+                                padding: 12px;
+                                font-size: 32px;
                                 cursor: pointer;
                                 transition: all 0.2s ease;
                                 backdrop-filter: blur(10px);
-                                width: 80px;
-                                height: 80px;
+                                width: 70px;
+                                height: 70px;
                                 display: flex;
+                                flex-direction: column;
                                 align-items: center;
                                 justify-content: center;
+                                gap: 4px;
                             "
-                            onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1.1)';"
-                            onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)';"
-                        >${emoji}</button>
+                            onmouseover="this.style.background='rgba(139, 92, 246, 0.4)'; this.style.transform='scale(1.05)';"
+                            onmouseout="this.style.background='rgba(99, 102, 241, 0.2)'; this.style.transform='scale(1)';"
+                        >
+                            <div>${emoji}</div>
+                            <div style="font-size: 11px; color: white; text-transform: capitalize;">${mood}</div>
+                        </button>
                     `).join('')}
                 </div>
+                <textarea 
+                    id="moodNoteInput"
+                    placeholder="Add a note (optional)..."
+                    style="
+                        width: 100%;
+                        min-height: 60px;
+                        padding: 12px;
+                        background: rgba(99, 102, 241, 0.1);
+                        border: 1px solid rgba(139, 92, 246, 0.3);
+                        border-radius: 8px;
+                        color: #ffffff !important;
+                        font-size: 14px;
+                        font-family: inherit;
+                        resize: vertical;
+                        box-sizing: border-box;
+                    "
+                    onfocus="this.style.color='#ffffff';"
+                    oninput="this.style.color='#ffffff';"
+                ></textarea>
+                <style>
+                    #moodNoteInput::placeholder {
+                        color: rgba(255, 255, 255, 0.5) !important;
+                    }
+                </style>
             </div>
         `;
         
         document.body.appendChild(moodContainer);
         
-        // Add click handlers
+        // Add close button handler
+        const closeBtn = moodContainer.querySelector('#closeMoodTracker');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                moodContainer.remove();
+            });
+        }
+        
+        // Add click handlers for mood buttons
         moodContainer.querySelectorAll('.mood-button').forEach(button => {
             button.addEventListener('click', (e) => {
-                const mood = e.target.dataset.mood;
-                this.recordMood(mood);
+                const mood = e.target.closest('.mood-button').dataset.mood;
+                const noteInput = document.getElementById('moodNoteInput');
+                const note = noteInput ? noteInput.value.trim() : '';
+                
+                this.recordMood(mood, note);
                 moodContainer.remove();
                 
-                // Show dialogue response if level 5+
-                if (gameState.jerryLevel >= 5 && !gameState.isEgg) {
-                    setTimeout(() => {
-                        this.showDialogue('mood', mood);
-                    }, 300);
-                }
+                // Trigger monster animation based on mood
+                this.playMonsterMoodAnimation(mood);
+                
+                // DO NOT show dialogue after mood selection
             });
         });
         } catch (error) {
@@ -390,14 +472,14 @@ const MoodDialogueSystem = {
     },
     
     // Record mood - SYNCED with moodTracker.js localStorage system
-    recordMood(mood) {
-        console.log('[MoodDialogueSystem] Recording mood:', mood);
+    recordMood(mood, note = '') {
+        console.log('[MoodDialogueSystem] Recording mood:', mood, 'with note:', note);
         
         const moodData = {
             mood: mood,
             emoji: this.moods[mood],
             name: mood.charAt(0).toUpperCase() + mood.slice(1),
-            note: '',
+            note: note,
             timestamp: Date.now(),
             date: new Date().toISOString()
         };
@@ -661,6 +743,47 @@ const MoodDialogueSystem = {
                 }).join('')}
             </div>
         `;
+    },
+    
+    // Play monster animation based on mood selection
+    playMonsterMoodAnimation(mood) {
+        const monsterSprite = document.getElementById('mainHeroSprite');
+        if (!monsterSprite) return;
+        
+        console.log('[MoodDialogueSystem] Playing animation for mood:', mood);
+        
+        if (mood === 'happy') {
+            // Brief hover animation (fast)
+            monsterSprite.style.transition = 'transform 0.3s ease-in-out';
+            monsterSprite.style.transform = 'scale(4) translateY(-10px)';
+            setTimeout(() => {
+                monsterSprite.style.transform = 'scale(4) translateY(0)';
+            }, 300);
+            setTimeout(() => {
+                monsterSprite.style.transition = '';
+            }, 600);
+        } else if (mood === 'anxious') {
+            // Slower hover animation
+            monsterSprite.style.transition = 'transform 0.6s ease-in-out';
+            monsterSprite.style.transform = 'scale(4) translateY(-8px)';
+            setTimeout(() => {
+                monsterSprite.style.transform = 'scale(4) translateY(0)';
+            }, 600);
+            setTimeout(() => {
+                monsterSprite.style.transition = '';
+            }, 1200);
+        } else if (mood === 'neutral' || mood === 'angry') {
+            // Brief flicker animation
+            let flickerCount = 0;
+            const flickerInterval = setInterval(() => {
+                monsterSprite.style.opacity = monsterSprite.style.opacity === '0.3' ? '1' : '0.3';
+                flickerCount++;
+                if (flickerCount >= 6) {
+                    clearInterval(flickerInterval);
+                    monsterSprite.style.opacity = '1';
+                }
+            }, 100);
+        }
     }
 };
 

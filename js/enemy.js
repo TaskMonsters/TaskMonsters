@@ -19,17 +19,16 @@ class Enemy {
 
     // Scale stats based on player level
     scaleToLevel(playerLevel) {
-        // Apply difficulty scaling if AI system available
-        let scaling = { hpBonus: 0, healBonus: 0, defenseBonus: 0 };
-        if (window.enemyAI) {
-            scaling = window.enemyAI.getDifficultyScaling(playerLevel);
-        }
-        
-        // Increase attack scaling to make enemies hit harder as player levels up
-        this.attack = this.baseAttack + Math.floor(playerLevel * 2.5);
-        this.defense = this.baseDefense + Math.floor(playerLevel * 1.5);
-        this.maxHP = Math.floor((this.baseHP + playerLevel * 5) * (1 + scaling.hpBonus));
+        // FIXED: Reasonable scaling for balanced gameplay
+        // HP scales minimally with level (enemies should be beatable)
+        this.maxHP = Math.floor(this.baseHP + (playerLevel * 2));
         this.hp = this.maxHP;
+        
+        // Attack uses base attack from config (already balanced)
+        this.attack = this.baseAttack;
+        
+        // Defense scales slightly with level
+        this.defense = this.baseDefense + Math.floor(playerLevel * 0.5);
     }
 
     // Take damage
@@ -62,9 +61,9 @@ class Enemy {
 
 const LAZY_BAT_DATA = {
     name: 'Lazy Bat',
-    baseHP: 60,
+    baseHP: 40,
     baseAttack: 10,
-    baseDefense: 8,
+    baseDefense: 5,
     minLevel: 5,
     tier: 'early',
     attackDamageMin: 10,
@@ -79,9 +78,9 @@ const LAZY_BAT_DATA = {
 
 const ENERGY_VAMPIRE_BAT_DATA = {
     name: 'Energy Vampire Bat',
-    baseHP: 70,
+    baseHP: 45,
     baseAttack: 15,
-    baseDefense: 12,
+    baseDefense: 6,
     minLevel: 5,
     tier: 'early',
     attackDamageMin: 15,
@@ -97,9 +96,9 @@ const ENERGY_VAMPIRE_BAT_DATA = {
 
 const LAND_ALIEN_DATA = {
     name: 'Land Alien',
-    baseHP: 75,
+    baseHP: 50,
     baseAttack: 25,
-    baseDefense: 10,
+    baseDefense: 7,
     minLevel: 5,
     tier: 'early',
     attackDamageMin: 25,
@@ -119,9 +118,9 @@ const LAND_ALIEN_DATA = {
 
 const FLYING_PROCRASTINATOR_DATA = {
     name: 'Flying Procrastinator',
-    baseHP: 80,
+    baseHP: 55,
     baseAttack: 25,
-    baseDefense: 12,
+    baseDefense: 8,
     minLevel: 7,
     tier: 'mid',
     attackDamageMin: 25,
@@ -141,9 +140,9 @@ const FLYING_PROCRASTINATOR_DATA = {
 
 const SENTRY_DRONE_DATA = {
     name: 'Sentry Drone',
-    baseHP: 85,
+    baseHP: 60,
     baseAttack: 15,
-    baseDefense: 14,
+    baseDefense: 9,
     minLevel: 8,
     tier: 'mid',
     attackDamageMin: 15,
@@ -164,9 +163,9 @@ const SENTRY_DRONE_DATA = {
 
 const SELF_DOUBT_DRONE_DATA = {
     name: 'Self Doubt Drone',
-    baseHP: 90,
+    baseHP: 65,
     baseAttack: 20,
-    baseDefense: 15,
+    baseDefense: 10,
     minLevel: 9,
     tier: 'mid',
     attackDamageMin: 20,
@@ -188,9 +187,9 @@ const SELF_DOUBT_DRONE_DATA = {
 
 const TWOFACE_DATA = {
     name: '2Face',
-    baseHP: 100,
+    baseHP: 75,
     baseAttack: 20,
-    baseDefense: 16,
+    baseDefense: 12,
     minLevel: 12,
     tier: 'boss',
     attackDamageMin: 20,
@@ -469,6 +468,44 @@ const DISTRACTION_DRAGON_DATA = {
     }
 };
 
+// THE GLOOM - Final Boss (Level 50+)
+const GLOOM_DATA = {
+    name: 'The Gloom',
+    baseHP: 600,
+    baseAttack: 90,
+    baseDefense: 50,
+    minLevel: 50,
+    tier: 'final_boss',
+    attackDamageMin: 90,
+    attackDamageMax: 105,
+    specialAbility: 'gloom_ultimate',
+    isFinalBoss: true,
+    
+    // Special abilities
+    canDeflect: true,
+    deflectChance: 0.25, // 25% chance to deflect attacks back to player
+    
+    canSelfHeal: true,
+    selfHealAmount: 50,
+    selfHealMax: 3, // Can only heal 3 times per battle
+    selfHealCount: 0, // Track heal usage
+    
+    canAbsorbPower: true,
+    absorbAmount: 30, // Absorbs 30 attack gauge
+    absorbChance: 0.20, // 20% chance to absorb
+    
+    canEvade: true,
+    evasionChance: 0.15, // 15% chance to evade attacks
+    evasionAbility: true,
+    
+    sprites: {
+        idle: 'assets/enemies/gloom_idle_transparent.gif',
+        attack: 'assets/enemies/gloom_attack2_transparent.gif',
+        attack2: 'assets/enemies/gloom_lightning_transparent.gif', // Lightning attack
+        hurt: 'assets/enemies/gloom_hurt_transparent.gif'
+    }
+};
+
 // Enemy types array - ordered by minimum level
 const ENEMY_TYPES = [
     LAZY_BAT_DATA,
@@ -488,7 +525,8 @@ const ENEMY_TYPES = [
     SLIME_ENEMY_DATA,
     ICE_BULLY_DATA,
     MUSHROOM_GUARD_DATA,
-    DISTRACTION_DRAGON_DATA
+    DISTRACTION_DRAGON_DATA,
+    GLOOM_DATA
 ];
 
 // Enemy rotation system - 7-level tier rotation
@@ -518,8 +556,50 @@ function getNextEnemyFromRotation(availableEnemies, playerLevel) {
 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
-    // Filter enemies available at current level
-    let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
+    // Check for Gloom boss encounter (Level 50+ only, after other level 50 enemies)
+    if (playerLevel >= 50 && !gameState.gloomDefeated) {
+        // Track battles at level 50+
+        if (!gameState.level50BattleCount) {
+            gameState.level50BattleCount = 0;
+        }
+        gameState.level50BattleCount++;
+        
+        // Gloom appears after 3 battles at level 50+ (so player encounters other level 50 enemies first)
+        if (gameState.level50BattleCount > 3 && Math.random() < 0.3) { // 30% chance after 3 battles
+            const enemyData = GLOOM_DATA;
+            const enemy = new Enemy(
+                enemyData.name,
+                enemyData.baseHP,
+                enemyData.baseAttack,
+                enemyData.baseDefense,
+                enemyData.sprites
+            );
+            
+            // Copy all special abilities
+            Object.keys(enemyData).forEach(key => {
+                if (!['name', 'baseHP', 'baseAttack', 'baseDefense', 'sprites'].includes(key)) {
+                    enemy[key] = enemyData[key];
+                }
+            });
+            
+            // Gloom doesn't scale with level - fixed stats for epic boss fight
+            enemy.maxHP = enemyData.baseHP;
+            enemy.hp = enemyData.baseHP;
+            enemy.attack = enemyData.baseAttack;
+            enemy.defense = enemyData.baseDefense;
+            
+            // Reset self-heal counter for this battle
+            enemy.selfHealCount = 0;
+            
+            // Mark that Gloom encounter is happening
+            enemy.isGloomEncounter = true;
+            
+            return enemy;
+        }
+    }
+    
+    // Filter enemies available at current level (exclude Gloom from rotation)
+    let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel && !e.isFinalBoss);
     
     if (availableEnemies.length === 0) {
         // Fallback to first enemy if none available
@@ -582,8 +662,39 @@ function playWakeUpSequence(enemy, callback) {
     });
 }
 
-// Export to global scope
-window.Enemy = Enemy;
-window.createRandomEnemy = createRandomEnemy;
-window.playWakeUpSequence = playWakeUpSequence;
-window.ENEMY_TYPES = ENEMY_TYPES;
+// Export to global scope IMMEDIATELY and protect from being overwritten
+(function() {
+    'use strict';
+    
+    // Export with property descriptors to prevent accidental overwriting
+    Object.defineProperty(window, 'Enemy', {
+        value: Enemy,
+        writable: false,
+        configurable: false
+    });
+    
+    Object.defineProperty(window, 'createRandomEnemy', {
+        value: createRandomEnemy,
+        writable: false,
+        configurable: false
+    });
+    
+    Object.defineProperty(window, 'playWakeUpSequence', {
+        value: playWakeUpSequence,
+        writable: false,
+        configurable: false
+    });
+    
+    Object.defineProperty(window, 'ENEMY_TYPES', {
+        value: ENEMY_TYPES,
+        writable: false,
+        configurable: false
+    });
+    
+    console.log('✅ Enemy.js exports locked and protected:', {
+        Enemy: typeof window.Enemy,
+        createRandomEnemy: typeof window.createRandomEnemy,
+        playWakeUpSequence: typeof window.playWakeUpSequence,
+        ENEMY_TYPES: typeof window.ENEMY_TYPES
+    });
+})();

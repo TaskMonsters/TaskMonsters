@@ -22,13 +22,13 @@ class BattleEffectsManager {
      * Displays floating damage number above target
      */
     showDamageNumber(damage, target, isCritical = false) {
-        const targetElement = document.getElementById(target === 'player' ? 'playerSprite' : 'enemySprite');
+        const targetElement = document.getElementById(target === 'player' ? 'heroSprite' : 'enemySprite');
         if (!targetElement) return;
         
         // Create damage number element
         const damageNumber = document.createElement('div');
         damageNumber.className = `damage-number ${isCritical ? 'critical' : ''}`;
-        damageNumber.textContent = `-${damage}`;
+        damageNumber.textContent = `-${Math.round(damage)} HP`;
         
         // Position above target
         const rect = targetElement.getBoundingClientRect();
@@ -58,7 +58,7 @@ class BattleEffectsManager {
      * Displays healing animation
      */
     showHealEffect(target) {
-        const targetElement = document.getElementById(target === 'player' ? 'playerSprite' : 'enemySprite');
+        const targetElement = document.getElementById(target === 'player' ? 'heroSprite' : 'enemySprite');
         if (!targetElement) return;
         
         // Create heal effect
@@ -91,7 +91,7 @@ class BattleEffectsManager {
      * Animates sprite during attack
      */
     playAttackAnimation(attacker) {
-        const spriteElement = document.getElementById(attacker === 'player' ? 'playerSprite' : 'enemySprite');
+        const spriteElement = document.getElementById(attacker === 'player' ? 'heroSprite' : 'enemySprite');
         if (!spriteElement) return;
         
         // Add attack class
@@ -241,8 +241,8 @@ class BattleEffectsManager {
      * Displays projectile animation from attacker to target
      */
     showProjectile(projectileType, fromTarget, toTarget) {
-        const fromElement = document.getElementById(fromTarget === 'player' ? 'playerSprite' : 'enemySprite');
-        const toElement = document.getElementById(toTarget === 'player' ? 'playerSprite' : 'enemySprite');
+        const fromElement = document.getElementById(fromTarget === 'player' ? 'heroSprite' : 'enemySprite');
+        const toElement = document.getElementById(toTarget === 'player' ? 'heroSprite' : 'enemySprite');
         
         if (!fromElement || !toElement) return;
         
@@ -277,7 +277,7 @@ class BattleEffectsManager {
      * Display status effect icon above target
      */
     showStatusEffect(target, effectType, duration = 3000) {
-        const targetElement = document.getElementById(target === 'player' ? 'playerSprite' : 'enemySprite');
+        const targetElement = document.getElementById(target === 'player' ? 'heroSprite' : 'enemySprite');
         if (!targetElement) return;
         
         // Create status icon

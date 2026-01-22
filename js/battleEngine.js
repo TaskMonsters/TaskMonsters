@@ -99,7 +99,8 @@ class BattleEngine {
             return;
         }
         
-        const enemyId = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+        // getAvailableEnemies now returns a single enemy in alternating order
+        const enemyId = availableEnemies[0];
         const enemyConfig = BATTLE_ENEMIES[enemyId];
         const scaledStats = scaleEnemyStats(enemyConfig, playerLevel);
         
@@ -239,6 +240,12 @@ class BattleEngine {
             if (this.effectsManager) {
                 this.effectsManager.showDamageNumber(damage, 'enemy');
                 this.effectsManager.playAttackAnimation('player');
+                
+                // Show Fire Pig projectile if equipped
+                const equippedSkin = window.gameState?.equippedSkinId || null;
+                if (equippedSkin && equippedSkin.toLowerCase().includes('pig')) {
+                    this.effectsManager.showProjectile('fire-pig', 'player', 'enemy');
+                }
             }
         }
         
@@ -474,6 +481,24 @@ class BattleEngine {
             if (this.effectsManager) {
                 this.effectsManager.showDamageNumber(damage, 'player');
                 this.effectsManager.playAttackAnimation('enemy');
+                
+                // Show enemy projectile based on enemy type
+                const enemyName = enemy.name.toLowerCase();
+                if (enemyName.includes('phantom') || enemyName.includes('ghost')) {
+                    this.effectsManager.showProjectile('phantom', 'enemy', 'player');
+                } else if (enemyName.includes('medusa')) {
+                    this.effectsManager.showProjectile('medusa', 'enemy', 'player');
+                } else if (enemyName.includes('mushroom')) {
+                    this.effectsManager.showProjectile('mushroom', 'enemy', 'player');
+                } else if (enemyName.includes('drone') || enemyName.includes('sentry')) {
+                    this.effectsManager.showProjectile('drone', 'enemy', 'player');
+                } else if (enemyName.includes('procrastinator')) {
+                    this.effectsManager.showProjectile('procrastinator', 'enemy', 'player');
+                } else if (enemyName.includes('alien')) {
+                    this.effectsManager.showProjectile('alien', 'enemy', 'player');
+                } else if (enemyName.includes('vampire') || enemyName.includes('bat')) {
+                    this.effectsManager.showProjectile('vampire-bat', 'enemy', 'player');
+                }
             }
         }
         
@@ -568,10 +593,16 @@ class BattleEngine {
         const battle = this.currentBattle;
         const enemy = battle.enemy;
         
+        // Get loot config with defaults
+        const lootConfig = enemy.config?.loot || {
+            xpCoins: { min: 10, max: 30 },
+            items: []
+        };
+        
         // Calculate XP reward
         const xpReward = Math.floor(
-            enemy.config.loot.xpCoins.min +
-            Math.random() * (enemy.config.loot.xpCoins.max - enemy.config.loot.xpCoins.min)
+            lootConfig.xpCoins.min +
+            Math.random() * (lootConfig.xpCoins.max - lootConfig.xpCoins.min)
         );
         
         // Award XP
@@ -582,7 +613,7 @@ class BattleEngine {
         battle.loot = { xpCoins: xpReward, items: [] };
         
         // Roll for item drops
-        for (const itemDrop of enemy.config.loot.items) {
+        for (const itemDrop of lootConfig.items) {
             if (Math.random() < itemDrop.chance) {
                 battle.loot.items.push(itemDrop.id);
                 
@@ -772,11 +803,22 @@ class BattleEngine {
         }
         
         // Update enemy sprite using the correct element ID
-        const enemySprite = document.getElementById('battleEnemySprite');
+        // Try both possible sprite element IDs (battleEnemySprite and enemySprite)
+        let enemySprite = document.getElementById('battleEnemySprite');
+        if (!enemySprite) {
+            enemySprite = document.getElementById('enemySprite');
+        }
+        
         if (enemySprite) {
             const enemyConfig = this.currentBattle.enemy.config;
-            enemySprite.src = enemyConfig.assets?.idle || enemyConfig.sprite || 'assets/battle/enemies/placeholder.gif';
-            // Apply similar styling to enemy for consistency
+            const idleAnimation = enemyConfig.assets?.idle || enemyConfig.sprite || 'assets/battle/enemies/placeholder.gif';
+            
+            console.log('[BattleEngine] Setting enemy sprite:', idleAnimation);
+            
+            // Set the sprite source
+            enemySprite.src = idleAnimation;
+            
+            // Apply styling to enemy for consistency
             enemySprite.style.setProperty('width', '32px', 'important');
             enemySprite.style.setProperty('height', '32px', 'important');
             enemySprite.style.setProperty('object-fit', 'contain', 'important');
@@ -784,6 +826,13 @@ class BattleEngine {
             enemySprite.style.setProperty('image-rendering', 'pixelated', 'important');
             enemySprite.style.setProperty('opacity', '1', 'important');
             enemySprite.style.setProperty('display', 'block', 'important');
+            enemySprite.style.setProperty('visibility', 'visible', 'important');
+            
+            // Store enemy config on sprite element for animation system
+            enemySprite.dataset.enemyName = enemyConfig.name;
+            enemySprite.dataset.enemyId = enemyConfig.id;
+        } else {
+            console.error('[BattleEngine] Enemy sprite element not found!');
         }
         
         // Render initial state
@@ -900,26 +949,35 @@ class BattleEngine {
     showBattleResults(result) {
         const battle = this.currentBattle;
         
-        // Create results modal
-        const modal = document.createElement('div');
-        modal.className = 'battle-results-modal';
-        modal.innerHTML = `
-            <div class="battle-results-content">
-                <h2>${result === 'victory' ? '🎉 Victory!' : result === 'defeat' ? '💀 Defeat' : '🏃 Fled'}</h2>
-                ${battle.loot ? `
-                    <p>XP Coins: ${battle.loot.xpCoins > 0 ? '+' : ''}${battle.loot.xpCoins}</p>
-                    ${battle.loot.items.length > 0 ? `<p>Items: ${battle.loot.items.join(', ')}</p>` : ''}
-                ` : ''}
-                <p>Turns: ${battle.turnCount}</p>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            modal.remove();
-        }, 3000);
+        if (result === 'victory') {
+            // Show loot modal first
+            if (window.lootSystem && battle.loot) {
+                const enemyName = battle.enemy?.name || 'Enemy';
+                const xpGained = battle.loot.xpCoins || 0;
+                const lootItems = battle.loot.items || [];
+                
+                // Show loot modal
+                window.lootSystem.showLootModal(lootItems, xpGained, enemyName);
+                
+                // Store world map context for later
+                if (window.gameState) {
+                    window._pendingWorldMapContext = {
+                        level: window.gameState.level || 1,
+                        previousLevel: (window.gameState.level || 1) - 1,
+                        petName: window.gameState.petName || 'Your Monster',
+                        isFirstBattle: (window.gameState.level || 1) <= 5,
+                        enemyName: enemyName,
+                        justLeveledUp: true
+                    };
+                }
+            }
+        } else if (result === 'defeat') {
+            // Show defeat message
+            this.addLog('You were defeated...');
+        } else if (result === 'fled') {
+            // Show flee message
+            this.addLog('You fled from battle!');
+        }
     }
 }
 

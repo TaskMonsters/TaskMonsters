@@ -35,6 +35,7 @@
     overflow: hidden;
     border-radius: 16px;
     border: 3px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -125,12 +126,13 @@
 }
 
 .sprite-wrapper {
+    position: relative; /* For absolute positioning of damage/heal text */
     width: 120px;
     height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* FIXED: Clip to show only one frame (prevents duplicate rows) */
+    overflow: visible; /* Changed from hidden to allow damage text to show above */
 }
 
 /* Hero sprites (32x32 base) */
@@ -187,6 +189,17 @@
     background-repeat: no-repeat;
     background-position: 0 0;
     transform: scale(1.5);
+    transform-origin: center;
+}
+
+/* Sentry Drone - scaled down by 0.5x */
+.sprite.enemy-sprite-sentry-drone {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    transform: scale(1); /* 0.5x of the normal 2x scale */
     transform-origin: center;
 }
 
@@ -549,6 +562,24 @@
     display: none;
 }
 
+/* Fire Pig projectile animation */
+.projectile {
+    position: absolute;
+    transition: all 0.6s ease-out;
+    pointer-events: none;
+}
+
+.projectile-fire-pig {
+    width: 40px;
+    height: 40px;
+    background-image: url('../assets/projectiles/FirePigProjectileAttack.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 10px rgba(255, 100, 0, 0.8));
+    image-rendering: pixelated;
+}
+
 .explosion-effect {
     position: absolute;
     width: 80px;
@@ -585,9 +616,10 @@
     }
     
     .sprite-wrapper {
+        position: relative;
         width: 100px;
         height: 100px;
-        overflow: hidden; /* FIXED: Clip on mobile too */
+        overflow: visible; /* Allow damage text to show above */
     }
 }
 
@@ -949,4 +981,251 @@
 @keyframes impDeath {
     from { background-position: 0 -288px; }
     to { background-position: -256px -288px; }
+}
+
+
+/* ===================================
+   DAMAGE NUMBERS
+   =================================== */
+
+.damage-number {
+    position: fixed;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ff4444;
+    text-shadow: 
+        2px 2px 0 #000,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        0 0 10px rgba(255, 68, 68, 0.8);
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(-50%) translateY(0);
+    transition: all 0.3s ease-out;
+}
+
+.damage-number.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-60px);
+}
+
+.damage-number.critical {
+    font-size: 42px;
+    color: #ffaa00;
+    text-shadow: 
+        2px 2px 0 #000,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        0 0 15px rgba(255, 170, 0, 1),
+        0 0 30px rgba(255, 170, 0, 0.5);
+    animation: criticalPulse 0.3s ease-in-out;
+}
+
+@keyframes criticalPulse {
+    0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
+    50% { transform: translateX(-50%) translateY(-10px) scale(1.2); }
+}
+
+@keyframes xpFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-80px);
+    }
+}
+
+/* HP Animation - Damage (Red) - Reduced float for arena containment */
+@keyframes hpFloatDamage {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    20% {
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px) scale(0.9);
+    }
+}
+
+/* HP Animation - Heal (Blue) - Reduced float for arena containment */
+@keyframes hpFloatHeal {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+    20% {
+        transform: translateX(-50%) translateY(-5px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px) scale(0.9);
+    }
+}
+
+/* Heal effect styling */
+.heal-effect {
+    position: fixed;
+    font-size: 36px;
+    font-weight: 900;
+    color: #44ff44;
+    text-shadow: 
+        2px 2px 0 #000,
+        -2px -2px 0 #000,
+        2px -2px 0 #000,
+        -2px 2px 0 #000,
+        0 0 10px rgba(68, 255, 68, 0.8);
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(-50%) translateY(0);
+    transition: all 0.3s ease-out;
+}
+
+.heal-effect.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-60px);
+}
+
+
+/* ===================================
+   PROJECTILE ANIMATIONS
+   =================================== */
+
+/* Fire Pig Projectile */
+.projectile-fire-pig {
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/projectiles/FirePigProjectileAttack.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.8));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* Task Phantom Projectile */
+.projectile-phantom {
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/projectiles/procrastination_ghost_projectile.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 10px rgba(150, 100, 255, 0.8));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+    animation: phantomFloat 0.6s ease-in-out;
+}
+
+@keyframes phantomFloat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -55%) scale(1.1); }
+}
+
+/* Medusa Projectile */
+.projectile-medusa {
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/enemy-projectiles/Medusa Projectile.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 8px rgba(100, 255, 100, 0.6));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* Mushroom Guard Projectile */
+.projectile-mushroom {
+    width: 40px;
+    height: 40px;
+    background-image: url('../assets/enemy-projectiles/Mushroom Guard Projectile.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 8px rgba(150, 255, 150, 0.6));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* Drone Projectile */
+.projectile-drone {
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/enemy-projectiles/Sentry Drone Projectile.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 8px rgba(100, 200, 255, 0.8));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* Flying Procrastinator Projectile */
+.projectile-procrastinator {
+    width: 28px;
+    height: 28px;
+    background-image: url('../assets/enemy-projectiles/Flying Procrastinator Profectile.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 8px rgba(200, 200, 200, 0.6));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* Alien Projectile */
+.projectile-alien {
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/enemy-projectiles/Alien Attack Projectile.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 200, 0.8));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* Vampire Bat Projectile */
+.projectile-vampire-bat {
+    width: 32px;
+    height: 32px;
+    background-image: url('../assets/enemy-projectiles/Energy Vampire Bat Projectile Attack.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 8px rgba(200, 50, 50, 0.8));
+    transition: all 0.6s linear;
+    transform: translate(-50%, -50%);
+}
+
+/* ===================================
+   HP ANIMATION TEXT ELEMENTS
+   =================================== */
+
+/* Base styling for HP animation text (damage and heal) */
+.hp-animation-text {
+    position: absolute;
+    left: 50%;
+    top: 10px; /* Positioned lower to stay within sprite wrapper bounds */
+    transform: translateX(-50%);
+    transform-origin: center top;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+    will-change: transform, opacity;
+}
+
+/* Ensure sprite wrappers allow HP animations to overflow */
+.sprite-wrapper {
+    overflow: visible !important;
+}
+
+/* Ensure sprite containers don't clip HP animations */
+.sprite-container {
+    overflow: visible !important;
 }

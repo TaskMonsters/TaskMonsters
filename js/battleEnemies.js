@@ -11,17 +11,16 @@ const BATTLE_ENEMIES = {
         tier: 1,
         minLevel: 5,
         maxLevel: 15,
-        instinct: 'opportunist', // Takes advantage of low defense
+        instinct: 'opportunist',
         
         // Base stats (scale with player level)
         hp: { min: 30, max: 50 },
-        attack: { min: 5, max: 10 },
+        attack: { min: 10, max: 20 },
         defense: { min: 3, max: 8 },
         
-        // Abilities
+        // Abilities - Level 5+: Attack Damage 10-20, No special ability
         abilities: [
-            { name: 'Wing Slash', damage: [5, 10], cooldown: 0 },
-            { name: 'Drowsy Bite', damage: [8, 12], effect: 'slow', cooldown: 2 }
+            { name: 'Wing Slash', damage: [10, 20], cooldown: 0 }
         ],
         
         // Loot table
@@ -79,19 +78,20 @@ const BATTLE_ENEMIES = {
     flying_procrastinator: {
         id: 'flying_procrastinator',
         name: 'Flying Procrastinator',
-        tier: 2,
-        minLevel: 10,
-        maxLevel: 25,
-        instinct: 'trickster', // Uses evasion and misdirection
+        tier: 1,
+        minLevel: 7,
+        maxLevel: 22,
+        instinct: 'trickster',
         
-        hp: { min: 50, max: 80 },
-        attack: { min: 8, max: 15 },
+        hp: { min: 45, max: 75 },
+        attack: { min: 25, max: 30 },
         defense: { min: 5, max: 12 },
         
+        // Level 7+: Attack Damage 25-30, Uses Defend to block some attacks, Can Use a Daze attack that skips users turn for one turn
         abilities: [
-            { name: 'Delay Dart', damage: [8, 15], cooldown: 0 },
-            { name: 'Evasive Maneuver', damage: 0, effect: 'dodge_next', cooldown: 4 },
-            { name: 'Time Waster', damage: [12, 18], effect: 'stun', cooldown: 5 }
+            { name: 'Delay Dart', damage: [25, 30], cooldown: 0 },
+            { name: 'Defend', damage: 0, effect: 'defend', cooldown: 3 },
+            { name: 'Daze', damage: 0, effect: 'stun', cooldown: 4 }
         ],
         
         loot: {
@@ -114,18 +114,20 @@ const BATTLE_ENEMIES = {
         id: 'self_doubt_drone',
         name: 'Self-Doubt Drone',
         tier: 2,
-        minLevel: 10,
-        maxLevel: 25,
-        instinct: 'bully', // Targets weakened players
+        minLevel: 9,
+        maxLevel: 26,
+        instinct: 'bully',
         
-        hp: { min: 55, max: 85 },
-        attack: { min: 10, max: 16 },
-        defense: { min: 6, max: 13 },
+        hp: { min: 55, max: 90 },
+        attack: { min: 20, max: 35 },
+        defense: { min: 8, max: 15 },
         
+        // Level 9+: Attack Damage 20-35, Uses Defend to block some attacks, Can restore 30 HP if its HP is low, Can stun users monster which skips users turn for one turn
         abilities: [
-            { name: 'Doubt Beam', damage: [10, 16], cooldown: 0 },
-            { name: 'Confidence Drain', damage: [8, 14], effect: 'reduce_defense', cooldown: 3 },
-            { name: 'Crushing Words', damage: [15, 22], cooldown: 4 }
+            { name: 'Doubt Beam', damage: [20, 35], cooldown: 0 },
+            { name: 'Defend', damage: 0, effect: 'defend', cooldown: 3 },
+            { name: 'Self Repair', damage: 0, effect: 'heal_self_30', cooldown: 4 },
+            { name: 'Crushing Words', damage: 0, effect: 'stun', cooldown: 5 }
         ],
         
         loot: {
@@ -363,22 +365,19 @@ const BATTLE_ENEMIES = {
     energy_vampire_bat: {
         id: 'energy_vampire_bat',
         name: 'Energy Vampire Bat',
-        tier: 5,
-        minLevel: 40,
-        maxLevel: 50,
+        tier: 1,
+        minLevel: 5,
+        maxLevel: 20,
         instinct: 'leecher',
-        hasMemory: true,
-        isBoss: true,
         
-        hp: { min: 150, max: 220 },
-        attack: { min: 35, max: 50 },
-        defense: { min: 25, max: 40 },
+        hp: { min: 35, max: 60 },
+        attack: { min: 15, max: 25 },
+        defense: { min: 5, max: 10 },
         
+        // Level 5+: Attack Damage 15-25, Uses Defend to block some attacks
         abilities: [
-            { name: 'Life Drain', damage: [35, 50], effect: 'heal_self', cooldown: 0 },
-            { name: 'Energy Siphon', damage: [40, 55], effect: 'drain_all', cooldown: 3 },
-            { name: 'Vampiric Swarm', damage: [45, 60], effect: 'multi_hit', cooldown: 5 },
-            { name: 'Blood Moon', damage: [50, 70], effect: 'heal_and_buff', cooldown: 8 }
+            { name: 'Bite', damage: [15, 25], cooldown: 0 },
+            { name: 'Defend', damage: 0, effect: 'defend', cooldown: 3 }
         ],
         
         loot: {
@@ -478,19 +477,20 @@ const BATTLE_ENEMIES = {
     two_face: {
         id: 'two_face',
         name: '2Face',
-        tier: 3,
-        minLevel: 25,
-        maxLevel: 40,
+        tier: 2,
+        minLevel: 12,
+        maxLevel: 30,
         instinct: 'trickster',
         
-        hp: { min: 95, max: 145 },
-        attack: { min: 20, max: 35 },
-        defense: { min: 15, max: 28 },
+        hp: { min: 60, max: 100 },
+        attack: { min: 20, max: 25 },
+        defense: { min: 10, max: 18 },
         
+        // Level 12+: Attack Damage 20-25, Can morph into any other enemy and use their attack damage and special attack for 2 turns, Has a charm attack that can lower the users defense by half
         abilities: [
-            { name: 'Dual Strike', damage: [20, 35], effect: 'random', cooldown: 0 },
-            { name: 'Personality Shift', damage: [25, 40], effect: 'buff_or_debuff', cooldown: 4 },
-            { name: 'Identity Crisis', damage: [30, 45], effect: 'confusion', cooldown: 5 }
+            { name: 'Dual Strike', damage: [20, 25], cooldown: 0 },
+            { name: 'Morph', damage: 0, effect: 'morph_enemy', cooldown: 5 },
+            { name: 'Charm Attack', damage: 0, effect: 'reduce_defense_half', cooldown: 4 }
         ],
         
         loot: {
@@ -512,19 +512,20 @@ const BATTLE_ENEMIES = {
     land_alien: {
         id: 'land_alien',
         name: 'Land Alien',
-        tier: 2,
-        minLevel: 15,
-        maxLevel: 30,
+        tier: 1,
+        minLevel: 5,
+        maxLevel: 20,
         instinct: 'opportunist',
         
-        hp: { min: 65, max: 95 },
-        attack: { min: 12, max: 20 },
-        defense: { min: 8, max: 16 },
+        hp: { min: 40, max: 70 },
+        attack: { min: 25, max: 25 },
+        defense: { min: 5, max: 12 },
         
+        // Level 5+: Attack Damage 25, Uses Defend to block some attacks, Can evade some enemy attacks
         abilities: [
-            { name: 'Laser Beam', damage: [12, 20], cooldown: 0 },
-            { name: 'Abduction Attempt', damage: [15, 25], effect: 'teleport', cooldown: 4 },
-            { name: 'Probe Attack', damage: [18, 28], cooldown: 3 }
+            { name: 'Laser Beam', damage: [25, 25], cooldown: 0 },
+            { name: 'Defend', damage: 0, effect: 'defend', cooldown: 3 },
+            { name: 'Evade', damage: 0, effect: 'evade', cooldown: 4 }
         ],
         
         loot: {
@@ -583,19 +584,20 @@ const BATTLE_ENEMIES = {
     sentry_drone: {
         id: 'sentry_drone',
         name: 'Sentry Drone',
-        tier: 2,
-        minLevel: 12,
-        maxLevel: 28,
+        tier: 1,
+        minLevel: 8,
+        maxLevel: 25,
         instinct: 'opportunist',
         
-        hp: { min: 60, max: 90 },
-        attack: { min: 14, max: 22 },
-        defense: { min: 10, max: 18 },
+        hp: { min: 50, max: 85 },
+        attack: { min: 15, max: 30 },
+        defense: { min: 8, max: 15 },
         
+        // Level 8+: Attack Damage 15-30, Can restore 20 HP if its HP is low, Can stun users monster which skips users turn for one turn
         abilities: [
-            { name: 'Pulse Cannon', damage: [14, 22], cooldown: 0 },
-            { name: 'Shield Boost', damage: 0, effect: 'buff_defense', cooldown: 4 },
-            { name: 'Overcharge', damage: [20, 30], cooldown: 5 }
+            { name: 'Pulse Cannon', damage: [15, 30], cooldown: 0 },
+            { name: 'Repair', damage: 0, effect: 'heal_self_20', cooldown: 4 },
+            { name: 'Stun Beam', damage: 0, effect: 'stun', cooldown: 5 }
         ],
         
         loot: {
@@ -700,6 +702,37 @@ function getAvailableEnemies(playerLevel, difficulty = 'standard') {
         }
     }
     
+    // ALTERNATION SYSTEM: Cycle through enemies instead of random selection
+    // Initialize rotation index if not exists
+    if (!window.battleEnemyRotationIndex) {
+        window.battleEnemyRotationIndex = {};
+    }
+    
+    // Create a unique key for this level bracket and difficulty
+    const bracketKey = `L${playerLevel}_${difficulty}`;
+    
+    // Initialize rotation index for this bracket if not exists
+    if (typeof window.battleEnemyRotationIndex[bracketKey] === 'undefined') {
+        window.battleEnemyRotationIndex[bracketKey] = 0;
+    }
+    
+    // If we have enemies, return them in alternating order
+    if (enemies.length > 0) {
+        // Get current rotation index
+        const currentIndex = window.battleEnemyRotationIndex[bracketKey];
+        
+        // Get the enemy at current rotation position
+        const selectedEnemy = enemies[currentIndex % enemies.length];
+        
+        // Advance rotation for next battle
+        window.battleEnemyRotationIndex[bracketKey] = (currentIndex + 1) % enemies.length;
+        
+        console.log(`[EnemyRotation] Level ${playerLevel}, Difficulty ${difficulty}: Selected ${selectedEnemy} (${currentIndex % enemies.length + 1}/${enemies.length})`);
+        
+        // Return array with single selected enemy for compatibility
+        return [selectedEnemy];
+    }
+    
     return enemies;
 }
 
@@ -710,13 +743,16 @@ function getAvailableEnemies(playerLevel, difficulty = 'standard') {
  * @returns {Object} Scaled enemy stats
  */
 function scaleEnemyStats(enemy, playerLevel) {
-    const levelRange = enemy.maxLevel - enemy.minLevel;
-    const levelProgress = Math.min(1, Math.max(0, (playerLevel - enemy.minLevel) / levelRange));
+    // FIXED: Use minimal scaling to keep battles balanced
+    // Attack uses the minimum value (abilities define damage ranges)
+    // HP and defense scale slightly with level
+    
+    const levelDiff = Math.max(0, playerLevel - enemy.minLevel);
     
     return {
-        hp: Math.floor(enemy.hp.min + (enemy.hp.max - enemy.hp.min) * levelProgress),
-        attack: Math.floor(enemy.attack.min + (enemy.attack.max - enemy.attack.min) * levelProgress),
-        defense: Math.floor(enemy.defense.min + (enemy.defense.max - enemy.defense.min) * levelProgress)
+        hp: Math.floor(enemy.hp.min + (levelDiff * 2)),
+        attack: enemy.attack.min, // Use minimum attack (abilities handle damage)
+        defense: Math.floor(enemy.defense.min + (levelDiff * 0.5))
     };
 }
 

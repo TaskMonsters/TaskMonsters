@@ -3,34 +3,34 @@
 // Level-based arena pools (as per battle system specifications)
 const ARENA_POOLS = {
     level_1_9: [
-        'assets/battle-backgrounds/city-sunset level 1 - 9.png',
-        'assets/battle-backgrounds/forest level 1 - 9.png',
-        'assets/battle-backgrounds/misty-forest level 1 - 9.png'
+        'assets/battle-backgrounds/City Sunset Level 1-10 and up.png',
+        'assets/battle-backgrounds/Forest Level 1-10 and up.png',
+        'assets/battle-backgrounds/MistyForest Levle 1-10 and up.png'
     ],
     level_10_19: [
         'assets/battle-backgrounds/synth-city Level 10 - 20 and up .png',
-        'assets/battle-backgrounds/forest level 1 - 9.png',
-        'assets/battle-backgrounds/night_town level 5 - 30.png',
+        'assets/battle-backgrounds/Forest Level 1-10 and up.png',
+        'assets/battle-backgrounds/Night Town Level 10 - 20 and up.png',
         'assets/battle-backgrounds/Dungeon Level 20+.png',
-        'assets/battle-backgrounds/dark-gothic-castle Level 20 and up.png'
+        'assets/battle-backgrounds/DarkGothicCastle Level 20 and up.png'
     ],
     level_20_29: [
-        'assets/battle-backgrounds/skull-gate-arena level 15 - 30.png',
+        'assets/battle-backgrounds/skull-gate level 20 - 25 and up.png',
         'assets/battle-backgrounds/Dusk Arena Level 20 - 25 and up.png',
-        'assets/battle-backgrounds/mountain-dusk level 20 - 25 and up.png'
+        'assets/battle-backgrounds/Mountain Dusk Level 20 - 25 and up.png'
     ],
     level_30_39: [
-        'assets/battle-backgrounds/hot-town level 30 and up.png',
-        'assets/battle-backgrounds/castle level 4 - 30.png',
-        'assets/battle-backgrounds/underwater-fantasy level 30 and up.png',
-        'assets/battle-backgrounds/Green Arena Level 30 and up.png'
+        'assets/battle-backgrounds/Hot Town Level 30 - 35 and up.png',
+        'assets/battle-backgrounds/Castle Arena Level 30 - 35 and up.png',
+        'assets/battle-backgrounds/UnderwaterFantasy Level 30 - 35 and up.png',
+        'assets/battle-backgrounds/Green Arena Level 30 - 35 and up.png'
     ],
     level_40_49: [
-        'assets/battle-backgrounds/forest-of-illusions level 40 and up.png'
+        'assets/battle-backgrounds/Forest of Illusions Level 40 and up.gif'
     ],
     level_50_plus: [
-        'assets/battle-backgrounds/fort-of-illusions level 50 and up.png',
-        'assets/battle-backgrounds/vampire-castle level 50 and up.png'
+        'assets/battle-backgrounds/Fort of Illusions Level 50.gif',
+        'assets/battle-backgrounds/vampire-castle Level 50.png'
     ]
 };
 
@@ -306,7 +306,23 @@ function startHeroAnimation(animationType = 'idle') {
     // Validate animation data
     if (!anim || !anim.sprite) {
         console.error('[Battle] Invalid animation data for type:', animationType);
-        // Use absolute fallback
+        
+        // Special case: If hurt animation is missing, use flicker effect
+        if (animationType === 'hurt') {
+            console.log('[Battle] No hurt animation found, using flicker effect');
+            let flickerCount = 0;
+            const flickerInterval = setInterval(() => {
+                heroSprite.style.opacity = heroSprite.style.opacity === '0.3' ? '1' : '0.3';
+                flickerCount++;
+                if (flickerCount >= 6) {
+                    clearInterval(flickerInterval);
+                    heroSprite.style.opacity = '1';
+                }
+            }, 100);
+            return; // Exit early, flicker effect is handled
+        }
+        
+        // Use absolute fallback for other animations
         const fallbackAnim = {
             frames: 4,
             width: 128,
@@ -494,11 +510,22 @@ function startTestBattle() {
         saveGameState();
     } else {
         // Create regular enemy
-        if (typeof createRandomEnemy !== 'function') {
-            console.error('❌ createRandomEnemy is not defined. Make sure enemy.js is loaded.');
+        // Wait for enemy.js to load if not ready yet
+        if (typeof window.createRandomEnemy !== 'function') {
+            console.warn('⏳ createRandomEnemy not ready yet, waiting for enemy.js to load...');
+            // Retry after a short delay
+            setTimeout(() => {
+                if (typeof window.createRandomEnemy === 'function') {
+                    console.log('✅ enemy.js loaded, retrying battle start');
+                    startTestBattle();
+                } else {
+                    console.error('❌ createRandomEnemy still not defined after wait. Make sure enemy.js is loaded.');
+                    console.error('Available window functions:', Object.keys(window).filter(k => k.includes('enemy')));
+                }
+            }, 500);
             return;
         }
-        enemyData = createRandomEnemy(playerLevel);
+        enemyData = window.createRandomEnemy(playerLevel);
         
         // Set rotating arena background on battle-container (not battleArena)
         const arenaBackground = getNextArenaBackground();

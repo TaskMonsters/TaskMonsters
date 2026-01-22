@@ -452,7 +452,10 @@ const BattleSystem = {
         enemySprite.src = 'assets/enemies/bat-attack.png';
 
         setTimeout(() => {
-            const damage = Math.max(3, Math.floor(this.state.enemy.attack - this.state.hero.defense / 2));
+            // Use correct damage range if available
+            const damage = this.state.enemy.attackDamageMin !== undefined && this.state.enemy.attackDamageMax !== undefined
+                ? Math.floor(Math.random() * (this.state.enemy.attackDamageMax - this.state.enemy.attackDamageMin + 1)) + this.state.enemy.attackDamageMin
+                : Math.max(3, Math.floor(this.state.enemy.attack - this.state.hero.defense / 2));
             this.state.hero.energy = Math.max(0, this.state.hero.energy - damage);
             
             this.updateStats();
