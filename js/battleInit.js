@@ -204,20 +204,30 @@ function renderHeroSprite() {
     const spriteRow = appearance?.spriteRow || 0;
     const animationRows = appearance?.animationRows || {};
     
-    // FIX: Don't scale the sprite element itself - scale the wrapper instead
-    // This prevents multi-frame display and flickering
-    heroSprite.style.width = `${spriteSize.width}px`;
-    heroSprite.style.height = `${spriteSize.height}px`;
+    // FIX: Maintain consistent sprite container size across ALL animations
+    // This prevents size changes during attack/idle transitions
+    
+    // Store the base sprite size on first animation (or use from appearance)
+    if (!heroSprite.dataset.baseWidth || !heroSprite.dataset.baseHeight) {
+        heroSprite.dataset.baseWidth = spriteSize.width;
+        heroSprite.dataset.baseHeight = spriteSize.height;
+    }
+    
+    // Always use the stored base size for consistency
+    const baseWidth = parseInt(heroSprite.dataset.baseWidth);
+    const baseHeight = parseInt(heroSprite.dataset.baseHeight);
+    
+    heroSprite.style.width = `${baseWidth}px`;
+    heroSprite.style.height = `${baseHeight}px`;
     heroSprite.style.transform = 'none'; // No scaling on sprite element
     
-    // Scale the wrapper instead to maintain visual size
+    // Scale the wrapper to maintain visual size (NEVER change this during battle)
     const spriteWrapper = heroSprite.parentElement;
     if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
-        const isSkinEquipped = appearance && appearance.isSkin;
-        if (isSkinEquipped) {
-            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for skins
-        } else {
-            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for default monsters
+        // Lock the wrapper transform to prevent size changes
+        if (!spriteWrapper.dataset.transformLocked) {
+            spriteWrapper.style.transform = 'scale(3.5)';
+            spriteWrapper.dataset.transformLocked = 'true';
         }
     }
     
@@ -252,7 +262,12 @@ function startHeroAnimation(animationType = 'idle') {
     // Stop any existing animation
     if (heroAnimationInterval) {
         clearInterval(heroAnimationInterval);
+        heroAnimationInterval = null;
     }
+    
+    // Prevent flicker: ensure sprite is fully visible and disable transitions
+    heroSprite.style.opacity = '1';
+    heroSprite.style.transition = 'none';
     
     // Get current monster appearance using the robust helper
     const appearance = getActiveHeroAppearance();
@@ -361,20 +376,30 @@ function startHeroAnimation(animationType = 'idle') {
         heroSprite.style.backgroundImage = `url('${spritePath}')`;
         heroSprite.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
     }
-    // FIX: Don't scale the sprite element itself - scale the wrapper instead
-    // This prevents multi-frame display and flickering
-    heroSprite.style.width = `${spriteSize.width}px`;
-    heroSprite.style.height = `${spriteSize.height}px`;
+    // FIX: Maintain consistent sprite container size across ALL animations
+    // This prevents size changes during attack/idle transitions
+    
+    // Store the base sprite size on first animation (or use from appearance)
+    if (!heroSprite.dataset.baseWidth || !heroSprite.dataset.baseHeight) {
+        heroSprite.dataset.baseWidth = spriteSize.width;
+        heroSprite.dataset.baseHeight = spriteSize.height;
+    }
+    
+    // Always use the stored base size for consistency
+    const baseWidth = parseInt(heroSprite.dataset.baseWidth);
+    const baseHeight = parseInt(heroSprite.dataset.baseHeight);
+    
+    heroSprite.style.width = `${baseWidth}px`;
+    heroSprite.style.height = `${baseHeight}px`;
     heroSprite.style.transform = 'none'; // No scaling on sprite element
     
-    // Scale the wrapper instead to maintain visual size
+    // Scale the wrapper to maintain visual size (NEVER change this during battle)
     const spriteWrapper = heroSprite.parentElement;
     if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
-        const isSkinEquipped = appearance && appearance.isSkin;
-        if (isSkinEquipped) {
-            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for skins
-        } else {
-            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for default monsters
+        // Lock the wrapper transform to prevent size changes
+        if (!spriteWrapper.dataset.transformLocked) {
+            spriteWrapper.style.transform = 'scale(3.5)';
+            spriteWrapper.dataset.transformLocked = 'true';
         }
     }
     
@@ -665,3 +690,38 @@ function maybeTriggerBattle(sourceType) {
 // Expose globally for use in index.html
 window.maybeTriggerBattle = maybeTriggerBattle;
 
+
+
+// ========================================
+// ANIMATION PRELOADING
+// ========================================
+
+/**
+ * Preload all skin animations to prevent flicker
+ * Call this when battle starts
+ */
+function preloadSkinAnimations(appearance) {
+    if (!appearance || !appearance.isSkin) {
+        return; // Only preload for skins
+    }
+    
+    const animations = ['idle', 'attack', 'hurt', 'death', 'walk', 'jump', 'throw'];
+    const preloadedImages = [];
+    
+    animations.forEach(animType => {
+        const animPath = appearance.animations?.[animType];
+        if (animPath) {
+            const img = new Image();
+            img.src = animPath;
+            preloadedImages.push(img);
+            console.log(`[Battle] Preloading ${animType} animation:`, animPath);
+        }
+    });
+    
+    return preloadedImages;
+}
+
+// Export to global scope
+window.preloadSkinAnimations = preloadSkinAnimations;
+
+console.log('✅ Animation preloading system loaded');

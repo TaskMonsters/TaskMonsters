@@ -87,6 +87,7 @@ const ENERGY_VAMPIRE_BAT_DATA = {
     attackDamageMax: 25,
     specialAbility: 'defend',
     canDefend: true,
+    projectileType: 'vampire-bolt',
     sprites: {
         idle: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
         attack: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
@@ -107,6 +108,7 @@ const LAND_ALIEN_DATA = {
     canDefend: true,
     canEvade: true,
     evasionChance: 0.20,
+    projectileType: 'alien',
     sprites: {
         idle: 'assets/enemies/Land Alien/alien-idle-animated.gif',
         attack: 'assets/enemies/Land Alien/alien-walk-animated.gif',
@@ -152,6 +154,7 @@ const SENTRY_DRONE_DATA = {
     healAmount: 20,
     canStun: true,
     stunChance: 0.30,
+    projectileType: 'drone-projectile',
     sprites: {
         idle: 'assets/enemies/Sentry Drone/Sentry Drone.gif',
         attack: 'assets/enemies/Sentry Drone/Sentry Drone Projectile.gif',
@@ -176,6 +179,7 @@ const SELF_DOUBT_DRONE_DATA = {
     healAmount: 30,
     canStun: true,
     stunChance: 0.30,
+    projectileType: 'drone-projectile',
     sprites: {
         idle: 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
         attack: 'assets/enemies/Self Doubt Drone/Self Doubt Drone Projectile.gif',
@@ -247,7 +251,7 @@ const ORC_DATA = {
     canPickpocket: true,
     pickpocketCount: 3,
     sprites: {
-        idle: 'assets/enemies/Orc/Orc-Attack.gif',
+        idle: 'assets/enemies/Orc/Orc-Idle.gif',
         attack: 'assets/enemies/Orc/Orc-Attack.gif',
         hurt: 'assets/enemies/Orc/Orc-Hurt.gif'
     }
@@ -288,6 +292,7 @@ const OVERTHINKER_DATA = {
     variableDamage: true,
     specialAbility: 'overthink',
     canOverthink: true,
+    projectileType: 'fire-explosion',
     sprites: {
         idle: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
         attack: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
@@ -315,6 +320,7 @@ const TREANT_DATA = {
     canPoison: true,
     poisonDamage: 10,
     poisonDuration: 4,
+    projectileType: 'treant-explosion',
     sprites: {
         idle: 'assets/enemies/Treant/Treant.gif',
         attack: 'assets/enemies/Treant/Treant Attack Explosion.gif',
@@ -343,6 +349,7 @@ const LITTLE_CTHULHU_DATA = {
     canTeleport: true,
     teleportDamage: 20,
     teleportDuration: 3,
+    projectileType: 'cthulhu-explosion',
     sprites: {
         idle: 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
         attack: 'assets/enemies/Little Cthulhu/Little Cthulhu Attack Explosion.gif',
@@ -367,6 +374,7 @@ const MEDUSA_DATA = {
     petrifyDuration: 2,
     canCharm: true,
     charmDefenseReduction: 0.5,
+    projectileType: 'medusa',
     sprites: {
         idle: 'assets/enemies/Medusa/Medusa-animated.gif',
         attack: 'assets/enemies/Medusa/Medusa Attack Explosion.gif',

@@ -3282,8 +3282,86 @@
         width: calc(100% - 40px);
         max-width: 400px;
     }
+    }
     
-    /* Egg Info Banner Mobile Styles */
+    /* Extra Small Mobile Devices (< 375px) */
+    @media (max-width: 374px) {
+    .onboarding-overlay {
+        padding: 10px;
+    }
+    
+    .onboarding-content {
+        padding: 15px;
+        padding-bottom: 100px;
+    }
+    
+    .step-title {
+        font-size: 20px;
+        margin-bottom: 8px;
+    }
+    
+    .step-subtitle {
+        font-size: 12px;
+    }
+    
+    .monster-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .monster-card {
+        padding: 15px;
+    }
+    
+    .monster-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 40px;
+    }
+    
+    .selected-monster-avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .monster-name {
+        font-size: 18px;
+    }
+    
+    .monster-description {
+        font-size: 12px;
+    }
+    
+    .monster-input {
+        font-size: 16px;
+        padding: 12px;
+    }
+    
+    .quick-suggestions {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .suggestion-chip {
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .onboarding-button {
+        bottom: 15px;
+        padding: 12px 24px;
+        font-size: 14px;
+        width: calc(100% - 30px);
+    }
+    
+    .back-button {
+        top: 15px;
+        left: 15px;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+    }    /* Egg Info Banner Mobile Styles */
     .egg-info-banner {
         padding: 20px 16px;
         margin: 20px 16px;
@@ -4405,6 +4483,9 @@ input:checked + .toggle-slider:before {
         </button>
         <button id="btnHoneyTrap" class="btn-action" onclick="battleManager.playerHoneyTrap()" style="display: none;">
             🍯 Honey Trap <span class="item-count" id="honeyTrapCount">(0)</span>
+        </button>
+        <button id="btnThrowingStars" class="btn-action" onclick="battleManager.playerThrowingStars()" style="display: none;">
+            ⭐ Throwing Stars <span class="item-count" id="throwingStarsCount">(0)</span>
         </button>
         <button id="btnProcrastinationGhost" class="btn-action" onclick="battleManager.playerProcrastinationGhost()" style="display: none;">
             👻 Ghost <span class="item-count" id="procrastinationGhostCount">(0)</span>

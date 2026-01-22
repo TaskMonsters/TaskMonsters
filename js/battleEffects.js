@@ -343,3 +343,287 @@ class BattleEffectsManager {
 if (typeof window !== 'undefined') {
     window.BattleEffectsManager = BattleEffectsManager;
 }
+
+
+// ========================================
+// ENEMY PROJECTILE ANIMATIONS
+// ========================================
+
+/**
+ * Vampire Bolt Animation
+ * Red energy bolt projectile
+ */
+window.playVampireBoltAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const fromRect = fromSprite.getBoundingClientRect();
+        const toRect = toSprite.getBoundingClientRect();
+        
+        const projectile = document.createElement('img');
+        projectile.src = 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat Projectile Attack.png';
+        projectile.style.position = 'fixed';
+        projectile.style.width = '32px';
+        projectile.style.height = '32px';
+        projectile.style.left = `${fromRect.left + fromRect.width / 2}px`;
+        projectile.style.top = `${fromRect.top + fromRect.height / 2}px`;
+        projectile.style.zIndex = '9999';
+        projectile.style.pointerEvents = 'none';
+        projectile.style.transition = 'all 0.5s linear';
+        
+        document.body.appendChild(projectile);
+        
+        setTimeout(() => {
+            projectile.style.left = `${toRect.left + toRect.width / 2}px`;
+            projectile.style.top = `${toRect.top + toRect.height / 2}px`;
+        }, 50);
+        
+        setTimeout(() => {
+            projectile.remove();
+            resolve();
+        }, 550);
+    });
+};
+
+/**
+ * Drone Projectile Animation
+ * Blue energy projectile for drones
+ */
+window.playDroneProjectileAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const fromRect = fromSprite.getBoundingClientRect();
+        const toRect = toSprite.getBoundingClientRect();
+        
+        // Determine which drone projectile to use based on enemy name
+        const enemyName = window.battleManager?.enemy?.name || '';
+        let projectileSrc = 'assets/enemies/Sentry Drone/Sentry Drone Projectile.gif';
+        
+        if (enemyName === 'Self Doubt Drone') {
+            projectileSrc = 'assets/enemies/Self Doubt Drone/Self Doubt Drone Projectile.gif';
+        }
+        
+        const projectile = document.createElement('img');
+        projectile.src = projectileSrc;
+        projectile.style.position = 'fixed';
+        projectile.style.width = '48px';
+        projectile.style.height = '48px';
+        projectile.style.left = `${fromRect.left + fromRect.width / 2}px`;
+        projectile.style.top = `${fromRect.top + fromRect.height / 2}px`;
+        projectile.style.zIndex = '9999';
+        projectile.style.pointerEvents = 'none';
+        projectile.style.transition = 'all 0.6s linear';
+        
+        document.body.appendChild(projectile);
+        
+        setTimeout(() => {
+            projectile.style.left = `${toRect.left + toRect.width / 2}px`;
+            projectile.style.top = `${toRect.top + toRect.height / 2}px`;
+        }, 50);
+        
+        setTimeout(() => {
+            projectile.remove();
+            resolve();
+        }, 650);
+    });
+};
+
+/**
+ * Mushroom Projectile Animation
+ * Mushroom spore projectile with explosion
+ */
+window.playMushroomProjectileAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const fromRect = fromSprite.getBoundingClientRect();
+        const toRect = toSprite.getBoundingClientRect();
+        
+        const projectile = document.createElement('img');
+        projectile.src = 'assets/enemies/Mushroom Guard/Mushroom Guard Projectile.gif';
+        projectile.style.position = 'fixed';
+        projectile.style.width = '40px';
+        projectile.style.height = '40px';
+        projectile.style.left = `${fromRect.left + fromRect.width / 2}px`;
+        projectile.style.top = `${fromRect.top + fromRect.height / 2}px`;
+        projectile.style.zIndex = '9999';
+        projectile.style.pointerEvents = 'none';
+        projectile.style.transition = 'all 0.5s ease-in-out';
+        
+        document.body.appendChild(projectile);
+        
+        setTimeout(() => {
+            projectile.style.left = `${toRect.left + toRect.width / 2}px`;
+            projectile.style.top = `${toRect.top + toRect.height / 2}px`;
+        }, 50);
+        
+        setTimeout(() => {
+            projectile.remove();
+            
+            // Show explosion
+            const explosion = document.createElement('img');
+            explosion.src = 'assets/enemies/Mushroom Guard/Mushroom Guard Projectile Attack Explosion.gif';
+            explosion.style.position = 'fixed';
+            explosion.style.width = '64px';
+            explosion.style.height = '64px';
+            explosion.style.left = `${toRect.left + toRect.width / 2 - 32}px`;
+            explosion.style.top = `${toRect.top + toRect.height / 2 - 32}px`;
+            explosion.style.zIndex = '9999';
+            explosion.style.pointerEvents = 'none';
+            
+            document.body.appendChild(explosion);
+            
+            setTimeout(() => {
+                explosion.remove();
+                resolve();
+            }, 600);
+        }, 550);
+    });
+};
+
+/**
+ * Cthulhu Explosion Animation
+ * Dark energy explosion
+ */
+window.playCthulhuExplosionAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const toRect = toSprite.getBoundingClientRect();
+        
+        const explosion = document.createElement('img');
+        explosion.src = 'assets/enemies/Little Cthulhu/Little Cthulhu Attack Explosion.gif';
+        explosion.style.position = 'fixed';
+        explosion.style.width = '96px';
+        explosion.style.height = '96px';
+        explosion.style.left = `${toRect.left + toRect.width / 2 - 48}px`;
+        explosion.style.top = `${toRect.top + toRect.height / 2 - 48}px`;
+        explosion.style.zIndex = '9999';
+        explosion.style.pointerEvents = 'none';
+        
+        document.body.appendChild(explosion);
+        
+        setTimeout(() => {
+            explosion.remove();
+            resolve();
+        }, 800);
+    });
+};
+
+/**
+ * Treant Explosion Animation
+ * Nature/wood explosion
+ */
+window.playTreantExplosionAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const toRect = toSprite.getBoundingClientRect();
+        
+        const explosion = document.createElement('img');
+        explosion.src = 'assets/enemies/Treant/Treant Attack Explosion.gif';
+        explosion.style.position = 'fixed';
+        explosion.style.width = '96px';
+        explosion.style.height = '96px';
+        explosion.style.left = `${toRect.left + toRect.width / 2 - 48}px`;
+        explosion.style.top = `${toRect.top + toRect.height / 2 - 48}px`;
+        explosion.style.zIndex = '9999';
+        explosion.style.pointerEvents = 'none';
+        
+        document.body.appendChild(explosion);
+        
+        setTimeout(() => {
+            explosion.remove();
+            resolve();
+        }, 800);
+    });
+};
+
+console.log('✅ Enemy projectile animations loaded');
+
+
+// ========================================
+// PLAYER BATTLE ITEM ANIMATIONS
+// ========================================
+
+/**
+ * Throwing Star Animation
+ * Spinning star projectile
+ */
+window.playThrowingStarAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const fromRect = fromSprite.getBoundingClientRect();
+        const toRect = toSprite.getBoundingClientRect();
+        
+        const projectile = document.createElement('img');
+        projectile.src = 'assets/battle/items/Throwing Star/Throwing Star Projectile.gif';
+        projectile.style.position = 'fixed';
+        projectile.style.width = '32px';
+        projectile.style.height = '32px';
+        projectile.style.left = `${fromRect.left + fromRect.width / 2}px`;
+        projectile.style.top = `${fromRect.top + fromRect.height / 2}px`;
+        projectile.style.zIndex = '9999';
+        projectile.style.pointerEvents = 'none';
+        projectile.style.transition = 'all 0.4s linear';
+        projectile.style.transform = 'rotate(0deg)';
+        
+        document.body.appendChild(projectile);
+        
+        setTimeout(() => {
+            projectile.style.left = `${toRect.left + toRect.width / 2}px`;
+            projectile.style.top = `${toRect.top + toRect.height / 2}px`;
+            projectile.style.transform = 'rotate(720deg)'; // Two full rotations
+        }, 50);
+        
+        setTimeout(() => {
+            projectile.remove();
+            resolve();
+        }, 450);
+    });
+};
+
+/**
+ * Honeypot Animation
+ * Sticky honey projectile
+ */
+window.playHoneypotAnimation = async function(fromSprite, toSprite) {
+    return new Promise((resolve) => {
+        const fromRect = fromSprite.getBoundingClientRect();
+        const toRect = toSprite.getBoundingClientRect();
+        
+        // Create honey jar projectile
+        const projectile = document.createElement('div');
+        projectile.textContent = '🍯';
+        projectile.style.position = 'fixed';
+        projectile.style.fontSize = '48px';
+        projectile.style.left = `${fromRect.left + fromRect.width / 2}px`;
+        projectile.style.top = `${fromRect.top + fromRect.height / 2}px`;
+        projectile.style.zIndex = '9999';
+        projectile.style.pointerEvents = 'none';
+        projectile.style.transition = 'all 0.5s ease-in-out';
+        projectile.style.transform = 'rotate(0deg)';
+        
+        document.body.appendChild(projectile);
+        
+        setTimeout(() => {
+            projectile.style.left = `${toRect.left + toRect.width / 2}px`;
+            projectile.style.top = `${toRect.top + toRect.height / 2}px`;
+            projectile.style.transform = 'rotate(360deg)';
+        }, 50);
+        
+        setTimeout(() => {
+            projectile.remove();
+            
+            // Show honey splash effect
+            const splash = document.createElement('div');
+            splash.textContent = '💧💧💧';
+            splash.style.position = 'fixed';
+            splash.style.fontSize = '36px';
+            splash.style.left = `${toRect.left + toRect.width / 2 - 30}px`;
+            splash.style.top = `${toRect.top + toRect.height / 2 - 20}px`;
+            splash.style.zIndex = '9999';
+            splash.style.pointerEvents = 'none';
+            splash.style.animation = 'pulse 0.5s ease-in-out';
+            
+            document.body.appendChild(splash);
+            
+            setTimeout(() => {
+                splash.remove();
+                resolve();
+            }, 500);
+        }, 550);
+    });
+};
+
+console.log('✅ Player battle item animations loaded');

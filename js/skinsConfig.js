@@ -222,13 +222,17 @@ const SKINS_CONFIG = {
             sleep: 1
         },
         spriteSheetWidth: {
-            idle: 32,
-            walk: 32,
-            attack: 32,
-            hurt: 32,
-            death: 32,
-            jump: 32,
-            sleep: 32
+            idle: 18,
+            walk: 18,
+            attack: 47,
+            hurt: 20,
+            death: 43,
+            jump: 18,
+            sleep: 18
+        },
+        spriteSize: {
+            width: 32,
+            height: 48
         },
         seamlessImage: true
     },
@@ -550,44 +554,6 @@ const SKINS_CONFIG = {
             death: 'assets/skins/eye_monster/eye-monster-death.gif',
             jump: 'assets/skins/eye_monster/eye-monster-idle.gif',
             sleep: 'assets/skins/eye_monster/eye-monster-idle.gif'
-        },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
-        },
-        spriteSheetWidth: {
-            idle: 80,
-            walk: 80,
-            attack: 80,
-            hurt: 80,
-            death: 80,
-            jump: 80,
-            sleep: 80
-        },
-        seamlessImage: true
-    },
-
-    mage: {
-        id: 'mage',
-        name: 'Mage',
-        price: 3000,
-        levelRequired: 30,
-        tier: 'premium',
-        emoji: '🧙',
-        thumbnail: 'assets/skins/mage/mage-thumbnail.png',
-        animations: {
-            idle: 'assets/skins/mage/mage-idle.gif',
-            walk: 'assets/skins/mage/mage-idle.gif',
-            attack: 'assets/skins/mage/mage-attack.gif',
-            hurt: 'assets/skins/mage/mage-hurt.gif',
-            death: 'assets/skins/mage/mage-death.gif',
-            jump: 'assets/skins/mage/mage-idle.gif',
-            sleep: 'assets/skins/mage/mage-idle.gif'
         },
         frameCount: {
             idle: 1,

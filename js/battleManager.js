@@ -213,6 +213,15 @@ class BattleManager {
         if (typeof renderHeroSprite === 'function') {
             renderHeroSprite();
         }
+        
+        // Preload all skin animations to prevent flicker
+        if (window.preloadSkinAnimations && window.getActiveHeroAppearance) {
+            const appearance = window.getActiveHeroAppearance();
+            if (appearance && appearance.isSkin) {
+                console.log('[Battle] Preloading skin animations to prevent flicker');
+                window.preloadSkinAnimations(appearance);
+            }
+        }
 
         // Initialize enemy sprite with correct size class
         if (typeof initEnemySprite === 'function') {
@@ -1404,11 +1413,19 @@ class BattleManager {
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600));
 
-        // Play honey projectile animation (reuse prickler animation)
-        await playPricklerAnimation(
-            document.getElementById('heroSprite'),
-            document.getElementById('enemySprite')
-        );
+        // Play honey projectile animation
+        if (window.playHoneypotAnimation) {
+            await window.playHoneypotAnimation(
+                document.getElementById('heroSprite'),
+                document.getElementById('enemySprite')
+            );
+        } else {
+            // Fallback to prickler animation if honeypot not available
+            await playPricklerAnimation(
+                document.getElementById('heroSprite'),
+                document.getElementById('enemySprite')
+            );
+        }
 
         // Calculate damage (30-40 damage)
         const damage = Math.floor(Math.random() * 11) + 30;
@@ -1423,6 +1440,79 @@ class BattleManager {
         
         addBattleLog(`🍯 Honey Trap dealt ${damage} damage!`);
         addBattleLog('🐝 Enemy is slowed! Damage reduced by 30% for 3 turns!');
+        updateBattleUI(this.hero, this.enemy);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        // Save game state
+        saveGameState();
+
+        if (isDead) {
+            this.state = BattleState.VICTORY;
+            await this.endBattle('victory');
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+        }
+    }
+
+    // Player uses Throwing Stars
+    async playerThrowingStars() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
+        
+        // FIX: Stop turn timer when player takes action
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        
+        if (this.attackGauge < 15) {
+            addBattleLog('❌ Need 15 attack gauge for Throwing Stars!');
+            return;
+        }
+
+        const throwingStarsCount = gameState.battleInventory?.throwing_stars || 0;
+        if (throwingStarsCount <= 0) {
+            addBattleLog('❌ No Throwing Stars left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        this.attackGauge -= 15;
+        gameState.battleInventory.throwing_stars = Math.max(0, gameState.battleInventory.throwing_stars - 1);
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero throw animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play throwing star projectile animation
+        if (window.playThrowingStarAnimation) {
+            await window.playThrowingStarAnimation(
+                document.getElementById('heroSprite'),
+                document.getElementById('enemySprite')
+            );
+        }
+
+        // Calculate damage (15-25 range)
+        const damage = Math.floor(Math.random() * 11) + 15;
+        const isDead = this.enemy.takeDamage(damage);
+        
+        // Apply weaken effect (reduces enemy's next attack by 50%)
+        this.enemyWeakened = true;
+        this.enemyWeakenAmount = 0.5;
+        
+        // Play critical hit sound for damage >= 10
+        if (window.audioManager && damage >= 10) {
+            window.audioManager.playSound('critical_hit', 0.8);
+        }
+        
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+        
+        addBattleLog(`⭐ Throwing Stars dealt ${damage} damage!`);
+        addBattleLog(`💫 Enemy's next attack will be weakened by 50%!`);
         updateBattleUI(this.hero, this.enemy);
 
         // Reset hero sprite to idle
@@ -1957,6 +2047,51 @@ class BattleManager {
             const heroSprite = document.getElementById('heroSprite');
             if (window.createProjectile) {
                 await window.createProjectile('fly-spit', enemySprite, heroSprite);
+            }
+        }
+        
+        // Vampire bolt projectile
+        if (this.enemy.projectileType === 'vampire-bolt') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (window.playVampireBoltAnimation) {
+                await window.playVampireBoltAnimation(enemySprite, heroSprite);
+            }
+        }
+        
+        // Drone projectile
+        if (this.enemy.projectileType === 'drone-projectile') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (window.playDroneProjectileAnimation) {
+                await window.playDroneProjectileAnimation(enemySprite, heroSprite);
+            }
+        }
+        
+        // Mushroom projectile
+        if (this.enemy.projectileType === 'mushroom') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (window.playMushroomProjectileAnimation) {
+                await window.playMushroomProjectileAnimation(enemySprite, heroSprite);
+            }
+        }
+        
+        // Cthulhu explosion
+        if (this.enemy.projectileType === 'cthulhu-explosion') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (window.playCthulhuExplosionAnimation) {
+                await window.playCthulhuExplosionAnimation(enemySprite, heroSprite);
+            }
+        }
+        
+        // Treant explosion
+        if (this.enemy.projectileType === 'treant-explosion') {
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (window.playTreantExplosionAnimation) {
+                await window.playTreantExplosionAnimation(enemySprite, heroSprite);
             }
         }
 
