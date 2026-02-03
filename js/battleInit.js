@@ -103,6 +103,9 @@ let heroCurrentFrame = 0;
 let heroTotalFrames = 4;
 let heroFrameWidth = 32;
 
+// Cache the hero appearance for the entire battle to prevent skin reversion
+let cachedBattleAppearance = null;
+
 /**
  * Get active hero appearance with robust fallback
  * Returns skin animations if equipped, otherwise default monster animations
@@ -111,51 +114,74 @@ function getActiveHeroAppearance() {
     const baseMonsterId = localStorage.getItem('selectedMonster') || 'nova';
     const equippedSkinId = window.gameState ? window.gameState.equippedSkinId : null;
     
+    // Default frame counts for fallback
+    const defaultFrameCount = {
+        idle: 4,
+        walk: 4,
+        attack: 4,
+        jump: 8,
+        hurt: 4,
+        death: 8
+    };
+    
     // Try to use skin if equipped
     if (equippedSkinId && window.SKINS_CONFIG && window.SKINS_CONFIG[equippedSkinId]) {
         const skin = window.SKINS_CONFIG[equippedSkinId];
+        
+        // CRITICAL FIX: Ensure frameCount always exists with valid defaults
+        const frameCount = skin.frameCount ? {
+            idle: skin.frameCount.idle || 4,
+            walk: skin.frameCount.walk || 4,
+            attack: skin.frameCount.attack || 4,
+            jump: skin.frameCount.jump || 8,
+            hurt: skin.frameCount.hurt || 4,
+            death: skin.frameCount.death || 8
+        } : defaultFrameCount;
+        
         return {
-            animations: skin.animations,
-            frameCount: skin.frameCount,
+            animations: skin.animations || {},
+            frameCount: frameCount,
+            spriteSize: skin.spriteSize || { width: 32, height: 32 },
+            spriteRow: skin.spriteRow || 0,
+            animationRows: skin.animationRows || {},
             isSkin: true,
             skinId: equippedSkinId
         };
     }
     
-    // Fallback to default monster
+    // Fallback to default monster - USE GIF FILES
     const defaultMonsterMap = {
-        luna: 'Owlet_Monster',
-        benny: 'Dude_Monster',
-        nova: 'Pink_Monster'
+        luna: 'Luna',
+        benny: 'Benny',
+        nova: 'Nova'
     };
     
-    const prefix = defaultMonsterMap[baseMonsterId] || 'Pink_Monster';
+    const prefix = defaultMonsterMap[baseMonsterId] || 'Nova';
     
+    // Use GIF files for all animations (not sprite sheets)
     return {
         animations: {
-            idle: `assets/heroes/${prefix}_Idle_4.png`,
-            walk: `assets/heroes/${prefix}_Walk_4.png`,
-            attack: `assets/heroes/${prefix}_Attack1_4.png`,
-            jump: `assets/heroes/${prefix}_Jump_8.png`,
-            hurt: `assets/heroes/${prefix}_Hurt_4.png`,
-            death: `assets/heroes/${prefix}_Death_8.png`
+            idle: `assets/heroes/${prefix}_idle.gif`,
+            walk: `assets/heroes/${prefix}_idle.gif`,
+            attack: `assets/heroes/${prefix}_attack.gif`,
+            jump: `assets/heroes/${prefix}_jump.gif`,
+            hurt: `assets/heroes/${prefix}_Hurt.gif`,
+            death: `assets/heroes/${prefix}_Hurt.gif`
         },
-        frameCount: {
-            idle: 4,
-            walk: 4,
-            attack: 4,
-            jump: 8,
-            hurt: 4,
-            death: 8
-        },
+        frameCount: { idle: 1, walk: 1, attack: 1, jump: 1, hurt: 1, death: 1 },
+        spriteSize: { width: 32, height: 32 },
+        spriteRow: 0,
+        animationRows: {},
         isSkin: false,
-        skinId: null
+        skinId: null,
+        useGif: true  // Flag to indicate GIF-based animation
     };
 }
 
 /**
  * Render hero sprite with guaranteed visibility
  * Called at battle start to ensure hero is always visible
+ * NOW USES IMG.SRC FOR GIF ANIMATIONS (not background-image sprite sheets)
  */
 function renderHeroSprite() {
     const heroSprite = document.getElementById('heroSprite');
@@ -164,94 +190,53 @@ function renderHeroSprite() {
         return;
     }
     
-    const appearance = getActiveHeroAppearance();
+    // Reset all sprite state
+    heroSprite.className = 'sprite';
+    heroSprite.style.cssText = '';
+    
+    // Cache the appearance at battle start to prevent skin reversion
+    cachedBattleAppearance = getActiveHeroAppearance();
+    const appearance = cachedBattleAppearance;
+    console.log('[Battle] Hero appearance cached:', appearance);
     
     if (!appearance || !appearance.animations || !appearance.animations.idle) {
         console.error('[Battle] Unable to get valid hero appearance', { appearance });
-        // Last resort fallback
-        heroSprite.style.backgroundImage = "url('assets/heroes/Pink_Monster_Idle_4.png')";
-        heroSprite.style.backgroundSize = '128px 32px';
+        // Last resort fallback - use GIF
+        heroSprite.src = 'assets/heroes/Nova_idle.gif';
     } else {
-        heroSprite.style.backgroundImage = `url('${appearance.animations.idle}')`;
-        
-        // Get sprite dimensions (default to 32x32 for standard sprites)
-        const spriteSize = appearance.spriteSize || { width: 32, height: 32 };
-        const frameWidth = spriteSize.width;
-        const frameHeight = spriteSize.height;
-        
-        // For multi-directional sprites, we need to account for multiple rows
-        const spriteRow = appearance.spriteRow || 0;
-        const animationRows = appearance.animationRows || {};
-        
-        // Calculate total width and height based on sprite type
-        let totalWidth, totalHeight;
-        
-        if (Object.keys(animationRows).length > 0) {
-            // Blob-style: full sprite sheet is 192x192 (6 frames wide × 6 rows tall)
-            totalWidth = 192; // Full sprite sheet width
-            totalHeight = 192; // Full sprite sheet height (6 rows × 32px)
-        } else {
-            // Standard sprites: calculate based on idle frame count
-            totalWidth = (appearance.frameCount.idle || 4) * frameWidth;
-            totalHeight = frameHeight;
-        }
-        
-        heroSprite.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
+        // USE IMG.SRC FOR GIF ANIMATION - This is the key fix!
+        heroSprite.src = appearance.animations.idle;
+        console.log('[Battle] Setting hero sprite src to:', appearance.animations.idle);
     }
     
-    // Ensure sprite is visible - render all skins at same size as cat skins
-    const spriteSize = appearance?.spriteSize || { width: 32, height: 32 };
-    const spriteRow = appearance?.spriteRow || 0;
-    const animationRows = appearance?.animationRows || {};
-    
-    // FIX: Maintain consistent sprite container size across ALL animations
-    // This prevents size changes during attack/idle transitions
-    
-    // Store the base sprite size on first animation (or use from appearance)
-    if (!heroSprite.dataset.baseWidth || !heroSprite.dataset.baseHeight) {
-        heroSprite.dataset.baseWidth = spriteSize.width;
-        heroSprite.dataset.baseHeight = spriteSize.height;
-    }
-    
-    // Always use the stored base size for consistency
-    const baseWidth = parseInt(heroSprite.dataset.baseWidth);
-    const baseHeight = parseInt(heroSprite.dataset.baseHeight);
-    
-    heroSprite.style.width = `${baseWidth}px`;
-    heroSprite.style.height = `${baseHeight}px`;
-    heroSprite.style.transform = 'none'; // No scaling on sprite element
-    
-    // Scale the wrapper to maintain visual size (NEVER change this during battle)
-    const spriteWrapper = heroSprite.parentElement;
-    if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
-        // Lock the wrapper transform to prevent size changes
-        if (!spriteWrapper.dataset.transformLocked) {
-            spriteWrapper.style.transform = 'scale(3.5)';
-            spriteWrapper.dataset.transformLocked = 'true';
-        }
-    }
-    
+    // Style the img element - 200px (2x enemy size)
+    heroSprite.style.width = '200px';
+    heroSprite.style.height = '200px';
+    heroSprite.style.objectFit = 'contain';
     heroSprite.style.imageRendering = 'pixelated';
     
-    // Set initial background position (accounting for sprite row if multi-directional)
-    // For Blob-style sprites with animationRows, use idle row
-    const initialRow = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-    const yOffset = initialRow * spriteSize.height;
-    heroSprite.style.backgroundPosition = `0 -${yOffset}px`;
+    // Ensure visibility
+    heroSprite.style.opacity = '1';
+    heroSprite.style.visibility = 'visible';
+    heroSprite.style.display = 'block';
     
-    // Remove any classes or styles that could hide the sprite
-    heroSprite.classList.remove('hidden', 'opacity-0', 'fade-out', 'defeated');
-    heroSprite.style.removeProperty('display');
-    heroSprite.style.removeProperty('visibility');
-    heroSprite.style.removeProperty('opacity');
+    // Store animation paths for later use
+    heroSprite.dataset.idleGif = appearance.animations.idle;
+    heroSprite.dataset.attackGif = appearance.animations.attack || appearance.animations.idle;
+    heroSprite.dataset.hurtGif = appearance.animations.hurt || appearance.animations.idle;
+    heroSprite.dataset.deathGif = appearance.animations.death || appearance.animations.hurt || appearance.animations.idle;
     
-    console.log('[Battle] Hero sprite rendered successfully', { appearance });
+    console.log('[Battle] Hero sprite rendered successfully with GIF:', heroSprite.src);
 }
 
 // Export to global scope
 window.getActiveHeroAppearance = getActiveHeroAppearance;
 window.renderHeroSprite = renderHeroSprite;
 
+/**
+ * Start hero animation - NOW USES GIF FILES
+ * Simply swaps the img.src to the appropriate GIF for the animation type
+ */
 function startHeroAnimation(animationType = 'idle') {
     const heroSprite = document.getElementById('heroSprite');
     if (!heroSprite) {
@@ -259,72 +244,32 @@ function startHeroAnimation(animationType = 'idle') {
         return;
     }
     
-    // Stop any existing animation
+    // Stop any existing animation interval (not needed for GIFs but keep for cleanup)
     if (heroAnimationInterval) {
         clearInterval(heroAnimationInterval);
         heroAnimationInterval = null;
     }
     
-    // Prevent flicker: ensure sprite is fully visible and disable transitions
+    // Ensure sprite is visible
     heroSprite.style.opacity = '1';
-    heroSprite.style.transition = 'none';
+    heroSprite.style.visibility = 'visible';
+    heroSprite.style.display = 'block';
     
-    // Get current monster appearance using the robust helper
-    const appearance = getActiveHeroAppearance();
-    const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
+    // Get the appropriate GIF from cached appearance (prevents skin reversion)
+    const appearance = cachedBattleAppearance || getActiveHeroAppearance();
+    let gifPath;
     
-    // Set animation parameters based on type
-    let animations;
-    
-    if (appearance && appearance.isSkin) {
-        // Use skin animations
-        const skin = appearance;
-        const spriteSize = skin.spriteSize || { width: 32, height: 32 };
-        const frameWidth = spriteSize.width;
-        const spriteSheetWidth = skin.spriteSheetWidth || {};
-        
-        // Helper function to get width - use actual sprite sheet width if available, otherwise calculate
-        const getWidth = (animType, frameCount) => {
-            return spriteSheetWidth[animType] || (frameCount * frameWidth);
-        };
-        
-        animations = {
-            idle: { frames: skin.frameCount.idle || 4, width: getWidth('idle', skin.frameCount.idle || 4), sprite: skin.animations.idle, speed: 200 },
-            attack1: { frames: skin.frameCount.attack || 4, width: getWidth('attack', skin.frameCount.attack || 4), sprite: skin.animations.attack, speed: 150 },
-            'walk-attack': { frames: skin.frameCount.walk || 6, width: getWidth('walk', skin.frameCount.walk || 6), sprite: skin.animations.walk, speed: 150 },
-            throw: { frames: skin.frameCount.attack || 4, width: getWidth('attack', skin.frameCount.attack || 4), sprite: skin.animations.attack, speed: 150 },
-            jump: { frames: skin.frameCount.jump || 4, width: getWidth('jump', skin.frameCount.jump || 4), sprite: skin.animations.jump || skin.animations.idle, speed: 100 },
-            hurt: { frames: skin.frameCount.hurt || 2, width: getWidth('hurt', skin.frameCount.hurt || 2), sprite: skin.animations.hurt, speed: 150 },
-            death: { frames: skin.frameCount.death || 4, width: getWidth('death', skin.frameCount.death || 4), sprite: skin.animations.death, speed: 150 },
-            dash: { frames: skin.frameCount.dash || 4, width: getWidth('dash', skin.frameCount.dash || 4), sprite: skin.animations.dash || skin.animations.walk, speed: 100 },
-            special: { frames: skin.frameCount.special || 4, width: getWidth('special', skin.frameCount.special || 4), sprite: skin.animations.special || skin.animations.attack, speed: 150 },
-            walk: { frames: skin.frameCount.walk || 4, width: getWidth('walk', skin.frameCount.walk || 4), sprite: skin.animations.walk, speed: 150 }
-        };
-    } else {
-        // Use default monster animations
-        animations = {
-            idle: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Idle_4.png`, speed: 200 },
-            attack1: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Attack1_4.png`, speed: 150 },
-            'walk-attack': { frames: 6, width: 192, sprite: `assets/heroes/${spritePrefix}_Walk+Attack_6.png`, speed: 150 },
-            throw: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Throw_4.png`, speed: 150 },
-            jump: { frames: 8, width: 256, sprite: `assets/heroes/${spritePrefix}_Jump_8.png`, speed: 100 },
-            hurt: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Hurt_4.png`, speed: 150 },
-            death: { frames: 8, width: 256, sprite: `assets/heroes/${spritePrefix}_Death_8.png`, speed: 150 }
-        };
-    }
-    
-    const anim = animations[animationType] || animations.idle;
-    
-    // Get sprite dimensions from appearance (already declared above)
-    const spriteSize = appearance?.spriteSize || { width: 32, height: 32 };
-    
-    // Validate animation data
-    if (!anim || !anim.sprite) {
-        console.error('[Battle] Invalid animation data for type:', animationType);
-        
-        // Special case: If hurt animation is missing, use flicker effect
-        if (animationType === 'hurt') {
-            console.log('[Battle] No hurt animation found, using flicker effect');
+    // Map animation types to GIF paths
+    switch(animationType) {
+        case 'attack':
+        case 'attack1':
+        case 'throw':
+        case 'special':
+            gifPath = heroSprite.dataset.attackGif || appearance.animations.attack || appearance.animations.idle;
+            break;
+        case 'hurt':
+            gifPath = heroSprite.dataset.hurtGif || appearance.animations.hurt || appearance.animations.idle;
+            // Add flicker effect for hurt
             let flickerCount = 0;
             const flickerInterval = setInterval(() => {
                 heroSprite.style.opacity = heroSprite.style.opacity === '0.3' ? '1' : '0.3';
@@ -334,99 +279,28 @@ function startHeroAnimation(animationType = 'idle') {
                     heroSprite.style.opacity = '1';
                 }
             }, 100);
-            return; // Exit early, flicker effect is handled
-        }
-        
-        // Use absolute fallback for other animations
-        const fallbackAnim = {
-            frames: 4,
-            width: 128,
-            sprite: `assets/heroes/${spritePrefix}_Idle_4.png`,
-            speed: 200
-        };
-        heroTotalFrames = fallbackAnim.frames;
-        heroFrameWidth = fallbackAnim.width / fallbackAnim.frames;
-        heroCurrentFrame = 0;
-        heroSprite.style.backgroundImage = `url('${fallbackAnim.sprite}')`;
-        heroSprite.style.backgroundSize = `${fallbackAnim.width}px ${spriteSize.height}px`;
-        console.warn('[Battle] Using fallback animation:', fallbackAnim);
-    } else {
-        heroTotalFrames = anim.frames;
-        heroFrameWidth = anim.width / anim.frames;
-        heroCurrentFrame = 0;
-        
-        // Set sprite image and size (only if not using fallback)
-        const spritePath = anim.sprite;
-        const spriteRow = appearance?.spriteRow || 0;
-        const animationRows = appearance?.animationRows || {};
-        
-        // Calculate total width and height based on sprite type
-        let totalWidth, totalHeight;
-        
-        if (Object.keys(animationRows).length > 0) {
-            // Blob-style: full sprite sheet is 192x192
-            totalWidth = 192;
-            totalHeight = 192;
-        } else {
-            // Standard sprites: use calculated animation width
-            totalWidth = anim.width;
-            totalHeight = spriteSize.height;
-        }
-        
-        heroSprite.style.backgroundImage = `url('${spritePath}')`;
-        heroSprite.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
-    }
-    // FIX: Maintain consistent sprite container size across ALL animations
-    // This prevents size changes during attack/idle transitions
-    
-    // Store the base sprite size on first animation (or use from appearance)
-    if (!heroSprite.dataset.baseWidth || !heroSprite.dataset.baseHeight) {
-        heroSprite.dataset.baseWidth = spriteSize.width;
-        heroSprite.dataset.baseHeight = spriteSize.height;
+            break;
+        case 'death':
+            gifPath = heroSprite.dataset.deathGif || appearance.animations.death || appearance.animations.hurt || appearance.animations.idle;
+            break;
+        case 'jump':
+            gifPath = appearance.animations.jump || appearance.animations.idle;
+            break;
+        default:
+            gifPath = heroSprite.dataset.idleGif || appearance.animations.idle;
     }
     
-    // Always use the stored base size for consistency
-    const baseWidth = parseInt(heroSprite.dataset.baseWidth);
-    const baseHeight = parseInt(heroSprite.dataset.baseHeight);
-    
-    heroSprite.style.width = `${baseWidth}px`;
-    heroSprite.style.height = `${baseHeight}px`;
-    heroSprite.style.transform = 'none'; // No scaling on sprite element
-    
-    // Scale the wrapper to maintain visual size (NEVER change this during battle)
-    const spriteWrapper = heroSprite.parentElement;
-    if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
-        // Lock the wrapper transform to prevent size changes
-        if (!spriteWrapper.dataset.transformLocked) {
-            spriteWrapper.style.transform = 'scale(3.5)';
-            spriteWrapper.dataset.transformLocked = 'true';
-        }
+    // Set the GIF source - this is all we need for GIF animations!
+    if (gifPath && heroSprite.src !== gifPath) {
+        heroSprite.src = gifPath;
+        console.log('[Battle] Hero animation changed to:', animationType, gifPath);
     }
     
+    // Ensure proper styling - 200px (2x enemy size)
+    heroSprite.style.width = '200px';
+    heroSprite.style.height = '200px';
+    heroSprite.style.objectFit = 'contain';
     heroSprite.style.imageRendering = 'pixelated';
-    
-    // Ensure hero sprite is visible (remove any hidden classes)
-    heroSprite.classList.remove('hidden', 'opacity-0', 'fade-out', 'defeated');
-    heroSprite.style.removeProperty('display');
-    heroSprite.style.removeProperty('visibility');
-    heroSprite.style.removeProperty('opacity');
-    
-    // Animate frames
-    const spriteRow = appearance?.spriteRow || 0;
-    const animationRows = appearance?.animationRows || {};
-    
-    // Determine which row to use for this animation type
-    let rowIndex = spriteRow;
-    if (animationRows[animationType] !== undefined) {
-        rowIndex = animationRows[animationType];
-    }
-    const yOffset = rowIndex * spriteSize.height;
-    
-    heroAnimationInterval = setInterval(() => {
-        heroCurrentFrame = (heroCurrentFrame + 1) % heroTotalFrames;
-        const xPos = -(heroCurrentFrame * heroFrameWidth);
-        heroSprite.style.backgroundPosition = `${xPos}px -${yOffset}px`;
-    }, anim.speed);
 }
 
 function stopHeroAnimation() {
@@ -439,6 +313,7 @@ function stopHeroAnimation() {
 // Export to global scope for use in battleManager
 window.startHeroAnimation = startHeroAnimation;
 window.stopHeroAnimation = stopHeroAnimation;
+window.cachedBattleAppearance = cachedBattleAppearance;
 
 // Start idle animation when battle starts
 function initializeHeroSprite() {

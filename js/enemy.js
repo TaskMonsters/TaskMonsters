@@ -236,27 +236,6 @@ const NAUGHTY_NOVA_DATA = {
 
 // Level 20+ Enemies
 
-const ORC_DATA = {
-    name: 'Orc',
-    baseHP: 130,
-    baseAttack: 25,
-    baseDefense: 20,
-    minLevel: 20,
-    tier: 'boss',
-    attackDamageMin: 25,
-    attackDamageMax: 30,
-    specialAbility: 'berserk_pickpocket',
-    canBerserk: true,
-    berserkAttacks: 3,
-    canPickpocket: true,
-    pickpocketCount: 3,
-    sprites: {
-        idle: 'assets/enemies/Orc/Orc-Idle.gif',
-        attack: 'assets/enemies/Orc/Orc-Attack.gif',
-        hurt: 'assets/enemies/Orc/Orc-Hurt.gif'
-    }
-};
-
 const SLOTHFUL_OGRE_DATA = {
     name: 'Slothful Ogre',
     baseHP: 140,
@@ -524,7 +503,6 @@ const ENEMY_TYPES = [
     SELF_DOUBT_DRONE_DATA,
     TWOFACE_DATA,
     NAUGHTY_NOVA_DATA,
-    ORC_DATA,
     SLOTHFUL_OGRE_DATA,
     OVERTHINKER_DATA,
     TREANT_DATA,

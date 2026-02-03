@@ -102,37 +102,80 @@
 
 /* ===================================
    SPRITE POSITIONING (ABSOLUTE)
+   MATCHING REFERENCE SCREENSHOT EXACTLY:
+   - Hero: Small (~40px), TOP-LEFT of battle arena, HP bar below
+   - Enemy: Larger (~100px), RIGHT side, HP bar at bottom-right
    =================================== */
 
-/* Sprite Containers */
-.sprite-container {
+/* Hero Container - LEFT side, positioned to show HP bar fully */
+#heroContainer {
     position: absolute;
-    width: 45%;
-    top: 25%; /* Lowered from 5% to 25% to position creatures lower in arena */
+    left: 5%;
+    top: 35%;
+    transform: translateY(-35%);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
+    align-items: flex-start;
+    gap: 5px;
+    z-index: 10;
 }
 
-/* Hero (left side) */
-.sprite-container:first-child {
-    left: 3%;
+/* Enemy Container - RIGHT side, positioned to match hero alignment */
+#enemyContainer {
+    position: absolute;
+    right: 5%;
+    top: 35%;
+    transform: translateY(-35%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    z-index: 10;
 }
 
-/* Enemy (right side) */
-.sprite-container:last-child {
-    right: 3%;
-}
-
+/* Sprite wrapper - contains the sprite image */
 .sprite-wrapper {
-    position: relative; /* For absolute positioning of damage/heal text */
-    width: 120px;
-    height: 120px;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: visible; /* Changed from hidden to allow damage text to show above */
+    overflow: visible;
+}
+
+/* Hero sprite wrapper - 240px (2x larger for visibility) */
+#heroContainer .sprite-wrapper {
+    width: 240px;
+    height: 240px;
+}
+
+/* Enemy sprite wrapper - larger */
+#enemyContainer .sprite-wrapper {
+    width: 120px;
+    height: 120px;
+}
+
+/* Base sprite styling for img elements */
+.sprite {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+/* Hero sprite (img element) - 200px (2x enemy size for prominence) */
+img#heroSprite {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+/* Enemy sprite (img element) - LARGER like reference (~100px) */
+img#enemySprite {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    image-rendering: pixelated;
 }
 
 /* Hero sprites (32x32 base) */
@@ -208,24 +251,40 @@
    =================================== */
 
 .hp-bar-container {
-    width: 100%;
-    max-width: 150px;
+    width: 140px; /* Same width for both HP bars */
+    max-width: 140px;
+}
+
+/* Hero HP bar container - proportional to 200px sprite */
+#heroContainer .hp-bar-container {
+    width: 180px;
+    max-width: 180px;
+    margin-bottom: 10px;
+}
+
+/* Enemy HP bar container - proportional to 100px sprite */
+#enemyContainer .hp-bar-container {
+    width: 120px;
+    max-width: 120px;
+    margin-bottom: 8px;
 }
 
 .hp-label {
     display: flex;
     justify-content: space-between;
     color: white;
-    font-size: clamp(10px, 2.2vw, 14px);
+    font-size: clamp(11px, 2.5vw, 14px);
     font-weight: bold;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .hp-bar-bg {
-    height: 8px;
-    background: rgba(0, 0, 0, 0.5);
+    height: 10px;
+    background: rgba(0, 0, 0, 0.7);
     border-radius: 8px;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .hp-bar-fill {

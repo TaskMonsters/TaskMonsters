@@ -68,9 +68,9 @@ class SkinsManager {
         const isSkin = appearance.isSkin || false;
         
         // Determine scales based on whether it's a skin or default monster
-        // Skins are 1x larger (scale 5 vs 4 for main, 4 vs 3 for focus timer)
-        const mainScale = isSkin ? 5 : 4;
-        const focusScale = isSkin ? 4 : 3;
+        // Check for skin-specific scale, otherwise use default
+        const mainScale = appearance.mainAppScale || (isSkin ? 5 : 4);
+        const focusScale = appearance.mainAppScale || (isSkin ? 4 : 3);
         const battleScale = 3.5; // Battle mode keeps same scale
         
         // 1. Update Main Hero Sprite

@@ -1,6 +1,6 @@
 /**
  * Enemy Animation System - GIF-based
- * Uses GIF animations instead of sprite sheets for simplicity and reliability
+ * Uses GIF animations with img.src for proper animated display
  * 
  * NOTE: Enemy class is defined in enemy.js
  * This file only handles animation playback
@@ -9,7 +9,7 @@
 // Play enemy animation using GIF files
 function playEnemyAnimation(enemy, animationKey, duration = 500) {
     return new Promise((resolve) => {
-        // Try both possible sprite element IDs
+        // Get the enemy sprite element (now an img tag)
         let spriteElement = document.getElementById('enemySprite');
         if (!spriteElement) {
             spriteElement = document.getElementById('battleEnemySprite');
@@ -32,55 +32,43 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
                 case 'attack1':
                 case 'attack2':
                 case 'attack':
-                    animationPath = enemy.config.assets.attack;
+                    animationPath = enemy.config.assets.attack || enemy.config.assets.idle;
                     break;
                 case 'hurt':
-                    animationPath = enemy.config.assets.hurt;
+                    animationPath = enemy.config.assets.hurt || enemy.config.assets.idle;
                     break;
                 case 'death':
                 case 'die':
-                    animationPath = enemy.config.assets.die || enemy.config.assets.hurt;
+                    animationPath = enemy.config.assets.die || enemy.config.assets.hurt || enemy.config.assets.idle;
                     break;
                 default:
                     animationPath = enemy.config.assets.idle;
             }
         } else {
-            // Fallback to old system
+            // Fallback to mapped paths
             const enemyName = enemy.name;
-            const basePath = `assets/enemies/${enemyName}/`;
-            
-            switch(animationKey) {
-                case 'idle':
-                    animationPath = `${basePath}${enemyName}-IdleFly-animated.gif`;
-                    break;
-                case 'attack1':
-                case 'attack2':
-                case 'attack':
-                    animationPath = `${basePath}${enemyName}-Attack-animated.gif`;
-                    break;
-                case 'hurt':
-                    animationPath = `${basePath}${enemyName}-Hurt.gif`;
-                    break;
-                case 'death':
-                case 'die':
-                    animationPath = `${basePath}${enemyName}-Die.gif`;
-                    break;
-                default:
-                    animationPath = `${basePath}${enemyName}-IdleFly-animated.gif`;
-            }
+            const enemyPaths = getEnemyPaths();
+            animationPath = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}.gif`;
         }
         
         console.log('[EnemyAnimation] Playing', animationKey, 'animation:', animationPath);
         
-        // Set the animation using img src (not background image)
+        // USE IMG.SRC FOR GIF ANIMATION - This is the key fix!
         spriteElement.src = animationPath;
         
         // Add hurt flash effect for hurt animation
         if (animationKey === 'hurt') {
             spriteElement.classList.add('enemy-hurt-flash');
-            setTimeout(() => {
-                spriteElement.classList.remove('enemy-hurt-flash');
-            }, duration);
+            let flickerCount = 0;
+            const flickerInterval = setInterval(() => {
+                spriteElement.style.opacity = spriteElement.style.opacity === '0.3' ? '1' : '0.3';
+                flickerCount++;
+                if (flickerCount >= 6) {
+                    clearInterval(flickerInterval);
+                    spriteElement.style.opacity = '1';
+                    spriteElement.classList.remove('enemy-hurt-flash');
+                }
+            }, 80);
         }
         
         // Resolve after duration
@@ -92,7 +80,8 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
                     idleAnimation = enemy.config.assets.idle;
                 } else {
                     const enemyName = enemy.name;
-                    idleAnimation = `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
+                    const enemyPaths = getEnemyPaths();
+                    idleAnimation = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}.gif`;
                 }
                 spriteElement.src = idleAnimation;
             }
@@ -101,15 +90,9 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
     });
 }
 
-// Initialize enemy sprite with idle animation
-function initEnemySprite(enemy) {
-    const spriteElement = document.getElementById('enemySprite');
-    if (!spriteElement || !enemy) return;
-    
-    const enemyName = enemy.name;
-    
-    // Map enemy names to their actual directory and file names
-    const enemyPaths = {
+// Helper function to get enemy paths mapping
+function getEnemyPaths() {
+    return {
         'Slime': 'assets/enemies/Slime Enemy/Slime Enemy.gif',
         'Treant': 'assets/enemies/Treant/Treant.gif',
         '2Face': 'assets/enemies/2Face/2Face Idle.gif',
@@ -129,26 +112,57 @@ function initEnemySprite(enemy) {
         'Sentry Drone': 'assets/enemies/Sentry Drone/Sentry Drone.gif',
         'Slothful Ogre': 'assets/enemies/Slothful Ogre/ogre-idle.gif'
     };
-    
-    // Use mapped path if available, otherwise try the standard pattern
-    const idleGif = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
-    
-    spriteElement.style.backgroundImage = `url('${idleGif}')`;
-    spriteElement.style.backgroundSize = 'contain';
-    spriteElement.style.backgroundRepeat = 'no-repeat';
-    spriteElement.style.backgroundPosition = 'center';
-    
-    // Apply size-specific classes
-    spriteElement.className = 'sprite'; // Reset classes
-    if (enemyName === 'Sentry Drone') {
-        spriteElement.classList.add('enemy-sprite-sentry-drone');
-    } else {
-        // Default size for other enemies
-        spriteElement.style.width = '100px';
-        spriteElement.style.height = '100px';
+}
+
+// Initialize enemy sprite with idle animation
+function initEnemySprite(enemy) {
+    const spriteElement = document.getElementById('enemySprite');
+    if (!spriteElement || !enemy) {
+        console.warn('[EnemyAnimation] Cannot init enemy sprite - element or enemy missing');
+        return;
     }
+    
+    console.log('[EnemyAnimation] Initializing enemy sprite for:', enemy.name);
+    
+    // Reset all styles first
+    spriteElement.className = 'sprite';
+    spriteElement.style.cssText = '';
+    
+    const enemyName = enemy.name;
+    
+    // Check if enemy has config with assets (new BATTLE_ENEMIES system)
+    let idleGif = null;
+    if (enemy.config && enemy.config.assets && enemy.config.assets.idle) {
+        idleGif = enemy.config.assets.idle;
+        console.log('[EnemyAnimation] Using config assets:', idleGif);
+    } else {
+        // Use mapped paths
+        const enemyPaths = getEnemyPaths();
+        idleGif = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}.gif`;
+        console.log('[EnemyAnimation] Using mapped path:', idleGif);
+    }
+    
+    // USE IMG.SRC FOR GIF ANIMATION - This is the key fix!
+    spriteElement.src = idleGif;
+    
+    // Style the img element - larger size matching reference screenshot
+    spriteElement.style.width = '100px';
+    spriteElement.style.height = '100px';
+    spriteElement.style.objectFit = 'contain';
+    spriteElement.style.imageRendering = 'pixelated';
+    
+    // Ensure visibility
+    spriteElement.style.opacity = '1';
+    spriteElement.style.visibility = 'visible';
+    spriteElement.style.display = 'block';
+    
+    // Store idle gif path for later use
+    spriteElement.dataset.idleGif = idleGif;
+    
+    console.log('[EnemyAnimation] Enemy sprite initialized successfully with src:', idleGif);
 }
 
 // Export to global scope
 window.playEnemyAnimation = playEnemyAnimation;
 window.initEnemySprite = initEnemySprite;
+window.getEnemyPaths = getEnemyPaths;

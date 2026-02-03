@@ -10,7 +10,7 @@ class GuardianOnboarding {
         this.steps = [
             {
                 title: 'Welcome to Task World',
-                message: `Welcome, new Task Master! You've just stepped into Task World, a secret realm that thrives on focus and accomplishment. This world is powered by your energy—every task you complete in the real world sends a wave of power here, pushing back the shadows and helping our world flourish.`,
+                message: `Welcome, new Task Master! You've just stepped into Task World, a magical realm powered by your actions. Every task you complete in the real world sends energy here, pushing back the shadows and helping this world flourish.`,
                 animation: 'welcome',
                 showMap: true
             },
@@ -23,7 +23,7 @@ class GuardianOnboarding {
             },
             {
                 title: 'The Gloom',
-                message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters that represent real-world challenges like procrastination and distraction. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
+                message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
                 animation: 'gloom',
                 showMap: true,
                 isLastStep: true

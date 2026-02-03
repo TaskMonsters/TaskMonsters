@@ -513,19 +513,20 @@ class RecurringTasksManager {
             `;
         }
         
-        // Get last 5 completions for display
-        const recentCompletions = completions.slice(-5).reverse();
+        // Show up to 10 recent completions as glowing green dots
+        const recentCompletions = completions.slice(-10).reverse();
         const lastCompletion = new Date(completions[completions.length - 1]);
         const timeSinceLastCompletion = this.getTimeSince(lastCompletion);
         
-        // Create visual dots for recent completions
+        // Create visual glowing dots for recent completions
         const dots = recentCompletions.map((completion, index) => {
             const date = new Date(completion);
-            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            return `<span class="completion-dot" title="Completed on ${dateStr}" style="display: inline-block; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; margin: 0 2px;"></span>`;
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            return `<span class="completion-dot" title="Completed on ${dateStr} at ${timeStr}" style="display: inline-block; width: 12px; height: 12px; background: #4ade80; border-radius: 50%; margin: 0 3px; box-shadow: 0 0 8px rgba(74, 222, 128, 0.6), 0 0 12px rgba(74, 222, 128, 0.4); animation: glow-pulse 2s ease-in-out infinite;"></span>`;
         }).join('');
         
-        const moreCount = completionCount > 5 ? completionCount - 5 : 0;
+        const moreCount = completionCount > 10 ? completionCount - 10 : 0;
         
         return `
             <div class="recurring-task-stats" style="margin-top: 12px; padding: 10px; background: var(--bg-tertiary); border-radius: 8px;">

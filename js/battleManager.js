@@ -105,7 +105,12 @@ class BattleManager {
                 prickler: 0,
                 freeze: 0,
                 blue_flame: 0,
-                procrastination_ghost: 0
+                procrastination_ghost: 0,
+                lightning: 0,
+                honey_trap: 0,
+                throwing_stars: 0,
+                star_shield: 0,
+                mirror_attack: 0
             };
         }
         
@@ -807,18 +812,13 @@ class BattleManager {
         }
     }
 
-    // Player uses freeze (deals damage and skips enemy turn)
+    // Player uses freeze (freezes enemy for 2 turns - NO DAMAGE, COSTS 80% ATTACK GAUGE)
     async playerFreeze() {
         if (this.state !== BattleState.PLAYER_TURN) return;
         
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
-        }
-        
-        if (this.attackGauge < 35) {
-            addBattleLog('❌ Need 35 attack gauge for freeze!');
-            return;
         }
 
         const freezeCount = gameState.battleInventory?.freeze || 0;
@@ -828,7 +828,15 @@ class BattleManager {
         }
 
         this.state = BattleState.ANIMATING;
-        this.attackGauge -= 35;  // Freeze costs 35 attack gauge
+        
+        // FREEZE COSTS 80% OF ATTACK GAUGE
+        const freezeCost = Math.floor(this.attackGauge * 0.80);
+        this.attackGauge = Math.max(0, this.attackGauge - freezeCost);
+        addBattleLog(`❄️ Freeze used ${freezeCost} attack gauge!`);
+        
+        // Set flag to prevent gauge refill during frozen turns
+        this.freezeActiveNoRefill = true;
+        
         gameState.battleInventory.freeze = Math.max(0, gameState.battleInventory.freeze - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
@@ -848,19 +856,8 @@ class BattleManager {
             window.audioManager.playSound('freeze_attack', 0.8);
         }
 
-        // Calculate damage (45-55 damage, skips 2 turns - INCREASED)
-        const damage = Math.floor(Math.random() * 11) + 45; // 45-55 damage
-        const isDead = this.enemy.takeDamage(damage);
-        
-        // Play critical hit sound for damage >= 10
-        if (window.audioManager && damage >= 10) {
-            window.audioManager.playSound('critical_hit', 0.8);
-        }
-
-        // Play enemy hurt animation
-        await playEnemyAnimation(this.enemy, 'hurt', 300);
-        
-        addBattleLog(`❄️ Freeze dealt ${damage} damage and froze the enemy!`);
+        // NO DAMAGE - Freeze only stops enemy from attacking
+        addBattleLog('❄️ Enemy is frozen for 2 turns!');
         updateBattleUI(this.hero, this.enemy);
 
         // Reset hero sprite to idle
@@ -869,29 +866,21 @@ class BattleManager {
         // Save game state
         saveGameState();
 
-        if (isDead) {
-            this.state = BattleState.VICTORY;
-            await this.endBattle('victory');
-        } else {
-            // Set enemy frozen for 2 turns
-            this.enemyFrozenTurns = 2;
-            addBattleLog('❄️ Enemy is frozen for 2 turns!');
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Refill gauges slightly for next turn
-            this.attackGauge = Math.min(100, this.attackGauge + 15);
-            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
-            
-            this.state = BattleState.PLAYER_TURN;
-            updateBattleUI(this.hero, this.enemy);
-            updateActionButtons(this.hero);
-            
-            // FIX: Start turn timer
-            if (typeof startTurnTimer === 'function') {
-                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
-                startTurnTimer(timerDuration);
-                this.turnTimerReduced = false;
-            }
+        // Set enemy frozen for 2 turns
+        this.enemyFrozenTurns = 2;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // NO GAUGE RESTORATION - Freeze does not refill any gauges
+        
+        this.state = BattleState.PLAYER_TURN;
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+        
+        // FIX: Start turn timer
+        if (typeof startTurnTimer === 'function') {
+            const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+            startTurnTimer(timerDuration);
+            this.turnTimerReduced = false;
         }
     }
 
@@ -1276,7 +1265,7 @@ class BattleManager {
             return;
         }
 
-        const lightningCount = gameState.battleInventory?.lightning_bolt || 0;
+        const lightningCount = gameState.battleInventory?.lightning || 0;
         if (lightningCount <= 0) {
             addBattleLog('❌ No Lightning Bolts left!');
             return;
@@ -1284,7 +1273,7 @@ class BattleManager {
 
         this.state = BattleState.ANIMATING;
         this.attackGauge -= 25;
-        gameState.battleInventory.lightning_bolt = Math.max(0, gameState.battleInventory.lightning_bolt - 1);
+        gameState.battleInventory.lightning = Math.max(0, gameState.battleInventory.lightning - 1);
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
 
@@ -1292,11 +1281,19 @@ class BattleManager {
         startHeroAnimation('throw');
         await new Promise(resolve => setTimeout(resolve, 600));
 
-        // Play lightning animation (reuse spark animation with different effect)
-        await playSparkAnimation(
-            document.getElementById('heroSprite'),
-            document.getElementById('enemySprite')
-        );
+        // Play dramatic lightning bolt animation
+        if (window.playLightningBoltAnimation) {
+            await playLightningBoltAnimation(
+                document.getElementById('heroSprite'),
+                document.getElementById('enemySprite')
+            );
+        } else {
+            // Fallback to spark animation if lightning animation not loaded
+            await playSparkAnimation(
+                document.getElementById('heroSprite'),
+                document.getElementById('enemySprite')
+            );
+        }
         
         // Play thunder sound
         if (window.audioManager) {
@@ -1628,9 +1625,13 @@ class BattleManager {
             // Skip enemy turn and return to player turn
             this.state = BattleState.PLAYER_TURN;
             
-            // Refill gauges slightly
-            this.attackGauge = Math.min(100, this.attackGauge + 15);
-            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
+            // NO GAUGE REFILL during frozen turns - gauge stays depleted until player uses power boost
+            // (Freeze costs 80% attack gauge and it should STAY that way)
+            
+            // Clear the no-refill flag when freeze effect ends
+            if (this.enemyFrozenTurns <= 0) {
+                this.freezeActiveNoRefill = false;
+            }
             
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
@@ -1642,6 +1643,28 @@ class BattleManager {
                 this.turnTimerReduced = false;
             }
             return;
+        }
+        
+        // Apply Nova's burn damage at start of enemy turn (from Nova Spirit special attack)
+        if (this.burnTurns > 0) {
+            const burnDmg = this.burnDamage || 20;
+            const isDead = this.enemy.takeDamage(burnDmg);
+            addBattleLog(`🔥 Burn dealt ${burnDmg} damage! (${this.burnTurns} turns left)`);
+            
+            this.burnTurns--;
+            if (this.burnTurns <= 0) {
+                addBattleLog('✨ Burn effect ended!');
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (isDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 800));
         }
         
         // FIX: Apply Nova's poison damage at start of enemy turn
@@ -2286,6 +2309,44 @@ class BattleManager {
             }
         }
         
+        // Apply Throwing Stars weakening effect (reduces damage by 50%)
+        if (this.enemyWeakened && this.enemyWeakenAmount > 0) {
+            const originalDamage = damage;
+            damage = Math.floor(damage * (1 - this.enemyWeakenAmount)); // 50% damage reduction
+            addBattleLog(`💫 Throwing Stars weakened the enemy! Damage reduced from ${originalDamage} to ${damage}!`);
+            this.enemyWeakened = false;
+            this.enemyWeakenAmount = 0;
+        }
+        
+        // Apply Luna's Eclipse deflect effect (deflects damage back to enemy)
+        if (this.deflectActive) {
+            addBattleLog(`🌙 Luna's Eclipse deflects ${damage} damage back to the enemy!`);
+            const isDead = this.enemy.takeDamage(damage);
+            this.deflectActive = false;
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (isDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+                return;
+            }
+            
+            // Skip the rest of enemy attack since damage was deflected
+            this.state = BattleState.PLAYER_TURN;
+            this.attackGauge = Math.min(100, this.attackGauge + 15);
+            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
+        
         // Check if Star Shield is active
         if (this.starShieldActive && this.starShieldCharges > 0) {
             this.starShieldCharges--;
@@ -2300,14 +2361,23 @@ class BattleManager {
         }
         // Check if defend was active - use defense gauge instead of HP
         else if (this.defendActive && this.defenseGauge > 0) {
-            const gaugeUsed = Math.min(damage, this.defenseGauge);
-            this.defenseGauge -= gaugeUsed;
-            const remainingDamage = damage - gaugeUsed;
-            if (remainingDamage > 0) {
-                this.applyHeroDamage(remainingDamage);
-                addBattleLog(`🛡️ Blocked ${gaugeUsed} damage! Took ${remainingDamage} damage!`);
+            // Check if Benny's defense immune is active (defense gauge won't decrease)
+            if (this.defenseImmune > 0) {
+                addBattleLog(`💨 Benny Bubble! Defense immune - blocked all ${damage} damage! (${this.defenseImmune} turns left)`);
+                this.defenseImmune--;
+                if (this.defenseImmune <= 0) {
+                    addBattleLog('✨ Defense immunity ended!');
+                }
             } else {
-                addBattleLog(`🛡️ Blocked all ${damage} damage!`);
+                const gaugeUsed = Math.min(damage, this.defenseGauge);
+                this.defenseGauge -= gaugeUsed;
+                const remainingDamage = damage - gaugeUsed;
+                if (remainingDamage > 0) {
+                    this.applyHeroDamage(remainingDamage);
+                    addBattleLog(`🛡️ Blocked ${gaugeUsed} damage! Took ${remainingDamage} damage!`);
+                } else {
+                    addBattleLog(`🛡️ Blocked all ${damage} damage!`);
+                }
             }
             this.defendActive = false;
         } else {
@@ -2613,6 +2683,11 @@ class BattleManager {
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
             
+            // Clear cached battle appearance to allow skin changes between battles
+            if (window.cachedBattleAppearance !== undefined) {
+                window.cachedBattleAppearance = null;
+            }
+            
             // FIXED: Stop all battle music when arena is hidden
             // This ensures music stops even if user navigates away without clicking Continue
             if (window.audioManager) {
@@ -2790,9 +2865,11 @@ class BattleManager {
         };
 
         okButton.onclick = () => {
-            // Stop defeat music
+            // CRITICAL: Stop ALL battle music (defeat music + any lingering battle music)
             if (window.audioManager) {
                 window.audioManager.stopBattleOutcomeMusic();
+                window.audioManager.stopAllBattleMusic();
+                console.log('[DefeatModal] Stopped all battle music');
             }
             overlay.remove();
         };

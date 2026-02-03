@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orc Animation Test</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+        }
+        .animation-container {
+            margin: 30px auto;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        img {
+            display: block;
+            margin: 20px auto;
+            border: 2px solid #0f3460;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #e94560;
+        }
+        .status {
+            font-size: 18px;
+            margin: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 5px;
+        }
+        .success {
+            color: #00ff00;
+        }
+        .error {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Orc Animation Test</h1>
+    <p>This page tests if the Orc idle animation loads correctly</p>
+    
+    <div class="animation-container">
+        <h2>Orc Idle Animation</h2>
+        <img id="orcIdle" src="assets/enemies/Orc/Orc-Idle.gif" alt="Orc Idle" width="100" height="100">
+        <div id="idleStatus" class="status">Loading...</div>
+    </div>
+    
+    <div class="animation-container">
+        <h2>Orc Attack Animation</h2>
+        <img id="orcAttack" src="assets/enemies/Orc/Orc-Attack.gif" alt="Orc Attack" width="100" height="100">
+        <div id="attackStatus" class="status">Loading...</div>
+    </div>
+    
+    <div class="animation-container">
+        <h2>Orc Hurt Animation</h2>
+        <img id="orcHurt" src="assets/enemies/Orc/Orc-Hurt.gif" alt="Orc Hurt" width="100" height="100">
+        <div id="hurtStatus" class="status">Loading...</div>
+    </div>
+    
+    <div class="animation-container">
+        <h2>Orc Death Animation</h2>
+        <img id="orcDeath" src="assets/enemies/Orc/Orc-Death.gif" alt="Orc Death" width="100" height="100">
+        <div id="deathStatus" class="status">Loading...</div>
+    </div>
+    
+    <script>
+        // Check if images load successfully
+        function checkImage(imgId, statusId, name) {
+            const img = document.getElementById(imgId);
+            const status = document.getElementById(statusId);
+            
+            img.onload = function() {
+                status.innerHTML = `✅ ${name} loaded successfully!<br>Size: ${img.naturalWidth}x${img.naturalHeight}px`;
+                status.className = 'status success';
+            };
+            
+            img.onerror = function() {
+                status.innerHTML = `❌ ${name} failed to load!<br>Path: ${img.src}`;
+                status.className = 'status error';
+            };
+        }
+        
+        checkImage('orcIdle', 'idleStatus', 'Orc-Idle.gif');
+        checkImage('orcAttack', 'attackStatus', 'Orc-Attack.gif');
+        checkImage('orcHurt', 'hurtStatus', 'Orc-Hurt.gif');
+        checkImage('orcDeath', 'deathStatus', 'Orc-Death.gif');
+    </script>
+</body>
+</html>

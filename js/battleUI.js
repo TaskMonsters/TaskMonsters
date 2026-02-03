@@ -5,6 +5,13 @@ function showBattle(hero, enemy) {
     const arena = document.getElementById('battleArena');
     arena.classList.remove('hidden');
     
+    // CRITICAL FIX: Clear battle log at start of each battle
+    const battleLog = document.getElementById('battleLog');
+    if (battleLog) {
+        battleLog.innerHTML = '';
+        console.log('[BattleUI] Battle log cleared');
+    }
+    
     // Initialize UI elements
     updateBattleUI(hero, enemy);
     updateBattleButtonsVisibility();
@@ -409,6 +416,70 @@ function updateActionButtons(hero) {
             btnProcrastinationGhost.disabled = battleManager.attackGauge < 25 || procrastinationGhostCount === 0;
         } else {
             btnProcrastinationGhost.style.display = 'none';
+        }
+    }
+    
+    // Lightning Bolt (show if owned)
+    const btnLightningBolt = document.getElementById('btnLightningBolt');
+    if (btnLightningBolt) {
+        const lightningBoltCount = gameState.battleInventory?.lightning || 0;
+        if (lightningBoltCount > 0) {
+            btnLightningBolt.style.display = '';
+            const lightningBoltCountSpan = btnLightningBolt.querySelector('.item-count');
+            if (lightningBoltCountSpan) {
+                lightningBoltCountSpan.textContent = `(${lightningBoltCount})`;
+            }
+            btnLightningBolt.disabled = battleManager.attackGauge < 20 || lightningBoltCount === 0;
+        } else {
+            btnLightningBolt.style.display = 'none';
+        }
+    }
+    
+    // Honey Trap (show if owned)
+    const btnHoneyTrap = document.getElementById('btnHoneyTrap');
+    if (btnHoneyTrap) {
+        const honeyTrapCount = gameState.battleInventory?.honey_trap || 0;
+        if (honeyTrapCount > 0) {
+            btnHoneyTrap.style.display = '';
+            const honeyTrapCountSpan = btnHoneyTrap.querySelector('.item-count');
+            if (honeyTrapCountSpan) {
+                honeyTrapCountSpan.textContent = `(${honeyTrapCount})`;
+            }
+            btnHoneyTrap.disabled = battleManager.attackGauge < 15 || honeyTrapCount === 0;
+        } else {
+            btnHoneyTrap.style.display = 'none';
+        }
+    }
+    
+    // Throwing Stars (show if owned)
+    const btnThrowingStars = document.getElementById('btnThrowingStars');
+    if (btnThrowingStars) {
+        const throwingStarsCount = gameState.battleInventory?.throwing_stars || 0;
+        if (throwingStarsCount > 0) {
+            btnThrowingStars.style.display = '';
+            const throwingStarsCountSpan = btnThrowingStars.querySelector('.item-count');
+            if (throwingStarsCountSpan) {
+                throwingStarsCountSpan.textContent = `(${throwingStarsCount})`;
+            }
+            btnThrowingStars.disabled = battleManager.attackGauge < 15 || throwingStarsCount === 0;
+        } else {
+            btnThrowingStars.style.display = 'none';
+        }
+    }
+    
+    // Star Shield (show if owned)
+    const btnStarShield = document.getElementById('btnStarShield');
+    if (btnStarShield) {
+        const starShieldCount = gameState.battleInventory?.star_shield || 0;
+        if (starShieldCount > 0) {
+            btnStarShield.style.display = '';
+            const starShieldCountSpan = btnStarShield.querySelector('.item-count');
+            if (starShieldCountSpan) {
+                starShieldCountSpan.textContent = `(${starShieldCount})`;
+            }
+            btnStarShield.disabled = starShieldCount === 0;
+        } else {
+            btnStarShield.style.display = 'none';
         }
     }
 }

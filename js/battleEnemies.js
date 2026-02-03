@@ -34,9 +34,9 @@ const BATTLE_ENEMIES = {
         
         // Asset paths
         assets: {
-            idle: 'assets/battle/enemies/Lazy Bat/Lazy Bat-IdleFly-animated.gif',
-            attack: 'assets/battle/enemies/Lazy Bat/Lazy Bat-Attack-animated.gif',
-            hurt: 'assets/battle/enemies/Lazy Bat/Lazy Bat-Hurt.gif',
+            idle: 'assets/enemies/Lazy Bat/Lazy Bat-IdleFly-animated.gif',
+            attack: 'assets/enemies/Lazy Bat/Lazy Bat-Attack-animated.gif',
+            hurt: 'assets/enemies/Lazy Bat/Lazy Bat-Hurt.gif',
             attackSound: 'assets/battle/enemies/Lazy Bat/Lazy Bat-Attack Sound.mp3'
         }
     },
@@ -67,9 +67,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Slime Enemy/Slime-Idle.gif',
-            attack: 'assets/battle/enemies/Slime Enemy/Slime-Attack.gif',
-            hurt: 'assets/battle/enemies/Slime Enemy/Slime-Hurt.gif',
+            idle: 'assets/enemies/Slime Enemy/Slime Enemy.gif',
+            attack: 'assets/enemies/Slime Enemy/Slime Enemy Attack.gif',
+            hurt: 'assets/enemies/Slime Enemy/Slime Enemy.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -103,9 +103,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Flying Procrastinator/Flying Procrastinator-Idle.gif',
-            attack: 'assets/battle/enemies/Flying Procrastinator/Flying Procrastinator-Attack.gif',
-            hurt: 'assets/battle/enemies/Flying Procrastinator/Flying Procrastinator-Hurt.gif',
+            idle: 'assets/enemies/Flying Procrastinator/Flying Procrastinator.gif',
+            attack: 'assets/enemies/Flying Procrastinator/Flying Procrastinator.gif',
+            hurt: 'assets/enemies/Flying Procrastinator/Flying Procrastinator.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -139,9 +139,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Self Doubt Drone/Self Doubt Drone-Idle.gif',
-            attack: 'assets/battle/enemies/Self Doubt Drone/Self Doubt Drone-Attack.gif',
-            hurt: 'assets/battle/enemies/Self Doubt Drone/Self Doubt Drone-Hurt.gif',
+            idle: 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
+            attack: 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
+            hurt: 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -174,9 +174,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Overthinker/Overthinker-Idle.gif',
-            attack: 'assets/battle/enemies/Overthinker/Overthinker-Attack.gif',
-            hurt: 'assets/battle/enemies/Overthinker/Overthinker-Hurt.gif',
+            idle: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
+            attack: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
+            hurt: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -208,9 +208,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Ice Bully/Ice Bully-Idle.gif',
-            attack: 'assets/battle/enemies/Ice Bully/Ice Bully-Attack.gif',
-            hurt: 'assets/battle/enemies/Ice Bully/Ice Bully-Hurt.gif',
+            idle: 'assets/enemies/Ice Bully/idle.gif',
+            attack: 'assets/enemies/Ice Bully/1_atk.gif',
+            hurt: 'assets/enemies/Ice Bully/take_hit.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -242,9 +242,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Mushroom Guard/Mushroom Guard-Idle.gif',
-            attack: 'assets/battle/enemies/Mushroom Guard/Mushroom Guard-Attack.gif',
-            hurt: 'assets/battle/enemies/Mushroom Guard/Mushroom Guard-Hurt.gif',
+            idle: 'assets/enemies/Mushroom Guard/Mushroom_Idle.gif',
+            attack: 'assets/enemies/Mushroom Guard/Mushroom_Attack.gif',
+            hurt: 'assets/enemies/Mushroom Guard/Mushroom_Hit.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -280,9 +280,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Distraction Dragon/Distraction Dragon-Idle.gif',
-            attack: 'assets/battle/enemies/Distraction Dragon/Distraction Dragon-Attack.gif',
-            hurt: 'assets/battle/enemies/Distraction Dragon/Distraction Dragon-Hurt.gif',
+            idle: 'assets/enemies/Distraction Dragon/Distraction Dragon.gif',
+            attack: 'assets/enemies/Distraction Dragon/Distraction Dragon Attack.gif',
+            hurt: 'assets/enemies/Distraction Dragon/Distraction Dragon.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -317,46 +317,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Medusa/Medusa-Idle.gif',
-            attack: 'assets/battle/enemies/Medusa/Medusa-Attack.gif',
-            hurt: 'assets/battle/enemies/Medusa/Medusa-Hurt.gif',
-            attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
-        }
-    },
-
-    orc: {
-        id: 'orc',
-        name: 'Burnout Orc',
-        tier: 4,
-        minLevel: 30,
-        maxLevel: 45,
-        instinct: 'bully',
-        hasMemory: true,
-        
-        hp: { min: 140, max: 200 },
-        attack: { min: 30, max: 45 },
-        defense: { min: 22, max: 35 },
-        
-        abilities: [
-            { name: 'Exhaustion Smash', damage: [30, 45], cooldown: 0 },
-            { name: 'Rage Quit', damage: [35, 50], effect: 'berserk', cooldown: 4 },
-            { name: 'Overwork Slam', damage: [40, 55], cooldown: 3 },
-            { name: 'Burnout Wave', damage: [45, 60], effect: 'drain_all', cooldown: 7 }
-        ],
-        
-        loot: {
-            xpCoins: { min: 90, max: 130 },
-            items: [
-                { id: 'energy_crystal', chance: 0.4 },
-                { id: 'orc_tooth', chance: 0.3 },
-                { id: 'legendary_item', chance: 0.15 }
-            ]
-        },
-        
-        assets: {
-            idle: 'assets/battle/enemies/Orc/Orc-Idle.gif',
-            attack: 'assets/battle/enemies/Orc/Orc-Attack.gif',
-            hurt: 'assets/battle/enemies/Orc/Orc-Hurt.gif',
+            idle: 'assets/enemies/Medusa/Medusa-animated.gif',
+            attack: 'assets/enemies/Medusa/Medusa Attack Explosion.gif',
+            hurt: 'assets/enemies/Medusa/Medusa-animated.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -390,9 +353,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Energy Vampire Bat/Energy Vampire Bat-Idle.gif',
-            attack: 'assets/battle/enemies/Energy Vampire Bat/Energy Vampire Bat-Attack.gif',
-            hurt: 'assets/battle/enemies/Energy Vampire Bat/Energy Vampire Bat-Hurt.gif',
+            idle: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
+            attack: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
+            hurt: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -428,9 +391,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Little Cthulhu/Little Cthulhu-Idle.gif',
-            attack: 'assets/battle/enemies/Little Cthulhu/Little Cthulhu-Attack.gif',
-            hurt: 'assets/battle/enemies/Little Cthulhu/Little Cthulhu-Hurt.gif',
+            idle: 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
+            attack: 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
+            hurt: 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -466,9 +429,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Slothful Ogre/Slothful Ogre-Idle.gif',
-            attack: 'assets/battle/enemies/Slothful Ogre/Slothful Ogre-Attack.gif',
-            hurt: 'assets/battle/enemies/Slothful Ogre/Slothful Ogre-Hurt.gif',
+            idle: 'assets/enemies/Slothful Ogre/ogre-idle.gif',
+            attack: 'assets/enemies/Slothful Ogre/ogre-attack.gif',
+            hurt: 'assets/enemies/Slothful Ogre/ogre-idle.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -502,9 +465,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/2Face/2Face-Idle.gif',
-            attack: 'assets/battle/enemies/2Face/2Face-Attack.gif',
-            hurt: 'assets/battle/enemies/2Face/2Face-Hurt.gif',
+            idle: 'assets/enemies/2Face/2Face Idle.gif',
+            attack: 'assets/enemies/2Face/2Face_Attack.gif',
+            hurt: 'assets/enemies/2Face/2Face_Hurt.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -537,9 +500,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Land Alien/Land Alien-Idle.gif',
-            attack: 'assets/battle/enemies/Land Alien/Land Alien-Attack.gif',
-            hurt: 'assets/battle/enemies/Land Alien/Land Alien-Hurt.gif',
+            idle: 'assets/enemies/Land Alien/alien-idle-animated.gif',
+            attack: 'assets/enemies/Land Alien/alien-idle-animated.gif',
+            hurt: 'assets/enemies/Land Alien/alien-idle-animated.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -574,9 +537,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Naughty Nova/Naughty Nova-Idle.gif',
-            attack: 'assets/battle/enemies/Naughty Nova/Naughty Nova-Attack.gif',
-            hurt: 'assets/battle/enemies/Naughty Nova/Naughty Nova-Hurt.gif',
+            idle: 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
+            attack: 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
+            hurt: 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -609,9 +572,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Sentry Drone/Sentry Drone-Idle.gif',
-            attack: 'assets/battle/enemies/Sentry Drone/Sentry Drone-Attack.gif',
-            hurt: 'assets/battle/enemies/Sentry Drone/Sentry Drone-Hurt.gif',
+            idle: 'assets/enemies/Sentry Drone/Sentry Drone.gif',
+            attack: 'assets/enemies/Sentry Drone/Sentry Drone.gif',
+            hurt: 'assets/enemies/Sentry Drone/Sentry Drone.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     },
@@ -648,9 +611,9 @@ const BATTLE_ENEMIES = {
         },
         
         assets: {
-            idle: 'assets/battle/enemies/Treant/Treant-Idle.gif',
-            attack: 'assets/battle/enemies/Treant/Treant-Attack.gif',
-            hurt: 'assets/battle/enemies/Treant/Treant-Hurt.gif',
+            idle: 'assets/enemies/Treant/Treant.gif',
+            attack: 'assets/enemies/Treant/Treant.gif',
+            hurt: 'assets/enemies/Treant/Treant.gif',
             attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
         }
     }

@@ -26,9 +26,9 @@ const SELF_DOUBT_DRONE_BOSS = {
     }
 };
 
-// Level 20 Boss - Orc (Enhanced Boss Version)
-const ORC_BOSS = {
-    name: 'Orc',
+// Level 20 Boss - Overthinker (Enhanced Boss Version)
+const OVERTHINKER_BOSS = {
+    name: 'Overthinker',
     baseHP: 280,
     baseAttack: 45,
     baseDefense: 35,
@@ -36,16 +36,16 @@ const ORC_BOSS = {
     isBoss: true,
     bossLevel: 20,
     tier: 'boss',
-    specialAbility: 'berserk_pickpocket',
-    canBerserk: true,
-    berserkAttacks: 4, // Enhanced from 3 to 4
-    canPickpocket: true,
-    pickpocketCount: 4,
+    specialAbility: 'confusion_drain',
+    canConfuse: true,
+    confuseChance: 0.35,
+    canDrain: true,
+    drainAmount: 25,
     bossRewardMultiplier: 2.5,
     sprites: {
-        idle: 'assets/enemies/Orc/Orc-Attack.gif',
-        attack: 'assets/enemies/Orc/Orc-Attack.gif',
-        hurt: 'assets/enemies/Orc/Orc-Hurt.gif'
+        idle: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
+        attack: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
+        hurt: 'assets/enemies/Overthinker/OverthinkerEnemy.gif'
     }
 };
 
@@ -127,7 +127,7 @@ const DISTRACTION_DRAGON_BOSS = {
 // Boss type array - ordered by level
 const BOSS_TYPES = [
     SELF_DOUBT_DRONE_BOSS,  // Level 10
-    ORC_BOSS,                // Level 20
+    OVERTHINKER_BOSS,        // Level 20
     TREANT_BOSS,             // Level 30
     MEDUSA_BOSS,             // Level 40
     DISTRACTION_DRAGON_BOSS  // Level 50
@@ -143,7 +143,7 @@ function isBossLevel(playerLevel) {
 function createBossEnemy(playerLevel) {
     // Determine which boss based on level
     // Level 10 → Self Doubt Drone
-    // Level 20 → Orc
+    // Level 20 → Overthinker
     // Level 30 → Treant
     // Level 40 → Medusa
     // Level 50+ → Distraction Dragon
@@ -157,7 +157,7 @@ function createBossEnemy(playerLevel) {
     } else if (playerLevel >= 30) {
         selectedBoss = TREANT_BOSS;
     } else if (playerLevel >= 20) {
-        selectedBoss = ORC_BOSS;
+        selectedBoss = OVERTHINKER_BOSS;
     } else {
         selectedBoss = SELF_DOUBT_DRONE_BOSS;
     }

@@ -3,10 +3,10 @@
  * Shows floating damage and heal numbers above sprites during battle
  * 
  * POSITIONING STRATEGY:
- * - Anchored relative to sprite wrapper (parent container)
- * - Positioned LOWER and closer to sprite for better visibility
- * - Animation constrained to stay within battle arena bounds
- * - Responsive to different sprite scales and screen sizes
+ * - Same size for both hero and enemy (24px font)
+ * - Positioned above the sprite wrapper (negative top value)
+ * - Animation floats upward and fades out
+ * - Appended to sprite-container for proper visibility
  */
 
 // Show damage animation above a sprite (-HP in red)
@@ -17,49 +17,51 @@ function showBattleDamageAnimation(spriteId, damage) {
         console.error(`[HP Animation] Sprite not found: ${spriteId}`);
         return;
     }
-    if (!sprite.parentElement) {
-        console.error(`[HP Animation] Sprite has no parent: ${spriteId}`);
+    
+    // Get the sprite-container (grandparent) for positioning context
+    // Structure: sprite-container > sprite-wrapper > heroSprite/enemySprite
+    const spriteWrapper = sprite.parentElement;
+    if (!spriteWrapper) {
+        console.error(`[HP Animation] Sprite wrapper not found for: ${spriteId}`);
         return;
     }
     
-    // Get sprite wrapper for positioning context
-    const spriteWrapper = sprite.parentElement;
+    const spriteContainer = spriteWrapper.parentElement;
+    if (!spriteContainer) {
+        console.error(`[HP Animation] Sprite container not found for: ${spriteId}`);
+        return;
+    }
     
     // Create damage text element
     const damageText = document.createElement('div');
     damageText.textContent = `-${damage} HP`;
-    damageText.className = 'hp-animation-text';
+    damageText.className = 'hp-animation-text hp-damage-text';
     
-    // Core positioning: anchor to sprite wrapper with safe positioning
-    damageText.style.position = 'absolute';
-    damageText.style.left = '50%';
+    // Core positioning: anchor to sprite container
+    damageText.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff4444;
+        text-shadow: 
+            2px 2px 0 #000,
+            -2px -2px 0 #000,
+            2px -2px 0 #000,
+            -2px 2px 0 #000,
+            0 0 10px rgba(255, 68, 68, 0.8),
+            0 0 20px rgba(255, 68, 68, 0.5);
+        pointer-events: none;
+        z-index: 10000;
+        white-space: nowrap;
+        animation: hpFloatDamage 2s ease-out forwards;
+    `;
     
-    // CRITICAL FIX: Position LOWER (closer to sprite) to avoid clipping
-    // Changed from -20px to 10px to position within visible sprite area
-    damageText.style.top = '10px';
-    
-    // Transform for centering and animation
-    damageText.style.transform = 'translateX(-50%)';
-    damageText.style.transformOrigin = 'center top';
-    
-    // Styling
-    damageText.style.fontSize = '24px';
-    damageText.style.fontWeight = 'bold';
-    damageText.style.color = '#ef4444'; // Red color
-    damageText.style.textShadow = '0 0 10px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8)';
-    damageText.style.pointerEvents = 'none';
-    damageText.style.zIndex = '1000';
-    damageText.style.whiteSpace = 'nowrap';
-    
-    // Performance optimization
-    damageText.style.willChange = 'transform, opacity';
-    
-    // CRITICAL FIX: Reduced float distance to keep animation within arena bounds
-    // Changed from xpFloat (translateY -80px) to custom animation with -50px
-    damageText.style.animation = 'hpFloatDamage 2s ease-out forwards';
-    
-    // Add to sprite's parent container (sprite-wrapper)
-    spriteWrapper.appendChild(damageText);
+    // Add to sprite container (not wrapper) for proper visibility
+    spriteContainer.appendChild(damageText);
+    console.log(`[HP Animation] Damage text appended to container for ${spriteId}`);
     
     // Remove after animation completes
     setTimeout(() => {
@@ -69,7 +71,7 @@ function showBattleDamageAnimation(spriteId, damage) {
     }, 2000);
 }
 
-// Show heal animation above a sprite (+HP in blue)
+// Show heal animation above a sprite (+HP in green)
 function showBattleHealAnimation(spriteId, healAmount) {
     console.log(`[HP Animation] showBattleHealAnimation called: spriteId=${spriteId}, healAmount=${healAmount}`);
     const sprite = document.getElementById(spriteId);
@@ -77,49 +79,50 @@ function showBattleHealAnimation(spriteId, healAmount) {
         console.error(`[HP Animation] Sprite not found: ${spriteId}`);
         return;
     }
-    if (!sprite.parentElement) {
-        console.error(`[HP Animation] Sprite has no parent: ${spriteId}`);
+    
+    // Get the sprite-container (grandparent) for positioning context
+    const spriteWrapper = sprite.parentElement;
+    if (!spriteWrapper) {
+        console.error(`[HP Animation] Sprite wrapper not found for: ${spriteId}`);
         return;
     }
     
-    // Get sprite wrapper for positioning context
-    const spriteWrapper = sprite.parentElement;
+    const spriteContainer = spriteWrapper.parentElement;
+    if (!spriteContainer) {
+        console.error(`[HP Animation] Sprite container not found for: ${spriteId}`);
+        return;
+    }
     
     // Create heal text element
     const healText = document.createElement('div');
     healText.textContent = `+${healAmount} HP`;
-    healText.className = 'hp-animation-text';
+    healText.className = 'hp-animation-text hp-heal-text';
     
-    // Core positioning: anchor to sprite wrapper with safe positioning
-    healText.style.position = 'absolute';
-    healText.style.left = '50%';
+    // Core positioning: anchor to sprite container
+    healText.style.cssText = `
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: #44ff44;
+        text-shadow: 
+            2px 2px 0 #000,
+            -2px -2px 0 #000,
+            2px -2px 0 #000,
+            -2px 2px 0 #000,
+            0 0 10px rgba(68, 255, 68, 0.8),
+            0 0 20px rgba(68, 255, 68, 0.5);
+        pointer-events: none;
+        z-index: 10000;
+        white-space: nowrap;
+        animation: hpFloatHeal 2s ease-out forwards;
+    `;
     
-    // CRITICAL FIX: Position LOWER (closer to sprite) to avoid clipping
-    // Changed from -20px to 10px to position within visible sprite area
-    healText.style.top = '10px';
-    
-    // Transform for centering and animation
-    healText.style.transform = 'translateX(-50%)';
-    healText.style.transformOrigin = 'center top';
-    
-    // Styling
-    healText.style.fontSize = '24px';
-    healText.style.fontWeight = 'bold';
-    healText.style.color = '#3b82f6'; // Blue color
-    healText.style.textShadow = '0 0 10px rgba(59, 130, 246, 0.8), 0 0 20px rgba(59, 130, 246, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8)';
-    healText.style.pointerEvents = 'none';
-    healText.style.zIndex = '1000';
-    healText.style.whiteSpace = 'nowrap';
-    
-    // Performance optimization
-    healText.style.willChange = 'transform, opacity';
-    
-    // CRITICAL FIX: Reduced float distance to keep animation within arena bounds
-    // Changed from xpFloat (translateY -80px) to custom animation with -50px
-    healText.style.animation = 'hpFloatHeal 2s ease-out forwards';
-    
-    // Add to sprite's parent container (sprite-wrapper)
-    spriteWrapper.appendChild(healText);
+    // Add to sprite container (not wrapper) for proper visibility
+    spriteContainer.appendChild(healText);
+    console.log(`[HP Animation] Heal text appended to container for ${spriteId}`);
     
     // Remove after animation completes
     setTimeout(() => {
@@ -132,3 +135,5 @@ function showBattleHealAnimation(spriteId, healAmount) {
 // Expose functions globally
 window.showBattleDamageAnimation = showBattleDamageAnimation;
 window.showBattleHealAnimation = showBattleHealAnimation;
+
+console.log('[HP Animation] Battle HP Animations loaded');

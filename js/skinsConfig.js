@@ -39,7 +39,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        seamlessImage: false
     },
 
     imp: {
@@ -77,7 +77,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true,  // Flag to indicate this is a seamless animated sprite
+        seamlessImage: false,  // Flag to indicate this is a seamless animated sprite
         hasFireball: true  // Special flag for fireball attack
     },
 
@@ -116,7 +116,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true  // Flag to indicate this is a seamless animated sprite
+        seamlessImage: false  // Flag to indicate this is a seamless animated sprite
     },
 
     human_knight: {
@@ -154,7 +154,8 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        mainAppScale: 20,  // Increased to 20 (4x larger for better visibility)
+        seamlessImage: false
     },
 
     human_ranger: {
@@ -192,7 +193,8 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        mainAppScale: 20,  // Increased to 20 (4x larger for better visibility)
+        seamlessImage: false
     },
 
     skeleton: {
@@ -204,13 +206,13 @@ const SKINS_CONFIG = {
         emoji: '💀',
         thumbnail: 'assets/skins/skeleton/thumbnail.png',
         animations: {
-            idle: 'assets/skins/skeleton/idle.gif',
-            walk: 'assets/skins/skeleton/idle.gif',
-            attack: 'assets/skins/skeleton/attack.gif',
-            hurt: 'assets/skins/skeleton/hurt.gif',
-            death: 'assets/skins/skeleton/death.gif',
-            jump: 'assets/skins/skeleton/idle.gif',
-            sleep: 'assets/skins/skeleton/idle.gif'
+            idle: 'assets/skins/skeleton/skeleton-idle.gif',
+            walk: 'assets/skins/skeleton/skeleton-idle.gif',
+            attack: 'assets/skins/skeleton/skeleton-attack.gif',
+            hurt: 'assets/skins/skeleton/skeleton-hurt.gif',
+            death: 'assets/skins/skeleton/skeleton-death.gif',
+            jump: 'assets/skins/skeleton/skeleton-jump.gif',
+            sleep: 'assets/skins/skeleton/skeleton-idle.gif'
         },
         frameCount: {
             idle: 1,
@@ -222,19 +224,20 @@ const SKINS_CONFIG = {
             sleep: 1
         },
         spriteSheetWidth: {
-            idle: 18,
-            walk: 18,
+            idle: 47,
+            walk: 47,
             attack: 47,
-            hurt: 20,
-            death: 43,
-            jump: 18,
-            sleep: 18
+            hurt: 47,
+            death: 47,
+            jump: 47,
+            sleep: 47
         },
         spriteSize: {
-            width: 32,
-            height: 48
+            width: 47,
+            height: 65
         },
-        seamlessImage: true
+        mainAppScale: 20,  // Increased to 20 (4x larger for better visibility)
+        seamlessImage: false
     },
 
     rockstar: {
@@ -254,25 +257,12 @@ const SKINS_CONFIG = {
             jump: 'assets/skins/rockstar/idle.gif',
             sleep: 'assets/skins/rockstar/idle.gif'
         },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
+        spriteSize: {
+            width: 80,
+            height: 80
         },
-        spriteSheetWidth: {
-            idle: 80,
-            walk: 80,
-            attack: 80,
-            hurt: 80,
-            death: 80,
-            jump: 80,
-            sleep: 80
-        },
-        seamlessImage: true
+        scale: 3.5,
+        seamlessImage: false  // Changed to false to enable GIF playback
     },
 
     brown_cat: {
@@ -310,7 +300,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        seamlessImage: false
     },
 
     baby_blue_cat: {
@@ -347,7 +337,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        seamlessImage: false
     },
 
     white_cat: {
@@ -385,7 +375,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        seamlessImage: false
     },
 
     flying_eye: {
@@ -397,13 +387,13 @@ const SKINS_CONFIG = {
         emoji: '👁️',
         thumbnail: 'assets/skins/flying_eye/flying-eye-thumbnail.png',
         animations: {
-            idle: 'assets/skins/flying_eye/flying-eye-idle.gif',
-            walk: 'assets/skins/flying_eye/flying-eye-idle.gif',
-            attack: 'assets/skins/flying_eye/flying-eye-attack.gif',
-            hurt: 'assets/skins/flying_eye/flying-eye-hurt.gif',
-            death: 'assets/skins/flying_eye/flying-eye-death.gif',
-            jump: 'assets/skins/flying_eye/flying-eye-idle.gif',
-            sleep: 'assets/skins/flying_eye/flying-eye-idle.gif'
+            idle: 'assets/skins/flying_eye/idle.gif',
+            walk: 'assets/skins/flying_eye/walk.gif',
+            attack: 'assets/skins/flying_eye/attack.gif',
+            hurt: 'assets/skins/flying_eye/hurt.gif',
+            death: 'assets/skins/flying_eye/death.gif',
+            jump: 'assets/skins/flying_eye/idle.gif',
+            sleep: 'assets/skins/flying_eye/idle.gif'
         },
         frameCount: {
             idle: 1,
@@ -414,16 +404,12 @@ const SKINS_CONFIG = {
             jump: 1,
             sleep: 1
         },
-        spriteSheetWidth: {
-            idle: 80,
-            walk: 80,
-            attack: 80,
-            hurt: 80,
-            death: 80,
-            jump: 80,
-            sleep: 80
+        spriteSize: {
+            width: 80,
+            height: 80
         },
-        seamlessImage: true
+        scale: 3.5,
+        seamlessImage: false
     },
 
     rainbow_cat: {
@@ -460,7 +446,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        seamlessImage: false
     },
 
     demonic_cat: {
@@ -497,7 +483,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true
+        seamlessImage: false
     },
 
     warrior_queen: {
@@ -517,25 +503,12 @@ const SKINS_CONFIG = {
             jump: 'assets/skins/warrior_queen/idle.gif',
             sleep: 'assets/skins/warrior_queen/idle.gif'
         },
-        frameCount: {
-            idle: 1,
-            walk: 1,
-            attack: 1,
-            hurt: 1,
-            death: 1,
-            jump: 1,
-            sleep: 1
+        spriteSize: {
+            width: 80,
+            height: 80
         },
-        spriteSheetWidth: {
-            idle: 80,
-            walk: 80,
-            attack: 232,
-            hurt: 84,
-            death: 168,
-            jump: 80,
-            sleep: 80
-        },
-        seamlessImage: true
+        scale: 3.5,
+        seamlessImage: false
     },
 
     eye_monster: {
@@ -547,13 +520,13 @@ const SKINS_CONFIG = {
         emoji: '👁️',
         thumbnail: 'assets/skins/eye_monster/eye-monster-thumbnail.png',
         animations: {
-            idle: 'assets/skins/eye_monster/eye-monster-idle.gif',
-            walk: 'assets/skins/eye_monster/eye-monster-idle.gif',
-            attack: 'assets/skins/eye_monster/eye-monster-attack.gif',
-            hurt: 'assets/skins/eye_monster/eye-monster-hurt.gif',
-            death: 'assets/skins/eye_monster/eye-monster-death.gif',
-            jump: 'assets/skins/eye_monster/eye-monster-idle.gif',
-            sleep: 'assets/skins/eye_monster/eye-monster-idle.gif'
+            idle: 'assets/skins/eye_monster/idle.gif',
+            walk: 'assets/skins/eye_monster/walk.gif',
+            attack: 'assets/skins/eye_monster/attack.gif',
+            hurt: 'assets/skins/eye_monster/hurt.gif',
+            death: 'assets/skins/eye_monster/death.gif',
+            jump: 'assets/skins/eye_monster/idle.gif',
+            sleep: 'assets/skins/eye_monster/idle.gif'
         },
         frameCount: {
             idle: 1,
@@ -564,16 +537,12 @@ const SKINS_CONFIG = {
             jump: 1,
             sleep: 1
         },
-        spriteSheetWidth: {
-            idle: 80,
-            walk: 80,
-            attack: 80,
-            hurt: 80,
-            death: 80,
-            jump: 80,
-            sleep: 80
+        spriteSize: {
+            width: 80,
+            height: 80
         },
-        seamlessImage: true
+        scale: 3.5,
+        seamlessImage: false
     },
 
     task_phantom: {
@@ -611,7 +580,7 @@ const SKINS_CONFIG = {
             jump: 32,
             sleep: 32
         },
-        seamlessImage: true  // Flag to indicate this is a single seamless GIF animation
+        seamlessImage: false  // Flag to indicate this is a single seamless GIF animation
     },
 
     task_toad: {
@@ -650,7 +619,7 @@ const SKINS_CONFIG = {
             sleep: 32
         },
         scale: 2.5,  // Reduce from default 4x to 2.5x to fit in frame
-        seamlessImage: true,  // Flag to indicate this is a single seamless image
+        seamlessImage: false,  // Flag to indicate this is a single seamless image
         offsetY: -20  // Move up 20px from gauge containers
     },
 
@@ -663,13 +632,13 @@ const SKINS_CONFIG = {
         emoji: '🧙‍♂️',
         thumbnail: 'assets/skins/merlin/merlin-thumbnail.png',
         animations: {
-            idle: 'assets/skins/merlin/merlin-idle.gif',
-            walk: 'assets/skins/merlin/merlin-idle.gif',
-            attack: 'assets/skins/merlin/merlin-attack.gif',
-            hurt: 'assets/skins/merlin/merlin-hurt.gif',
-            death: 'assets/skins/merlin/merlin-death.gif',
-            jump: 'assets/skins/merlin/merlin-idle.gif',
-            sleep: 'assets/skins/merlin/merlin-idle.gif'
+            idle: 'assets/skins/merlin/idle.gif',
+            walk: 'assets/skins/merlin/walk.gif',
+            attack: 'assets/skins/merlin/attack.gif',
+            hurt: 'assets/skins/merlin/hurt.gif',
+            death: 'assets/skins/merlin/death.gif',
+            jump: 'assets/skins/merlin/idle.gif',
+            sleep: 'assets/skins/merlin/idle.gif'
         },
         frameCount: {
             idle: 1,
@@ -680,16 +649,12 @@ const SKINS_CONFIG = {
             jump: 1,
             sleep: 1
         },
-        spriteSheetWidth: {
-            idle: 80,
-            walk: 80,
-            attack: 80,
-            hurt: 80,
-            death: 80,
-            jump: 80,
-            sleep: 80
+        spriteSize: {
+            width: 80,
+            height: 80
         },
-        seamlessImage: true
+        scale: 3.5,
+        seamlessImage: false
     }
 
 };

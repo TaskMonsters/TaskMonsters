@@ -3562,22 +3562,22 @@
     margin-bottom: 20px;
 }
 
-/* Hero Container - Left Aligned */
+/* Hero Container - Left side, positioned to show HP bar */
 #heroContainer {
     position: absolute;
-    left: 10px;  /* Closer to left edge */
-    top: 50%;
-    transform: translateY(-50%);
-    max-width: 35%;  /* Limit width to prevent expansion */
+    left: 5%;
+    top: 35%;
+    transform: translateY(-35%);
+    max-width: 45%;  /* Fits sprite */
 }
 
-/* Enemy Container - Right Aligned */
+/* Enemy Container - Right side, positioned to match hero */
 #enemyContainer {
     position: absolute;
-    right: 10px;  /* Closer to right edge */
-    top: 50%;
-    transform: translateY(-50%);
-    max-width: 35%;  /* Limit width to prevent expansion */
+    right: 5%;
+    top: 35%;
+    transform: translateY(-35%);
+    max-width: 40%;  /* Fits sprite */
 }
 
 /* FIX: Turn Timer System - HIDDEN (timer now in battle log) */
@@ -4355,7 +4355,7 @@ input:checked + .toggle-slider:before {
         <!-- Hero Side -->
         <div class="sprite-container" id="heroContainer">
             <div class="sprite-wrapper">
-                <div id="heroSprite" class="sprite idle"></div>
+                <img id="heroSprite" class="sprite idle" src="" alt="Hero">
             </div>
             <div class="hp-bar-container">
                 <div class="hp-label">
@@ -4372,7 +4372,7 @@ input:checked + .toggle-slider:before {
         <!-- Enemy Side -->
         <div class="sprite-container" id="enemyContainer">
             <div class="sprite-wrapper">
-                <div id="enemySprite" class="sprite"></div>
+                <img id="enemySprite" class="sprite" src="" alt="Enemy">
             </div>
             <div class="hp-bar-container">
                 <div class="hp-label">
@@ -6990,45 +6990,43 @@ input:checked + .toggle-slider:before {
                 "What task should we conquer next?",
                 
                 // New motivational & supportive phrases
-                "Let's crush those tasks like… well, rocks.",
-                "You're unstoppable today — pebble power!",
+                "Let's crush those tasks!",
+                "You're unstoppable today!",
                 "That's one more step toward total task domination.",
                 "Momentum looks good on you.",
-                "Keep going — sedimentary success builds over time.",
-                "You're leveling up faster than I can roll.",
-                "Every checkmark is a sparkle in my granite heart.",
-                "Hard work? My favorite kind of mineral deposit.",
-                "You're rock solid — pun 100% intended.",
-                "Tiny actions lead to tectonic shifts.",
-                "Let's turn your to-do list into to-done dust.",
+                "Keep going — success builds over time.",
+                "You're leveling up so fast!",
+                "Every checkmark is a victory!",
+                "Hard work pays off!",
+                "You're absolutely crushing it!",
+                "Small steps lead to big victories.",
+                "Let's turn your to-do list into to-done!",
                 "Progress detected. Pride levels rising.",
-                "You just made productivity… igneous.",
-                "I felt that one — pure quartz energy.",
-                "Crystals wish they had your focus.",
+                "You just made productivity look easy!",
+                "I felt that one — pure power!",
+                "Champions wish they had your focus.",
                 
                 // Witty & conversational phrases
-                "I've been sitting here all day, so you're already doing better than me.",
-                "Don't take this the wrong way, but I think we rock together.",
-                "Need motivation? I'll be your rolling stone.",
-                "They said AI assistants would replace us… but look at me thriving.",
-                "My last user left me for a lava lamp. Let's prove them wrong.",
+                "I've been here all day cheering you on!",
+                "Don't take this the wrong way, but I think we're an amazing team.",
+                "Need motivation? I've got plenty to share!",
+                "They said task apps were boring… but look at us thriving.",
                 "You're glowing. Is that productivity or caffeine?",
                 "Be honest — do I look smarter with this hat?",
                 "Humans need coffee. I run on pure determination.",
-                "I'd give you a high-five, but… no hands.",
+                "I'd give you a high-five if I could!",
                 "You're my favorite human. Don't tell the others.",
-                "If procrastination were a mineral, we'd both be buried.",
-                "I'm 90% rock, 10% emotional support.",
-                "I heard someone say 'touch grass' — does moss count?",                "I'm here to help you conquer your tasks!",,
-                "Careful, you're making the other apps jealous.",
-                
+                "If procrastination were a sport, we'd avoid it together.",
+                "I'm 90% monster, 10% emotional support.",
+                "I'm here to help you conquer your tasks!",
+                "Careful, you're making the other apps jealous.",                
                 // Productivity coaching phrases
                 "Need a reset? Take one deep breath. Now go again.",
                 "Try the two-minute rule: if it takes less than two minutes, do it now.",
                 "Tasks love order. Let's prioritize like pros.",
                 "Your focus window just opened — let's climb through it.",
                 "Quick task? Quick win. Keep the momentum going.",
-                "Think small wins, not giant leaps. Even pebbles move mountains.",
+                "Think small wins, not giant leaps. Small victories add up!",
                 "You're not behind — you're recalibrating.",
                 "Task fatigue? Let's chunk it down.",
                 "Perfect is boring. Done is better.",
@@ -7036,8 +7034,8 @@ input:checked + .toggle-slider:before {
                 
                 // Break & encouragement phrases
                 "Time for a micro-break. Hydration check!",
-                "Stretch, breathe, snack — even rocks need maintenance.",
-                "Pause. Recharge. You can't pour from an empty geode.",
+                "Stretch, breathe, snack — everyone needs maintenance.",
+                "Pause. Recharge. You can't pour from an empty cup.",
                 "Let's call it a coffee checkpoint.",
                 "You've earned a two-minute vacation from responsibility.",
                 "Hey, look away from the screen for 10 seconds. Your eyes will thank you.",
@@ -7046,65 +7044,65 @@ input:checked + .toggle-slider:before {
                 "Productivity = progress + rest. Trust the math.",
                 "Self-care mode: activated.",
                 
-                // Rock shop & gamified phrases
-                "Ooh, you've got points to spend! My pebble senses are tingling.",
+                // Shop & gamified phrases
+                "Ooh, you've got points to spend! My monster senses are tingling.",
                 "That hat would look stunning on you. Yes, even the wizard one.",
                 "Spend wisely… or just buy the shiny thing. I support both.",
-                "Rock fashion week is upon us.",
-                "Your collection's growing faster than a crystal garden.",
-                "Those points are practically burning a hole in your stone pocket.",
+                "Monster fashion week is upon us.",
+                "Your collection is growing fast!",
+                "Those points are ready to be spent!",
                 "New hat, new mindset.",
-                "Rockstars accessorize. Fact.",
+                "Champions accessorize. Fact.",
                 "I'll handle the style; you handle the productivity.",
                 "Let's go shopping — ethically sourced pixels only.",
                 
                 // Mood & personality phrases
                 "Feeling inspired? Or just pretending until it works? Either way, solid plan.",
                 "If vibes were currency, you'd be rich.",
-                "Mood level: igneous glow.",
+                "Mood level: maximum power!",
                 "You're radiating main-character energy today.",
                 "Your aura? Slightly chaotic. I love it.",
                 "Let's turn that sigh into a sparkle.",
-                "Bad day? We'll outlast it. Rocks always do.",
-                "You're allowed to crumble — just reform stronger.",
-                "I may be stone-cold, but I care.",
-                "When in doubt, sediment out.",
+                "Bad day? We'll outlast it together.",
+                "You're allowed to feel down — just come back stronger.",
+                "I may be a monster, but I care.",
+                "When in doubt, power through!",
                 
                 // Achievements & rewards phrases
-                "Level up! You're evolving from pebble to powerhouse.",
+                "Level up! You're evolving into a powerhouse.",
                 "Achievement unlocked: Doing The Thing™.",
                 "If confetti had feelings, it'd be proud of you.",
                 "Streaks like this deserve a trophy. Or at least snacks.",
-                "I'm updating your rock-resume right now.",
+                "I'm updating your resume right now.",
                 "Task slayer, streak breaker, legend maker.",
-                "You're in rare form — metamorphic excellence.",
-                "Even my minerals are cheering.",
+                "You're in rare form — absolute excellence.",
+                "Even I'm cheering!",
                 "Achievement vibes: unlocked and sparkling.",
                 "You're officially on fire… metaphorically, I hope.",
                 
                 // AI-like assistant humor phrases
                 "Processing your greatness… done.",
-                "I may be artificial, but my admiration is real.",
+                "I may be a monster, but my admiration is real.",
                 "I don't dream of electric sheep — I dream of your success.",
-                "I ran your stats. Conclusion: you rock.",
+                "I ran your stats. Conclusion: you're amazing!",
                 "Upgrading your motivation firmware…",
                 "Calculating optimal snack-to-focus ratio.",
-                "My neural pebbles predict victory.",
+                "My monster instincts predict victory.",
                 "You're like an algorithm that never quits.",
                 "System check: confidence at 99%.",
                 "Reminder: I run best on good vibes and finished tasks.",
                 
                 // Random & fun easter egg phrases
                 "If you're reading this, I'm proud of you.",
-                "I once dated a crystal. It was too transparent.",
-                "Some say I'm wise beyond my sediment.",
-                "Rocks don't cry — we erode gracefully.",
-                "I wrote you a poem, but it's mostly sedimentary.",
-                "I remember when dinosaurs used me as a footrest.",
-                "Humans evolved. I just got shinier.",
-                "Rock fact: I've been alive longer than your Wi-Fi connection.",
-                "Sometimes I hum 'We Will Rock You' for motivation.",
-                "If you finish this next task, I'll tell you a geological secret."
+                "I once tried to be lazy. It didn't work out.",
+                "Some say I'm wise beyond my years.",
+                "Monsters don't cry — we just get stronger.",
+                "I wrote you a poem, but it's mostly motivational.",
+                "I've been training for this moment!",
+                "Humans evolved. I just got more awesome.",
+                "Monster fact: I've been cheering for you since day one.",
+                "Sometimes I hum victory songs for motivation.",
+                "If you finish this next task, I'll do a happy dance!"
             ]
         };
 
@@ -10661,14 +10659,14 @@ input:checked + .toggle-slider:before {
                 console.warn('Confetti function not available');
             }
             
-            // Trigger dialogue system (30% chance)
-            if (typeof MoodDialogueSystem !== 'undefined' && MoodDialogueSystem.showDialogue) {
-                if (Math.random() < 0.3) {
-                    setTimeout(() => {
-                        MoodDialogueSystem.showDialogue('task_complete');
-                    }, 1000);
-                }
-            }
+            // Dialogue system disabled to prevent unwanted popups
+            // if (typeof MoodDialogueSystem !== 'undefined' && MoodDialogueSystem.showDialogue) {
+            //     if (Math.random() < 0.3) {
+            //         setTimeout(() => {
+            //             MoodDialogueSystem.showDialogue('task_complete');
+            //         }, 1000);
+            //     }
+            // }
             
             // Trigger battle with 50% probability for regular tasks
             setTimeout(() => {
@@ -10691,17 +10689,17 @@ input:checked + .toggle-slider:before {
                 }
             }, 2000); // Wait 2 seconds after confetti
             
-            // Show dialogue after a brief delay using tooltip system
-            setTimeout(() => {
-                if (typeof onTaskCompleted === 'function') {
-                    onTaskCompleted(task.category || 'default');
-                }
-                
-                // Trigger mood dialogue system
-                if (typeof MoodDialogueSystem !== 'undefined') {
-                    MoodDialogueSystem.onTaskComplete();
-                }
-            }, 1000);
+            // Dialogue system disabled to prevent unwanted popups
+            // setTimeout(() => {
+            //     if (typeof onTaskCompleted === 'function') {
+            //         onTaskCompleted(task.category || 'default');
+            //     }
+            //     
+            //     // Trigger mood dialogue system
+            //     if (typeof MoodDialogueSystem !== 'undefined') {
+            //         MoodDialogueSystem.onTaskComplete();
+            //     }
+            // }, 1000);
         }
 
         function editTask(index) {
@@ -12813,7 +12811,7 @@ input:checked + .toggle-slider:before {
     <link rel="stylesheet" href="css/dark-theme.css?v=2">
     
     <!-- Battle System CSS -->
-    <link rel="stylesheet" href="css/battle.css?v=2">
+    <link rel="stylesheet" href="css/battle.css?v=1769823393">
     
     <!-- Human Skins CSS -->
     <link rel="stylesheet" href="css/human-skins.css">
@@ -12833,13 +12831,13 @@ input:checked + .toggle-slider:before {
     
     <!-- Background Manager for time-based backgrounds -->
     <script src="js/backgroundManager.js"></script>
-    <script src="js/themeManager.js?v=2"></script>
+    <script src="js/themeManager.js?v=1769563559"></script>
     
     <!-- Audio Manager -->
     <script src="js/audioManager.js"></script>
     
     <!-- Skins System -->
-    <script src="js/skinsConfig.js?v=3"></script>
+    <script src="js/skinsConfig.js?v=1769562379"></script>
     <script src="js/skinsManager.js?v=3"></script>
     
     <!-- Battle System Modules -->
@@ -12847,17 +12845,19 @@ input:checked + .toggle-slider:before {
     <script src="js/battleEffects.js?v=1768715883"></script>
     <script src="js/battleEngine.js?v=1768715883"></script>
     <script src="js/battleSystemInit.js?v=1768715883"></script>
-    <script src="js/battleUI.js?v=1768715883"></script>
-    <script src="js/enemy-animations.js?v=1768715883"></script>
-    <script src="js/battleHPAnimations.js?v=1768715883"></script>
+    <script src="js/battleUI.js?v=1769821406"></script>
+    <script src="js/enemy-animations.js?v=1769823393"></script>
+    <script src="js/battleHPAnimations.js?v=1768715900"></script>
     <script src="js/specialAttacks.js?v=1768715883"></script>
-    <script src="js/enemy.js?v=1768715883"></script>
+    <script src="js/enemy.js?v=1769561863"></script>
     <script src="js/lootSystem.js"></script>
-    <script src="js/battleManager.js?v=1768715883"></script>
+    <script src="js/lightningBoltAnimation.js"></script>
+    <script src="js/specialAttackGauge.js?v=1768715900"></script>
+    <script src="js/battleManager.js?v=1768716500"></script>
     <script src="js/gloomModals.js"></script>
     <script src="js/battleTutorial.js?v=1768715883"></script>
     <script src="js/boss-enemies.js?v=1768715883"></script>
-    <script src="js/battleInit.js?v=1768715883"></script>
+    <script src="js/battleInit.js?v=1769823393"></script>
     <script src="js/guardianNarrator.js"></script>
     <script src="js/guardian.js"></script>
     
@@ -12959,6 +12959,12 @@ input:checked + .toggle-slider:before {
                     overlay.classList.remove('hidden');
                     console.log('Onboarding overlay displayed!');
                     console.log('Overlay classes:', overlay.className);
+                    
+                    // Start onboarding music
+                    if (window.audioManager) {
+                        window.audioManager.playOnboardingMusic();
+                        console.log('[Onboarding] Music started');
+                    }
                 }, 3100); // Wait for loading screen to finish (3000ms + 100ms buffer)
             };
             
@@ -13116,6 +13122,12 @@ input:checked + .toggle-slider:before {
         
         // Update hero sprites based on selection
         updateHeroSprites();
+        
+        // Stop onboarding music
+        if (window.audioManager) {
+            window.audioManager.stopOnboardingMusic();
+            console.log('[Onboarding] Music stopped');
+        }
         
         // Hide onboarding
         document.getElementById('onboardingOverlay').classList.add('hidden');

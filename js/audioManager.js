@@ -70,12 +70,17 @@ class AudioManager {
         this.battleWinMusic = null;
         this.battleLoseMusic = null;
         this.battleOutcomeMusicVolume = 0.7; // Volume for win/loss music
+        
+        // Onboarding music
+        this.onboardingMusic = null;
+        this.onboardingMusicVolume = 0.5; // Volume for onboarding music
 
         // Music tracks (separate from sound effects)
         this.music = {
             quest_giver: "assets/sounds/Quest Giver Mode music.mp3",
             battle_win: "assets/audio/battle_win.mp3", // Battle victory music
             battle_lose: "assets/sounds/battle-loss.mp3", // Battle defeat music
+            onboarding: "assets/music/OnboardingMusic.mp3", // Onboarding music
         };
         
         // Battle music rotation system
@@ -436,6 +441,49 @@ class AudioManager {
                 console.log("[AudioManager] Battle lose music stopped");
             } catch (error) {
                 console.warn("[AudioManager] Error stopping battle lose music:", error.message);
+            }
+        }
+    }
+
+    /**
+     * Play onboarding music (looping)
+     * Called when onboarding starts
+     */
+    playOnboardingMusic() {
+        if (!this.enabled || !this.music.onboarding) return;
+
+        // Stop any currently playing onboarding music
+        this.stopOnboardingMusic();
+
+        try {
+            this.onboardingMusic = new Audio(this.music.onboarding);
+            this.onboardingMusic.volume = this.onboardingMusicVolume;
+            this.onboardingMusic.loop = true; // Loop during onboarding
+
+            this.onboardingMusic.play().catch((err) => {
+                console.warn("[AudioManager] Onboarding music playback failed:", err.message);
+                this.onboardingMusic = null;
+            });
+
+            console.log("[AudioManager] Onboarding music started");
+        } catch (error) {
+            console.warn("[AudioManager] Error playing onboarding music:", error.message);
+        }
+    }
+
+    /**
+     * Stop onboarding music
+     * Called when onboarding ends
+     */
+    stopOnboardingMusic() {
+        if (this.onboardingMusic) {
+            try {
+                this.onboardingMusic.pause();
+                this.onboardingMusic.currentTime = 0;
+                this.onboardingMusic = null;
+                console.log("[AudioManager] Onboarding music stopped");
+            } catch (error) {
+                console.warn("[AudioManager] Error stopping onboarding music:", error.message);
             }
         }
     }
