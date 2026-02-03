@@ -110,26 +110,24 @@
 /* Hero Container - LEFT side, positioned to show HP bar fully */
 #heroContainer {
     position: absolute;
-    left: 5%;
-    top: 35%;
-    transform: translateY(-35%);
+    left: 2%;
+    bottom: 15%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 8px;
     z-index: 10;
 }
 
 /* Enemy Container - RIGHT side, positioned to match hero alignment */
 #enemyContainer {
     position: absolute;
-    right: 5%;
-    top: 35%;
-    transform: translateY(-35%);
+    right: 2%;
+    bottom: 15%;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 5px;
+    gap: 8px;
     z-index: 10;
 }
 
@@ -142,10 +140,10 @@
     overflow: visible;
 }
 
-/* Hero sprite wrapper - 240px (2x larger for visibility) */
+/* Hero sprite wrapper - 360px (3x larger for visibility) */
 #heroContainer .sprite-wrapper {
-    width: 240px;
-    height: 240px;
+    width: 360px;
+    height: 360px;
 }
 
 /* Enemy sprite wrapper - larger */
@@ -162,10 +160,10 @@
     image-rendering: pixelated;
 }
 
-/* Hero sprite (img element) - 200px (2x enemy size for prominence) */
+/* Hero sprite (img element) - 300px (3x enemy size for prominence) */
 img#heroSprite {
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
     object-fit: contain;
     image-rendering: pixelated;
 }
@@ -255,18 +253,18 @@ img#enemySprite {
     max-width: 140px;
 }
 
-/* Hero HP bar container - proportional to 200px sprite */
+/* Hero HP bar container - proportional to 300px sprite */
 #heroContainer .hp-bar-container {
-    width: 180px;
-    max-width: 180px;
+    width: 250px;
+    max-width: 250px;
     margin-bottom: 10px;
 }
 
-/* Enemy HP bar container - proportional to 100px sprite */
+/* Enemy HP bar container - matched with hero for alignment */
 #enemyContainer .hp-bar-container {
-    width: 120px;
-    max-width: 120px;
-    margin-bottom: 8px;
+    width: 250px;
+    max-width: 250px;
+    margin-bottom: 10px;
 }
 
 .hp-label {

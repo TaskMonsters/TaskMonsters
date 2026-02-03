@@ -209,9 +209,9 @@ function renderHeroSprite() {
         console.log('[Battle] Setting hero sprite src to:', appearance.animations.idle);
     }
     
-    // Style the img element - 200px (2x enemy size)
-    heroSprite.style.width = '200px';
-    heroSprite.style.height = '200px';
+    // Style the img element - 300px (3x enemy size)
+    heroSprite.style.width = '300px';
+    heroSprite.style.height = '300px';
     heroSprite.style.objectFit = 'contain';
     heroSprite.style.imageRendering = 'pixelated';
     
@@ -296,9 +296,9 @@ function startHeroAnimation(animationType = 'idle') {
         console.log('[Battle] Hero animation changed to:', animationType, gifPath);
     }
     
-    // Ensure proper styling - 200px (2x enemy size)
-    heroSprite.style.width = '200px';
-    heroSprite.style.height = '200px';
+    // Ensure proper styling - 300px (3x enemy size)
+    heroSprite.style.width = '300px';
+    heroSprite.style.height = '300px';
     heroSprite.style.objectFit = 'contain';
     heroSprite.style.imageRendering = 'pixelated';
 }
