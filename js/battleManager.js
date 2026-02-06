@@ -620,10 +620,13 @@ class BattleManager {
             window.audioManager.playSound('defend', 0.7);
         }
         
+        // Play defense boost visual animation (same as defense refill)
+        await this.playDefenseBoostAnimation();
+        
         addBattleLog('🛡️ Defense stance activated!');
         updateBattleUI(this.hero, this.enemy);
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         await this.enemyTurn();
     }
 
@@ -1765,10 +1768,10 @@ class BattleManager {
         const needsMoreSpecialAttacks = this.shouldForceSpecialAttack();
         
         // Check if enemy can petrify (Medusa)
-        // Force petrify if needed, otherwise use probability
+        // Force petrify if needed (100% chance), otherwise use probability
         const canPetrify = this.enemy.canPetrify && (
-            needsMoreSpecialAttacks && this.specialAttackUsageCount['petrify'] < this.minimumSpecialAttackUses ||
-            Math.random() < (this.enemy.petrifyChance || 0.3)
+            (needsMoreSpecialAttacks && this.specialAttackUsageCount['petrify'] < this.minimumSpecialAttackUses) ||
+            (!needsMoreSpecialAttacks && Math.random() < (this.enemy.petrifyChance || 0.3))
         );
         
         if (canPetrify) {
@@ -1807,10 +1810,10 @@ class BattleManager {
         }
 
         // Check if enemy can cast sleep (Lazy Eye)
-        // Force sleep if needed, otherwise use probability
+        // Force sleep if needed (100% chance), otherwise use probability
         const canCastSleep = this.enemy.canSleep && (
-            needsMoreSpecialAttacks && this.specialAttackUsageCount['sleep'] < this.minimumSpecialAttackUses ||
-            Math.random() < 0.3
+            (needsMoreSpecialAttacks && this.specialAttackUsageCount['sleep'] < this.minimumSpecialAttackUses) ||
+            (!needsMoreSpecialAttacks && Math.random() < 0.3)
         );
         
         if (canCastSleep) {
@@ -1841,17 +1844,17 @@ class BattleManager {
         }
         
         // Check for Octopus drench attack
-        // Force drench if needed, otherwise use probability
+        // Force drench if needed (100% chance), otherwise use probability
         const useDrench = this.enemy.drenchAttack && (
-            needsMoreSpecialAttacks && this.specialAttackUsageCount['drench'] < this.minimumSpecialAttackUses ||
-            Math.random() < 0.5
+            (needsMoreSpecialAttacks && this.specialAttackUsageCount['drench'] < this.minimumSpecialAttackUses) ||
+            (!needsMoreSpecialAttacks && Math.random() < 0.5)
         );
         
         // Check for Octopus hug attack
-        // Force hug if needed, otherwise use probability
+        // Force hug if needed (100% chance), otherwise use probability
         const useHug = this.enemy.hugAttack && !useDrench && (
-            needsMoreSpecialAttacks && this.specialAttackUsageCount['hug'] < this.minimumSpecialAttackUses ||
-            Math.random() < 0.3
+            (needsMoreSpecialAttacks && this.specialAttackUsageCount['hug'] < this.minimumSpecialAttackUses) ||
+            (!needsMoreSpecialAttacks && Math.random() < 0.3)
         );
         
         if (useDrench) {
@@ -1916,10 +1919,10 @@ class BattleManager {
         // Boss special attacks
         if (this.enemy.isBoss) {
             // Treant poison attack
-            // Force poison if needed
+            // Force poison if needed (100% chance)
             const shouldUsePoison = this.enemy.poisonAttack && (
-                needsMoreSpecialAttacks && this.specialAttackUsageCount['poison'] < this.minimumSpecialAttackUses ||
-                Math.random() < 0.6
+                (needsMoreSpecialAttacks && this.specialAttackUsageCount['poison'] < this.minimumSpecialAttackUses) ||
+                (!needsMoreSpecialAttacks && Math.random() < 0.6)
             );
             
             if (shouldUsePoison) {
@@ -2011,10 +2014,10 @@ class BattleManager {
             }
             
             // Mushroom special attack
-            // Force mushroom if needed
+            // Force mushroom if needed (100% chance)
             const shouldUseMushroom = this.enemy.mushroomAttack && (
-                needsMoreSpecialAttacks && this.specialAttackUsageCount['mushroom'] < this.minimumSpecialAttackUses ||
-                Math.random() < 0.6
+                (needsMoreSpecialAttacks && this.specialAttackUsageCount['mushroom'] < this.minimumSpecialAttackUses) ||
+                (!needsMoreSpecialAttacks && Math.random() < 0.6)
             );
             
             if (shouldUseMushroom) {
@@ -2070,10 +2073,10 @@ class BattleManager {
         }
         
         // OVERTHINKER SPECIAL ATTACK: Overthink - Makes user's next attack backfire at a random turn
-        // Force overthink if needed, otherwise use probability
+        // Force overthink if needed (100% chance), otherwise use probability
         const shouldUseOverthink = this.enemy.canOverthink && (
-            needsMoreSpecialAttacks && this.specialAttackUsageCount['overthink'] < this.minimumSpecialAttackUses ||
-            Math.random() < 0.4
+            (needsMoreSpecialAttacks && this.specialAttackUsageCount['overthink'] < this.minimumSpecialAttackUses) ||
+            (!needsMoreSpecialAttacks && Math.random() < 0.4)
         );
         
         if (shouldUseOverthink) {

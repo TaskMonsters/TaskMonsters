@@ -611,25 +611,74 @@ img#enemySprite {
    MOBILE RESPONSIVENESS
    =================================== */
 
-/* Very small screens (iPhone SE, etc.) */
+/* Very small screens (iPhone SE, iPhone 12 mini, etc.) */
 @media (max-width: 400px) {
     .battle-container {
         max-width: 95%;
         margin: 0.5rem auto;
+        height: 250px;
+        min-height: 250px;
+        padding: 15px;
+    }
+    
+    /* Adjust sprite positioning for small screens */
+    #heroContainer {
+        left: 40px;
+        top: 20px;
+    }
+    
+    #enemyContainer {
+        right: 40px;
+        top: 20px;
+    }
+    
+    /* Scale down sprites to prevent overlap */
+    #heroContainer .sprite-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+    
+    #enemyContainer .sprite-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+    
+    img#heroSprite {
+        width: 70px !important;
+        height: 70px !important;
+    }
+    
+    img#enemySprite {
+        width: 70px;
+        height: 70px;
+    }
+    
+    /* Scale down HP bars */
+    .hp-bar-container {
+        width: 110px !important;
+        max-width: 110px !important;
+    }
+    
+    #heroContainer .hp-bar-container,
+    #enemyContainer .hp-bar-container {
+        width: 110px !important;
+        max-width: 110px !important;
+    }
+    
+    .hp-bar {
+        height: 10px !important;
+    }
+    
+    .hp-text {
+        font-size: 0.7rem !important;
     }
     
     .action-buttons {
         grid-template-columns: 1fr;
     }
     
-    .sprite {
-        transform: scale(2);
-    }
-    
     .sprite-wrapper {
         position: relative;
-        width: 100px;
-        height: 100px;
         overflow: visible; /* Allow damage text to show above */
     }
 }
@@ -655,11 +704,64 @@ img#enemySprite {
     }
 }
 
-/* Dynamic scaling for very small screens */
+/* Dynamic scaling for iPhone 12 mini and similar (375px) */
 @media (max-width: 375px) {
     .battle-container {
-        transform: scale(0.95);
-        transform-origin: top center;
+        height: 240px;
+        min-height: 240px;
+        padding: 12px;
+    }
+    
+    /* Further adjust positioning */
+    #heroContainer {
+        left: 30px;
+        top: 15px;
+    }
+    
+    #enemyContainer {
+        right: 30px;
+        top: 15px;
+    }
+    
+    /* Even smaller sprites */
+    #heroContainer .sprite-wrapper {
+        width: 70px;
+        height: 70px;
+    }
+    
+    #enemyContainer .sprite-wrapper {
+        width: 70px;
+        height: 70px;
+    }
+    
+    img#heroSprite {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    img#enemySprite {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* Smaller HP bars */
+    .hp-bar-container {
+        width: 100px !important;
+        max-width: 100px !important;
+    }
+    
+    #heroContainer .hp-bar-container,
+    #enemyContainer .hp-bar-container {
+        width: 100px !important;
+        max-width: 100px !important;
+    }
+    
+    .hp-bar {
+        height: 8px !important;
+    }
+    
+    .hp-text {
+        font-size: 0.65rem !important;
     }
 }
 
