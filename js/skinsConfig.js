@@ -679,23 +679,23 @@ function getActiveMonsterAppearance(baseMonsterId, equippedSkinId) {
         };
     }
     
-    // Return default monster appearance
+    // Return default monster appearance - USE ONLY GIF FILES
     const defaultMonsterMap = {
-        luna: 'Owlet_Monster',
-        benny: 'Dude_Monster',
-        nova: 'Pink_Monster'
+        luna: 'Luna',
+        benny: 'Benny',
+        nova: 'Nova'
     };
     
-    const prefix = defaultMonsterMap[baseMonsterId] || 'Pink_Monster';
+    const prefix = defaultMonsterMap[baseMonsterId] || 'Nova';
     
     return {
         animations: {
-            idle: `assets/${prefix}_idle.gif`,
-            walk: `assets/${prefix}_idle.gif`,
-            attack: `assets/${prefix}_attack.gif`,
-            jump: `assets/${prefix}_jump.gif`,
-            hurt: `assets/${prefix}_Hurt.gif`,
-            die: `assets/${prefix}_die.gif`
+            idle: `assets/heroes/${prefix}_idle.gif`,
+            walk: `assets/heroes/${prefix}_idle.gif`,
+            attack: `assets/heroes/${prefix}_attack.gif`,
+            jump: `assets/heroes/${prefix}_jump.gif`,
+            hurt: `assets/heroes/${prefix}_Hurt.gif`,
+            death: `assets/heroes/${prefix}_Hurt.gif`
         },
         frameCount: {
             idle: 1,
@@ -703,7 +703,7 @@ function getActiveMonsterAppearance(baseMonsterId, equippedSkinId) {
             attack: 1,
             jump: 1,
             hurt: 1,
-            die: 1
+            death: 1
         },
         isSkin: false,
         skinId: null

@@ -27,18 +27,21 @@
 
 /* Battle Container - Main Game Frame */
 .battle-container {
-    width: 100%;
-    max-width: 420px;
-    aspect-ratio: 16 / 9;
+    width: 90%;
+    max-width: 900px;
+    height: 300px;
+    min-height: 300px; /* CRITICAL: Ensure container never shrinks */
     margin: 1rem auto 0.5rem;
     position: relative;
     overflow: hidden;
-    border-radius: 16px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    padding: 25px;
+    flex-shrink: 0; /* CRITICAL: Prevent flexbox from shrinking this container */
 }
 
 /* Background variants */
@@ -107,28 +110,54 @@
    - Enemy: Larger (~100px), RIGHT side, HP bar at bottom-right
    =================================== */
 
-/* Hero Container - LEFT side, positioned to show HP bar fully */
+/* Hero Container - LEFT side inside battle arena */
 #heroContainer {
     position: absolute;
-    left: 2%;
-    bottom: 15%;
+    left: 80px;
+    top: 30px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     z-index: 10;
+    background: transparent !important;
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    pointer-events: none; /* CRITICAL: Ensure HP bars are always visible and not blocked */
 }
 
-/* Enemy Container - RIGHT side, positioned to match hero alignment */
+#heroContainer > * {
+    pointer-events: auto; /* Re-enable pointer events for child elements */
+}
+
+/* Enemy Container - RIGHT side inside battle arena */
 #enemyContainer {
     position: absolute;
-    right: 2%;
-    bottom: 15%;
+    right: 80px;
+    top: 30px;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
     z-index: 10;
+    pointer-events: none; /* CRITICAL: Ensure HP bars are always visible and not blocked */
+}
+
+#enemyContainer > * {
+    pointer-events: auto; /* Re-enable pointer events for child elements */
+}
+
+/* Hero HP Bar - flows within hero container */
+#heroContainer .hp-bar-container {
+    position: relative;
+    z-index: 20;
+}
+
+/* Enemy HP Bar - flows within enemy container */
+#enemyContainer .hp-bar-container {
+    position: relative;
+    z-index: 20;
 }
 
 /* Sprite wrapper - contains the sprite image */
@@ -138,18 +167,35 @@
     align-items: center;
     justify-content: center;
     overflow: visible;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    /* CRITICAL: Prevent any visual artifacts */
+    box-shadow: none !important;
+    border: none !important;
 }
 
-/* Hero sprite wrapper - 360px (3x larger for visibility) */
+/* Hero sprite wrapper - sized for battle arena */
 #heroContainer .sprite-wrapper {
-    width: 360px;
-    height: 360px;
-}
-
-/* Enemy sprite wrapper - larger */
-#enemyContainer .sprite-wrapper {
     width: 120px;
     height: 120px;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Enemy sprite wrapper - sized for battle arena */
+#enemyContainer .sprite-wrapper {
+    width: 100px;
+    height: 100px;
 }
 
 /* Base sprite styling for img elements */
@@ -158,14 +204,27 @@
     max-height: 100%;
     object-fit: contain;
     image-rendering: pixelated;
+    background: none !important;
+    background-color: transparent !important;
 }
 
-/* Hero sprite (img element) - 300px (3x enemy size for prominence) */
+/* Hero sprite (img element) - sized for battle arena */
 img#heroSprite {
-    width: 300px;
-    height: 300px;
-    object-fit: contain;
-    image-rendering: pixelated;
+    width: 100px !important;
+    height: 100px !important;
+    object-fit: contain !important;
+    image-rendering: pixelated !important;
+    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+    position: relative !important;
+    /* CRITICAL: Prevent any box shadow or border that could appear as black square */
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
 }
 
 /* Enemy sprite (img element) - LARGER like reference (~100px) */
@@ -174,72 +233,61 @@ img#enemySprite {
     height: 100px;
     object-fit: contain;
     image-rendering: pixelated;
+    background: none !important;
+    background-color: transparent !important;
 }
 
-/* Hero sprites (32x32 base) */
+/* Hero sprites - GIF based, no transforms or background */
 .sprite.hero-sprite {
-    width: 32px;
-    height: 32px;
     image-rendering: pixelated;
-    background-size: auto 32px;
-    background-repeat: no-repeat;
-    background-position: 0 0;
-    transform: scale(0.28); /* Adjusted to match reference screenshot - proper visible size in battle */
-    transform-origin: center;
+    background: none !important;
+    /* No width/height/transform - let img element handle sizing */
 }
 
-/* Enemy sprites (64x64 base for bats) */
+/* Enemy sprites (64x64 base for bats) - GIF only */
 .sprite.enemy-sprite-large {
     width: 64px;
     height: 64px;
     image-rendering: pixelated;
-    /* background-size set by JavaScript for each enemy */
-    background-repeat: no-repeat;
-    background-position: 0 0;
+    background: none !important;
     transform: scale(2);
     transform-origin: center;
 }
 
-/* Enemy sprites (48x48 base for flying eye) */
+/* Enemy sprites (48x48 base for flying eye) - GIF only */
 .sprite.enemy-sprite-medium {
     width: 48px;
     height: 48px;
     image-rendering: pixelated;
-    /* background-size set by JavaScript for each enemy */
-    background-repeat: no-repeat;
+    background: none !important;
 }
 
-/* Enemy sprites (32x32 base for ghost) */
+/* Enemy sprites (32x32 base for ghost) - GIF only */
 .sprite.enemy-sprite-small {
     width: 32px;
     height: 32px;
     image-rendering: pixelated;
-    /* background-size set by JavaScript for each enemy */
-    background-repeat: no-repeat;
-    background-position: 0 0;
+    background: none !important;
     transform: scale(2.2);
     transform-origin: center;
 }
 
-/* Enemy sprites (118x79 base for slime) */
+/* Enemy sprites (118x79 base for slime) - GIF only */
 .sprite.enemy-sprite-slime {
     width: 118px;
     height: 79px;
     image-rendering: pixelated;
-    /* background-size set by JavaScript for each enemy */
-    background-repeat: no-repeat;
-    background-position: 0 0;
+    background: none !important;
     transform: scale(1.5);
     transform-origin: center;
 }
 
-/* Sentry Drone - scaled down by 0.5x */
+/* Sentry Drone - GIF only */
 .sprite.enemy-sprite-sentry-drone {
     width: 64px;
     height: 64px;
     image-rendering: pixelated;
-    background-repeat: no-repeat;
-    background-position: 0 0;
+    background: none !important;
     transform: scale(1); /* 0.5x of the normal 2x scale */
     transform-origin: center;
 }
@@ -253,18 +301,26 @@ img#enemySprite {
     max-width: 140px;
 }
 
-/* Hero HP bar container - proportional to 300px sprite */
+/* Hero HP bar container - relative positioning within hero container */
 #heroContainer .hp-bar-container {
-    width: 250px;
-    max-width: 250px;
-    margin-bottom: 10px;
+    position: relative;
+    width: 180px;
+    max-width: 180px;
+    margin-bottom: 0;
+    z-index: 100;
+    visibility: visible !important; /* CRITICAL: Always keep HP bars visible */
+    opacity: 1 !important; /* CRITICAL: Always keep HP bars visible */
 }
 
-/* Enemy HP bar container - matched with hero for alignment */
+/* Enemy HP bar container - relative positioning within enemy container */
 #enemyContainer .hp-bar-container {
-    width: 250px;
-    max-width: 250px;
-    margin-bottom: 10px;
+    position: relative;
+    width: 180px;
+    max-width: 180px;
+    margin-bottom: 0;
+    z-index: 100;
+    visibility: visible !important; /* CRITICAL: Always keep HP bars visible */
+    opacity: 1 !important; /* CRITICAL: Always keep HP bars visible */
 }
 
 .hp-label {
@@ -439,116 +495,14 @@ img#enemySprite {
    =================================== */
 
 /* Hero sprite animations */
-.sprite.idle {
-    animation: sprite-idle 0.8s steps(4) infinite;
-}
-
-@keyframes sprite-idle {
-    0% { background-position: 0 0; }
-    25% { background-position: -32px 0; }
-    50% { background-position: -64px 0; }
-    75% { background-position: -96px 0; }
-}
-
-.sprite.attack {
-    animation: sprite-attack 0.6s steps(4) forwards;
-}
-
-@keyframes sprite-attack {
-    0% { background-position: 0 0; }
-    25% { background-position: -32px 0; }
-    50% { background-position: -64px 0; }
-    75% { background-position: -96px 0; }
-}
-
+/* All sprite animations handled by GIF files - no CSS animations needed */
+.sprite.idle,
+.sprite.attack,
 .sprite.hurt {
-    animation: sprite-hurt 0.4s steps(4) forwards;
+    /* GIF animations only */
 }
 
-@keyframes sprite-hurt {
-    0% { background-position: 0 0; }
-    25% { background-position: -32px 0; }
-    50% { background-position: -64px 0; }
-    75% { background-position: -96px 0; }
-}
-
-/* Lazy Bat animations - 64x64 sprites, 9 frames */
-#enemySprite.bat-idle {
-    animation: batIdle 0.9s steps(9) infinite;
-}
-
-@keyframes batIdle {
-    from { background-position: 0 0; }
-    to { background-position: -576px 0; } /* 9 frames × 64px = 576px */
-}
-
-#enemySprite.bat-attack {
-    animation: batAttack 0.6s steps(8) forwards;
-}
-
-@keyframes batAttack {
-    from { background-position: 0 0; }
-    to { background-position: -512px 0; } /* 8 frames × 64px = 512px */
-}
-
-#enemySprite.bat-hurt {
-    animation: batHurt 0.4s steps(5) forwards;
-}
-
-@keyframes batHurt {
-    from { background-position: 0 0; }
-    to { background-position: -320px 0; } /* 5 frames × 64px = 320px */
-}
-
-/* Flying Eye Demon animations - 48x48 sprites, 8 frames */
-#enemySprite.eye-idle {
-    animation: eyeIdle 0.8s steps(8) infinite;
-}
-
-@keyframes eyeIdle {
-    from { background-position: 0 0; }
-    to { background-position: -384px 0; } /* 8 frames × 48px = 384px */
-}
-
-/* Ghost Task Stopper animations - 32x32 sprites, 6 frames */
-#enemySprite.ghost-idle {
-    animation: ghostIdle 0.6s steps(6) infinite;
-}
-
-@keyframes ghostIdle {
-    from { background-position: 0 0; }
-    to { background-position: -192px 0; } /* 6 frames × 32px = 192px */
-}
-
-/* Lazy Bat II animations - 32x32 sprites, 4 frames */
-#enemySprite.bat2-idle {
-    animation: bat2Idle 0.4s steps(4) infinite;
-}
-
-@keyframes bat2Idle {
-    from { background-position: 0 0; }
-    to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
-}
-
-/* Slime animations - 118x79 sprites, 4 frames */
-#enemySprite.slime-idle {
-    animation: slimeIdle 0.6s steps(4) infinite;
-}
-
-@keyframes slimeIdle {
-    from { background-position: 0 0; }
-    to { background-position: -472px 0; } /* 4 frames × 118px = 472px */
-}
-
-/* Medusa animations - 32x32 sprites, 4 frames */
-#enemySprite.medusa-idle {
-    animation: medusaIdle 0.5s steps(4) infinite;
-}
-
-@keyframes medusaIdle {
-    from { background-position: 0 0; }
-    to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
-}
+/* All enemy animations handled by GIF files - no spritesheet animations */
 
 /* ===================================
    FIREBALL & EXPLOSION EFFECTS

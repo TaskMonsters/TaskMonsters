@@ -28,6 +28,11 @@ class BattleManager {
         this.enemyFrozenTurns = 0;  // Freeze effect turns remaining
         this.focusAttackUsed = false;  // Track if focus timer special attack has been used this battle
         
+        // CRITICAL: Track special attack usage to ensure 3+ uses per battle
+        this.specialAttackUsageCount = {};
+        this.enemyTurnCount = 0;
+        this.minimumSpecialAttackUses = 3;
+        
         // Turn timer system
         this.turnTimerDuration = 3000; // Default 3 seconds
         this.turnTimerInterval = null;
@@ -92,6 +97,26 @@ class BattleManager {
         this.attackCount = 0;    // Track attack count for walk+attack animation
         this.enemyAttackCount = 0;  // Reset enemy attack count for every 5th attack sound
         
+        // CRITICAL: Initialize special attack tracking for this battle
+        this.specialAttackUsageCount = {};
+        this.enemyTurnCount = 0;
+        
+        // Initialize tracking for all enemy special abilities
+        if (enemyData.poisonAttack) this.specialAttackUsageCount['poison'] = 0;
+        if (enemyData.mushroomAttack) this.specialAttackUsageCount['mushroom'] = 0;
+        if (enemyData.canPetrify) this.specialAttackUsageCount['petrify'] = 0;
+        if (enemyData.canSleep) this.specialAttackUsageCount['sleep'] = 0;
+        if (enemyData.drenchAttack) this.specialAttackUsageCount['drench'] = 0;
+        if (enemyData.hugAttack) this.specialAttackUsageCount['hug'] = 0;
+        if (enemyData.timeStingAttack) this.specialAttackUsageCount['timeSting'] = 0;
+        if (enemyData.gaugeStealAttack) this.specialAttackUsageCount['gaugeSteal'] = 0;
+        if (enemyData.overthinkerAttack) this.specialAttackUsageCount['overthink'] = 0;
+        
+        // Overthink effect state (Overthinker enemy special attack)
+        this.overthinkActive = false;
+        this.overthinkTurns = 0;
+        this.overthinkBackfireDamage = 0;
+        
         // Verify gameState inventory is loaded
         if (!window.gameState.battleInventory) {
             console.warn('Battle inventory not found, initializing...');
@@ -146,65 +171,27 @@ class BattleManager {
         this.mushroomSkipChance = 0;
         this.mushroomGaugeDrain = 0;
 
-        // Set battle background based on level with rotation
-        const battleContainer = document.querySelector('.battle-container');
-        battleContainer.classList.remove('bg-forest', 'bg-night-town', 'bg-city', 'bg-temple', 'bg-ocean', 'bg-skull-gate', 'bg-space', 'bg-castle', 'bg-city-neon', 'bg-synth-city');
-        
-        // Determine available arenas based on level - TRUE ALTERNATION SYSTEM
-        let availableArenas = [];
-        
-        // LEVELS 1-10: Synth City only
-        if (this.hero.level >= 1 && this.hero.level < 11) {
-            availableArenas = ['bg-synth-city'];
-        }
-        // LEVELS 11-19: Multiple arenas rotate
-        else if (this.hero.level >= 11 && this.hero.level < 20) {
-            availableArenas = [
-                'bg-city',        // city_sunset
-                'bg-forest',      // forest_path
-                'bg-ocean',       // ocean
-                'bg-castle',      // castle
-                'bg-temple',      // temple
-                'bg-space',       // space
-                'bg-night-town',  // night town
-                'bg-synth-city',  // synth city
-                'bg-skull-gate'   // skull gate
-            ];
-        }
-        // LEVELS 20+: All shop themes available
-        else if (this.hero.level >= 20) {
-            availableArenas = [
-                'bg-forest',      // forest_path
-                'bg-night-town',  // night town
-                'bg-city',        // city_sunset
-                'bg-temple',      // temple
-                'bg-ocean',       // ocean
-                'bg-skull-gate',  // skull gate
-                'bg-space',       // space
-                'bg-castle',      // castle
-                'bg-city-neon',   // neon city
-                'bg-synth-city'   // synth city
-            ];
+        // CRITICAL: Use proper BattleArenasManager for level-based arena rotation
+        if (!window.battleArenasManager) {
+            window.battleArenasManager = new BattleArenasManager();
         }
         
-        // True alternation system - cycle through arenas in order
-        if (!window.battleArenaRotationIndex) window.battleArenaRotationIndex = 0;
-        if (!window.lastArenaPoolSize) window.lastArenaPoolSize = 0;
+        // Select arena based on player level using the arena manager
+        const playerLevel = this.hero.level || 1;
+        const selectedArenaId = window.battleArenasManager.selectArena(playerLevel);
+        const arenaConfig = window.battleArenasManager.getArena(selectedArenaId);
         
-        // Reset rotation if arena pool changed (level up unlocked new arenas)
-        if (availableArenas.length !== window.lastArenaPoolSize) {
-            window.battleArenaRotationIndex = 0;
-            window.lastArenaPoolSize = availableArenas.length;
+        console.log(`[Battle] Selected arena: ${arenaConfig.name} (Level ${playerLevel})`);
+        
+        // Apply arena background to battle scene
+        const battleScene = document.getElementById('battleScene');
+        if (battleScene && arenaConfig) {
+            battleScene.style.backgroundImage = `url('${arenaConfig.background}')`;
+            battleScene.style.backgroundSize = 'cover';
+            battleScene.style.backgroundPosition = 'center bottom';
+            battleScene.style.backgroundRepeat = 'no-repeat';
+            console.log(`[Battle] Arena background set: ${arenaConfig.background}`);
         }
-        
-        // Get current arena from rotation
-        const selectedArena = availableArenas[window.battleArenaRotationIndex];
-        
-        // Move to next arena in rotation
-        window.battleArenaRotationIndex = (window.battleArenaRotationIndex + 1) % availableArenas.length;
-        
-        // Apply selected arena
-        battleContainer.classList.add(selectedArena);
         
         // Play alternating battle music
         if (window.audioManager) {
@@ -328,6 +315,42 @@ class BattleManager {
                 this.state = BattleState.DEFEAT;
                 await this.endBattle('defeat');
                 return;
+            }
+        }
+        
+        // Process Overthink backfire effect
+        if (this.overthinkActive && this.overthinkTurns > 0) {
+            this.overthinkTurns--;
+            if (this.overthinkTurns === 0) {
+                // BACKFIRE! User's attack damages themselves
+                addBattleLog(`💥 BACKFIRE! Your attack turned against you!`);
+                addBattleLog(`🤯 Overthink effect caused ${this.overthinkBackfireDamage} damage to yourself!`);
+                
+                this.hero.hp = Math.max(0, this.hero.hp - this.overthinkBackfireDamage);
+                this.overthinkActive = false;
+                
+                // Play hurt animation
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                startHeroAnimation('idle');
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                if (this.hero.hp <= 0) {
+                    this.state = BattleState.DEFEAT;
+                    await this.endBattle('defeat');
+                    return;
+                }
+                
+                // Still costs attack gauge
+                this.attackGauge = Math.max(0, this.attackGauge - 10);
+                updateBattleUI(this.hero, this.enemy);
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await this.enemyTurn();
+                return;
+            } else {
+                addBattleLog(`💭 Overthink: ${this.overthinkTurns} turn(s) until backfire...`);
             }
         }
         
@@ -1613,6 +1636,9 @@ class BattleManager {
     async enemyTurn() {
         console.log('[Battle] enemyTurn called, setting state to ENEMY_TURN');
         this.state = BattleState.ENEMY_TURN;
+        
+        // CRITICAL: Increment enemy turn counter
+        this.enemyTurnCount++;
 
         await new Promise(resolve => setTimeout(resolve, 500));
         
@@ -1735,10 +1761,21 @@ class BattleManager {
             }
         }
 
+        // CRITICAL: Check if we need to force special attacks (ensure 3+ uses)
+        const needsMoreSpecialAttacks = this.shouldForceSpecialAttack();
+        
         // Check if enemy can petrify (Medusa)
-        const canPetrify = this.enemy.canPetrify && Math.random() < (this.enemy.petrifyChance || 0.3);
+        // Force petrify if needed, otherwise use probability
+        const canPetrify = this.enemy.canPetrify && (
+            needsMoreSpecialAttacks && this.specialAttackUsageCount['petrify'] < this.minimumSpecialAttackUses ||
+            Math.random() < (this.enemy.petrifyChance || 0.3)
+        );
         
         if (canPetrify) {
+            // CRITICAL: Track special attack usage
+            this.specialAttackUsageCount['petrify'] = (this.specialAttackUsageCount['petrify'] || 0) + 1;
+            console.log(`[Battle] Petrify used ${this.specialAttackUsageCount['petrify']} time(s)`);
+            
             // Petrify attack
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             
@@ -1770,9 +1807,17 @@ class BattleManager {
         }
 
         // Check if enemy can cast sleep (Lazy Eye)
-        const canCastSleep = this.enemy.canSleep && Math.random() < 0.3; // 30% chance
+        // Force sleep if needed, otherwise use probability
+        const canCastSleep = this.enemy.canSleep && (
+            needsMoreSpecialAttacks && this.specialAttackUsageCount['sleep'] < this.minimumSpecialAttackUses ||
+            Math.random() < 0.3
+        );
         
         if (canCastSleep) {
+            // CRITICAL: Track special attack usage
+            this.specialAttackUsageCount['sleep'] = (this.specialAttackUsageCount['sleep'] || 0) + 1;
+            console.log(`[Battle] Sleep used ${this.specialAttackUsageCount['sleep']} time(s)`);
+            
             // Sleep attack
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             addBattleLog(`😴 ${this.enemy.name} cast Sleep! You skip your next turn!`);
@@ -1795,13 +1840,25 @@ class BattleManager {
             return;
         }
         
-        // Check for Octopus drench attack (50% chance)
-        const useDrench = this.enemy.drenchAttack && Math.random() < 0.5;
+        // Check for Octopus drench attack
+        // Force drench if needed, otherwise use probability
+        const useDrench = this.enemy.drenchAttack && (
+            needsMoreSpecialAttacks && this.specialAttackUsageCount['drench'] < this.minimumSpecialAttackUses ||
+            Math.random() < 0.5
+        );
         
-        // Check for Octopus hug attack (30% chance)
-        const useHug = this.enemy.hugAttack && !useDrench && Math.random() < 0.3;
+        // Check for Octopus hug attack
+        // Force hug if needed, otherwise use probability
+        const useHug = this.enemy.hugAttack && !useDrench && (
+            needsMoreSpecialAttacks && this.specialAttackUsageCount['hug'] < this.minimumSpecialAttackUses ||
+            Math.random() < 0.3
+        );
         
         if (useDrench) {
+            // CRITICAL: Track special attack usage
+            this.specialAttackUsageCount['drench'] = (this.specialAttackUsageCount['drench'] || 0) + 1;
+            console.log(`[Battle] Drench used ${this.specialAttackUsageCount['drench']} time(s)`);
+            
             // Drench attack
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             
@@ -1832,6 +1889,10 @@ class BattleManager {
             }
             return;
         } else if (useHug) {
+            // CRITICAL: Track special attack usage
+            this.specialAttackUsageCount['hug'] = (this.specialAttackUsageCount['hug'] || 0) + 1;
+            console.log(`[Battle] Hug used ${this.specialAttackUsageCount['hug']} time(s)`);
+            
             // Hug attack
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             
@@ -1855,7 +1916,17 @@ class BattleManager {
         // Boss special attacks
         if (this.enemy.isBoss) {
             // Treant poison attack
-            if (this.enemy.poisonAttack) {
+            // Force poison if needed
+            const shouldUsePoison = this.enemy.poisonAttack && (
+                needsMoreSpecialAttacks && this.specialAttackUsageCount['poison'] < this.minimumSpecialAttackUses ||
+                Math.random() < 0.6
+            );
+            
+            if (shouldUsePoison) {
+                // CRITICAL: Track special attack usage
+                this.specialAttackUsageCount['poison'] = (this.specialAttackUsageCount['poison'] || 0) + 1;
+                console.log(`[Battle] Poison used ${this.specialAttackUsageCount['poison']} time(s)`);
+                
                 await playEnemyAnimation(this.enemy, 'attack1', 600);
                 
                 // Use correct damage range
@@ -1940,7 +2011,17 @@ class BattleManager {
             }
             
             // Mushroom special attack
-            if (this.enemy.mushroomAttack) {
+            // Force mushroom if needed
+            const shouldUseMushroom = this.enemy.mushroomAttack && (
+                needsMoreSpecialAttacks && this.specialAttackUsageCount['mushroom'] < this.minimumSpecialAttackUses ||
+                Math.random() < 0.6
+            );
+            
+            if (shouldUseMushroom) {
+                // CRITICAL: Track special attack usage
+                this.specialAttackUsageCount['mushroom'] = (this.specialAttackUsageCount['mushroom'] || 0) + 1;
+                console.log(`[Battle] Mushroom used ${this.specialAttackUsageCount['mushroom']} time(s)`);
+                
                 await playEnemyAnimation(this.enemy, 'attack2', 600);
                 
                 // Show mushroom emoji projectiles
@@ -1986,6 +2067,84 @@ class BattleManager {
                 }
                 return;
             }
+        }
+        
+        // OVERTHINKER SPECIAL ATTACK: Overthink - Makes user's next attack backfire at a random turn
+        // Force overthink if needed, otherwise use probability
+        const shouldUseOverthink = this.enemy.canOverthink && (
+            needsMoreSpecialAttacks && this.specialAttackUsageCount['overthink'] < this.minimumSpecialAttackUses ||
+            Math.random() < 0.4
+        );
+        
+        if (shouldUseOverthink) {
+            // CRITICAL: Track special attack usage
+            this.specialAttackUsageCount['overthink'] = (this.specialAttackUsageCount['overthink'] || 0) + 1;
+            console.log(`[Battle] Overthink used ${this.specialAttackUsageCount['overthink']} time(s)`);
+            
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            // Show thought bubble projectile effect
+            const enemySprite = document.getElementById('enemySprite');
+            const heroSprite = document.getElementById('heroSprite');
+            if (enemySprite && heroSprite) {
+                const thoughtBubble = document.createElement('div');
+                thoughtBubble.innerHTML = '🤯💭';
+                thoughtBubble.style.cssText = `
+                    position: absolute;
+                    font-size: 40px;
+                    z-index: 1000;
+                    animation: thoughtFloat 1s ease-out forwards;
+                `;
+                
+                // Add animation keyframes
+                if (!document.getElementById('overthinkStyle')) {
+                    const style = document.createElement('style');
+                    style.id = 'overthinkStyle';
+                    style.textContent = `
+                        @keyframes thoughtFloat {
+                            0% { transform: translateX(0) scale(1); opacity: 1; }
+                            50% { transform: translateX(-100px) scale(1.5); opacity: 1; }
+                            100% { transform: translateX(-200px) scale(0.5); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                const enemyRect = enemySprite.getBoundingClientRect();
+                thoughtBubble.style.left = enemyRect.left + 'px';
+                thoughtBubble.style.top = enemyRect.top + 'px';
+                document.body.appendChild(thoughtBubble);
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                thoughtBubble.remove();
+            }
+            
+            // Apply Overthink effect: user's next attack will backfire at a random turn (1-3 turns)
+            this.overthinkActive = true;
+            this.overthinkTurns = Math.floor(Math.random() * 3) + 1; // 1-3 turns until backfire
+            this.overthinkBackfireDamage = Math.floor(Math.random() * 16) + 15; // 15-30 backfire damage
+            
+            addBattleLog(`🤯 ${this.enemy.name} used Overthink!`);
+            addBattleLog(`💭 Your next attack will backfire in ${this.overthinkTurns} turn(s)!`);
+            
+            // Play sound effect
+            if (window.audioManager) {
+                window.audioManager.playSound('error', 0.6);
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 500));
+            addBattleLog('⚔️ Your turn!');
+            
+            // Start turn timer
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
         }
         
         // FIX: Alien's Time Sting attack
@@ -2677,6 +2836,11 @@ class BattleManager {
         this.inBattle = false;
         console.log('[Battle] Battle ended, inBattle flag set to false');
         
+        // CRITICAL: Clear battle state to allow external code to modify heroSprite again
+        if (typeof window.clearBattleState === 'function') {
+            window.clearBattleState();
+        }
+        
         // Fade out after 2 seconds
         setTimeout(() => {
             document.getElementById('battleLog').innerHTML = '';
@@ -2901,6 +3065,24 @@ class BattleManager {
             `;
             document.head.appendChild(style);
         }
+    }
+    
+    /**
+     * CRITICAL: Determine if we should force special attacks
+     * Ensures each special attack is used at least 3 times per battle
+     */
+    shouldForceSpecialAttack() {
+        // Check if any tracked special attack hasn't been used enough
+        for (const attackType in this.specialAttackUsageCount) {
+            if (this.specialAttackUsageCount[attackType] < this.minimumSpecialAttackUses) {
+                // Force special attacks if we're past turn 5 and haven't used them enough
+                if (this.enemyTurnCount >= 5) {
+                    console.log(`[Battle] Forcing special attacks - ${attackType} only used ${this.specialAttackUsageCount[attackType]} time(s)`);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     /**

@@ -650,30 +650,37 @@ class QuestGiver {
     // Update hero sprite to use selected monster with animation
     updateHeroSprite() {
         const heroSprite = document.getElementById('questHeroSprite');
-        const heroSpritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
+        const heroSpritePrefix = localStorage.getItem('heroSpritePrefix') || 'nova';
         
         if (heroSprite) {
-            // Use 4-frame idle animation sprite sheet
-            const spriteSheetPath = `assets/heroes/${heroSpritePrefix}_Idle_4.png`;
-            heroSprite.style.backgroundImage = `url('${spriteSheetPath}')`;
-            heroSprite.style.backgroundSize = '128px 32px'; // 4 frames × 32px = 128px width
-            
-            // Animate through 4 frames
-            let currentFrame = 0;
-            const frameWidth = 32;
-            const totalFrames = 4;
+            // Use GIF animation instead of spritesheet
+            // Map old sprite names to new GIF names
+            const spriteMap = {
+                'Pink_Monster': 'Nova',
+                'Owlet_Monster': 'Luna',
+                'Dude_Monster': 'Benny',
+                'nova': 'Nova',
+                'luna': 'Luna',
+                'benny': 'Benny'
+            };
+            const spriteName = spriteMap[heroSpritePrefix] || 'Nova';
+            const gifPath = `assets/heroes/${spriteName}_idle.gif`;
             
             // Clear any existing animation interval
             if (this.questHeroAnimationInterval) {
                 clearInterval(this.questHeroAnimationInterval);
+                this.questHeroAnimationInterval = null;
             }
             
-            // Start frame animation
-            this.questHeroAnimationInterval = setInterval(() => {
-                currentFrame = (currentFrame + 1) % totalFrames;
-                const xPos = -(currentFrame * frameWidth);
-                heroSprite.style.backgroundPosition = `${xPos}px 0`;
-            }, 200); // 200ms per frame = 5 FPS
+            // Set as img src if it's an img element, otherwise use background
+            if (heroSprite.tagName === 'IMG') {
+                heroSprite.src = gifPath;
+            } else {
+                heroSprite.style.backgroundImage = `url('${gifPath}')`;
+                heroSprite.style.backgroundSize = 'contain';
+                heroSprite.style.backgroundRepeat = 'no-repeat';
+                heroSprite.style.backgroundPosition = 'center';
+            }
         }
     }
 

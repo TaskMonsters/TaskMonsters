@@ -630,18 +630,31 @@ function playWakeUpSequence(enemy, callback) {
         // Play wake-up animation if available
         if (enemy.sprites.wakeup) {
             enemy.setSprite('wakeup');
-            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            // Use img.src for GIF animations
+            if (spriteElement.tagName === 'IMG') {
+                spriteElement.src = enemy.currentSprite;
+            } else {
+                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            }
             
             setTimeout(() => {
                 enemy.setSprite('idle');
-                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+                if (spriteElement.tagName === 'IMG') {
+                    spriteElement.src = enemy.currentSprite;
+                } else {
+                    spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+                }
                 if (callback) callback();
                 resolve();
             }, 1000);
         } else {
             // No wake-up animation, just set idle
             enemy.setSprite('idle');
-            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            if (spriteElement.tagName === 'IMG') {
+                spriteElement.src = enemy.currentSprite;
+            } else {
+                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            }
             if (callback) callback();
             resolve();
         }

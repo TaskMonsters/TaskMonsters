@@ -79,10 +79,12 @@ class GuardianOnboarding {
                 background: rgba(0, 0, 0, 0.95);
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-start;
                 align-items: center;
                 z-index: 10005;
                 animation: fadeIn 0.5s ease;
+                overflow-y: auto;
+                padding: 20px 0;
             `;
             document.body.appendChild(overlay);
         } else {
@@ -92,10 +94,11 @@ class GuardianOnboarding {
         // Create content container
         const container = document.createElement('div');
         container.style.cssText = `
-            max-width: 900px;
+            max-width: 600px;
             width: 90%;
             text-align: center;
             animation: scaleIn 0.5s ease;
+            margin: auto;
         `;
         
         // Show map
@@ -104,8 +107,8 @@ class GuardianOnboarding {
             mapContainer.style.cssText = `
                 position: relative;
                 width: 100%;
-                max-width: 800px;
-                margin: 0 auto 24px;
+                max-width: 500px;
+                margin: 0 auto 20px;
             `;
             
             const mapImg = document.createElement('img');
@@ -120,16 +123,18 @@ class GuardianOnboarding {
             mapImg.style.cssText = `
                 width: 100%;
                 height: auto;
-                border-radius: 16px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-                border: 3px solid rgba(255, 255, 255, 0.3);
+                max-height: 250px;
+                object-fit: contain;
+                border-radius: 12px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+                border: 2px solid rgba(255, 255, 255, 0.3);
             `;
             mapContainer.appendChild(mapImg);
             
             // Add monster sprite on map for journey step
             if (step.showMonsterOnMap) {
                 const monsterSprite = document.createElement('img');
-                monsterSprite.src = 'assets/Pink_Monster.png';
+                monsterSprite.src = 'assets/heroes/Nova_idle.gif';
                 monsterSprite.alt = 'Your Task Pet';
                 monsterSprite.style.cssText = `
                     position: absolute;
@@ -248,7 +253,8 @@ class GuardianOnboarding {
         const skipBtn = document.createElement('button');
         skipBtn.textContent = 'Skip Tutorial';
         skipBtn.style.cssText = `
-            margin-top: 16px;
+            margin-top: 12px;
+            margin-bottom: 20px;
             padding: 8px 16px;
             background: transparent;
             color: rgba(255, 255, 255, 0.5);

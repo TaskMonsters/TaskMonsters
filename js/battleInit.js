@@ -106,12 +106,35 @@ let heroFrameWidth = 32;
 // Cache the hero appearance for the entire battle to prevent skin reversion
 let cachedBattleAppearance = null;
 
+// CRITICAL: Flag to indicate battle is active - prevents external code from modifying heroSprite
+let battleInProgress = false;
+
+// Export battle state checker
+window.isBattleInProgress = function() {
+    return battleInProgress;
+};
+
 /**
  * Get active hero appearance with robust fallback
  * Returns skin animations if equipped, otherwise default monster animations
  */
 function getActiveHeroAppearance() {
-    const baseMonsterId = localStorage.getItem('selectedMonster') || 'nova';
+    let baseMonsterId = localStorage.getItem('selectedMonster') || 'nova';
+    
+    // Normalize monster ID to lowercase and extract base name
+    baseMonsterId = baseMonsterId.toLowerCase();
+    
+    // Handle various formats: 'Luna', 'luna', 'Luna_idle.gif', 'assets/heroes/Luna_idle.gif', etc.
+    if (baseMonsterId.includes('luna')) {
+        baseMonsterId = 'luna';
+    } else if (baseMonsterId.includes('benny')) {
+        baseMonsterId = 'benny';
+    } else if (baseMonsterId.includes('nova')) {
+        baseMonsterId = 'nova';
+    }
+    
+    console.log('[Battle] Selected monster ID:', baseMonsterId);
+    
     const equippedSkinId = window.gameState ? window.gameState.equippedSkinId : null;
     
     // Default frame counts for fallback
@@ -166,7 +189,7 @@ function getActiveHeroAppearance() {
             attack: `assets/heroes/${prefix}_attack.gif`,
             jump: `assets/heroes/${prefix}_jump.gif`,
             hurt: `assets/heroes/${prefix}_Hurt.gif`,
-            death: `assets/heroes/${prefix}_Hurt.gif`
+            death: `assets/heroes/${prefix}_die.gif`
         },
         frameCount: { idle: 1, walk: 1, attack: 1, jump: 1, hurt: 1, death: 1 },
         spriteSize: { width: 32, height: 32 },
@@ -190,6 +213,10 @@ function renderHeroSprite() {
         return;
     }
     
+    // CRITICAL: Set battle in progress flag
+    battleInProgress = true;
+    console.log('[Battle] Battle in progress flag set to TRUE');
+    
     // Reset all sprite state
     heroSprite.className = 'sprite';
     heroSprite.style.cssText = '';
@@ -209,11 +236,30 @@ function renderHeroSprite() {
         console.log('[Battle] Setting hero sprite src to:', appearance.animations.idle);
     }
     
-    // Style the img element - 300px (3x enemy size)
-    heroSprite.style.width = '300px';
-    heroSprite.style.height = '300px';
+    // Style the img element to fit in battle arena wrapper
+    heroSprite.style.width = '100px';
+    heroSprite.style.height = '100px';
     heroSprite.style.objectFit = 'contain';
     heroSprite.style.imageRendering = 'pixelated';
+    
+    // CRITICAL: Remove all backgrounds and effects
+    heroSprite.style.background = 'none';
+    heroSprite.style.backgroundColor = 'transparent';
+    heroSprite.style.backgroundImage = 'none';
+    heroSprite.style.animation = 'none';
+    heroSprite.style.transform = 'none';
+    heroSprite.style.transition = 'none';
+    heroSprite.style.boxShadow = 'none';
+    heroSprite.style.border = 'none';
+    heroSprite.style.outline = 'none';
+    
+    // Also ensure the wrapper has no background
+    const wrapper = heroSprite.parentElement;
+    if (wrapper) {
+        wrapper.style.background = 'none';
+        wrapper.style.backgroundColor = 'transparent';
+        wrapper.style.backgroundImage = 'none';
+    }
     
     // Ensure visibility
     heroSprite.style.opacity = '1';
@@ -223,8 +269,9 @@ function renderHeroSprite() {
     // Store animation paths for later use
     heroSprite.dataset.idleGif = appearance.animations.idle;
     heroSprite.dataset.attackGif = appearance.animations.attack || appearance.animations.idle;
+    heroSprite.dataset.jumpGif = appearance.animations.jump || appearance.animations.idle;
     heroSprite.dataset.hurtGif = appearance.animations.hurt || appearance.animations.idle;
-    heroSprite.dataset.deathGif = appearance.animations.death || appearance.animations.hurt || appearance.animations.idle;
+    heroSprite.dataset.deathGif = appearance.animations.death || appearance.animations.idle;
     
     console.log('[Battle] Hero sprite rendered successfully with GIF:', heroSprite.src);
 }
@@ -259,6 +306,9 @@ function startHeroAnimation(animationType = 'idle') {
     const appearance = cachedBattleAppearance || getActiveHeroAppearance();
     let gifPath;
     
+    // Track if we need to apply hurt effect (mix-blend-mode to remove black background)
+    let isHurtAnimation = false;
+    
     // Map animation types to GIF paths
     switch(animationType) {
         case 'attack':
@@ -269,22 +319,14 @@ function startHeroAnimation(animationType = 'idle') {
             break;
         case 'hurt':
             gifPath = heroSprite.dataset.hurtGif || appearance.animations.hurt || appearance.animations.idle;
-            // Add flicker effect for hurt
-            let flickerCount = 0;
-            const flickerInterval = setInterval(() => {
-                heroSprite.style.opacity = heroSprite.style.opacity === '0.3' ? '1' : '0.3';
-                flickerCount++;
-                if (flickerCount >= 6) {
-                    clearInterval(flickerInterval);
-                    heroSprite.style.opacity = '1';
-                }
-            }, 100);
+            isHurtAnimation = true;
             break;
         case 'death':
             gifPath = heroSprite.dataset.deathGif || appearance.animations.death || appearance.animations.hurt || appearance.animations.idle;
+            isHurtAnimation = true;
             break;
         case 'jump':
-            gifPath = appearance.animations.jump || appearance.animations.idle;
+            gifPath = heroSprite.dataset.jumpGif || appearance.animations.jump || appearance.animations.idle;
             break;
         default:
             gifPath = heroSprite.dataset.idleGif || appearance.animations.idle;
@@ -296,11 +338,44 @@ function startHeroAnimation(animationType = 'idle') {
         console.log('[Battle] Hero animation changed to:', animationType, gifPath);
     }
     
-    // Ensure proper styling - 300px (3x enemy size)
-    heroSprite.style.width = '300px';
-    heroSprite.style.height = '300px';
+    // Ensure proper styling - 100px to fit in battle arena
+    heroSprite.style.width = '100px';
+    heroSprite.style.height = '100px';
     heroSprite.style.objectFit = 'contain';
     heroSprite.style.imageRendering = 'pixelated';
+    
+    // CRITICAL: Remove ALL effects, animations, and backgrounds
+    heroSprite.style.background = 'none';
+    heroSprite.style.backgroundColor = 'transparent';
+    heroSprite.style.backgroundImage = 'none';
+    heroSprite.style.animation = 'none';
+    heroSprite.style.transform = 'none';
+    heroSprite.style.transition = 'none';
+    heroSprite.style.opacity = '1';
+    heroSprite.style.boxShadow = 'none';
+    heroSprite.style.border = 'none';
+    heroSprite.style.outline = 'none';
+    
+    // CRITICAL FIX: Apply mix-blend-mode to remove black background from hurt/death GIFs
+    // The hurt GIF files have black backgrounds baked in - mix-blend-mode: screen makes black transparent
+    if (isHurtAnimation) {
+        heroSprite.style.mixBlendMode = 'screen';
+        // Also add a subtle red tint to indicate damage
+        heroSprite.style.filter = 'brightness(1.2) saturate(1.3)';
+        console.log('[Battle] Applied mix-blend-mode: screen for hurt animation to remove black background');
+    } else {
+        // Reset blend mode for non-hurt animations
+        heroSprite.style.mixBlendMode = 'normal';
+        heroSprite.style.filter = 'none';
+    }
+    
+    // Also ensure the wrapper has no background
+    const wrapper = heroSprite.parentElement;
+    if (wrapper) {
+        wrapper.style.background = 'none';
+        wrapper.style.backgroundColor = 'transparent';
+        wrapper.style.backgroundImage = 'none';
+    }
 }
 
 function stopHeroAnimation() {
@@ -314,6 +389,18 @@ function stopHeroAnimation() {
 window.startHeroAnimation = startHeroAnimation;
 window.stopHeroAnimation = stopHeroAnimation;
 window.cachedBattleAppearance = cachedBattleAppearance;
+
+/**
+ * Clear battle state when battle ends
+ * Called from battleManager.endBattle()
+ */
+function clearBattleState() {
+    battleInProgress = false;
+    cachedBattleAppearance = null;
+    console.log('[Battle] Battle state cleared, battleInProgress = FALSE');
+}
+
+window.clearBattleState = clearBattleState;
 
 // Start idle animation when battle starts
 function initializeHeroSprite() {

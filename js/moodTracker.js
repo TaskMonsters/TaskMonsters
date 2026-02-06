@@ -324,7 +324,7 @@ class MoodTracker {
         }
         
         // Get current monster and skin info
-        const selectedMonster = localStorage.getItem('selectedMonster') || 'Pink_Monster';
+        const selectedMonster = localStorage.getItem('selectedMonster') || 'nova';
         const equippedSkinId = window.gameState?.equippedSkinId || null;
         const isEgg = window.gameState?.isEgg || false;
         
@@ -361,7 +361,10 @@ class MoodTracker {
             } else {
                 // NO SKIN AND NOT EGG: Use default monster jump GIF
                 console.log('[MoodTracker] No skin/egg - using default monster jump GIF');
-                const jumpGif = `assets/${selectedMonster}_jump.gif`;
+                // Map monster ID to proper name
+                const monsterMap = { luna: 'Luna', benny: 'Benny', nova: 'Nova' };
+                const monsterName = monsterMap[selectedMonster.toLowerCase()] || 'Nova';
+                const jumpGif = `assets/heroes/${monsterName}_jump.gif`;
                 sprite.src = jumpGif;
                 sprite.style.animation = 'none';
                 

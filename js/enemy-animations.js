@@ -6,6 +6,130 @@
  * This file only handles animation playback
  */
 
+// Complete enemy animation mappings (idle, attack, hurt, die)
+function getEnemyAnimations() {
+    return {
+        'Lazy Bat': {
+            idle: 'assets/enemies/Lazy Bat/Lazy Bat-IdleFly-animated.gif',
+            attack: 'assets/enemies/Lazy Bat/Lazy Bat-Attack-animated.gif',
+            hurt: 'assets/enemies/Lazy Bat/Lazy Bat-Hurt.gif',
+            die: null
+        },
+        'Flying Procrastinator': {
+            idle: 'assets/enemies/Flying Procrastinator/Flying Procrastinator.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Medusa': {
+            idle: 'assets/enemies/Medusa/Medusa-animated.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Distraction Dragon': {
+            idle: 'assets/enemies/Distraction Dragon/Distraction Dragon.gif',
+            attack: 'assets/enemies/Distraction Dragon/Distraction Dragon Attack.gif',
+            hurt: null,
+            die: null
+        },
+        'Treant': {
+            idle: 'assets/enemies/Treant/Treant.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Naughty Nova': {
+            idle: 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
+            attack: 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
+            hurt: null,
+            die: null
+        },
+        'Mushroom Guard': {
+            idle: 'assets/enemies/Mushroom Guard/Mushroom_Idle.gif',
+            attack: 'assets/enemies/Mushroom Guard/Mushroom_Attack.gif',
+            hurt: 'assets/enemies/Mushroom Guard/Mushroom_Hit.gif',
+            die: null
+        },
+        '2Face': {
+            idle: 'assets/enemies/2Face/2Face Idle.gif',
+            attack: 'assets/enemies/2Face/2Face_Attack.gif',
+            hurt: 'assets/enemies/2Face/2Face_Hurt.gif',
+            die: null
+        },
+        'Slime': {
+            idle: 'assets/enemies/Slime Enemy/Slime Enemy.gif',
+            attack: 'assets/enemies/Slime Enemy/Slime Enemy Attack.gif',
+            hurt: null,
+            die: null
+        },
+        'Little Cthulhu': {
+            idle: 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Ice Bully': {
+            idle: 'assets/enemies/Ice Bully/idle.gif',
+            attack: 'assets/enemies/Ice Bully/1_atk.gif',
+            hurt: 'assets/enemies/Ice Bully/take_hit.gif',
+            die: 'assets/enemies/Ice Bully/death.gif'
+        },
+        'Slothful Ogre': {
+            idle: 'assets/enemies/Slothful Ogre/ogre-idle.gif',
+            attack: 'assets/enemies/Slothful Ogre/ogre-attack.gif',
+            hurt: null,
+            die: null
+        },
+        'Energy Vampire Bat': {
+            idle: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Sentry Drone': {
+            idle: 'assets/enemies/Sentry Drone/Sentry Drone.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Land Alien': {
+            idle: 'assets/enemies/Land Alien/alien-idle-animated.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Orc': {
+            idle: 'assets/enemies/Orc/Orc-Idle.gif',
+            attack: 'assets/enemies/Orc/Orc-Attack.gif',
+            hurt: 'assets/enemies/Orc/Orc-Hurt.gif',
+            die: 'assets/enemies/Orc/Orc-Death.gif'
+        },
+        'Overthinker': {
+            idle: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        },
+        'Self Doubt Drone': {
+            idle: 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
+            attack: null,
+            hurt: null,
+            die: null
+        }
+    };
+}
+
+// Legacy function for backward compatibility
+function getEnemyPaths() {
+    const animations = getEnemyAnimations();
+    const paths = {};
+    for (const [name, anims] of Object.entries(animations)) {
+        paths[name] = anims.idle;
+    }
+    return paths;
+}
+
 // Play enemy animation using GIF files
 function playEnemyAnimation(enemy, animationKey, duration = 500) {
     return new Promise((resolve) => {
@@ -21,8 +145,9 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
             return;
         }
         
-        // Check if enemy has config with assets (new BATTLE_ENEMIES system)
         let animationPath = null;
+        
+        // Check if enemy has config with assets (new BATTLE_ENEMIES system)
         if (enemy.config && enemy.config.assets) {
             // Use new BATTLE_ENEMIES config
             switch(animationKey) {
@@ -45,10 +170,35 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
                     animationPath = enemy.config.assets.idle;
             }
         } else {
-            // Fallback to mapped paths
+            // Use complete animation mappings
             const enemyName = enemy.name;
-            const enemyPaths = getEnemyPaths();
-            animationPath = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}.gif`;
+            const enemyAnimations = getEnemyAnimations();
+            const animations = enemyAnimations[enemyName];
+            
+            if (animations) {
+                switch(animationKey) {
+                    case 'idle':
+                        animationPath = animations.idle;
+                        break;
+                    case 'attack1':
+                    case 'attack2':
+                    case 'attack':
+                        animationPath = animations.attack || animations.idle;
+                        break;
+                    case 'hurt':
+                        animationPath = animations.hurt || animations.idle;
+                        break;
+                    case 'death':
+                    case 'die':
+                        animationPath = animations.die || animations.hurt || animations.idle;
+                        break;
+                    default:
+                        animationPath = animations.idle;
+                }
+            } else {
+                // Ultimate fallback
+                animationPath = `assets/enemies/${enemyName}/${enemyName}.gif`;
+            }
         }
         
         console.log('[EnemyAnimation] Playing', animationKey, 'animation:', animationPath);
@@ -76,42 +226,21 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
             // Return to idle after animation completes (except for death)
             if (animationKey !== 'death' && animationKey !== 'die') {
                 let idleAnimation = null;
+                
                 if (enemy.config && enemy.config.assets) {
                     idleAnimation = enemy.config.assets.idle;
                 } else {
                     const enemyName = enemy.name;
-                    const enemyPaths = getEnemyPaths();
-                    idleAnimation = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}.gif`;
+                    const enemyAnimations = getEnemyAnimations();
+                    const animations = enemyAnimations[enemyName];
+                    idleAnimation = animations ? animations.idle : `assets/enemies/${enemyName}/${enemyName}.gif`;
                 }
+                
                 spriteElement.src = idleAnimation;
             }
             resolve();
         }, duration);
     });
-}
-
-// Helper function to get enemy paths mapping
-function getEnemyPaths() {
-    return {
-        'Slime': 'assets/enemies/Slime Enemy/Slime Enemy.gif',
-        'Treant': 'assets/enemies/Treant/Treant.gif',
-        '2Face': 'assets/enemies/2Face/2Face Idle.gif',
-        'Distraction Dragon': 'assets/enemies/Distraction Dragon/Distraction Dragon.gif',
-        'Energy Vampire Bat': 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
-        'Flying Procrastinator': 'assets/enemies/Flying Procrastinator/Flying Procrastinator.gif',
-        'Ice Bully': 'assets/enemies/Ice Bully/idle.gif',
-        'Land Alien': 'assets/enemies/Land Alien/alien-idle-animated.gif',
-        'Lazy Bat': 'assets/enemies/Lazy Bat/Lazy Bat-IdleFly-animated.gif',
-        'Little Cthulhu': 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
-        'Medusa': 'assets/enemies/Medusa/Medusa-animated.gif',
-        'Mushroom Guard': 'assets/enemies/Mushroom Guard/Mushroom_Attack.gif',
-        'Naughty Nova': 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
-        'Orc': 'assets/enemies/Orc/Orc-Attack.gif',
-        'Overthinker': 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
-        'Self Doubt Drone': 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
-        'Sentry Drone': 'assets/enemies/Sentry Drone/Sentry Drone.gif',
-        'Slothful Ogre': 'assets/enemies/Slothful Ogre/ogre-idle.gif'
-    };
 }
 
 // Initialize enemy sprite with idle animation
@@ -129,16 +258,17 @@ function initEnemySprite(enemy) {
     spriteElement.style.cssText = '';
     
     const enemyName = enemy.name;
+    let idleGif = null;
     
     // Check if enemy has config with assets (new BATTLE_ENEMIES system)
-    let idleGif = null;
     if (enemy.config && enemy.config.assets && enemy.config.assets.idle) {
         idleGif = enemy.config.assets.idle;
         console.log('[EnemyAnimation] Using config assets:', idleGif);
     } else {
-        // Use mapped paths
-        const enemyPaths = getEnemyPaths();
-        idleGif = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}.gif`;
+        // Use complete animation mappings
+        const enemyAnimations = getEnemyAnimations();
+        const animations = enemyAnimations[enemyName];
+        idleGif = animations ? animations.idle : `assets/enemies/${enemyName}/${enemyName}.gif`;
         console.log('[EnemyAnimation] Using mapped path:', idleGif);
     }
     
@@ -166,3 +296,4 @@ function initEnemySprite(enemy) {
 window.playEnemyAnimation = playEnemyAnimation;
 window.initEnemySprite = initEnemySprite;
 window.getEnemyPaths = getEnemyPaths;
+window.getEnemyAnimations = getEnemyAnimations;

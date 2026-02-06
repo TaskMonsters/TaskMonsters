@@ -33,125 +33,134 @@ class BattleArenasManager {
                 description: 'Fog-covered forest'
             },
             
-            // Tier 2 (Level 11-20)
+            // Tier 2 (Level 10-19) - User requirement: Level 10 and up
             synth_city: {
                 name: 'Synth City',
                 tier: 2,
                 background: 'assets/battle/arenas/synth-city Level 10 - 20 and up .png',
-                minLevel: 11,
-                maxLevel: 20,
+                minLevel: 10,
+                maxLevel: 19,
                 description: 'A neon-lit cyberpunk city'
+            },
+            forest_tier2: {
+                name: 'Forest Path',
+                tier: 2,
+                background: 'assets/battle/arenas/Forest Level 1-10 and up.png',
+                minLevel: 10,
+                maxLevel: 19,
+                description: 'A peaceful forest trail'
             },
             night_town: {
                 name: 'Night Town',
                 tier: 2,
                 background: 'assets/battle/arenas/Night Town Level 10 - 20 and up.png',
-                minLevel: 11,
-                maxLevel: 20,
+                minLevel: 10,
+                maxLevel: 19,
                 description: 'A town under moonlight'
             },
             dungeon: {
                 name: 'Dark Dungeon',
                 tier: 2,
                 background: 'assets/battle/arenas/Dungeon Level 20+.png',
-                minLevel: 11,
-                maxLevel: 20,
+                minLevel: 10,
+                maxLevel: 19,
                 description: 'A damp, dark dungeon'
             },
+            dark_gothic_tier2: {
+                name: 'Dark Gothic Castle',
+                tier: 2,
+                background: 'assets/battle/arenas/DarkGothicCastle Level 20 and up.png',
+                minLevel: 10,
+                maxLevel: 19,
+                description: 'A dark gothic castle'
+            },
             
-            // Tier 3 (Level 21-30)
+            // Tier 3 (Level 20-29) - User requirement: Level 20 and up
             skull_gate: {
                 name: 'Skull Gate',
                 tier: 3,
                 background: 'assets/battle/arenas/skull-gate level 20 - 25 and up.png',
-                minLevel: 21,
-                maxLevel: 30,
+                minLevel: 20,
+                maxLevel: 29,
                 description: 'An ominous gateway'
             },
             dusk: {
                 name: 'Dusk Valley',
                 tier: 3,
                 background: 'assets/battle/arenas/Dusk Arena Level 20 - 25 and up.png',
-                minLevel: 21,
-                maxLevel: 30,
+                minLevel: 20,
+                maxLevel: 29,
                 description: 'A valley at twilight'
             },
             mountain: {
                 name: 'Mountain Peak',
                 tier: 3,
                 background: 'assets/battle/arenas/Mountain Dusk Level 20 - 25 and up.png',
-                minLevel: 21,
-                maxLevel: 30,
+                minLevel: 20,
+                maxLevel: 29,
                 description: 'A high mountain summit'
             },
-            dark_castle: {
-                name: 'Dark Gothic Castle',
-                tier: 3,
-                background: 'assets/battle/arenas/DarkGothicCastle Level 20 and up.png',
-                minLevel: 21,
-                maxLevel: 30,
-                description: 'A dark gothic castle'
-            },
             
-            // Tier 4 (Level 31-40)
+            // Tier 4 (Level 30-39) - User requirement: Level 30 and up
+            hot_town: {
+                name: 'Desert Town',
+                tier: 4,
+                background: 'assets/battle/arenas/Hot Town Level 30 - 35 and up.png',
+                minLevel: 30,
+                maxLevel: 39,
+                description: 'A scorching desert settlement'
+            },
             castle: {
                 name: 'Ancient Castle',
                 tier: 4,
                 background: 'assets/battle/arenas/Castle Arena Level 30 - 35 and up.png',
-                minLevel: 31,
-                maxLevel: 40,
+                minLevel: 30,
+                maxLevel: 39,
                 description: 'A crumbling castle'
             },
             underwater: {
                 name: 'Underwater Ruins',
                 tier: 4,
                 background: 'assets/battle/arenas/UnderwaterFantasy Level 30 - 35 and up.png',
-                minLevel: 31,
-                maxLevel: 40,
+                minLevel: 30,
+                maxLevel: 39,
                 description: 'Submerged ancient ruins'
             },
             green: {
                 name: 'Emerald Gardens',
                 tier: 4,
                 background: 'assets/battle/arenas/Green Arena Level 30 - 35 and up.png',
-                minLevel: 31,
-                maxLevel: 40,
+                minLevel: 30,
+                maxLevel: 39,
                 description: 'Lush green gardens'
             },
-            hot_town: {
-                name: 'Desert Town',
-                tier: 4,
-                background: 'assets/battle/arenas/Hot Town Level 30 - 35 and up.png',
-                minLevel: 31,
-                maxLevel: 40,
-                description: 'A scorching desert settlement'
-            },
             
-            // Tier 5 (Level 41-50)
+            // Tier 5 (Level 40-49) - User requirement: Level 40 and up
             forest_of_illusions: {
                 name: 'Forest of Illusions',
                 tier: 5,
                 background: 'assets/battle/arenas/Forest of Illusions Level 40 and up.gif',
-                minLevel: 41,
-                maxLevel: 50,
+                minLevel: 40,
+                maxLevel: 49,
                 description: 'A mystical forest with bat hazards',
                 hasHazards: true
             },
+            // Tier 6 (Level 50+) - User requirement: Level 50
             fort_of_illusions: {
                 name: 'Fort of Illusions',
-                tier: 5,
+                tier: 6,
                 background: 'assets/battle/arenas/Fort of Illusions Level 50.gif',
                 minLevel: 50,
-                maxLevel: 50,
+                maxLevel: 100,
                 description: 'The ultimate fortress with bat hazards',
                 hasHazards: true
             },
             vampire_castle: {
                 name: 'Vampire Castle',
-                tier: 5,
+                tier: 6,
                 background: 'assets/battle/arenas/vampire-castle Level 50.png',
-                minLevel: 41,
-                maxLevel: 50,
+                minLevel: 50,
+                maxLevel: 100,
                 description: 'A dark vampire\'s lair'
             }
         };
