@@ -410,9 +410,14 @@ function returnToMainApp() {
         mainApp.classList.remove('hidden');
     }
     
-    // Resume home page music
-    if (window.audioManager && typeof window.audioManager.stopMusic === 'function') {
-        window.audioManager.stopMusic();
+    // Stop battle outcome music and resume home page music
+    if (window.audioManager) {
+        if (typeof window.audioManager.stopBattleOutcomeMusic === 'function') {
+            window.audioManager.stopBattleOutcomeMusic();
+        }
+        if (typeof window.audioManager.stopMusic === 'function') {
+            window.audioManager.stopMusic();
+        }
     }
 }
 

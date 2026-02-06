@@ -621,15 +621,15 @@ img#enemySprite {
         padding: 15px;
     }
     
-    /* Adjust sprite positioning for small screens */
+    /* Adjust sprite positioning for small screens - move lower */
     #heroContainer {
         left: 40px;
-        top: 20px;
+        top: 55px;
     }
     
     #enemyContainer {
         right: 40px;
-        top: 20px;
+        top: 55px;
     }
     
     /* Scale down sprites to prevent overlap */
@@ -712,15 +712,15 @@ img#enemySprite {
         padding: 12px;
     }
     
-    /* Further adjust positioning */
+    /* Further adjust positioning - move lower to center better */
     #heroContainer {
         left: 30px;
-        top: 15px;
+        top: 50px;
     }
     
     #enemyContainer {
         right: 30px;
-        top: 15px;
+        top: 50px;
     }
     
     /* Even smaller sprites */

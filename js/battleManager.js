@@ -38,6 +38,18 @@ class BattleManager {
         this.turnTimerInterval = null;
         this.turnTimerStartTime = null;
         this.turnTimerReduced = false; // Flag for Time Sting effect
+        
+        // New special ability tracking
+        this.dazedTurns = 0;
+        this.stunnedTurns = 0;
+        this.charmedTurns = 0;
+        this.originalDefense = 0;
+        this.teleportActive = false;
+        this.teleportTurns = 0;
+        this.originalArena = null;
+        this.morphActive = false;
+        this.morphTurns = 0;
+        this.morphedEnemy = null;
     }
 
     // Initialize battle with hero and enemy
@@ -110,7 +122,7 @@ class BattleManager {
         if (enemyData.hugAttack) this.specialAttackUsageCount['hug'] = 0;
         if (enemyData.timeStingAttack) this.specialAttackUsageCount['timeSting'] = 0;
         if (enemyData.gaugeStealAttack) this.specialAttackUsageCount['gaugeSteal'] = 0;
-        if (enemyData.overthinkerAttack) this.specialAttackUsageCount['overthink'] = 0;
+        if (enemyData.canOverthink) this.specialAttackUsageCount['overthink'] = 0;
         
         // Overthink effect state (Overthinker enemy special attack)
         this.overthinkActive = false;
@@ -294,6 +306,23 @@ class BattleManager {
         console.log('[Battle] playerAttack called, current state:', this.state);
         if (this.state !== BattleState.PLAYER_TURN) {
             console.warn('[Battle] playerAttack blocked - not player turn');
+            return;
+        }
+        
+        // Check if player is dazed or stunned
+        if (this.dazedTurns > 0) {
+            addBattleLog('😵 You are dazed and skip your turn!');
+            this.dazedTurns--;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
+            return;
+        }
+        
+        if (this.stunnedTurns > 0) {
+            addBattleLog('⚡ You are stunned and cannot move!');
+            this.stunnedTurns--;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.enemyTurn();
             return;
         }
         
@@ -1718,6 +1747,64 @@ class BattleManager {
             await new Promise(resolve => setTimeout(resolve, 800));
         }
         
+        // === ONGOING EFFECT CHECKS ===
+        
+        // Teleport damage
+        if (this.teleportActive && this.teleportTurns > 0) {
+            const teleportDamage = this.enemy.teleportDamage || 20;
+            this.hero.hp = Math.max(0, this.hero.hp - teleportDamage);
+            addBattleLog(`🌀 Teleport effect dealt ${teleportDamage} damage!`);
+            
+            this.teleportTurns--;
+            if (this.teleportTurns <= 0) {
+                // Restore original arena
+                const battleScene = document.querySelector('.battle-scene');
+                if (battleScene && this.originalArena) {
+                    battleScene.style.backgroundImage = this.originalArena;
+                }
+                this.teleportActive = false;
+                addBattleLog('🌀 Arena returned to normal!');
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+                return;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
+        
+        // Charm effect restoration
+        if (this.charmedTurns > 0) {
+            this.charmedTurns--;
+            if (this.charmedTurns <= 0 && this.originalDefense > 0) {
+                this.hero.defense = this.originalDefense;
+                this.originalDefense = 0;
+                addBattleLog('💖 Charm effect wore off! Defense restored!');
+                updateBattleUI(this.hero, this.enemy);
+            }
+        }
+        
+        // Morph effect end
+        if (this.morphActive && this.morphTurns > 0) {
+            this.morphTurns--;
+            if (this.morphTurns <= 0) {
+                this.morphActive = false;
+                this.morphedEnemy = null;
+                
+                // Restore original sprite
+                const enemySprite = document.getElementById('enemySprite');
+                if (enemySprite && this.enemy.sprites && this.enemy.sprites.idle) {
+                    enemySprite.src = this.enemy.sprites.idle;
+                }
+                
+                addBattleLog(`🎭 ${this.enemy.name} returned to normal!`);
+            }
+        }
+        
         // === ADAPTIVE HEALING AI ===
         if (window.enemyAI && this.enemy.hp < this.enemy.maxHP) {
             const playerLevel = gameState.level || 1;
@@ -2086,17 +2173,19 @@ class BattleManager {
             
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             
-            // Show thought bubble projectile effect
+            // Show fire skull projectile effect
             const enemySprite = document.getElementById('enemySprite');
             const heroSprite = document.getElementById('heroSprite');
             if (enemySprite && heroSprite) {
-                const thoughtBubble = document.createElement('div');
-                thoughtBubble.innerHTML = '🤯💭';
-                thoughtBubble.style.cssText = `
+                const projectile = document.createElement('img');
+                projectile.src = 'assets/enemies/Overthinker/Fire-skull-attack.gif';
+                projectile.style.cssText = `
                     position: absolute;
-                    font-size: 40px;
+                    width: 48px;
+                    height: 48px;
                     z-index: 1000;
-                    animation: thoughtFloat 1s ease-out forwards;
+                    image-rendering: pixelated;
+                    animation: fireSkullFloat 1s ease-out forwards;
                 `;
                 
                 // Add animation keyframes
@@ -2104,22 +2193,22 @@ class BattleManager {
                     const style = document.createElement('style');
                     style.id = 'overthinkStyle';
                     style.textContent = `
-                        @keyframes thoughtFloat {
+                        @keyframes fireSkullFloat {
                             0% { transform: translateX(0) scale(1); opacity: 1; }
-                            50% { transform: translateX(-100px) scale(1.5); opacity: 1; }
-                            100% { transform: translateX(-200px) scale(0.5); opacity: 0; }
+                            50% { transform: translateX(-150px) scale(1.2); opacity: 1; }
+                            100% { transform: translateX(-250px) scale(0.8); opacity: 0; }
                         }
                     `;
                     document.head.appendChild(style);
                 }
                 
                 const enemyRect = enemySprite.getBoundingClientRect();
-                thoughtBubble.style.left = enemyRect.left + 'px';
-                thoughtBubble.style.top = enemyRect.top + 'px';
-                document.body.appendChild(thoughtBubble);
+                projectile.style.left = enemyRect.left + 'px';
+                projectile.style.top = enemyRect.top + 'px';
+                document.body.appendChild(projectile);
                 
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                thoughtBubble.remove();
+                projectile.remove();
             }
             
             // Apply Overthink effect: user's next attack will backfire at a random turn (1-3 turns)
@@ -2199,6 +2288,267 @@ class BattleManager {
             }
             return;
         }
+        
+        // === NEW SPECIAL ABILITIES ===
+        
+        // Berserk Attack (Orc, Slothful Ogre, Distraction Dragon)
+        if (this.enemy.canBerserk && Math.random() < (this.enemy.berserkChance || 0.3)) {
+            addBattleLog(`😡 ${this.enemy.name} goes BERSERK!`);
+            
+            for (let i = 0; i < (this.enemy.berserkAttacks || 3); i++) {
+                await playEnemyAnimation(this.enemy, 'attack1', 600);
+                
+                const damage = Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin;
+                this.hero.hp = Math.max(0, this.hero.hp - damage);
+                
+                addBattleLog(`😡 ${this.enemy.name} dealt ${damage} damage! (Attack ${i+1}/${this.enemy.berserkAttacks})`);
+                
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                startHeroAnimation('idle');
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                this.state = BattleState.PLAYER_TURN;
+                await new Promise(resolve => setTimeout(resolve, 500));
+                addBattleLog('⚔️ Your turn!');
+                
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
+            }
+            return;
+        }
+        
+        // Pickpocket Attack (Naughty Nova, Orc, Slime, Ice Bully, Distraction Dragon)
+        if (this.enemy.canPickpocket && Math.random() < (this.enemy.pickpocketChance || 0.3)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            const itemsToSteal = this.enemy.pickpocketAmount || 2;
+            let stolenCount = 0;
+            
+            // Steal from battle inventory
+            if (window.gameState && window.gameState.inventory) {
+                const inventory = window.gameState.inventory;
+                const availableItems = Object.keys(inventory).filter(item => inventory[item] > 0);
+                
+                for (let i = 0; i < itemsToSteal && availableItems.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * availableItems.length);
+                    const randomItem = availableItems[randomIndex];
+                    if (inventory[randomItem] > 0) {
+                        inventory[randomItem]--;
+                        stolenCount++;
+                        availableItems.splice(randomIndex, 1);
+                    }
+                }
+            }
+            
+            if (stolenCount > 0) {
+                addBattleLog(`🦝 ${this.enemy.name} pickpocketed ${stolenCount} item(s)!`);
+            } else {
+                addBattleLog(`🦝 ${this.enemy.name} tried to pickpocket but found nothing!`);
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            addBattleLog('⚔️ Your turn!');
+            
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
+        
+        // Daze Attack (Flying Procrastinator)
+        if (this.enemy.canDaze && Math.random() < (this.enemy.dazeChance || 0.3)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            this.dazedTurns = 1;
+            addBattleLog(`😵 ${this.enemy.name} used Daze! You're confused!`);
+            addBattleLog('😵 Your next turn will be skipped!');
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
+        
+        // Stun Attack (Sentry Drone, Self Doubt Drone, Treant, Little Cthulhu)
+        if (this.enemy.canStun && Math.random() < (this.enemy.stunChance || 0.3)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            this.stunnedTurns = this.enemy.stunTurns || 1;
+            addBattleLog(`⚡ ${this.enemy.name} stunned you for ${this.stunnedTurns} turn(s)!`);
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
+        
+        // Charm Attack (2Face, Medusa)
+        if (this.enemy.canCharm && Math.random() < (this.enemy.charmChance || 0.25)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            if (!this.charmedTurns || this.charmedTurns <= 0) {
+                this.originalDefense = this.hero.defense;
+                this.hero.defense = Math.floor(this.hero.defense * (this.enemy.charmEffect || 0.5));
+                this.charmedTurns = 2;
+                
+                addBattleLog(`💖 ${this.enemy.name} charmed you! Defense reduced by half!`);
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
+        
+        // Teleport Attack (Little Cthulhu, Mushroom Guard, Distraction Dragon)
+        if (this.enemy.canTeleport && Math.random() < (this.enemy.teleportChance || 0.25)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            if (!this.teleportActive) {
+                // Save original arena
+                const battleScene = document.querySelector('.battle-scene');
+                if (battleScene) {
+                    this.originalArena = battleScene.style.backgroundImage;
+                    
+                    // Change to random arena
+                    if (window.BattleArenasManager) {
+                        const arenas = window.BattleArenasManager.getArenasForLevel(window.gameState.level);
+                        if (arenas && arenas.length > 0) {
+                            const randomArena = arenas[Math.floor(Math.random() * arenas.length)];
+                            battleScene.style.backgroundImage = `url('${randomArena.background}')`;
+                        }
+                    }
+                }
+                
+                this.teleportActive = true;
+                this.teleportTurns = this.enemy.teleportTurns || 3;
+                
+                addBattleLog(`🌀 ${this.enemy.name} teleported! Arena changed!`);
+            }
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            this.state = BattleState.PLAYER_TURN;
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
+        }
+        
+        // HP Absorption (Little Cthulhu, Slime)
+        if (this.enemy.canAbsorb && Math.random() < (this.enemy.absorbChance || 0.3)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            
+            const absorbMin = this.enemy.absorbMin || 30;
+            const absorbMax = this.enemy.absorbMax || 45;
+            const absorbAmount = Math.floor(Math.random() * (absorbMax - absorbMin + 1)) + absorbMin;
+            
+            this.hero.hp = Math.max(0, this.hero.hp - absorbAmount);
+            this.enemy.hp = Math.min(this.enemy.maxHP, this.enemy.hp + absorbAmount);
+            
+            addBattleLog(`🧛 ${this.enemy.name} absorbed ${absorbAmount} HP!`);
+            
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 800));
+            startHeroAnimation('idle');
+            
+            updateBattleUI(this.hero, this.enemy);
+            
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                this.state = BattleState.PLAYER_TURN;
+                await new Promise(resolve => setTimeout(resolve, 500));
+                addBattleLog('⚔️ Your turn!');
+                
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
+            }
+            return;
+        }
+        
+        // Morph Attack (2Face)
+        if (this.enemy.canMorph && Math.random() < (this.enemy.morphChance || 0.3)) {
+            if (!this.morphActive) {
+                await playEnemyAnimation(this.enemy, 'transform', 1000);
+                
+                // Select random enemy from ENEMY_TYPES
+                if (window.ENEMY_TYPES) {
+                    const availableEnemies = window.ENEMY_TYPES.filter(e => e.name !== this.enemy.name && !e.isFinalBoss);
+                    if (availableEnemies.length > 0) {
+                        this.morphedEnemy = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
+                        this.morphActive = true;
+                        this.morphTurns = this.enemy.morphDuration || 2;
+                        
+                        // Change sprite to morphed enemy
+                        const enemySprite = document.getElementById('enemySprite');
+                        if (enemySprite && this.morphedEnemy.sprites && this.morphedEnemy.sprites.idle) {
+                            enemySprite.src = this.morphedEnemy.sprites.idle;
+                        }
+                        
+                        addBattleLog(`🎭 ${this.enemy.name} morphed into ${this.morphedEnemy.name}!`);
+                    }
+                }
+                
+                updateBattleUI(this.hero, this.enemy);
+                
+                this.state = BattleState.PLAYER_TURN;
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                if (typeof startTurnTimer === 'function') {
+                    const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                    startTurnTimer(timerDuration);
+                    this.turnTimerReduced = false;
+                }
+                return;
+            }
+        }
+        
+        // === END NEW SPECIAL ABILITIES ===
         
         // Normal attack
         await playEnemyAnimation(this.enemy, 'attack1', 600);
@@ -2855,12 +3205,12 @@ class BattleManager {
                 window.cachedBattleAppearance = null;
             }
             
-            // FIXED: Stop all battle music when arena is hidden
-            // This ensures music stops even if user navigates away without clicking Continue
-            if (window.audioManager) {
-                window.audioManager.stopAllBattleMusic();
-                window.audioManager.stopBattleOutcomeMusic();
-            }
+            // FIXED: Don't stop music here - let it continue through loot modal and task world map
+            // Music will be stopped when user returns to home screen
+            // if (window.audioManager) {
+            //     window.audioManager.stopAllBattleMusic();
+            //     window.audioManager.stopBattleOutcomeMusic();
+            // }
         }, 2000);
     }
     
