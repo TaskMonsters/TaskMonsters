@@ -222,12 +222,17 @@ const MoodDialogueSystem = {
         
         // Check if dialogue should be shown (level 5+)
         if (gameState.jerryLevel >= 5 && !gameState.isEgg) {
-            // Don't show greeting immediately, let user settle in
+            // Show tap hint for mood tracker first
+            setTimeout(() => {
+                this.showDialogue('tap_hint');
+            }, 3000);
+            
+            // Then show greeting occasionally
             setTimeout(() => {
                 if (Math.random() < 0.3) { // 30% chance
                     this.showDialogue('greeting');
                 }
-            }, 5000);
+            }, 10000);
         }
     },
     

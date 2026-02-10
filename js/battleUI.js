@@ -1519,3 +1519,166 @@ window.increaseSpecialGauge = function(amount) {
     
     console.log(`[Special Gauge] Increased by ${amount}, now at ${window.gameState.specialAttackGauge}/100`);
 };
+
+// Medusa projectile animation (gaze beam)
+async function playMedusaProjectile(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'medusa-projectile';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.left + startRect.width / 2 - 30 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 30 + 'px';
+    projectile.style.width = '60px';
+    projectile.style.height = '60px';
+    projectile.style.fontSize = '60px';
+    projectile.textContent = '👁️';
+    projectile.style.zIndex = '10000';
+    projectile.style.filter = 'hue-rotate(270deg) brightness(1.5)';
+
+    // Animate projectile movement
+    const duration = 600;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const currentX = startRect.left + (targetRect.left - startRect.left) * progress;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * progress;
+
+            projectile.style.left = currentX + startRect.width / 2 - 30 + 'px';
+            projectile.style.top = currentY + startRect.height / 2 - 30 + 'px';
+            projectile.style.transform = `scale(${1 + progress * 0.5})`;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.style.opacity = '0';
+                setTimeout(() => {
+                    projectile.remove();
+                    resolve();
+                }, 200);
+            }
+        }
+        animate();
+    });
+}
+
+// Mushroom projectile animation (spinning mushroom)
+async function playMushroomProjectile(startElement, targetElement) {
+    const projectile = document.createElement('div');
+    projectile.className = 'mushroom-projectile';
+    document.body.appendChild(projectile);
+
+    // Get positions
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    
+    // Position projectile at start
+    projectile.style.position = 'fixed';
+    projectile.style.left = startRect.left + startRect.width / 2 - 25 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 25 + 'px';
+    projectile.style.width = '50px';
+    projectile.style.height = '50px';
+    projectile.style.fontSize = '50px';
+    projectile.textContent = '🍄';
+    projectile.style.zIndex = '10000';
+
+    // Animate projectile movement
+    const duration = 500;
+    const startTime = Date.now();
+
+    return new Promise((resolve) => {
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const currentX = startRect.left + (targetRect.left - startRect.left) * progress;
+            const currentY = startRect.top + (targetRect.top - startRect.top) * progress;
+
+            projectile.style.left = currentX + startRect.width / 2 - 25 + 'px';
+            projectile.style.top = currentY + startRect.height / 2 - 25 + 'px';
+            projectile.style.transform = `rotate(${progress * 720}deg)`;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                projectile.style.opacity = '0';
+                setTimeout(() => {
+                    projectile.remove();
+                    resolve();
+                }, 200);
+            }
+        }
+        animate();
+    });
+}
+
+// Export functions
+window.playMedusaProjectile = playMedusaProjectile;
+window.playMushroomProjectile = playMushroomProjectile;
+
+// Defend animation (yellow shield glow)
+async function showDefendAnimation(targetElementId) {
+    const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) return;
+
+    const animation = document.createElement('img');
+    animation.src = 'assets/animations/DefendandDefenseAnimation.gif';
+    animation.style.position = 'absolute';
+    animation.style.width = '120px';
+    animation.style.height = '120px';
+    animation.style.left = '50%';
+    animation.style.top = '50%';
+    animation.style.transform = 'translate(-50%, -50%)';
+    animation.style.pointerEvents = 'none';
+    animation.style.zIndex = '1000';
+    
+    targetElement.style.position = 'relative';
+    targetElement.appendChild(animation);
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            animation.remove();
+            resolve();
+        }, 1000);
+    });
+}
+
+// Potion/Attack boost animation (cyan glow)
+async function showPotionBoostAnimation(targetElementId) {
+    const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) return;
+
+    const animation = document.createElement('img');
+    animation.src = 'assets/animations/PotionandattackboostAnimation.gif';
+    animation.style.position = 'absolute';
+    animation.style.width = '120px';
+    animation.style.height = '120px';
+    animation.style.left = '50%';
+    animation.style.top = '50%';
+    animation.style.transform = 'translate(-50%, -50%)';
+    animation.style.pointerEvents = 'none';
+    animation.style.zIndex = '1000';
+    
+    targetElement.style.position = 'relative';
+    targetElement.appendChild(animation);
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            animation.remove();
+            resolve();
+        }, 1000);
+    });
+}
+
+// Export functions
+window.showDefendAnimation = showDefendAnimation;
+window.showPotionBoostAnimation = showPotionBoostAnimation;

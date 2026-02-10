@@ -123,7 +123,7 @@ function initEnemySprite(enemy) {
         'Medusa': 'assets/enemies/Medusa/Medusa-animated.gif',
         'Mushroom Guard': 'assets/enemies/Mushroom Guard/Mushroom_Attack.gif',
         'Naughty Nova': 'assets/enemies/Naughty Nova/Naughty Nova Attack.gif',
-        'Orc': 'assets/enemies/Orc/Orc-Attack.gif',
+        // 'Orc': removed from game
         'Overthinker': 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
         'Self Doubt Drone': 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
         'Sentry Drone': 'assets/enemies/Sentry Drone/Sentry Drone.gif',

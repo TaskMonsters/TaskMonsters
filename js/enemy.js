@@ -232,26 +232,7 @@ const NAUGHTY_NOVA_DATA = {
 
 // Level 20+ Enemies
 
-const ORC_DATA = {
-    name: 'Orc',
-    baseHP: 130,
-    baseAttack: 25,
-    baseDefense: 20,
-    minLevel: 20,
-    tier: 'boss',
-    attackDamageMin: 25,
-    attackDamageMax: 30,
-    specialAbility: 'berserk_pickpocket',
-    canBerserk: true,
-    berserkAttacks: 3,
-    canPickpocket: true,
-    pickpocketCount: 3,
-    sprites: {
-        idle: 'assets/enemies/Orc/Orc-Attack.gif',
-        attack: 'assets/enemies/Orc/Orc-Attack.gif',
-        hurt: 'assets/enemies/Orc/Orc-Hurt.gif'
-    }
-};
+// Orc removed from the game
 
 const SLOTHFUL_OGRE_DATA = {
     name: 'Slothful Ogre',
@@ -365,6 +346,8 @@ const MEDUSA_DATA = {
     specialAbility: 'petrify_charm',
     canPetrify: true,
     petrifyDuration: 2,
+    petrifyChance: 0.3,
+    projectileType: 'medusa',
     canCharm: true,
     charmDefenseReduction: 0.5,
     sprites: {
@@ -436,6 +419,7 @@ const MUSHROOM_GUARD_DATA = {
     canTeleport: true,
     teleportDamage: 20,
     teleportDuration: 3,
+    projectileType: 'mushroom',
     sprites: {
         idle: 'assets/enemies/Mushroom Guard/Mushroom_Attack.gif',
         attack: 'assets/enemies/Mushroom Guard/Mushroom Guard Projectile Attack Explosion.gif',
@@ -478,7 +462,6 @@ const ENEMY_TYPES = [
     SELF_DOUBT_DRONE_DATA,
     TWOFACE_DATA,
     NAUGHTY_NOVA_DATA,
-    ORC_DATA,
     SLOTHFUL_OGRE_DATA,
     OVERTHINKER_DATA,
     TREANT_DATA,
@@ -518,7 +501,12 @@ function getNextEnemyFromRotation(availableEnemies, playerLevel) {
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
     // Filter enemies available at current level
-    let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
+    // Allow all enemies from minLevel up to level 50 (lower level enemies can still appear)
+    let availableEnemies = ENEMY_TYPES.filter(e => {
+        const meetsMinLevel = playerLevel >= e.minLevel;
+        const withinRange = playerLevel <= 50 || e.minLevel >= 40; // Keep all enemies available up to level 50
+        return meetsMinLevel && withinRange;
+    });
     
     if (availableEnemies.length === 0) {
         // Fallback to first enemy if none available

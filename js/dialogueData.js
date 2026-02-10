@@ -61,6 +61,11 @@ const DIALOGUE_DATA = {
         "No pressure today.",
         "You're not failing.",
         "We'll come back stronger."
+      ],
+      "tap_hint": [
+        "Hey! Tap on me to check in with your mood!",
+        "Psst! You can tap me to track how you're feeling!",
+        "Tap me anytime to share your mood!"
       ]
     },
     "luna": {
@@ -123,6 +128,11 @@ const DIALOGUE_DATA = {
         "You're safe here.",
         "You don't have to push.",
         "I won't leave you."
+      ],
+      "tap_hint": [
+        "You can tap on me to share how you're feeling.",
+        "Tap me gently to check in with your mood.",
+        "I'm here if you want to track your mood. Just tap."
       ]
     },
     "benny": {
@@ -185,6 +195,11 @@ const DIALOGUE_DATA = {
         "I won't go away.",
         "You're still my friend.",
         "It's okay to be sad."
+      ],
+      "tap_hint": [
+        "Ooh! Tap me to tell me your mood!",
+        "You can tap me to share how you feel!",
+        "Tap tap! I wanna know your mood!"
       ]
     }
   }

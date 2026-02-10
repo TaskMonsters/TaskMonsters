@@ -2,7 +2,7 @@
 // SIMPLE MODAL-BASED ONBOARDING
 // ===================================
 // Clear, focused modals shown AFTER monster selection, BEFORE main app
-// Emphasizes ADHD-friendly features
+// Emphasizes gamification and engagement features
 
 class SimpleOnboarding {
     constructor() {
@@ -12,7 +12,7 @@ class SimpleOnboarding {
                 icon: '🎮',
                 title: 'Welcome to Task Monsters!',
                 content: 'Turn your to-do list into an adventure! Complete tasks to level up your monster and battle enemies.',
-                highlight: 'Perfect for your brain - gamification makes boring tasks fun! 🧠✨'
+                highlight: 'Gamification makes boring tasks fun! 🧠✨'
             },
             {
                 icon: '📝',
@@ -24,20 +24,20 @@ class SimpleOnboarding {
                 icon: '⚡',
                 title: 'Quick Tasks',
                 content: 'Need something fast? Quick tasks are pre-made and ready to go! Perfect for small to-dos when you don\'t want to overthink it.',
-                highlight: 'ADHD-friendly: Less decision fatigue, more action! 🚀'
+                highlight: 'Less decision fatigue, more action! 🚀'
             },
             {
                 icon: '⚔️',
                 title: 'Battle Mode',
                 content: 'Completing tasks triggers random battles! Fight enemies, earn XP, and level up your monster. The more tasks you complete, the stronger you become!',
-                highlight: 'Instant rewards = dopamine boost = motivation! 💪'
+                highlight: 'Instant rewards = instant motivation! 💪'
             },
             {
                 icon: '🎯',
-                title: 'Why This Works for ADHD',
+                title: 'Why This Works',
                 content: '✅ Instant feedback (XP, battles, loot)\n✅ Visual progress (levels, gauges)\n✅ Variety (different enemies, abilities)\n✅ Rewards (makes tasks feel worth it!)',
                 useList: true,
-                highlight: 'Your brain will LOVE the dopamine hits! 🎉'
+                highlight: 'Your brain will LOVE the instant rewards! 🎉'
             },
             {
                 icon: '🚀',

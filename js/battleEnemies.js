@@ -324,42 +324,7 @@ const BATTLE_ENEMIES = {
         }
     },
 
-    orc: {
-        id: 'orc',
-        name: 'Burnout Orc',
-        tier: 4,
-        minLevel: 30,
-        maxLevel: 45,
-        instinct: 'bully',
-        hasMemory: true,
-        
-        hp: { min: 140, max: 200 },
-        attack: { min: 30, max: 45 },
-        defense: { min: 22, max: 35 },
-        
-        abilities: [
-            { name: 'Exhaustion Smash', damage: [30, 45], cooldown: 0 },
-            { name: 'Rage Quit', damage: [35, 50], effect: 'berserk', cooldown: 4 },
-            { name: 'Overwork Slam', damage: [40, 55], cooldown: 3 },
-            { name: 'Burnout Wave', damage: [45, 60], effect: 'drain_all', cooldown: 7 }
-        ],
-        
-        loot: {
-            xpCoins: { min: 90, max: 130 },
-            items: [
-                { id: 'energy_crystal', chance: 0.4 },
-                { id: 'orc_tooth', chance: 0.3 },
-                { id: 'legendary_item', chance: 0.15 }
-            ]
-        },
-        
-        assets: {
-            idle: 'assets/battle/enemies/Orc/Orc-Idle.gif',
-            attack: 'assets/battle/enemies/Orc/Orc-Attack.gif',
-            hurt: 'assets/battle/enemies/Orc/Orc-Hurt.gif',
-            attackSound: 'assets/battle/sounds/Regular Attack Sound by Users Monster.mp3'
-        }
-    },
+    // Orc removed from the game
 
     // TIER 5: Levels 40-50+ (Boss-tier enemies)
     energy_vampire_bat: {

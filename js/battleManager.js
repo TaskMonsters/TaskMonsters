@@ -537,10 +537,15 @@ class BattleManager {
             window.audioManager.playSound('defend', 0.7);
         }
         
+        // Show defend animation
+        if (window.showDefendAnimation) {
+            await window.showDefendAnimation('heroSprite');
+        }
+        
         addBattleLog('🛡️ Defense stance activated!');
         updateBattleUI(this.hero, this.enemy);
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 800));
         await this.enemyTurn();
     }
 
@@ -873,6 +878,11 @@ class BattleManager {
             window.audioManager.playSound('potion_use', 0.7);
         }
         
+        // Show potion/boost animation
+        if (window.showPotionBoostAnimation) {
+            await window.showPotionBoostAnimation('heroSprite');
+        }
+        
         // Play hero jump animation
         startHeroAnimation('jump');
         
@@ -932,6 +942,11 @@ class BattleManager {
         // Play potion use sound
         if (window.audioManager) {
             window.audioManager.playSound('potion_use', 0.7);
+        }
+        
+        // Show potion/boost animation
+        if (window.showPotionBoostAnimation) {
+            await window.showPotionBoostAnimation('heroSprite');
         }
         
         // Play hero jump animation
@@ -1849,7 +1864,15 @@ class BattleManager {
         }
         // Fallback to old formula (should rarely be used now)
         else {
-            damage = Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+            const enemyAttack = this.enemy.attack || 10;
+            const heroDefense = this.hero.defense || 0;
+            damage = Math.max(3, Math.floor(enemyAttack - heroDefense / 2));
+        }
+        
+        // Safety check: ensure damage is a valid number
+        if (isNaN(damage) || damage === undefined || damage === null) {
+            console.error('[Battle] Invalid damage calculated, using default:', damage);
+            damage = 5; // Safe default
         }
         
         // Apply damage cap if enemy has one
@@ -2482,6 +2505,11 @@ class BattleManager {
         // Play power-up sound
         if (window.audioManager) {
             window.audioManager.playSound('potion_use', 0.8);
+        }
+        
+        // Show attack boost animation
+        if (window.showPotionBoostAnimation) {
+            await window.showPotionBoostAnimation('heroSprite');
         }
 
         saveGameState();

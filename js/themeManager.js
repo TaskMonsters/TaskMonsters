@@ -80,6 +80,42 @@ const availableThemes = {
         description: 'Haunted dungeon entrance with skull gateway',
         price: 1100,
         preview: 'assets/backgrounds/themes/SkullGates.png'
+    },
+    bright_town: {
+        id: 'bright_town',
+        name: 'Bright Town',
+        emoji: '🏘️',
+        description: 'Charming village with colorful houses',
+        price: 1400,
+        levelRequired: 30,
+        preview: 'assets/themes/bright-town.png'
+    },
+    fort_of_illusions: {
+        id: 'fort_of_illusions',
+        name: 'Fort of Illusions',
+        emoji: '🏯',
+        description: 'Mystical fortress under starry skies',
+        price: 1800,
+        levelRequired: 30,
+        preview: 'assets/themes/FortofIllusionsTheme.gif'
+    },
+    stone_ruins: {
+        id: 'stone_ruins',
+        name: 'Stone Ruins',
+        emoji: '🏛️',
+        description: 'Ancient ruins with cherry blossoms',
+        price: 2200,
+        levelRequired: 30,
+        preview: 'assets/themes/StoneRuins.png'
+    },
+    forest_of_illusions: {
+        id: 'forest_of_illusions',
+        name: 'Forest of Illusions',
+        emoji: '🌳',
+        description: 'Enchanted forest with magical creatures',
+        price: 2500,
+        levelRequired: 30,
+        preview: 'assets/themes/ForestofIllusionsTheme.gif'
     }
 };
 
@@ -101,6 +137,14 @@ function updateThemesDisplay() {
     
     // Render each theme
     sortedThemes.forEach(theme => {
+        // Check level requirement
+        const playerLevel = window.gameState?.level || 1;
+        const levelRequired = theme.levelRequired || 0;
+        const meetsLevelReq = playerLevel >= levelRequired;
+        
+        // Skip if level requirement not met
+        if (!meetsLevelReq) return;
+        
         const isOwned = window.gameState && window.gameState.ownedThemes && window.gameState.ownedThemes.includes(theme.id);
         const isActive = window.gameState && window.gameState.activeTheme === theme.preview;
         const canAfford = window.gameState && (window.gameState.jerryXP || 0) >= theme.price;

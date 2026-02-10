@@ -1,7 +1,7 @@
 /**
  * Mood Tracker System - Tooltip Style
  * Displays a speech bubble tooltip for users to track their mood with emoji buttons
- * Appears every 30 minutes and can be triggered by tapping the monster
+ * Appears every hour and can be triggered by tapping the monster
  * Saves mood history to localStorage and displays on Habits page with filters
  */
 
@@ -14,7 +14,7 @@ class MoodTracker {
             { emoji: '😡', name: 'Angry', value: 'angry' }
         ];
         
-        this.autoPopupInterval = 30 * 60 * 1000; // 30 minutes
+        this.autoPopupInterval = 60 * 60 * 1000; // 1 hour
         this.lastPopupTime = null;
         this.intervalId = null;
         
@@ -292,7 +292,7 @@ class MoodTracker {
     }
     
     startAutoPopup() {
-        console.log('[MoodTracker] Starting auto-popup timer (30 minutes)');
+        console.log('[MoodTracker] Starting auto-popup timer (1 hour)');
         
         // Clear existing interval
         if (this.intervalId) {
@@ -361,24 +361,48 @@ class MoodTracker {
             } else {
                 // NO SKIN AND NOT EGG: Use default monster jump GIF
                 console.log('[MoodTracker] No skin/egg - using default monster jump GIF');
-                const jumpGif = `assets/${selectedMonster}_jump.gif`;
-                sprite.src = jumpGif;
-                sprite.style.animation = 'none';
                 
-                // Add jump transform effect
-                sprite.style.transition = 'transform 0.3s ease';
-                sprite.style.transform = 'scale(4) translateY(-20px)';
+                // Normalize monster name: capitalize first letter for file path
+                const monsterName = selectedMonster.charAt(0).toUpperCase() + selectedMonster.slice(1).toLowerCase();
+                const jumpGif = `assets/${monsterName}_jump.gif`;
                 
-                setTimeout(() => {
-                    sprite.style.transform = 'scale(4) translateY(0)';
-                }, 300);
-                
-                setTimeout(() => {
-                    sprite.src = originalSrc;
-                    sprite.style.animation = originalAnimation;
-                    sprite.style.transition = '';
-                    console.log('[MoodTracker] Jump GIF animation complete');
-                }, 2000);
+                // Preload the jump GIF to prevent broken image display
+                const jumpImage = new Image();
+                jumpImage.onload = () => {
+                    sprite.src = jumpGif;
+                    sprite.style.animation = 'none';
+                    
+                    // Wait a frame for the image to render
+                    requestAnimationFrame(() => {
+                        // Add jump transform effect
+                        sprite.style.transition = 'transform 0.3s ease';
+                        sprite.style.transform = 'scale(4) translateY(-20px)';
+                        
+                        setTimeout(() => {
+                            sprite.style.transform = 'scale(4) translateY(0)';
+                        }, 300);
+                        
+                        setTimeout(() => {
+                            sprite.src = originalSrc;
+                            sprite.style.animation = originalAnimation;
+                            sprite.style.transition = '';
+                            console.log('[MoodTracker] Jump GIF animation complete');
+                        }, 2000);
+                    });
+                };
+                jumpImage.onerror = () => {
+                    console.error('[MoodTracker] Failed to load jump GIF:', jumpGif);
+                    // Fallback: just do transform without changing sprite
+                    sprite.style.transition = 'transform 0.3s ease';
+                    sprite.style.transform = 'scale(4) translateY(-20px)';
+                    setTimeout(() => {
+                        sprite.style.transform = 'scale(4) translateY(0)';
+                    }, 300);
+                    setTimeout(() => {
+                        sprite.style.transition = '';
+                    }, 600);
+                };
+                jumpImage.src = jumpGif;
             }
         } 
         // OTHER MOODS: Flicker/fade effect
