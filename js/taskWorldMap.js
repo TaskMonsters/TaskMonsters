@@ -205,72 +205,41 @@ class TaskWorldMap {
         `;
         container.appendChild(levelIndicator);
         
-        // Add guardian lore text directly to map page
-        const loreContainer = document.createElement('div');
-        loreContainer.style.cssText = `
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
-            padding: 20px 28px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-        `;
-        
-        // Get guardian message
-        let loreMessage = 'Your Task Pet grows stronger with each triumph!';
-        if (window.guardianNarrative) {
-            loreMessage = window.guardianNarrative.getMapMessage(context) || loreMessage;
-        } else if (window.guardianOfTaskWorld) {
-            const guardianContext = {
-                result: 'victory',
-                level: level,
-                previousLevel: previousLevel || level,
-                region: regionText,
-                petName: petName || 'your Task Pet',
-                enemyName: enemyName || 'enemy',
-                firstBattle: isFirstBattle || false,
-                regionChanged: false,
-                battleStreak: window.gameState?.battleStreak || 0
-            };
-            loreMessage = window.guardianOfTaskWorld.getMessage(guardianContext) || loreMessage;
-        }
-        
-        loreContainer.innerHTML = `
-            <div style="color: white; font-size: 16px; line-height: 1.6; text-align: center; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                🏰 ${loreMessage}
-            </div>
-        `;
-        container.appendChild(loreContainer);
-        
         // Add Continue button
-        const continueBtn = document.createElement('button');
-        continueBtn.textContent = 'Continue';
-        continueBtn.style.cssText = `
-            padding: 12px 32px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+        const continueButton = document.createElement('button');
+        continueButton.textContent = 'Continue';
+        continueButton.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: none;
+            padding: 16px 48px;
+            font-size: 20px;
+            font-weight: 700;
             border-radius: 12px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 700;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 24px;
         `;
-        continueBtn.onmouseover = () => {
-            continueBtn.style.transform = 'scale(1.05)';
-            continueBtn.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.6)';
+        continueButton.onmouseover = () => {
+            continueButton.style.transform = 'scale(1.05)';
+            continueButton.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
         };
-        continueBtn.onmouseout = () => {
-            continueBtn.style.transform = 'scale(1)';
-            continueBtn.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
+        continueButton.onmouseout = () => {
+            continueButton.style.transform = 'scale(1)';
+            continueButton.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.4)';
         };
-        continueBtn.onclick = () => {
-            if (window.returnToMainApp) {
-                window.returnToMainApp();
+        continueButton.onclick = () => {
+            // Hide the world map overlay
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            // Call returnToMainApp if it exists
+            if (typeof returnToMainApp === 'function') {
+                returnToMainApp();
             }
         };
-        container.appendChild(continueBtn);
+        container.appendChild(continueButton);
         
         overlay.appendChild(container);
         document.body.appendChild(overlay);
@@ -297,6 +266,14 @@ class TaskWorldMap {
             `;
             document.head.appendChild(style);
         }
+        
+        // Show Guardian message after a brief delay
+        setTimeout(() => {
+            if (window.guardianNarrative) {
+                const message = window.guardianNarrative.getMapMessage(context);
+                window.guardianNarrative.showMapMessage(message);
+            }
+        }, 1500);
     }
     
     /**
@@ -410,14 +387,9 @@ function returnToMainApp() {
         mainApp.classList.remove('hidden');
     }
     
-    // Stop battle outcome music and resume home page music
+    // Resume home page music
     if (window.audioManager) {
-        if (typeof window.audioManager.stopBattleOutcomeMusic === 'function') {
-            window.audioManager.stopBattleOutcomeMusic();
-        }
-        if (typeof window.audioManager.stopMusic === 'function') {
-            window.audioManager.stopMusic();
-        }
+        window.audioManager.resumeHomeMusic();
     }
 }
 

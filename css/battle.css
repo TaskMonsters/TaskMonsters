@@ -27,21 +27,18 @@
 
 /* Battle Container - Main Game Frame */
 .battle-container {
-    width: 90%;
-    max-width: 900px;
-    height: 300px;
-    min-height: 300px; /* CRITICAL: Ensure container never shrinks */
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 16 / 9;
     margin: 1rem auto 0.5rem;
     position: relative;
     overflow: hidden;
-    border-radius: 20px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    padding: 25px;
-    flex-shrink: 0; /* CRITICAL: Prevent flexbox from shrinking this container */
 }
 
 /* Background variants */
@@ -105,190 +102,92 @@
 
 /* ===================================
    SPRITE POSITIONING (ABSOLUTE)
-   MATCHING REFERENCE SCREENSHOT EXACTLY:
-   - Hero: Small (~40px), TOP-LEFT of battle arena, HP bar below
-   - Enemy: Larger (~100px), RIGHT side, HP bar at bottom-right
    =================================== */
 
-/* Hero Container - LEFT side inside battle arena */
-#heroContainer {
+/* Sprite Containers */
+.sprite-container {
     position: absolute;
-    left: 80px;
-    top: 30px;
+    width: 45%;
+    top: 25%; /* Lowered from 5% to 25% to position creatures lower in arena */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    z-index: 10;
-    background: transparent !important;
-    animation: none !important;
-    transform: none !important;
-    transition: none !important;
-    pointer-events: none; /* CRITICAL: Ensure HP bars are always visible and not blocked */
+    gap: 0.5rem;
 }
 
-#heroContainer > * {
-    pointer-events: auto; /* Re-enable pointer events for child elements */
+/* Hero (left side) */
+.sprite-container:first-child {
+    left: 3%;
 }
 
-/* Enemy Container - RIGHT side inside battle arena */
-#enemyContainer {
-    position: absolute;
-    right: 80px;
-    top: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    z-index: 10;
-    pointer-events: none; /* CRITICAL: Ensure HP bars are always visible and not blocked */
+/* Enemy (right side) */
+.sprite-container:last-child {
+    right: 3%;
 }
 
-#enemyContainer > * {
-    pointer-events: auto; /* Re-enable pointer events for child elements */
-}
-
-/* Hero HP Bar - flows within hero container */
-#heroContainer .hp-bar-container {
-    position: relative;
-    z-index: 20;
-}
-
-/* Enemy HP Bar - flows within enemy container */
-#enemyContainer .hp-bar-container {
-    position: relative;
-    z-index: 20;
-}
-
-/* Sprite wrapper - contains the sprite image */
 .sprite-wrapper {
-    position: relative;
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: visible;
-    background: transparent !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    animation: none !important;
-    transform: none !important;
-    transition: none !important;
-    /* CRITICAL: Prevent any visual artifacts */
-    box-shadow: none !important;
-    border: none !important;
+    overflow: hidden; /* FIXED: Clip to show only one frame (prevents duplicate rows) */
 }
 
-/* Hero sprite wrapper - sized for battle arena */
-#heroContainer .sprite-wrapper {
-    width: 120px;
-    height: 120px;
-    background: transparent !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    animation: none !important;
-    transform: none !important;
-    transition: none !important;
-    box-shadow: none !important;
-    border: none !important;
-}
-
-/* Enemy sprite wrapper - sized for battle arena */
-#enemyContainer .sprite-wrapper {
-    width: 100px;
-    height: 100px;
-}
-
-/* Base sprite styling for img elements */
-.sprite {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    image-rendering: pixelated;
-    background: none !important;
-    background-color: transparent !important;
-}
-
-/* Hero sprite (img element) - sized for battle arena */
-img#heroSprite {
-    width: 100px !important;
-    height: 100px !important;
-    object-fit: contain !important;
-    image-rendering: pixelated !important;
-    background: none !important;
-    background-color: transparent !important;
-    background-image: none !important;
-    animation: none !important;
-    transform: none !important;
-    transition: none !important;
-    position: relative !important;
-    /* CRITICAL: Prevent any box shadow or border that could appear as black square */
-    box-shadow: none !important;
-    border: none !important;
-    outline: none !important;
-}
-
-/* Enemy sprite (img element) - LARGER like reference (~100px) */
-img#enemySprite {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    image-rendering: pixelated;
-    background: none !important;
-    background-color: transparent !important;
-}
-
-/* Hero sprites - GIF based, no transforms or background */
+/* Hero sprites (32x32 base) */
 .sprite.hero-sprite {
+    width: 32px;
+    height: 32px;
     image-rendering: pixelated;
-    background: none !important;
-    /* No width/height/transform - let img element handle sizing */
+    background-size: auto 32px;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    transform: scale(0.28); /* Adjusted to match reference screenshot - proper visible size in battle */
+    transform-origin: center;
 }
 
-/* Enemy sprites (64x64 base for bats) - GIF only */
+/* Enemy sprites (64x64 base for bats) */
 .sprite.enemy-sprite-large {
     width: 64px;
     height: 64px;
     image-rendering: pixelated;
-    background: none !important;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+    background-position: 0 0;
     transform: scale(2);
     transform-origin: center;
 }
 
-/* Enemy sprites (48x48 base for flying eye) - GIF only */
+/* Enemy sprites (48x48 base for flying eye) */
 .sprite.enemy-sprite-medium {
     width: 48px;
     height: 48px;
     image-rendering: pixelated;
-    background: none !important;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
 }
 
-/* Enemy sprites (32x32 base for ghost) - GIF only */
+/* Enemy sprites (32x32 base for ghost) */
 .sprite.enemy-sprite-small {
     width: 32px;
     height: 32px;
     image-rendering: pixelated;
-    background: none !important;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+    background-position: 0 0;
     transform: scale(2.2);
     transform-origin: center;
 }
 
-/* Enemy sprites (118x79 base for slime) - GIF only */
+/* Enemy sprites (118x79 base for slime) */
 .sprite.enemy-sprite-slime {
     width: 118px;
     height: 79px;
     image-rendering: pixelated;
-    background: none !important;
+    /* background-size set by JavaScript for each enemy */
+    background-repeat: no-repeat;
+    background-position: 0 0;
     transform: scale(1.5);
-    transform-origin: center;
-}
-
-/* Sentry Drone - GIF only */
-.sprite.enemy-sprite-sentry-drone {
-    width: 64px;
-    height: 64px;
-    image-rendering: pixelated;
-    background: none !important;
-    transform: scale(1); /* 0.5x of the normal 2x scale */
     transform-origin: center;
 }
 
@@ -297,48 +196,24 @@ img#enemySprite {
    =================================== */
 
 .hp-bar-container {
-    width: 140px; /* Same width for both HP bars */
-    max-width: 140px;
-}
-
-/* Hero HP bar container - relative positioning within hero container */
-#heroContainer .hp-bar-container {
-    position: relative;
-    width: 180px;
-    max-width: 180px;
-    margin-bottom: 0;
-    z-index: 100;
-    visibility: visible !important; /* CRITICAL: Always keep HP bars visible */
-    opacity: 1 !important; /* CRITICAL: Always keep HP bars visible */
-}
-
-/* Enemy HP bar container - relative positioning within enemy container */
-#enemyContainer .hp-bar-container {
-    position: relative;
-    width: 180px;
-    max-width: 180px;
-    margin-bottom: 0;
-    z-index: 100;
-    visibility: visible !important; /* CRITICAL: Always keep HP bars visible */
-    opacity: 1 !important; /* CRITICAL: Always keep HP bars visible */
+    width: 100%;
+    max-width: 150px;
 }
 
 .hp-label {
     display: flex;
     justify-content: space-between;
     color: white;
-    font-size: clamp(11px, 2.5vw, 14px);
+    font-size: clamp(10px, 2.2vw, 14px);
     font-weight: bold;
-    margin-bottom: 0.3rem;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+    margin-bottom: 0.25rem;
 }
 
 .hp-bar-bg {
-    height: 10px;
-    background: rgba(0, 0, 0, 0.7);
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .hp-bar-fill {
@@ -495,14 +370,116 @@ img#enemySprite {
    =================================== */
 
 /* Hero sprite animations */
-/* All sprite animations handled by GIF files - no CSS animations needed */
-.sprite.idle,
-.sprite.attack,
-.sprite.hurt {
-    /* GIF animations only */
+.sprite.idle {
+    animation: sprite-idle 0.8s steps(4) infinite;
 }
 
-/* All enemy animations handled by GIF files - no spritesheet animations */
+@keyframes sprite-idle {
+    0% { background-position: 0 0; }
+    25% { background-position: -32px 0; }
+    50% { background-position: -64px 0; }
+    75% { background-position: -96px 0; }
+}
+
+.sprite.attack {
+    animation: sprite-attack 0.6s steps(4) forwards;
+}
+
+@keyframes sprite-attack {
+    0% { background-position: 0 0; }
+    25% { background-position: -32px 0; }
+    50% { background-position: -64px 0; }
+    75% { background-position: -96px 0; }
+}
+
+.sprite.hurt {
+    animation: sprite-hurt 0.4s steps(4) forwards;
+}
+
+@keyframes sprite-hurt {
+    0% { background-position: 0 0; }
+    25% { background-position: -32px 0; }
+    50% { background-position: -64px 0; }
+    75% { background-position: -96px 0; }
+}
+
+/* Lazy Bat animations - 64x64 sprites, 9 frames */
+#enemySprite.bat-idle {
+    animation: batIdle 0.9s steps(9) infinite;
+}
+
+@keyframes batIdle {
+    from { background-position: 0 0; }
+    to { background-position: -576px 0; } /* 9 frames × 64px = 576px */
+}
+
+#enemySprite.bat-attack {
+    animation: batAttack 0.6s steps(8) forwards;
+}
+
+@keyframes batAttack {
+    from { background-position: 0 0; }
+    to { background-position: -512px 0; } /* 8 frames × 64px = 512px */
+}
+
+#enemySprite.bat-hurt {
+    animation: batHurt 0.4s steps(5) forwards;
+}
+
+@keyframes batHurt {
+    from { background-position: 0 0; }
+    to { background-position: -320px 0; } /* 5 frames × 64px = 320px */
+}
+
+/* Flying Eye Demon animations - 48x48 sprites, 8 frames */
+#enemySprite.eye-idle {
+    animation: eyeIdle 0.8s steps(8) infinite;
+}
+
+@keyframes eyeIdle {
+    from { background-position: 0 0; }
+    to { background-position: -384px 0; } /* 8 frames × 48px = 384px */
+}
+
+/* Ghost Task Stopper animations - 32x32 sprites, 6 frames */
+#enemySprite.ghost-idle {
+    animation: ghostIdle 0.6s steps(6) infinite;
+}
+
+@keyframes ghostIdle {
+    from { background-position: 0 0; }
+    to { background-position: -192px 0; } /* 6 frames × 32px = 192px */
+}
+
+/* Lazy Bat II animations - 32x32 sprites, 4 frames */
+#enemySprite.bat2-idle {
+    animation: bat2Idle 0.4s steps(4) infinite;
+}
+
+@keyframes bat2Idle {
+    from { background-position: 0 0; }
+    to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
+}
+
+/* Slime animations - 118x79 sprites, 4 frames */
+#enemySprite.slime-idle {
+    animation: slimeIdle 0.6s steps(4) infinite;
+}
+
+@keyframes slimeIdle {
+    from { background-position: 0 0; }
+    to { background-position: -472px 0; } /* 4 frames × 118px = 472px */
+}
+
+/* Medusa animations - 32x32 sprites, 4 frames */
+#enemySprite.medusa-idle {
+    animation: medusaIdle 0.5s steps(4) infinite;
+}
+
+@keyframes medusaIdle {
+    from { background-position: 0 0; }
+    to { background-position: -128px 0; } /* 4 frames × 32px = 128px */
+}
 
 /* ===================================
    FIREBALL & EXPLOSION EFFECTS
@@ -611,75 +588,25 @@ img#enemySprite {
    MOBILE RESPONSIVENESS
    =================================== */
 
-/* Very small screens (iPhone SE, iPhone 12 mini, etc.) */
+/* Very small screens (iPhone SE, etc.) */
 @media (max-width: 400px) {
     .battle-container {
         max-width: 95%;
         margin: 0.5rem auto;
-        height: 250px;
-        min-height: 250px;
-        padding: 15px;
-    }
-    
-    /* Adjust sprite positioning for small screens - move lower */
-    #heroContainer {
-        left: 40px;
-        top: 55px;
-    }
-    
-    #enemyContainer {
-        right: 40px;
-        top: 55px;
-    }
-    
-    /* Scale down sprites to prevent overlap */
-    #heroContainer .sprite-wrapper {
-        width: 80px;
-        height: 80px;
-    }
-    
-    #enemyContainer .sprite-wrapper {
-        width: 80px;
-        height: 80px;
-    }
-    
-    img#heroSprite {
-        width: 70px !important;
-        height: 70px !important;
-    }
-    
-    img#enemySprite {
-        width: 70px;
-        height: 70px;
-    }
-    
-    /* Scale down HP bars */
-    .hp-bar-container {
-        width: 110px !important;
-        max-width: 110px !important;
-    }
-    
-    #heroContainer .hp-bar-container,
-    #enemyContainer .hp-bar-container {
-        width: 110px !important;
-        max-width: 110px !important;
-    }
-    
-    .hp-bar {
-        height: 10px !important;
-    }
-    
-    .hp-text {
-        font-size: 0.7rem !important;
     }
     
     .action-buttons {
         grid-template-columns: 1fr;
     }
     
+    .sprite {
+        transform: scale(2);
+    }
+    
     .sprite-wrapper {
-        position: relative;
-        overflow: visible; /* Allow damage text to show above */
+        width: 100px;
+        height: 100px;
+        overflow: hidden; /* FIXED: Clip on mobile too */
     }
 }
 
@@ -704,64 +631,11 @@ img#enemySprite {
     }
 }
 
-/* Dynamic scaling for iPhone 12 mini and similar (375px) */
+/* Dynamic scaling for very small screens */
 @media (max-width: 375px) {
     .battle-container {
-        height: 240px;
-        min-height: 240px;
-        padding: 12px;
-    }
-    
-    /* Further adjust positioning - move lower to center better */
-    #heroContainer {
-        left: 30px;
-        top: 50px;
-    }
-    
-    #enemyContainer {
-        right: 30px;
-        top: 50px;
-    }
-    
-    /* Even smaller sprites */
-    #heroContainer .sprite-wrapper {
-        width: 70px;
-        height: 70px;
-    }
-    
-    #enemyContainer .sprite-wrapper {
-        width: 70px;
-        height: 70px;
-    }
-    
-    img#heroSprite {
-        width: 60px !important;
-        height: 60px !important;
-    }
-    
-    img#enemySprite {
-        width: 60px;
-        height: 60px;
-    }
-    
-    /* Smaller HP bars */
-    .hp-bar-container {
-        width: 100px !important;
-        max-width: 100px !important;
-    }
-    
-    #heroContainer .hp-bar-container,
-    #enemyContainer .hp-bar-container {
-        width: 100px !important;
-        max-width: 100px !important;
-    }
-    
-    .hp-bar {
-        height: 8px !important;
-    }
-    
-    .hp-text {
-        font-size: 0.65rem !important;
+        transform: scale(0.95);
+        transform-origin: top center;
     }
 }
 
@@ -1103,7 +977,7 @@ img#enemySprite {
 
 .damage-number {
     position: fixed;
-    font-size: 20px;
+    font-size: 32px;
     font-weight: 900;
     color: #ff4444;
     text-shadow: 
@@ -1125,7 +999,7 @@ img#enemySprite {
 }
 
 .damage-number.critical {
-    font-size: 28px;
+    font-size: 42px;
     color: #ffaa00;
     text-shadow: 
         2px 2px 0 #000,
@@ -1140,47 +1014,6 @@ img#enemySprite {
 @keyframes criticalPulse {
     0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
     50% { transform: translateX(-50%) translateY(-10px) scale(1.2); }
-}
-
-@keyframes xpFloat {
-    0% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-80px);
-    }
-}
-
-/* HP Animation - Damage (Red) - Reduced float for arena containment */
-@keyframes hpFloatDamage {
-    0% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-    20% {
-        transform: translateX(-50%) translateY(-5px) scale(1.1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-50px) scale(0.9);
-    }
-}
-
-/* HP Animation - Heal (Blue) - Reduced float for arena containment */
-@keyframes hpFloatHeal {
-    0% {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-    20% {
-        transform: translateX(-50%) translateY(-5px) scale(1.1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-50px) scale(0.9);
-    }
 }
 
 /* Heal effect styling */
@@ -1312,33 +1145,4 @@ img#enemySprite {
     filter: drop-shadow(0 0 8px rgba(200, 50, 50, 0.8));
     transition: all 0.6s linear;
     transform: translate(-50%, -50%);
-}
-
-/* ===================================
-   HP ANIMATION TEXT ELEMENTS
-   =================================== */
-
-/* Base styling for HP animation text (damage and heal) */
-.hp-animation-text {
-    position: absolute;
-    left: 50%;
-    top: 10px; /* Positioned lower to stay within sprite wrapper bounds */
-    transform: translateX(-50%);
-    transform-origin: center top;
-    font-size: 24px;
-    font-weight: bold;
-    pointer-events: none;
-    z-index: 1000;
-    white-space: nowrap;
-    will-change: transform, opacity;
-}
-
-/* Ensure sprite wrappers allow HP animations to overflow */
-.sprite-wrapper {
-    overflow: visible !important;
-}
-
-/* Ensure sprite containers don't clip HP animations */
-.sprite-container {
-    overflow: visible !important;
 }

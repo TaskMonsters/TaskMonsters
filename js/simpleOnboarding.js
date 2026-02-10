@@ -33,6 +33,13 @@ class SimpleOnboarding {
                 highlight: 'Instant rewards = dopamine boost = motivation! 💪'
             },
             {
+                icon: '🎯',
+                title: 'Why This Works for ADHD',
+                content: '✅ Instant feedback (XP, battles, loot)\n✅ Visual progress (levels, gauges)\n✅ Variety (different enemies, abilities)\n✅ Rewards (makes tasks feel worth it!)',
+                useList: true,
+                highlight: 'Your brain will LOVE the dopamine hits! 🎉'
+            },
+            {
                 icon: '🚀',
                 title: 'Ready to Start!',
                 content: 'Remember: Every task you complete makes you stronger. Small wins add up to big victories!',

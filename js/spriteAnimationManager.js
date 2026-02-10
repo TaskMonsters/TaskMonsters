@@ -131,10 +131,9 @@ class SpriteAnimationManager {
             await this.startAnimation('mainHeroSprite', appearance, 'idle', 800);
             
             // Ensure proper sizing
-            const scale = appearance.mainAppScale || 3;
             mainHeroSprite.style.width = '32px';
             mainHeroSprite.style.height = '32px';
-            mainHeroSprite.style.transform = `scale(${scale})`;
+            mainHeroSprite.style.transform = 'scale(3)';
             mainHeroSprite.style.transformOrigin = 'center center';
         }
 
@@ -144,10 +143,9 @@ class SpriteAnimationManager {
             await this.startAnimation('focusTimerMonsterSprite', appearance, 'idle', 800);
             
             // Ensure proper sizing
-            const scale = appearance.mainAppScale || 3;
             focusTimerSprite.style.width = '32px';
             focusTimerSprite.style.height = '32px';
-            focusTimerSprite.style.transform = `scale(${scale})`;
+            focusTimerSprite.style.transform = 'scale(3)';
             focusTimerSprite.style.transformOrigin = 'center center';
         }
 

@@ -87,7 +87,6 @@ const ENERGY_VAMPIRE_BAT_DATA = {
     attackDamageMax: 25,
     specialAbility: 'defend',
     canDefend: true,
-    projectileType: 'vampire-bolt',
     sprites: {
         idle: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
         attack: 'assets/enemies/Energy Vampire Bat/Energy Vampire Bat.gif',
@@ -108,7 +107,6 @@ const LAND_ALIEN_DATA = {
     canDefend: true,
     canEvade: true,
     evasionChance: 0.20,
-    projectileType: 'alien',
     sprites: {
         idle: 'assets/enemies/Land Alien/alien-idle-animated.gif',
         attack: 'assets/enemies/Land Alien/alien-walk-animated.gif',
@@ -154,7 +152,6 @@ const SENTRY_DRONE_DATA = {
     healAmount: 20,
     canStun: true,
     stunChance: 0.30,
-    projectileType: 'drone-projectile',
     sprites: {
         idle: 'assets/enemies/Sentry Drone/Sentry Drone.gif',
         attack: 'assets/enemies/Sentry Drone/Sentry Drone Projectile.gif',
@@ -179,7 +176,6 @@ const SELF_DOUBT_DRONE_DATA = {
     healAmount: 30,
     canStun: true,
     stunChance: 0.30,
-    projectileType: 'drone-projectile',
     sprites: {
         idle: 'assets/enemies/Self Doubt Drone/Self Doubt Drone.gif',
         attack: 'assets/enemies/Self Doubt Drone/Self Doubt Drone Projectile.gif',
@@ -238,9 +234,9 @@ const NAUGHTY_NOVA_DATA = {
 
 const ORC_DATA = {
     name: 'Orc',
-    baseHP: 120,
-    baseAttack: 28,
-    baseDefense: 22,
+    baseHP: 130,
+    baseAttack: 25,
+    baseDefense: 20,
     minLevel: 20,
     tier: 'boss',
     attackDamageMin: 25,
@@ -248,15 +244,12 @@ const ORC_DATA = {
     specialAbility: 'berserk_pickpocket',
     canBerserk: true,
     berserkAttacks: 3,
-    berserkChance: 0.3,
     canPickpocket: true,
-    pickpocketAmount: 3,
-    pickpocketChance: 0.25,
+    pickpocketCount: 3,
     sprites: {
-        idle: 'assets/enemies/Orc/orc-idle.gif',
-        attack: 'assets/enemies/Orc/orc-attack.gif',
-        hurt: 'assets/enemies/Orc/orc-hurt.gif',
-        die: 'assets/enemies/Orc/orc-die.gif'
+        idle: 'assets/enemies/Orc/Orc-Attack.gif',
+        attack: 'assets/enemies/Orc/Orc-Attack.gif',
+        hurt: 'assets/enemies/Orc/Orc-Hurt.gif'
     }
 };
 
@@ -295,7 +288,6 @@ const OVERTHINKER_DATA = {
     variableDamage: true,
     specialAbility: 'overthink',
     canOverthink: true,
-    projectileType: 'fire-explosion',
     sprites: {
         idle: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
         attack: 'assets/enemies/Overthinker/OverthinkerEnemy.gif',
@@ -323,7 +315,6 @@ const TREANT_DATA = {
     canPoison: true,
     poisonDamage: 10,
     poisonDuration: 4,
-    projectileType: 'treant-explosion',
     sprites: {
         idle: 'assets/enemies/Treant/Treant.gif',
         attack: 'assets/enemies/Treant/Treant Attack Explosion.gif',
@@ -352,7 +343,6 @@ const LITTLE_CTHULHU_DATA = {
     canTeleport: true,
     teleportDamage: 20,
     teleportDuration: 3,
-    projectileType: 'cthulhu-explosion',
     sprites: {
         idle: 'assets/enemies/Little Cthulhu/Little Cthulhu.gif',
         attack: 'assets/enemies/Little Cthulhu/Little Cthulhu Attack Explosion.gif',
@@ -377,7 +367,6 @@ const MEDUSA_DATA = {
     petrifyDuration: 2,
     canCharm: true,
     charmDefenseReduction: 0.5,
-    projectileType: 'medusa',
     sprites: {
         idle: 'assets/enemies/Medusa/Medusa-animated.gif',
         attack: 'assets/enemies/Medusa/Medusa Attack Explosion.gif',
@@ -479,44 +468,6 @@ const DISTRACTION_DRAGON_DATA = {
     }
 };
 
-// THE GLOOM - Final Boss (Level 50+)
-const GLOOM_DATA = {
-    name: 'The Gloom',
-    baseHP: 600,
-    baseAttack: 90,
-    baseDefense: 50,
-    minLevel: 50,
-    tier: 'final_boss',
-    attackDamageMin: 90,
-    attackDamageMax: 105,
-    specialAbility: 'gloom_ultimate',
-    isFinalBoss: true,
-    
-    // Special abilities
-    canDeflect: true,
-    deflectChance: 0.25, // 25% chance to deflect attacks back to player
-    
-    canSelfHeal: true,
-    selfHealAmount: 50,
-    selfHealMax: 3, // Can only heal 3 times per battle
-    selfHealCount: 0, // Track heal usage
-    
-    canAbsorbPower: true,
-    absorbAmount: 30, // Absorbs 30 attack gauge
-    absorbChance: 0.20, // 20% chance to absorb
-    
-    canEvade: true,
-    evasionChance: 0.15, // 15% chance to evade attacks
-    evasionAbility: true,
-    
-    sprites: {
-        idle: 'assets/enemies/gloom_idle_transparent.gif',
-        attack: 'assets/enemies/gloom_attack2_transparent.gif',
-        attack2: 'assets/enemies/gloom_lightning_transparent.gif', // Lightning attack
-        hurt: 'assets/enemies/gloom_hurt_transparent.gif'
-    }
-};
-
 // Enemy types array - ordered by minimum level
 const ENEMY_TYPES = [
     LAZY_BAT_DATA,
@@ -536,8 +487,7 @@ const ENEMY_TYPES = [
     SLIME_ENEMY_DATA,
     ICE_BULLY_DATA,
     MUSHROOM_GUARD_DATA,
-    DISTRACTION_DRAGON_DATA,
-    GLOOM_DATA
+    DISTRACTION_DRAGON_DATA
 ];
 
 // Enemy rotation system - 7-level tier rotation
@@ -567,50 +517,8 @@ function getNextEnemyFromRotation(availableEnemies, playerLevel) {
 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
-    // Check for Gloom boss encounter (Level 50+ only, after other level 50 enemies)
-    if (playerLevel >= 50 && !gameState.gloomDefeated) {
-        // Track battles at level 50+
-        if (!gameState.level50BattleCount) {
-            gameState.level50BattleCount = 0;
-        }
-        gameState.level50BattleCount++;
-        
-        // Gloom appears after 3 battles at level 50+ (so player encounters other level 50 enemies first)
-        if (gameState.level50BattleCount > 3 && Math.random() < 0.3) { // 30% chance after 3 battles
-            const enemyData = GLOOM_DATA;
-            const enemy = new Enemy(
-                enemyData.name,
-                enemyData.baseHP,
-                enemyData.baseAttack,
-                enemyData.baseDefense,
-                enemyData.sprites
-            );
-            
-            // Copy all special abilities
-            Object.keys(enemyData).forEach(key => {
-                if (!['name', 'baseHP', 'baseAttack', 'baseDefense', 'sprites'].includes(key)) {
-                    enemy[key] = enemyData[key];
-                }
-            });
-            
-            // Gloom doesn't scale with level - fixed stats for epic boss fight
-            enemy.maxHP = enemyData.baseHP;
-            enemy.hp = enemyData.baseHP;
-            enemy.attack = enemyData.baseAttack;
-            enemy.defense = enemyData.baseDefense;
-            
-            // Reset self-heal counter for this battle
-            enemy.selfHealCount = 0;
-            
-            // Mark that Gloom encounter is happening
-            enemy.isGloomEncounter = true;
-            
-            return enemy;
-        }
-    }
-    
-    // Filter enemies available at current level (exclude Gloom from rotation)
-    let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel && !e.isFinalBoss);
+    // Filter enemies available at current level
+    let availableEnemies = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
     
     if (availableEnemies.length === 0) {
         // Fallback to first enemy if none available
@@ -655,31 +563,18 @@ function playWakeUpSequence(enemy, callback) {
         // Play wake-up animation if available
         if (enemy.sprites.wakeup) {
             enemy.setSprite('wakeup');
-            // Use img.src for GIF animations
-            if (spriteElement.tagName === 'IMG') {
-                spriteElement.src = enemy.currentSprite;
-            } else {
-                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-            }
+            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
             
             setTimeout(() => {
                 enemy.setSprite('idle');
-                if (spriteElement.tagName === 'IMG') {
-                    spriteElement.src = enemy.currentSprite;
-                } else {
-                    spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-                }
+                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
                 if (callback) callback();
                 resolve();
             }, 1000);
         } else {
             // No wake-up animation, just set idle
             enemy.setSprite('idle');
-            if (spriteElement.tagName === 'IMG') {
-                spriteElement.src = enemy.currentSprite;
-            } else {
-                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
-            }
+            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
             if (callback) callback();
             resolve();
         }

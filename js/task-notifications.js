@@ -143,7 +143,7 @@ class TaskNotificationsManager {
             try {
                 const notification = new Notification(title, {
                     body: body,
-                    icon: 'assets/heroes/Nova_idle.gif',
+                    icon: 'assets/Pink_Monster_idle.gif',
                     tag: 'task-reminder'
                 });
 

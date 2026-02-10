@@ -94,7 +94,7 @@ async function requestNotificationPermission() {
 /**
  * Send a local notification (fallback when FCM is not available)
  */
-function sendLocalNotification(title, body, icon = 'assets/heroes/Nova_idle.gif') {
+function sendLocalNotification(title, body, icon = 'assets/Pink_Monster_idle.gif') {
     try {
         // Check if notifications are supported and permitted
         if (!('Notification' in window)) {

@@ -324,7 +324,7 @@ class MoodTracker {
         }
         
         // Get current monster and skin info
-        const selectedMonster = localStorage.getItem('selectedMonster') || 'nova';
+        const selectedMonster = localStorage.getItem('selectedMonster') || 'Pink_Monster';
         const equippedSkinId = window.gameState?.equippedSkinId || null;
         const isEgg = window.gameState?.isEgg || false;
         
@@ -361,10 +361,7 @@ class MoodTracker {
             } else {
                 // NO SKIN AND NOT EGG: Use default monster jump GIF
                 console.log('[MoodTracker] No skin/egg - using default monster jump GIF');
-                // Map monster ID to proper name
-                const monsterMap = { luna: 'Luna', benny: 'Benny', nova: 'Nova' };
-                const monsterName = monsterMap[selectedMonster.toLowerCase()] || 'Nova';
-                const jumpGif = `assets/heroes/${monsterName}_jump.gif`;
+                const jumpGif = `assets/${selectedMonster}_jump.gif`;
                 sprite.src = jumpGif;
                 sprite.style.animation = 'none';
                 
@@ -584,33 +581,3 @@ if (document.readyState === 'loading') {
         }
     }, 500);
 }
-
-
-// Reset mood stats function
-function resetMoodStats() {
-    if (confirm('Are you sure you want to reset all mood history? This cannot be undone.')) {
-        // Reset mood history in localStorage
-        localStorage.removeItem('moodHistory');
-        console.log('[MoodTracker] Mood history cleared from localStorage');
-        
-        // Reset mood history in gameState (if it exists)
-        if (window.gameState && window.gameState.moodHistory) {
-            window.gameState.moodHistory = [];
-        }
-        
-        // Update mood display
-        if (typeof window.updateMoodHistoryDisplay === 'function') {
-            window.updateMoodHistoryDisplay();
-        }
-        
-        // Show success message
-        if (typeof window.showSuccessMessage === 'function') {
-            window.showSuccessMessage('🔄 Mood history reset!', 'All mood data has been cleared');
-        } else {
-            alert('✅ Mood history reset successfully!');
-        }
-    }
-}
-
-// Export to global scope
-window.resetMoodStats = resetMoodStats;

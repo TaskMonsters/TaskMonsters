@@ -80,44 +80,6 @@ const availableThemes = {
         description: 'Haunted dungeon entrance with skull gateway',
         price: 1100,
         preview: 'assets/backgrounds/themes/SkullGates.png'
-    },
-    bright_town: {
-        id: 'bright_town',
-        name: 'Bright Town',
-        emoji: '🏘️',
-        description: 'Charming village with colorful buildings',
-        price: 1500,
-        levelRequired: 20,
-        preview: 'assets/themes/bright-town.png'
-    },
-    stone_ruins: {
-        id: 'stone_ruins',
-        name: 'Stone Ruins',
-        emoji: '🏛️',
-        description: 'Ancient ruins with mystical atmosphere',
-        price: 1500,
-        levelRequired: 25,
-        preview: 'assets/themes/StoneRuins.png'
-    },
-    fort_of_illusions: {
-        id: 'fort_of_illusions',
-        name: 'Fort of Illusions',
-        emoji: '🏯',
-        description: 'Mysterious fortress with animated illusions',
-        price: 2000,
-        levelRequired: 30,
-        preview: 'assets/themes/FortofIllusionsTheme.gif',
-        isAnimated: true
-    },
-    forest_of_illusions: {
-        id: 'forest_of_illusions',
-        name: 'Forest of Illusions',
-        emoji: '🌳',
-        description: 'Enchanted forest with living animations',
-        price: 2000,
-        levelRequired: 40,
-        preview: 'assets/themes/ForestofIllusionsTheme.gif',
-        isAnimated: true
     }
 };
 
@@ -142,21 +104,12 @@ function updateThemesDisplay() {
         const isOwned = window.gameState && window.gameState.ownedThemes && window.gameState.ownedThemes.includes(theme.id);
         const isActive = window.gameState && window.gameState.activeTheme === theme.preview;
         const canAfford = window.gameState && (window.gameState.jerryXP || 0) >= theme.price;
-        const playerLevel = window.gameState ? window.gameState.level || 1 : 1;
-        const isLocked = theme.levelRequired && playerLevel < theme.levelRequired;
         
         const card = document.createElement('div');
         card.className = 'shop-item-card';
         
         let buttonHtml;
-        if (isLocked) {
-            buttonHtml = `
-                <div class="shop-item-price">${theme.price} XP</div>
-                <button class="buy-now-btn" style="background: #555; cursor: not-allowed;" disabled>
-                    🔒 Unlock at Level ${theme.levelRequired}
-                </button>
-            `;
-        } else if (isActive) {
+        if (isActive) {
             buttonHtml = `
                 <button class="buy-now-btn" style="background: #666;" onclick="unapplyThemeFromShop()">
                     ✓ Active - Unapply
@@ -196,13 +149,6 @@ function updateThemesDisplay() {
 function buyTheme(themeId) {
     const theme = availableThemes[themeId];
     if (!theme) return;
-    
-    // Check level requirement
-    const playerLevel = window.gameState.level || 1;
-    if (theme.levelRequired && playerLevel < theme.levelRequired) {
-        alert(`🔒 ${theme.name} is locked!\n\nYou need to reach Level ${theme.levelRequired} to unlock this theme.\nYour current level: ${playerLevel}`);
-        return;
-    }
     
     // Check if already owned
     if (window.gameState.ownedThemes && window.gameState.ownedThemes.includes(themeId)) {

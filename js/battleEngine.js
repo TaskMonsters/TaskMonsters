@@ -461,6 +461,15 @@ class BattleEngine {
         const player = battle.player;
         const enemy = battle.enemy;
         
+        // 30% chance to use special attack if enemy HP is below 50%
+        const enemyHPPercent = (enemy.hp / enemy.maxHp) * 100;
+        const useSpecialAttack = enemyHPPercent < 50 && Math.random() < 0.3;
+        
+        if (useSpecialAttack) {
+            this.enemySpecialAttack();
+            return;
+        }
+        
         // Calculate damage
         let damage = Math.floor(5 + (enemy.attack * 0.25));
         
@@ -483,6 +492,70 @@ class BattleEngine {
                 this.effectsManager.playAttackAnimation('enemy');
                 
                 // Show enemy projectile based on enemy type
+                const enemyName = enemy.name.toLowerCase();
+                if (enemyName.includes('phantom') || enemyName.includes('ghost')) {
+                    this.effectsManager.showProjectile('phantom', 'enemy', 'player');
+                } else if (enemyName.includes('medusa')) {
+                    this.effectsManager.showProjectile('medusa', 'enemy', 'player');
+                } else if (enemyName.includes('mushroom')) {
+                    this.effectsManager.showProjectile('mushroom', 'enemy', 'player');
+                } else if (enemyName.includes('drone') || enemyName.includes('sentry')) {
+                    this.effectsManager.showProjectile('drone', 'enemy', 'player');
+                } else if (enemyName.includes('procrastinator')) {
+                    this.effectsManager.showProjectile('procrastinator', 'enemy', 'player');
+                } else if (enemyName.includes('alien')) {
+                    this.effectsManager.showProjectile('alien', 'enemy', 'player');
+                } else if (enemyName.includes('vampire') || enemyName.includes('bat')) {
+                    this.effectsManager.showProjectile('vampire-bat', 'enemy', 'player');
+                }
+            }
+        }
+        
+        // Update UI
+        this.updateBattleUI();
+        
+        // Check if player defeated
+        if (player.hp <= 0) {
+            this.endBattle('defeat');
+            return;
+        }
+        
+        // Regenerate gauges
+        this.regenerateGauges();
+    }
+    
+    /**
+     * ENEMY SPECIAL ATTACK
+     */
+    enemySpecialAttack() {
+        const battle = this.currentBattle;
+        const player = battle.player;
+        const enemy = battle.enemy;
+        
+        // Special attack does 1.5x damage
+        let damage = Math.floor((5 + (enemy.attack * 0.25)) * 1.5);
+        
+        this.addLog(`⚡ ${enemy.name} used a SPECIAL ATTACK!`);
+        
+        // Apply player defense if defending
+        if (player.isDefending && player.defense > 0) {
+            const absorbed = Math.min(damage, player.defense);
+            player.defense -= absorbed;
+            damage -= absorbed;
+            this.addLog(`You blocked ${absorbed} damage!`);
+        }
+        
+        // Apply remaining damage to HP
+        if (damage > 0) {
+            player.hp = Math.max(0, player.hp - damage);
+            this.addLog(`${enemy.name} dealt ${damage} damage with special attack!`);
+            
+            // Visual effect with enhanced animation
+            if (this.effectsManager) {
+                this.effectsManager.showDamageNumber(damage, 'player');
+                this.effectsManager.playAttackAnimation('enemy');
+                
+                // Show enhanced projectile for special attack
                 const enemyName = enemy.name.toLowerCase();
                 if (enemyName.includes('phantom') || enemyName.includes('ghost')) {
                     this.effectsManager.showProjectile('phantom', 'enemy', 'player');
@@ -950,26 +1023,32 @@ class BattleEngine {
         const battle = this.currentBattle;
         
         if (result === 'victory') {
-            // Show loot modal first
-            if (window.lootSystem && battle.loot) {
-                const enemyName = battle.enemy?.name || 'Enemy';
-                const xpGained = battle.loot.xpCoins || 0;
-                const lootItems = battle.loot.items || [];
+            // Store loot and world map context
+            const enemyName = battle.enemy?.name || 'Enemy';
+            const xpGained = battle.loot?.xpCoins || 0;
+            const lootItems = battle.loot?.items || [];
+            
+            if (window.gameState) {
+                window._pendingLootContext = {
+                    lootItems: lootItems,
+                    xpGained: xpGained,
+                    enemyName: enemyName
+                };
                 
-                // Show loot modal
-                window.lootSystem.showLootModal(lootItems, xpGained, enemyName);
-                
-                // Store world map context for later
-                if (window.gameState) {
-                    window._pendingWorldMapContext = {
-                        level: window.gameState.level || 1,
-                        previousLevel: (window.gameState.level || 1) - 1,
-                        petName: window.gameState.petName || 'Your Monster',
-                        isFirstBattle: (window.gameState.level || 1) <= 5,
-                        enemyName: enemyName,
-                        justLeveledUp: true
-                    };
-                }
+                window._pendingWorldMapContext = {
+                    level: window.gameState.level || 1,
+                    previousLevel: (window.gameState.level || 1) - 1,
+                    petName: window.gameState.petName || 'Your Monster',
+                    isFirstBattle: (window.gameState.level || 1) <= 5,
+                    enemyName: enemyName,
+                    justLeveledUp: true
+                };
+            }
+            
+            // Show victory modal first (Guardian message)
+            if (window.guardianNarrative) {
+                const victoryMessage = '🏰 Another victory for Task World! The Gloom grows weaker.';
+                window.guardianNarrative.showMapMessage(victoryMessage);
             }
         } else if (result === 'defeat') {
             // Show defeat message

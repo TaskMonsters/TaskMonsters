@@ -5,13 +5,6 @@ function showBattle(hero, enemy) {
     const arena = document.getElementById('battleArena');
     arena.classList.remove('hidden');
     
-    // CRITICAL FIX: Clear battle log at start of each battle
-    const battleLog = document.getElementById('battleLog');
-    if (battleLog) {
-        battleLog.innerHTML = '';
-        console.log('[BattleUI] Battle log cleared');
-    }
-    
     // Initialize UI elements
     updateBattleUI(hero, enemy);
     updateBattleButtonsVisibility();
@@ -419,67 +412,67 @@ function updateActionButtons(hero) {
         }
     }
     
-    // Lightning Bolt (show if owned)
-    const btnLightningBolt = document.getElementById('btnLightningBolt');
-    if (btnLightningBolt) {
-        const lightningBoltCount = gameState.battleInventory?.lightning || 0;
-        if (lightningBoltCount > 0) {
-            btnLightningBolt.style.display = '';
-            const lightningBoltCountSpan = btnLightningBolt.querySelector('.item-count');
-            if (lightningBoltCountSpan) {
-                lightningBoltCountSpan.textContent = `(${lightningBoltCount})`;
+    // Throwing Star button
+    const btnThrowingStar = document.getElementById('btnThrowingStar');
+    if (btnThrowingStar) {
+        if (hero.level >= 20) {
+            btnThrowingStar.style.display = '';
+            const throwingStarCount = gameState.battleInventory?.throwing_stars || 0;
+            const throwingStarCountSpan = btnThrowingStar.querySelector('.item-count');
+            if (throwingStarCountSpan) {
+                throwingStarCountSpan.textContent = `(${throwingStarCount})`;
             }
-            btnLightningBolt.disabled = battleManager.attackGauge < 20 || lightningBoltCount === 0;
+            btnThrowingStar.disabled = throwingStarCount === 0;
         } else {
-            btnLightningBolt.style.display = 'none';
+            btnThrowingStar.style.display = 'none';
         }
     }
     
-    // Honey Trap (show if owned)
-    const btnHoneyTrap = document.getElementById('btnHoneyTrap');
-    if (btnHoneyTrap) {
-        const honeyTrapCount = gameState.battleInventory?.honey_trap || 0;
-        if (honeyTrapCount > 0) {
-            btnHoneyTrap.style.display = '';
-            const honeyTrapCountSpan = btnHoneyTrap.querySelector('.item-count');
-            if (honeyTrapCountSpan) {
-                honeyTrapCountSpan.textContent = `(${honeyTrapCount})`;
+    // Battle Glove button
+    const btnBattleGlove = document.getElementById('btnBattleGlove');
+    if (btnBattleGlove) {
+        if (hero.level >= 30) {
+            btnBattleGlove.style.display = '';
+            const battleGloveCount = gameState.battleInventory?.battle_glove || 0;
+            const battleGloveCountSpan = btnBattleGlove.querySelector('.item-count');
+            if (battleGloveCountSpan) {
+                battleGloveCountSpan.textContent = `(${battleGloveCount})`;
             }
-            btnHoneyTrap.disabled = battleManager.attackGauge < 15 || honeyTrapCount === 0;
+            btnBattleGlove.disabled = battleGloveCount === 0;
         } else {
-            btnHoneyTrap.style.display = 'none';
+            btnBattleGlove.style.display = 'none';
         }
     }
     
-    // Throwing Stars (show if owned)
-    const btnThrowingStars = document.getElementById('btnThrowingStars');
-    if (btnThrowingStars) {
-        const throwingStarsCount = gameState.battleInventory?.throwing_stars || 0;
-        if (throwingStarsCount > 0) {
-            btnThrowingStars.style.display = '';
-            const throwingStarsCountSpan = btnThrowingStars.querySelector('.item-count');
-            if (throwingStarsCountSpan) {
-                throwingStarsCountSpan.textContent = `(${throwingStarsCount})`;
+    // Jade Dagger button
+    const btnJadeDagger = document.getElementById('btnJadeDagger');
+    if (btnJadeDagger) {
+        if (hero.level >= 35) {
+            btnJadeDagger.style.display = '';
+            const jadeDaggerCount = gameState.battleInventory?.jade_dagger || 0;
+            const jadeDaggerCountSpan = btnJadeDagger.querySelector('.item-count');
+            if (jadeDaggerCountSpan) {
+                jadeDaggerCountSpan.textContent = `(${jadeDaggerCount})`;
             }
-            btnThrowingStars.disabled = battleManager.attackGauge < 15 || throwingStarsCount === 0;
+            btnJadeDagger.disabled = jadeDaggerCount === 0;
         } else {
-            btnThrowingStars.style.display = 'none';
+            btnJadeDagger.style.display = 'none';
         }
     }
     
-    // Star Shield (show if owned)
-    const btnStarShield = document.getElementById('btnStarShield');
-    if (btnStarShield) {
-        const starShieldCount = gameState.battleInventory?.star_shield || 0;
-        if (starShieldCount > 0) {
-            btnStarShield.style.display = '';
-            const starShieldCountSpan = btnStarShield.querySelector('.item-count');
-            if (starShieldCountSpan) {
-                starShieldCountSpan.textContent = `(${starShieldCount})`;
+    // Wizard's Wand button
+    const btnWizardsWand = document.getElementById('btnWizardsWand');
+    if (btnWizardsWand) {
+        if (hero.level >= 40) {
+            btnWizardsWand.style.display = '';
+            const wizardsWandCount = gameState.battleInventory?.wizards_wand || 0;
+            const wizardsWandCountSpan = btnWizardsWand.querySelector('.item-count');
+            if (wizardsWandCountSpan) {
+                wizardsWandCountSpan.textContent = `(${wizardsWandCount})`;
             }
-            btnStarShield.disabled = starShieldCount === 0;
+            btnWizardsWand.disabled = wizardsWandCount === 0;
         } else {
-            btnStarShield.style.display = 'none';
+            btnWizardsWand.style.display = 'none';
         }
     }
 }
@@ -1504,3 +1497,21 @@ async function playPoisonLeafExplosion(targetRect) {
 
     explosion.remove();
 }
+
+
+// Increase special attack gauge
+window.increaseSpecialGauge = function(amount) {
+    if (!window.gameState.specialAttackGauge) {
+        window.gameState.specialAttackGauge = 0;
+    }
+    
+    window.gameState.specialAttackGauge = Math.min(100, window.gameState.specialAttackGauge + amount);
+    
+    // Update the gauge UI
+    const specialGaugeBar = document.getElementById('specialGaugeBar');
+    const specialGaugeText = document.getElementById('specialGaugeText');
+    if (specialGaugeBar) specialGaugeBar.style.width = window.gameState.specialAttackGauge + '%';
+    if (specialGaugeText) specialGaugeText.textContent = `${window.gameState.specialAttackGauge}/100`;
+    
+    console.log(`[Special Gauge] Increased by ${amount}, now at ${window.gameState.specialAttackGauge}/100`);
+};

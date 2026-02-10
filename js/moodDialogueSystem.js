@@ -509,9 +509,6 @@ const MoodDialogueSystem = {
     
     // Show dialogue
     showDialogue(context, moodType = null) {
-        // DISABLED: Monster dialogue system removed
-        return;
-        
         // Only show dialogue if level 5+
         if (gameState.jerryLevel < 5 || gameState.isEgg) {
             return;

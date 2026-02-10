@@ -9,15 +9,13 @@ class GuardianNarrator {
         this.currentMessage = null;
         this.messageQueue = [];
         
-        // Region definitions (Levels 1-50)
+        // Region definitions (Levels 1-50) - Updated to match actual map geography
         this.regions = {
-            'peaceful_village': { name: 'Peaceful Village', minLevel: 1, maxLevel: 7 },
-            'enchanted_forest': { name: 'Enchanted Forest', minLevel: 8, maxLevel: 14 },
-            'murky_swamp': { name: 'Murky Swamp', minLevel: 15, maxLevel: 21 },
-            'golden_desert': { name: 'Golden Desert', minLevel: 22, maxLevel: 30 },
-            'frozen_mountain': { name: 'Frozen Mountain Pass', minLevel: 31, maxLevel: 38 },
-            'volcanic_wasteland': { name: 'Volcanic Wasteland', minLevel: 39, maxLevel: 45 },
-            'castle': { name: 'Castle of Accomplishment', minLevel: 46, maxLevel: 50 }
+            'peaceful_village': { name: 'Starting Village', minLevel: 1, maxLevel: 5 },
+            'enchanted_forest': { name: 'Green Forest', minLevel: 6, maxLevel: 14 },
+            'golden_desert': { name: 'Desert Region', minLevel: 15, maxLevel: 26 },
+            'frozen_mountain': { name: 'Mountain Approach', minLevel: 27, maxLevel: 39 },
+            'castle': { name: 'Dark Castle', minLevel: 40, maxLevel: 50 }
         };
         
         // Message templates
@@ -58,12 +56,10 @@ class GuardianNarrator {
             
             // Region transitions
             regionTransitions: {
-                'enchanted_forest': "You've entered the Enchanted Forest! New challenges await among the ancient trees.",
-                'murky_swamp': "The Murky Swamp lies ahead. Stay focused—doubt and confusion lurk in the fog.",
-                'golden_desert': "Welcome to the Golden Desert! This test of endurance will forge your resilience.",
-                'frozen_mountain': "The Frozen Mountain Pass awaits. Only the determined can climb these peaks!",
-                'volcanic_wasteland': "You've reached the Volcanic Wasteland! The final challenges before the castle await.",
-                'castle': "Behold! The Castle of Accomplishment! You stand at the threshold of mastery, Task Master!"
+                'enchanted_forest': "You've entered the Green Forest! New challenges await among the ancient trees.",
+                'golden_desert': "Welcome to the Desert Region! Ancient pyramids and golden sands test your endurance.",
+                'frozen_mountain': "The Mountain Approach awaits. Only the determined can climb these peaks!",
+                'castle': "Behold! The Dark Castle! You stand at the threshold of mastery, Task Master!"
             },
             
             // Milestone levels
@@ -74,7 +70,7 @@ class GuardianNarrator {
                 40: "Forty levels mastered! The Castle of Accomplishment is within reach!",
                 48: "The castle gates are near! Just a few more victories, Task Master.",
                 49: "One final push! The Castle of Accomplishment awaits your arrival!",
-                50: "You've done it! The Castle of Accomplishment is yours! You are a true master of focus and determination. Task World celebrates your triumph!"
+                50: "You've done it! The Dark Castle is conquered! You are a true master of focus and determination. Task World celebrates your triumph!"
             },
             
             // First enemy defeats

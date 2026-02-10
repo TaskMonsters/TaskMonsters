@@ -10,7 +10,7 @@ class GuardianOnboarding {
         this.steps = [
             {
                 title: 'Welcome to Task World',
-                message: `Welcome, new Task Master! You've just stepped into Task World, a magical realm powered by your actions. Every task you complete in the real world sends energy here, pushing back the shadows and helping this world flourish.`,
+                message: `Welcome, new Task Master! You've just stepped into Task World, a secret realm that thrives on focus and accomplishment. This world is powered by your energy—every task you complete in the real world sends a wave of power here, pushing back the shadows and helping our world flourish.`,
                 animation: 'welcome',
                 showMap: true
             },
@@ -23,7 +23,7 @@ class GuardianOnboarding {
             },
             {
                 title: 'The Gloom',
-                message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
+                message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters that represent real-world challenges like procrastination and distraction. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
                 animation: 'gloom',
                 showMap: true,
                 isLastStep: true
@@ -79,12 +79,10 @@ class GuardianOnboarding {
                 background: rgba(0, 0, 0, 0.95);
                 display: flex;
                 flex-direction: column;
-                justify-content: flex-start;
+                justify-content: center;
                 align-items: center;
                 z-index: 10005;
                 animation: fadeIn 0.5s ease;
-                overflow-y: auto;
-                padding: 20px 0;
             `;
             document.body.appendChild(overlay);
         } else {
@@ -94,11 +92,10 @@ class GuardianOnboarding {
         // Create content container
         const container = document.createElement('div');
         container.style.cssText = `
-            max-width: 600px;
+            max-width: 900px;
             width: 90%;
             text-align: center;
             animation: scaleIn 0.5s ease;
-            margin: auto;
         `;
         
         // Show map
@@ -107,34 +104,26 @@ class GuardianOnboarding {
             mapContainer.style.cssText = `
                 position: relative;
                 width: 100%;
-                max-width: 500px;
-                margin: 0 auto 20px;
+                max-width: 800px;
+                margin: 0 auto 24px;
             `;
             
             const mapImg = document.createElement('img');
-            // Use Gloom villain image for The Gloom step, regular map for others
-            if (step.title === 'The Gloom') {
-                mapImg.src = 'assets/gloom_villain_castle.png';
-                mapImg.alt = 'The Gloom';
-            } else {
-                mapImg.src = 'assets/task_world_map.png';
-                mapImg.alt = 'Task World Map';
-            }
+            mapImg.src = 'assets/task_world_map.png';
+            mapImg.alt = 'Task World Map';
             mapImg.style.cssText = `
                 width: 100%;
                 height: auto;
-                max-height: 250px;
-                object-fit: contain;
-                border-radius: 12px;
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+                border: 3px solid rgba(255, 255, 255, 0.3);
             `;
             mapContainer.appendChild(mapImg);
             
             // Add monster sprite on map for journey step
             if (step.showMonsterOnMap) {
                 const monsterSprite = document.createElement('img');
-                monsterSprite.src = 'assets/heroes/Nova_idle.gif';
+                monsterSprite.src = 'assets/Pink_Monster.png';
                 monsterSprite.alt = 'Your Task Pet';
                 monsterSprite.style.cssText = `
                     position: absolute;
@@ -253,8 +242,7 @@ class GuardianOnboarding {
         const skipBtn = document.createElement('button');
         skipBtn.textContent = 'Skip Tutorial';
         skipBtn.style.cssText = `
-            margin-top: 12px;
-            margin-bottom: 20px;
+            margin-top: 16px;
             padding: 8px 16px;
             background: transparent;
             color: rgba(255, 255, 255, 0.5);

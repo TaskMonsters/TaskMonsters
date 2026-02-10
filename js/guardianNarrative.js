@@ -7,13 +7,11 @@
 class GuardianNarrative {
     constructor() {
         this.regions = [
-            { name: 'Peaceful Village', minLevel: 1, maxLevel: 7 },
-            { name: 'Enchanted Forest', minLevel: 8, maxLevel: 14 },
-            { name: 'Murky Swamp', minLevel: 15, maxLevel: 21 },
-            { name: 'Golden Desert', minLevel: 22, maxLevel: 30 },
-            { name: 'Frozen Mountain Pass', minLevel: 31, maxLevel: 38 },
-            { name: 'Volcanic Wasteland', minLevel: 39, maxLevel: 45 },
-            { name: 'Castle of Accomplishment', minLevel: 46, maxLevel: 50 }
+            { name: 'Peaceful Village', minLevel: 1, maxLevel: 5 },
+            { name: 'Enchanted Forest', minLevel: 6, maxLevel: 14 },
+            { name: 'Golden Desert', minLevel: 15, maxLevel: 26 },
+            { name: 'Frozen Mountain Pass', minLevel: 27, maxLevel: 39 },
+            { name: 'Dark Castle', minLevel: 40, maxLevel: 50 }
         ];
         
         console.log('[Guardian] Guardian Narrative System initialized');
@@ -175,7 +173,9 @@ class GuardianNarrative {
      * Show Guardian message on map page
      */
     showMapMessage(message, duration = 5000) {
-        console.log('[Guardian] Showing map message:', message);
+        console.log('[Guardian] Showing map message (disabled):', message);
+        // DISABLED: User requested removal of this modal
+        return;
         
         // Create Guardian message container
         const container = document.createElement('div');
@@ -253,12 +253,8 @@ class GuardianNarrative {
             });
         }
         
-        // Auto-hide after duration
-        setTimeout(() => {
-            if (document.getElementById('guardianMapMessage')) {
-                this.hideMapMessage();
-            }
-        }, duration);
+        // Modal stays open until user clicks Continue button
+        // No auto-close timer
     }
     
     /**
@@ -270,9 +266,17 @@ class GuardianNarrative {
             container.style.animation = 'guardianFadeOut 0.3s ease';
             setTimeout(() => {
                 container.remove();
-                // Return to main app after Guardian message
-                if (typeof returnToMainApp === 'function') {
-                    returnToMainApp();
+                
+                // Check if there's pending loot to show (from battle victory)
+                if (window._pendingLootContext && window.lootSystem) {
+                    const { lootItems, xpGained, enemyName } = window._pendingLootContext;
+                    window.lootSystem.showLootModal(lootItems, xpGained, enemyName);
+                    window._pendingLootContext = null; // Clear after showing
+                } else {
+                    // Return to main app after Guardian message
+                    if (typeof returnToMainApp === 'function') {
+                        returnToMainApp();
+                    }
                 }
             }, 300);
         }

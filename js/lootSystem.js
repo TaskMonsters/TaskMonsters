@@ -355,13 +355,6 @@ class LootSystem {
             setTimeout(() => {
                 overlay.remove();
                 
-                // CRITICAL: Stop all battle music when loot modal closes
-                if (window.audioManager) {
-                    window.audioManager.stopAllBattleMusic();
-                    window.audioManager.stopBattleOutcomeMusic();
-                    console.log('[LootModal] Stopped all battle music');
-                }
-                
                 // Show world map after loot modal closes
                 if (window._pendingWorldMapContext && window.taskWorldMap) {
                     setTimeout(() => {

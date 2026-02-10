@@ -213,13 +213,13 @@ document.addEventListener('battleVictory', (event) => {
         battleStreak: gameState.battleStreak || 0
     };
     
-    // Guardian message removed - lore now appears on map page
-    // const message = window.guardianOfTaskWorld.getMessage(context);
-    // if (message) {
-    //     setTimeout(() => {
-    //         window.guardianOfTaskWorld.showMessage(message);
-    //     }, 3000);
-    // }
+    const message = window.guardianOfTaskWorld.getMessage(context);
+    if (message) {
+        // Show Guardian message after loot modal closes (3 second delay)
+        setTimeout(() => {
+            window.guardianOfTaskWorld.showMessage(message);
+        }, 3000);
+    }
 });
 
 console.log('[Guardian] Guardian of Task World system loaded');

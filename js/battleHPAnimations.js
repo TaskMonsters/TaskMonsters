@@ -1,67 +1,30 @@
 /**
  * BATTLE HP ANIMATIONS
  * Shows floating damage and heal numbers above sprites during battle
- * 
- * POSITIONING STRATEGY:
- * - Same size for both hero and enemy (24px font)
- * - Positioned above the sprite wrapper (negative top value)
- * - Animation floats upward and fades out
- * - Appended to sprite-container for proper visibility
  */
 
 // Show damage animation above a sprite (-HP in red)
 function showBattleDamageAnimation(spriteId, damage) {
-    console.log(`[HP Animation] showBattleDamageAnimation called: spriteId=${spriteId}, damage=${damage}`);
     const sprite = document.getElementById(spriteId);
-    if (!sprite) {
-        console.error(`[HP Animation] Sprite not found: ${spriteId}`);
-        return;
-    }
-    
-    // Get the sprite-container (grandparent) for positioning context
-    // Structure: sprite-container > sprite-wrapper > heroSprite/enemySprite
-    const spriteWrapper = sprite.parentElement;
-    if (!spriteWrapper) {
-        console.error(`[HP Animation] Sprite wrapper not found for: ${spriteId}`);
-        return;
-    }
-    
-    const spriteContainer = spriteWrapper.parentElement;
-    if (!spriteContainer) {
-        console.error(`[HP Animation] Sprite container not found for: ${spriteId}`);
-        return;
-    }
+    if (!sprite || !sprite.parentElement) return;
     
     // Create damage text element
     const damageText = document.createElement('div');
     damageText.textContent = `-${damage} HP`;
-    damageText.className = 'hp-animation-text hp-damage-text';
+    damageText.style.position = 'absolute';
+    damageText.style.left = '50%';
+    damageText.style.top = '-20px';
+    damageText.style.transform = 'translateX(-50%)';
+    damageText.style.fontSize = '24px';
+    damageText.style.fontWeight = 'bold';
+    damageText.style.color = '#ef4444'; // Red color
+    damageText.style.textShadow = '0 0 10px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8)';
+    damageText.style.pointerEvents = 'none';
+    damageText.style.zIndex = '1000';
+    damageText.style.animation = 'xpFloat 2s ease-out forwards';
     
-    // Core positioning: anchor to sprite container
-    damageText.style.cssText = `
-        position: absolute;
-        left: 50%;
-        top: 0;
-        transform: translateX(-50%);
-        font-size: 24px;
-        font-weight: bold;
-        color: #ff4444;
-        text-shadow: 
-            2px 2px 0 #000,
-            -2px -2px 0 #000,
-            2px -2px 0 #000,
-            -2px 2px 0 #000,
-            0 0 10px rgba(255, 68, 68, 0.8),
-            0 0 20px rgba(255, 68, 68, 0.5);
-        pointer-events: none;
-        z-index: 10000;
-        white-space: nowrap;
-        animation: hpFloatDamage 2s ease-out forwards;
-    `;
-    
-    // Add to sprite container (not wrapper) for proper visibility
-    spriteContainer.appendChild(damageText);
-    console.log(`[HP Animation] Damage text appended to container for ${spriteId}`);
+    // Add to sprite's parent container
+    sprite.parentElement.appendChild(damageText);
     
     // Remove after animation completes
     setTimeout(() => {
@@ -71,58 +34,28 @@ function showBattleDamageAnimation(spriteId, damage) {
     }, 2000);
 }
 
-// Show heal animation above a sprite (+HP in green)
+// Show heal animation above a sprite (+HP in blue)
 function showBattleHealAnimation(spriteId, healAmount) {
-    console.log(`[HP Animation] showBattleHealAnimation called: spriteId=${spriteId}, healAmount=${healAmount}`);
     const sprite = document.getElementById(spriteId);
-    if (!sprite) {
-        console.error(`[HP Animation] Sprite not found: ${spriteId}`);
-        return;
-    }
-    
-    // Get the sprite-container (grandparent) for positioning context
-    const spriteWrapper = sprite.parentElement;
-    if (!spriteWrapper) {
-        console.error(`[HP Animation] Sprite wrapper not found for: ${spriteId}`);
-        return;
-    }
-    
-    const spriteContainer = spriteWrapper.parentElement;
-    if (!spriteContainer) {
-        console.error(`[HP Animation] Sprite container not found for: ${spriteId}`);
-        return;
-    }
+    if (!sprite || !sprite.parentElement) return;
     
     // Create heal text element
     const healText = document.createElement('div');
     healText.textContent = `+${healAmount} HP`;
-    healText.className = 'hp-animation-text hp-heal-text';
+    healText.style.position = 'absolute';
+    healText.style.left = '50%';
+    healText.style.top = '-20px';
+    healText.style.transform = 'translateX(-50%)';
+    healText.style.fontSize = '24px';
+    healText.style.fontWeight = 'bold';
+    healText.style.color = '#3b82f6'; // Blue color
+    healText.style.textShadow = '0 0 10px rgba(59, 130, 246, 0.8), 0 0 20px rgba(59, 130, 246, 0.5), 0 2px 4px rgba(0, 0, 0, 0.8)';
+    healText.style.pointerEvents = 'none';
+    healText.style.zIndex = '1000';
+    healText.style.animation = 'xpFloat 2s ease-out forwards';
     
-    // Core positioning: anchor to sprite container
-    healText.style.cssText = `
-        position: absolute;
-        left: 50%;
-        top: 0;
-        transform: translateX(-50%);
-        font-size: 24px;
-        font-weight: bold;
-        color: #44ff44;
-        text-shadow: 
-            2px 2px 0 #000,
-            -2px -2px 0 #000,
-            2px -2px 0 #000,
-            -2px 2px 0 #000,
-            0 0 10px rgba(68, 255, 68, 0.8),
-            0 0 20px rgba(68, 255, 68, 0.5);
-        pointer-events: none;
-        z-index: 10000;
-        white-space: nowrap;
-        animation: hpFloatHeal 2s ease-out forwards;
-    `;
-    
-    // Add to sprite container (not wrapper) for proper visibility
-    spriteContainer.appendChild(healText);
-    console.log(`[HP Animation] Heal text appended to container for ${spriteId}`);
+    // Add to sprite's parent container
+    sprite.parentElement.appendChild(healText);
     
     // Remove after animation completes
     setTimeout(() => {
@@ -135,5 +68,3 @@ function showBattleHealAnimation(spriteId, healAmount) {
 // Expose functions globally
 window.showBattleDamageAnimation = showBattleDamageAnimation;
 window.showBattleHealAnimation = showBattleHealAnimation;
-
-console.log('[HP Animation] Battle HP Animations loaded');
