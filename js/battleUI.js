@@ -146,6 +146,83 @@ function updateBattleButtonsVisibility() {
     } else {
         ghostBtn.style.display = 'none';
     }
+    
+    // Throwing Stars button - only show if ever unlocked
+    const throwingStarsBtn = document.getElementById('btnThrowingStar');
+    const throwingStarsCount = document.getElementById('throwingStarsCount');
+    const throwingStarsQty = inventory.throwing_stars || 0;
+    if (unlockedItems.includes('throwing_stars')) {
+        throwingStarsBtn.style.display = '';
+        throwingStarsCount.textContent = `(${throwingStarsQty})`;
+    } else {
+        throwingStarsBtn.style.display = 'none';
+    }
+    
+    // Battle Glove button - only show if ever unlocked
+    const battleGloveBtn = document.getElementById('btnBattleGlove');
+    const battleGloveCount = document.getElementById('battleGloveCount');
+    const battleGloveQty = inventory.battle_glove || 0;
+    if (unlockedItems.includes('battle_glove')) {
+        battleGloveBtn.style.display = '';
+        battleGloveCount.textContent = `(${battleGloveQty})`;
+    } else {
+        battleGloveBtn.style.display = 'none';
+    }
+    
+    // Jade Dagger button - only show if ever unlocked
+    const jadeDaggerBtn = document.getElementById('btnJadeDagger');
+    const jadeDaggerCount = document.getElementById('jadeDaggerCount');
+    const jadeDaggerQty = inventory.jade_dagger || 0;
+    if (unlockedItems.includes('jade_dagger')) {
+        jadeDaggerBtn.style.display = '';
+        jadeDaggerCount.textContent = `(${jadeDaggerQty})`;
+    } else {
+        jadeDaggerBtn.style.display = 'none';
+    }
+    
+    // Wizard's Wand button - only show if ever unlocked
+    const wizardsWandBtn = document.getElementById('btnWizardsWand');
+    const wizardsWandCount = document.getElementById('wizardsWandCount');
+    const wizardsWandQty = inventory.wizards_wand || 0;
+    if (unlockedItems.includes('wizards_wand')) {
+        wizardsWandBtn.style.display = '';
+        wizardsWandCount.textContent = `(${wizardsWandQty})`;
+    } else {
+        wizardsWandBtn.style.display = 'none';
+    }
+    
+    // Mirror Attack button - only show if ever unlocked
+    const mirrorAttackBtn = document.getElementById('btnMirrorAttack');
+    const mirrorAttackCount = document.getElementById('mirrorAttackCount');
+    const mirrorAttackQty = inventory.mirror_attack || 0;
+    if (unlockedItems.includes('mirror_attack')) {
+        mirrorAttackBtn.style.display = '';
+        mirrorAttackCount.textContent = `(${mirrorAttackQty})`;
+    } else {
+        mirrorAttackBtn.style.display = 'none';
+    }
+    
+    // Poison Leaf button - only show if ever unlocked
+    const poisonLeafBtn = document.getElementById('btnPoisonLeaf');
+    const poisonLeafCount = document.getElementById('poisonLeafCount');
+    const poisonLeafQty = inventory.poison_leaf || 0;
+    if (unlockedItems.includes('poison_leaf')) {
+        poisonLeafBtn.style.display = '';
+        poisonLeafCount.textContent = `(${poisonLeafQty})`;
+    } else {
+        poisonLeafBtn.style.display = 'none';
+    }
+    
+    // Asteroid Attack button - only show if ever unlocked
+    const asteroidBtn = document.getElementById('btnAsteroid');
+    const asteroidCount = document.getElementById('asteroidCount');
+    const asteroidQty = inventory.asteroid_attack || 0;
+    if (unlockedItems.includes('asteroid_attack')) {
+        asteroidBtn.style.display = '';
+        asteroidCount.textContent = `(${asteroidQty})`;
+    } else {
+        asteroidBtn.style.display = 'none';
+    }
 }
 
 // Update battle UI elements (HP, gauges, sprites)
@@ -1424,8 +1501,8 @@ async function playProcrastinationGhostAnimation(startElement, targetElement) {
     projectile.style.position = 'fixed';
     projectile.style.width = '40px';
     projectile.style.height = '40px';
-    // FIX: Use correct procrastination ghost sprite
-    projectile.style.backgroundImage = 'url(assets/projectiles/ProcrastinationGhostAttack.png)';
+    // Use Assertive Attack projectile GIF
+    projectile.style.backgroundImage = 'url(assets/battle/AssertiveAttackProjectile.gif)';
     projectile.style.backgroundSize = 'contain';
     projectile.style.backgroundRepeat = 'no-repeat';
     projectile.style.backgroundColor = 'rgba(150, 0, 200, 0.2)'; // Fallback purple tint
@@ -1631,7 +1708,7 @@ async function showDefendAnimation(targetElementId) {
     if (!targetElement) return;
 
     const animation = document.createElement('img');
-    animation.src = 'assets/animations/DefendandDefenseAnimation.gif';
+    animation.src = 'assets/defend_animation.gif';
     animation.style.position = 'absolute';
     animation.style.width = '120px';
     animation.style.height = '120px';
@@ -1658,7 +1735,7 @@ async function showPotionBoostAnimation(targetElementId) {
     if (!targetElement) return;
 
     const animation = document.createElement('img');
-    animation.src = 'assets/animations/PotionandattackboostAnimation.gif';
+    animation.src = 'assets/potion_boost_animation.gif';
     animation.style.position = 'absolute';
     animation.style.width = '120px';
     animation.style.height = '120px';
@@ -1682,3 +1759,123 @@ async function showPotionBoostAnimation(targetElementId) {
 // Export functions
 window.showDefendAnimation = showDefendAnimation;
 window.showPotionBoostAnimation = showPotionBoostAnimation;
+
+// Mirror Attack Animation - Shows swirling mirror effect on hero
+async function showMirrorAttackAnimation(targetElementId) {
+    const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) return;
+
+    const animation = document.createElement('img');
+    animation.src = 'assets/battle/MirrorAttackProjectile.gif';
+    animation.style.position = 'absolute';
+    animation.style.width = '150px';
+    animation.style.height = '150px';
+    animation.style.left = '50%';
+    animation.style.top = '50%';
+    animation.style.transform = 'translate(-50%, -50%)';
+    animation.style.zIndex = '1000';
+    animation.style.pointerEvents = 'none';
+
+    targetElement.style.position = 'relative';
+    targetElement.appendChild(animation);
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            animation.remove();
+            resolve();
+        }, 1500);
+    });
+}
+
+// Poison Leaf Animation - Projectile with explosion
+async function playPoisonLeafAnimation(startElement, targetElement) {
+    console.log('🍃 Poison Leaf animation starting');
+    const startRect = startElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+
+    // Create projectile
+    const projectile = document.createElement('img');
+    projectile.src = 'assets/battle/PoisonLeafProjectile.png';
+    projectile.style.position = 'fixed';
+    projectile.style.width = '40px';
+    projectile.style.height = '40px';
+    projectile.style.left = startRect.left + startRect.width / 2 - 20 + 'px';
+    projectile.style.top = startRect.top + startRect.height / 2 - 20 + 'px';
+    projectile.style.zIndex = '10000';
+    projectile.style.pointerEvents = 'none';
+    projectile.style.imageRendering = 'pixelated';
+    
+    document.body.appendChild(projectile);
+
+    // Calculate trajectory
+    const deltaX = (targetRect.left + targetRect.width / 2) - (startRect.left + startRect.width / 2);
+    const deltaY = (targetRect.top + targetRect.height / 2) - (startRect.top + startRect.height / 2);
+
+    // Animate projectile
+    projectile.style.transition = 'all 0.6s ease-out';
+    projectile.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(360deg)`;
+
+    await new Promise(resolve => setTimeout(resolve, 600));
+
+    // Remove projectile
+    projectile.remove();
+
+    // Create explosion
+    const explosion = document.createElement('img');
+    explosion.src = 'assets/battle/PoisonLeafExplosion.gif';
+    explosion.style.position = 'fixed';
+    explosion.style.width = '80px';
+    explosion.style.height = '80px';
+    explosion.style.left = targetRect.left + targetRect.width / 2 - 40 + 'px';
+    explosion.style.top = targetRect.top + targetRect.height / 2 - 40 + 'px';
+    explosion.style.zIndex = '10000';
+    explosion.style.pointerEvents = 'none';
+    
+    document.body.appendChild(explosion);
+
+    // Play poison sound
+    if (window.audioManager) {
+        const audio = new Audio('assets/battle/PoisonLeafSound.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(e => console.log('Poison sound failed:', e));
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 800));
+    explosion.remove();
+    
+    console.log('🍃 Poison Leaf animation complete');
+}
+
+// Export new functions
+window.showMirrorAttackAnimation = showMirrorAttackAnimation;
+window.playPoisonLeafAnimation = playPoisonLeafAnimation;
+
+// Battle Glove Animation - Shows glove effect on hero
+async function showBattleGloveAnimation(targetElementId) {
+    const targetElement = document.getElementById(targetElementId);
+    if (!targetElement) return;
+
+    const animation = document.createElement('img');
+    animation.src = 'assets/battle/BattleGloveEffect.gif';
+    animation.style.position = 'absolute';
+    animation.style.width = '120px';
+    animation.style.height = '120px';
+    animation.style.left = '50%';
+    animation.style.top = '50%';
+    animation.style.transform = 'translate(-50%, -50%)';
+    animation.style.zIndex = '1000';
+    animation.style.pointerEvents = 'none';
+
+    targetElement.style.position = 'relative';
+    targetElement.appendChild(animation);
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            animation.remove();
+            resolve();
+        }, 1000);
+    });
+}
+
+// Export Battle Glove animation
+window.showBattleGloveAnimation = showBattleGloveAnimation;

@@ -142,9 +142,6 @@ function updateThemesDisplay() {
         const levelRequired = theme.levelRequired || 0;
         const meetsLevelReq = playerLevel >= levelRequired;
         
-        // Skip if level requirement not met
-        if (!meetsLevelReq) return;
-        
         const isOwned = window.gameState && window.gameState.ownedThemes && window.gameState.ownedThemes.includes(theme.id);
         const isActive = window.gameState && window.gameState.activeTheme === theme.preview;
         const canAfford = window.gameState && (window.gameState.jerryXP || 0) >= theme.price;
@@ -153,7 +150,15 @@ function updateThemesDisplay() {
         card.className = 'shop-item-card';
         
         let buttonHtml;
-        if (isActive) {
+        if (!meetsLevelReq) {
+            // Theme is locked due to level requirement
+            buttonHtml = `
+                <div class="shop-item-price">${theme.price} XP</div>
+                <button class="buy-now-btn" style="background: #555; cursor: not-allowed;" disabled>
+                    🔒 Requires Level ${levelRequired}
+                </button>
+            `;
+        } else if (isActive) {
             buttonHtml = `
                 <button class="buy-now-btn" style="background: #666;" onclick="unapplyThemeFromShop()">
                     ✓ Active - Unapply

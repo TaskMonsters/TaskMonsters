@@ -1094,6 +1094,17 @@ class BattleManager {
         
         addBattleLog('🤟🏻 Invisibility Cloak activated! You will evade the next attack.');
         
+        // Flicker monster sprite on/off during cloak effect
+        const heroSprite = document.getElementById('heroSprite');
+        if (heroSprite) {
+            for (let i = 0; i < 6; i++) {
+                heroSprite.style.opacity = '0';
+                await new Promise(resolve => setTimeout(resolve, 100));
+                heroSprite.style.opacity = '1';
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+        
         // Play hero roll animation
         if (window.playHeroRollAnimation) {
             await window.playHeroRollAnimation();
@@ -1131,6 +1142,11 @@ class BattleManager {
         // Play mirror sound (using cloak sound as placeholder)
         if (window.audioManager) {
             window.audioManager.playSound('cloak_use', 0.8);
+        }
+        
+        // Show mirror attack animation
+        if (window.showMirrorAttackAnimation) {
+            await window.showMirrorAttackAnimation('heroSprite');
         }
         
         addBattleLog('🪞 Mirror Attack activated! Enemy\'s next attack will be reflected!');
@@ -2507,9 +2523,9 @@ class BattleManager {
             window.audioManager.playSound('potion_use', 0.8);
         }
         
-        // Show attack boost animation
-        if (window.showPotionBoostAnimation) {
-            await window.showPotionBoostAnimation('heroSprite');
+        // Show Battle Glove animation
+        if (window.showBattleGloveAnimation) {
+            await window.showBattleGloveAnimation('heroSprite');
         }
 
         saveGameState();

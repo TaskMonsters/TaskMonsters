@@ -220,6 +220,12 @@ class SkinsManager {
         this.equippedSkinId = skinId;
         window.gameState.equippedSkinId = skinId;
         window.saveGameState();
+        
+        // Play equip sound (same as theme equip)
+        if (window.audioManager) {
+            window.audioManager.playSound('skin_theme_equip', 0.8);
+        }
+        
         this.updateAllMonsterVisuals();
         this.renderSkinsShop();
         return { success: true };
@@ -232,6 +238,12 @@ class SkinsManager {
         this.equippedSkinId = null;
         window.gameState.equippedSkinId = null;
         window.saveGameState();
+        
+        // Play unequip sound (same as theme equip)
+        if (window.audioManager) {
+            window.audioManager.playSound('skin_theme_equip', 0.8);
+        }
+        
         this.updateAllMonsterVisuals();
         this.renderSkinsShop();
         return { success: true };
