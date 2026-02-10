@@ -27,7 +27,7 @@ class GuardianNarrator {
             
             introducePet: "Look! A new Task Pet has been born from your potential. This loyal companion is a reflection of your inner drive. It will grow stronger with every goal you achieve. What will you name your new friend?",
             
-            explainGloom: "But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters that represent real-world challenges like procrastination and distraction. Your Task Pet is our champion against them!",
+            explainGloom: "But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters from everyday challenges. Your Task Pet is our champion against them!",
             
             firstBattle: "Your first challenge awaits! Let's complete a task to give your Task Pet the energy it needs to win. Every victory helps reclaim our world from The Gloom. Are you ready?",
             

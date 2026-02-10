@@ -280,12 +280,13 @@ function updateActionButtons(hero) {
         }
     }
 
-    // Prickler requires 20 attack gauge AND inventory (unlocked at level 3)
+    // Prickler requires 20 attack ga    // Prickler (unlocked when purchased)
     const btnPrickler = document.getElementById('btnPrickler');
     if (btnPrickler) {
-        if (gameState.unlockedBattleItems?.includes('prickler')) {
+        const pricklerCount = gameState.battleInventory?.prickler || 0;
+        // Show if owned
+        if (pricklerCount > 0 || gameState.unlockedBattleItems?.includes('prickler')) {
             btnPrickler.style.display = '';
-            const pricklerCount = gameState.battleInventory?.prickler || 0;
             const pricklerCountSpan = btnPrickler.querySelector('.item-count');
             if (pricklerCountSpan) {
                 pricklerCountSpan.textContent = `(${pricklerCount})`;
@@ -294,9 +295,7 @@ function updateActionButtons(hero) {
         } else {
             btnPrickler.style.display = 'none';
         }
-    }
-
-    // Freeze requires 35 attack gauge AND inventory (unlocked at level 8)
+    }    // Freeze requires 35 attack gauge AND inventory (unlocked at level 8)
     const btnFreeze = document.getElementById('btnFreeze');
     if (btnFreeze) {
         if (hero.level >= 8) {
@@ -367,9 +366,10 @@ function updateActionButtons(hero) {
     // Mirror Attack (unlocked at level 40)
     const btnMirrorAttack = document.getElementById('btnMirrorAttack');
     if (btnMirrorAttack) {
-        if (hero.level >= 40) {
+        const mirrorAttackCount = gameState.battleInventory?.mirror_attack || 0;
+        // Show if owned OR level requirement met
+        if (mirrorAttackCount > 0 || hero.level >= 40) {
             btnMirrorAttack.style.display = '';
-            const mirrorAttackCount = gameState.battleInventory?.mirror_attack || 0;
             const mirrorAttackCountSpan = btnMirrorAttack.querySelector('.item-count');
             if (mirrorAttackCountSpan) {
                 mirrorAttackCountSpan.textContent = `(${mirrorAttackCount})`;
@@ -415,9 +415,10 @@ function updateActionButtons(hero) {
     // Throwing Star button
     const btnThrowingStar = document.getElementById('btnThrowingStar');
     if (btnThrowingStar) {
-        if (hero.level >= 20) {
+        const throwingStarCount = gameState.battleInventory?.throwing_stars || 0;
+        // Show if owned OR level requirement met
+        if (throwingStarCount > 0 || hero.level >= 20) {
             btnThrowingStar.style.display = '';
-            const throwingStarCount = gameState.battleInventory?.throwing_stars || 0;
             const throwingStarCountSpan = btnThrowingStar.querySelector('.item-count');
             if (throwingStarCountSpan) {
                 throwingStarCountSpan.textContent = `(${throwingStarCount})`;
@@ -431,9 +432,10 @@ function updateActionButtons(hero) {
     // Battle Glove button
     const btnBattleGlove = document.getElementById('btnBattleGlove');
     if (btnBattleGlove) {
-        if (hero.level >= 30) {
+        const battleGloveCount = gameState.battleInventory?.battle_glove || 0;
+        // Show if owned OR level requirement met
+        if (battleGloveCount > 0 || hero.level >= 30) {
             btnBattleGlove.style.display = '';
-            const battleGloveCount = gameState.battleInventory?.battle_glove || 0;
             const battleGloveCountSpan = btnBattleGlove.querySelector('.item-count');
             if (battleGloveCountSpan) {
                 battleGloveCountSpan.textContent = `(${battleGloveCount})`;
@@ -447,9 +449,10 @@ function updateActionButtons(hero) {
     // Jade Dagger button
     const btnJadeDagger = document.getElementById('btnJadeDagger');
     if (btnJadeDagger) {
-        if (hero.level >= 35) {
+        const jadeDaggerCount = gameState.battleInventory?.jade_dagger || 0;
+        // Show if owned OR level requirement met
+        if (jadeDaggerCount > 0 || hero.level >= 35) {
             btnJadeDagger.style.display = '';
-            const jadeDaggerCount = gameState.battleInventory?.jade_dagger || 0;
             const jadeDaggerCountSpan = btnJadeDagger.querySelector('.item-count');
             if (jadeDaggerCountSpan) {
                 jadeDaggerCountSpan.textContent = `(${jadeDaggerCount})`;
@@ -463,9 +466,10 @@ function updateActionButtons(hero) {
     // Wizard's Wand button
     const btnWizardsWand = document.getElementById('btnWizardsWand');
     if (btnWizardsWand) {
-        if (hero.level >= 40) {
+        const wizardsWandCount = gameState.battleInventory?.wizards_wand || 0;
+        // Show if owned OR level requirement met
+        if (wizardsWandCount > 0 || hero.level >= 40) {
             btnWizardsWand.style.display = '';
-            const wizardsWandCount = gameState.battleInventory?.wizards_wand || 0;
             const wizardsWandCountSpan = btnWizardsWand.querySelector('.item-count');
             if (wizardsWandCountSpan) {
                 wizardsWandCountSpan.textContent = `(${wizardsWandCount})`;

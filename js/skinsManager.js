@@ -163,7 +163,7 @@ class SkinsManager {
             let thumbnailHTML = '';
             if (isLocked) {
                 // Show question mark for locked skins (GREEN)
-                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon" style="font-size: 3rem; filter: drop-shadow(0 0 8px #10b981) drop-shadow(0 0 15px #10b981);">🟢</div></div>`;
+                thumbnailHTML = `<div class="skin-thumbnail locked-thumbnail"><div class="locked-icon" style="font-size: 4rem; color: #10b981; text-shadow: 0 0 15px #10b981, 0 0 30px rgba(16, 185, 129, 0.8); font-weight: bold; font-family: Arial, sans-serif;">?</div></div>`;
             } else {
                 // Show actual skin image (unlocked skins only)
                 const skinImage = skin.thumbnail || skin.animations?.idle || `assets/skins/${skin.id}/thumbnail.png`;

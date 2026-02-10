@@ -23,7 +23,7 @@ class GuardianOnboarding {
             },
             {
                 title: 'The Gloom',
-                message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters that represent real-world challenges like procrastination and distraction. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
+                message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters from everyday challenges. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
                 animation: 'gloom',
                 showMap: true,
                 isLastStep: true
@@ -83,6 +83,8 @@ class GuardianOnboarding {
                 align-items: center;
                 z-index: 10005;
                 animation: fadeIn 0.5s ease;
+                overflow-y: auto;
+                padding: 20px 0;
             `;
             document.body.appendChild(overlay);
         } else {
@@ -92,10 +94,11 @@ class GuardianOnboarding {
         // Create content container
         const container = document.createElement('div');
         container.style.cssText = `
-            max-width: 900px;
+            max-width: 700px;
             width: 90%;
             text-align: center;
             animation: scaleIn 0.5s ease;
+            margin: auto;
         `;
         
         // Show map
@@ -145,19 +148,19 @@ class GuardianOnboarding {
         const messageBox = document.createElement('div');
         messageBox.style.cssText = `
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-            padding: 32px;
-            border-radius: 16px;
+            padding: 20px;
+            border-radius: 12px;
             backdrop-filter: blur(20px);
             border: 2px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 60px rgba(102, 126, 234, 0.6);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         `;
         
         messageBox.innerHTML = `
-            <h2 style="color: white; font-size: 28px; margin: 0 0 16px 0; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            <h2 style="color: white; font-size: 22px; margin: 0 0 12px 0; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
                 ${step.title}
             </h2>
-            <p style="color: white; font-size: 18px; line-height: 1.8; margin: 0; font-weight: 400; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+            <p style="color: white; font-size: 15px; line-height: 1.6; margin: 0; font-weight: 400; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
                 ${step.message}
             </p>
         `;
