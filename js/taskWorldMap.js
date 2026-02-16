@@ -18,65 +18,70 @@ class TaskWorldMap {
      */
     initializePathCoordinates() {
         return {
-            // Starting Village (Levels 1-5)
-            1: { x: 10, y: 81 },
-            2: { x: 10, y: 75 },
-            3: { x: 14, y: 69 },
-            4: { x: 18, y: 63 },
-            5: { x: 21, y: 56 },
+            // Starting Village (Levels 1-5) - Bottom Left
+            // Village with red houses at bottom left
+            1: { x: 12, y: 82 },
+            2: { x: 14, y: 78 },
+            3: { x: 16, y: 74 },
+            4: { x: 18, y: 70 },
+            5: { x: 20, y: 66 },
             
-            // Green Forest (Levels 6-14)
-            6: { x: 25, y: 50 },
-            7: { x: 29, y: 44 },
-            8: { x: 32, y: 38 },
-            9: { x: 36, y: 35 },
-            10: { x: 39, y: 38 },
-            11: { x: 43, y: 44 },
-            12: { x: 46, y: 50 },
-            13: { x: 50, y: 56 },
-            14: { x: 46, y: 63 },
+            // Enchanted Forest (Levels 6-14) - Left side, winding upward
+            // Green forest area with trees
+            6: { x: 22, y: 62 },
+            7: { x: 18, y: 58 },
+            8: { x: 16, y: 54 },
+            9: { x: 18, y: 50 },
+            10: { x: 22, y: 46 },
+            11: { x: 26, y: 42 },
+            12: { x: 30, y: 46 },
+            13: { x: 34, y: 50 },
+            14: { x: 38, y: 54 },
             
-            // Desert Region (Levels 15-26)
-            15: { x: 50, y: 44 },
-            16: { x: 54, y: 48 },
-            17: { x: 57, y: 44 },
-            18: { x: 61, y: 50 },
-            19: { x: 64, y: 53 },
-            20: { x: 68, y: 56 },
-            21: { x: 71, y: 60 },
-            22: { x: 75, y: 63 },
-            23: { x: 79, y: 65 },
-            24: { x: 75, y: 69 },
-            25: { x: 71, y: 73 },
-            26: { x: 68, y: 75 },
+            // Golden Desert (Levels 15-26) - Center-right, lower area
+            // Yellow sandy area with pyramids
+            15: { x: 42, y: 58 },
+            16: { x: 46, y: 62 },
+            17: { x: 50, y: 66 },
+            18: { x: 54, y: 70 },
+            19: { x: 58, y: 72 },
+            20: { x: 62, y: 70 },
+            21: { x: 66, y: 66 },
+            22: { x: 70, y: 62 },
+            23: { x: 68, y: 58 },
+            24: { x: 64, y: 54 },
+            25: { x: 60, y: 50 },
+            26: { x: 58, y: 46 },
             
-            // Mountain Approach (Levels 27-39)
-            27: { x: 64, y: 69 },
-            28: { x: 61, y: 63 },
-            29: { x: 64, y: 60 },
-            30: { x: 68, y: 58 },
-            31: { x: 71, y: 55 },
-            32: { x: 75, y: 53 },
-            33: { x: 79, y: 50 },
-            34: { x: 82, y: 48 },
-            35: { x: 86, y: 45 },
-            36: { x: 82, y: 43 },
-            37: { x: 79, y: 45 },
-            38: { x: 75, y: 48 },
-            39: { x: 71, y: 45 },
+            // Frozen Mountain Pass (Levels 27-39) - Upper center-right
+            // Gray mountains with snow peaks
+            27: { x: 60, y: 42 },
+            28: { x: 62, y: 38 },
+            29: { x: 64, y: 34 },
+            30: { x: 66, y: 30 },
+            31: { x: 68, y: 26 },
+            32: { x: 70, y: 30 },
+            33: { x: 72, y: 34 },
+            34: { x: 74, y: 38 },
+            35: { x: 76, y: 34 },
+            36: { x: 78, y: 30 },
+            37: { x: 76, y: 26 },
+            38: { x: 74, y: 22 },
+            39: { x: 72, y: 20 },
             
-            // Dark Castle (Levels 40-50)
-            40: { x: 68, y: 43 },
-            41: { x: 64, y: 40 },
-            42: { x: 61, y: 38 },
-            43: { x: 57, y: 35 },
-            44: { x: 54, y: 33 },
-            45: { x: 50, y: 30 },
-            46: { x: 46, y: 28 },
-            47: { x: 50, y: 25 },
-            48: { x: 54, y: 23 },
-            49: { x: 57, y: 20 },
-            50: { x: 61, y: 18 }  // Final boss at Dark Castle
+            // Dark Castle (Levels 40-50) - Top right
+            // Purple castle at top right
+            40: { x: 74, y: 18 },
+            41: { x: 76, y: 16 },
+            42: { x: 78, y: 14 },
+            43: { x: 80, y: 16 },
+            44: { x: 82, y: 18 },
+            45: { x: 80, y: 20 },
+            46: { x: 78, y: 18 },
+            47: { x: 76, y: 16 },
+            48: { x: 78, y: 14 },
+            49: { x: 80, y: 12 },
+            50: { x: 82, y: 14 }  // Castle throne (final boss)
         };
     }
     
@@ -334,10 +339,10 @@ class TaskWorldMap {
      * Get region name based on level
      */
     getRegionName(level) {
-        if (level >= 1 && level <= 5) return 'Starting Village';
-        if (level >= 6 && level <= 14) return 'Green Forest';
-        if (level >= 15 && level <= 26) return 'Desert Region';
-        if (level >= 27 && level <= 39) return 'Mountain Approach';
+        if (level >= 1 && level <= 5) return 'Peaceful Village';
+        if (level >= 6 && level <= 14) return 'Enchanted Forest';
+        if (level >= 15 && level <= 26) return 'Golden Desert';
+        if (level >= 27 && level <= 39) return 'Frozen Mountain Pass';
         if (level >= 40 && level <= 50) return 'Dark Castle';
         return 'Unknown Region';
     }

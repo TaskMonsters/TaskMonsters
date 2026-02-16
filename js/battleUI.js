@@ -230,27 +230,35 @@ function updateBattleUI(hero, enemy) {
     // Update hero HP
     const heroHPBar = document.getElementById('heroHPBar');
     const heroHPText = document.getElementById('heroHPText');
-    const heroHPPercent = (hero.hp / hero.maxHP) * 100;
-    heroHPBar.style.width = heroHPPercent + '%';
-    heroHPText.textContent = `${hero.hp}/${hero.maxHP}`;
+    if (heroHPBar && heroHPText && hero) {
+        const heroHPPercent = (hero.hp / hero.maxHP) * 100;
+        heroHPBar.style.width = heroHPPercent + '%';
+        heroHPText.textContent = `${hero.hp}/${hero.maxHP}`;
+    }
 
     // Update enemy HP
     const enemyHPBar = document.getElementById('enemyHPBar');
     const enemyHPText = document.getElementById('enemyHPText');
-    const enemyHPPercent = (enemy.hp / enemy.maxHP) * 100;
-    enemyHPBar.style.width = enemyHPPercent + '%';
-    enemyHPText.textContent = `${enemy.hp}/${enemy.maxHP}`;
+    if (enemyHPBar && enemyHPText && enemy) {
+        const enemyHPPercent = (enemy.hp / enemy.maxHP) * 100;
+        enemyHPBar.style.width = enemyHPPercent + '%';
+        enemyHPText.textContent = `${enemy.hp}/${enemy.maxHP}`;
+    }
 
     // Update gauges
     const attackGaugeBar = document.getElementById('attackGaugeBar');
     const attackGaugeText = document.getElementById('attackGaugeText');
-    attackGaugeBar.style.width = battleManager.attackGauge + '%';
-    attackGaugeText.textContent = `${battleManager.attackGauge}/100`;
+    if (attackGaugeBar && attackGaugeText && window.battleManager) {
+        attackGaugeBar.style.width = battleManager.attackGauge + '%';
+        attackGaugeText.textContent = `${battleManager.attackGauge}/100`;
+    }
 
     const defenseGaugeBar = document.getElementById('defenseGaugeBar');
     const defenseGaugeText = document.getElementById('defenseGaugeText');
-    defenseGaugeBar.style.width = battleManager.defenseGauge + '%';
-    defenseGaugeText.textContent = `${battleManager.defenseGauge}/100`;
+    if (defenseGaugeBar && defenseGaugeText && window.battleManager) {
+        defenseGaugeBar.style.width = battleManager.defenseGauge + '%';
+        defenseGaugeText.textContent = `${battleManager.defenseGauge}/100`;
+    }
     
     // Update special attack gauge
     const specialGaugeBar = document.getElementById('specialGaugeBar');
@@ -561,6 +569,10 @@ function updateActionButtons(hero) {
 // Add message to battle log
 function addBattleLog(message) {
     const log = document.getElementById('battleLog');
+    if (!log) {
+        console.error('[BattleUI] battleLog element not found');
+        return;
+    }
     log.innerHTML += `<div>${message}</div>`;
     log.scrollTop = log.scrollHeight;
 }

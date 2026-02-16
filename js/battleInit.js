@@ -168,72 +168,27 @@ function renderHeroSprite() {
     
     if (!appearance || !appearance.animations || !appearance.animations.idle) {
         console.error('[Battle] Unable to get valid hero appearance', { appearance });
-        // Last resort fallback
-        heroSprite.style.backgroundImage = "url('assets/heroes/Pink_Monster_Idle_4.png')";
-        heroSprite.style.backgroundSize = '128px 32px';
+        // Last resort fallback - use img src
+        heroSprite.src = 'assets/heroes/Pink_Monster_idle.gif';
     } else {
-        heroSprite.style.backgroundImage = `url('${appearance.animations.idle}')`;
-        
-        // Get sprite dimensions (default to 32x32 for standard sprites)
-        const spriteSize = appearance.spriteSize || { width: 32, height: 32 };
-        const frameWidth = spriteSize.width;
-        const frameHeight = spriteSize.height;
-        
-        // For multi-directional sprites, we need to account for multiple rows
-        const spriteRow = appearance.spriteRow || 0;
-        const animationRows = appearance.animationRows || {};
-        
-        // Calculate total width and height based on sprite type
-        let totalWidth, totalHeight;
-        
-        if (Object.keys(animationRows).length > 0) {
-            // Blob-style: full sprite sheet is 192x192 (6 frames wide × 6 rows tall)
-            totalWidth = 192; // Full sprite sheet width
-            totalHeight = 192; // Full sprite sheet height (6 rows × 32px)
-        } else {
-            // Standard sprites: calculate based on idle frame count
-            totalWidth = (appearance.frameCount.idle || 4) * frameWidth;
-            totalHeight = frameHeight;
-        }
-        
-        heroSprite.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
+        // Set as img src (element is now <img> not <div>)
+        heroSprite.src = appearance.animations.idle;
+        console.log('[Battle] Hero sprite src set to:', appearance.animations.idle);
     }
     
-    // Ensure sprite is visible - render all skins at same size as cat skins
-    const spriteSize = appearance?.spriteSize || { width: 32, height: 32 };
-    const spriteRow = appearance?.spriteRow || 0;
-    const animationRows = appearance?.animationRows || {};
-    
-    // FIX: Don't scale the sprite element itself - scale the wrapper instead
-    // This prevents multi-frame display and flickering
-    heroSprite.style.width = `${spriteSize.width}px`;
-    heroSprite.style.height = `${spriteSize.height}px`;
-    heroSprite.style.transform = 'none'; // No scaling on sprite element
-    
-    // Scale the wrapper instead to maintain visual size
-    const spriteWrapper = heroSprite.parentElement;
-    if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
-        const isSkinEquipped = appearance && appearance.isSkin;
-        if (isSkinEquipped) {
-            spriteWrapper.style.transform = 'scale(3.5)'; // Scale wrapper for skins
-        } else {
-            spriteWrapper.style.transform = 'scale(2.5)'; // Scale wrapper for default monsters (decreased by 1x)
-        }
-    }
-    
+    // Style for img element
+    heroSprite.style.width = '32px';
+    heroSprite.style.height = '32px';
+    heroSprite.style.objectFit = 'contain';
+    heroSprite.style.transform = 'scale(3.5)';
+    heroSprite.style.transformOrigin = 'bottom center';
     heroSprite.style.imageRendering = 'pixelated';
+    heroSprite.style.opacity = '1';
+    heroSprite.style.display = 'block';
+    heroSprite.style.visibility = 'visible';
     
-    // Set initial background position (accounting for sprite row if multi-directional)
-    // For Blob-style sprites with animationRows, use idle row
-    const initialRow = animationRows.idle !== undefined ? animationRows.idle : spriteRow;
-    const yOffset = initialRow * spriteSize.height;
-    heroSprite.style.backgroundPosition = `0 -${yOffset}px`;
-    
-    // Remove any classes or styles that could hide the sprite
+    // Remove any classes that could hide the sprite
     heroSprite.classList.remove('hidden', 'opacity-0', 'fade-out', 'defeated');
-    heroSprite.style.removeProperty('display');
-    heroSprite.style.removeProperty('visibility');
-    heroSprite.style.removeProperty('opacity');
     
     console.log('[Battle] Hero sprite rendered successfully', { appearance });
 }

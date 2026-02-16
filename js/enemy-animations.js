@@ -133,12 +133,18 @@ function initEnemySprite(enemy) {
     // Use mapped path if available, otherwise try the standard pattern
     const idleGif = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
     
-    spriteElement.style.backgroundImage = `url('${idleGif}')`;
-    spriteElement.style.backgroundSize = 'contain';
-    spriteElement.style.backgroundRepeat = 'no-repeat';
-    spriteElement.style.backgroundPosition = 'center';
-    spriteElement.style.width = '100px';
-    spriteElement.style.height = '100px';
+    // Set as img src (element is now <img> not <div>)
+    spriteElement.src = idleGif;
+    spriteElement.style.width = '32px';
+    spriteElement.style.height = '32px';
+    spriteElement.style.objectFit = 'contain';
+    spriteElement.style.transform = 'scale(6)';
+    spriteElement.style.imageRendering = 'pixelated';
+    spriteElement.style.opacity = '1';
+    spriteElement.style.display = 'block';
+    spriteElement.style.visibility = 'visible';
+    
+    console.log('[Enemy] Sprite initialized:', enemyName, idleGif);
 }
 
 // Export to global scope
