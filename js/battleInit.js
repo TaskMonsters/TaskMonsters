@@ -122,31 +122,31 @@ function getActiveHeroAppearance() {
         };
     }
     
-    // Fallback to default monster
+    // Fallback to default monster - USE GIF ANIMATIONS
     const defaultMonsterMap = {
-        luna: 'Owlet_Monster',
-        benny: 'Dude_Monster',
-        nova: 'Pink_Monster'
+        luna: 'Luna',
+        benny: 'Benny',
+        nova: 'Nova'
     };
     
-    const prefix = defaultMonsterMap[baseMonsterId] || 'Pink_Monster';
+    const monsterName = defaultMonsterMap[baseMonsterId] || 'Nova';
     
     return {
         animations: {
-            idle: `assets/heroes/${prefix}_Idle_4.png`,
-            walk: `assets/heroes/${prefix}_Walk_4.png`,
-            attack: `assets/heroes/${prefix}_Attack1_4.png`,
-            jump: `assets/heroes/${prefix}_Jump_8.png`,
-            hurt: `assets/heroes/${prefix}_Hurt_4.png`,
-            death: `assets/heroes/${prefix}_Death_8.png`
+            idle: `assets/heroes/${monsterName}_idle.gif`,
+            walk: `assets/heroes/${monsterName}_idle.gif`,
+            attack: `assets/heroes/${monsterName}_attack.gif`,
+            jump: `assets/heroes/${monsterName}_jump.gif`,
+            hurt: `assets/heroes/${monsterName}_Hurt.gif`,
+            death: `assets/heroes/${monsterName}_Hurt.gif`
         },
         frameCount: {
-            idle: 4,
-            walk: 4,
-            attack: 4,
-            jump: 8,
-            hurt: 4,
-            death: 8
+            idle: 1,
+            walk: 1,
+            attack: 1,
+            jump: 1,
+            hurt: 1,
+            death: 1
         },
         isSkin: false,
         skinId: null
@@ -169,7 +169,7 @@ function renderHeroSprite() {
     if (!appearance || !appearance.animations || !appearance.animations.idle) {
         console.error('[Battle] Unable to get valid hero appearance', { appearance });
         // Last resort fallback - use img src
-        heroSprite.src = 'assets/heroes/Pink_Monster_idle.gif';
+        heroSprite.src = 'assets/heroes/Nova_idle.gif';
     } else {
         // Set as img src (element is now <img> not <div>)
         heroSprite.src = appearance.animations.idle;
@@ -241,16 +241,20 @@ function startHeroAnimation(animationType = 'idle') {
             walk: { frames: skin.frameCount.walk || 4, width: getWidth('walk', skin.frameCount.walk || 4), sprite: skin.animations.walk, speed: 150 }
         };
     } else {
-        // Use default monster animations
-        animations = {
-            idle: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Idle_4.png`, speed: 200 },
-            attack1: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Attack1_4.png`, speed: 150 },
-            'walk-attack': { frames: 6, width: 192, sprite: `assets/heroes/${spritePrefix}_Walk+Attack_6.png`, speed: 150 },
-            throw: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Throw_4.png`, speed: 150 },
-            jump: { frames: 8, width: 256, sprite: `assets/heroes/${spritePrefix}_Jump_8.png`, speed: 100 },
-            hurt: { frames: 4, width: 128, sprite: `assets/heroes/${spritePrefix}_Hurt_4.png`, speed: 150 },
-            death: { frames: 8, width: 256, sprite: `assets/heroes/${spritePrefix}_Death_8.png`, speed: 150 }
+        // Use default monster GIF animations
+        const baseMonsterId = localStorage.getItem('selectedMonster') || 'nova';
+        const monsterNameMap = {
+            luna: 'Luna',
+            benny: 'Benny',
+            nova: 'Nova'
         };
+        const monsterName = monsterNameMap[baseMonsterId] || 'Nova';
+        
+        // For GIF animations, we just set the src directly
+        const gifPath = appearance.animations[animationType] || appearance.animations.idle;
+        heroSprite.src = gifPath;
+        console.log('[Battle] Hero animation changed to:', animationType, gifPath);
+        return; // Exit early for GIF animations
     }
     
     const anim = animations[animationType] || animations.idle;
