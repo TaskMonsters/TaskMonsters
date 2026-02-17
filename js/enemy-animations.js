@@ -103,10 +103,19 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
 
 // Initialize enemy sprite with idle animation
 function initEnemySprite(enemy) {
+    console.log('[InitEnemy] Called with enemy:', enemy);
     const spriteElement = document.getElementById('enemySprite');
-    if (!spriteElement || !enemy) return;
+    if (!spriteElement) {
+        console.error('[InitEnemy] Enemy sprite element not found!');
+        return;
+    }
+    if (!enemy) {
+        console.error('[InitEnemy] Enemy object is null/undefined!');
+        return;
+    }
     
     const enemyName = enemy.name;
+    console.log('[InitEnemy] Enemy name:', enemyName);
     
     // Map enemy names to their actual directory and file names
     const enemyPaths = {
@@ -134,6 +143,7 @@ function initEnemySprite(enemy) {
     const idleGif = enemyPaths[enemyName] || `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
     
     // Set as img src (element is now <img> not <div>)
+    console.log('[InitEnemy] Setting sprite src to:', idleGif);
     spriteElement.src = idleGif;
     spriteElement.style.width = '32px';
     spriteElement.style.height = '32px';
@@ -144,7 +154,9 @@ function initEnemySprite(enemy) {
     spriteElement.style.display = 'block';
     spriteElement.style.visibility = 'visible';
     
-    console.log('[Enemy] Sprite initialized:', enemyName, idleGif);
+    console.log('[InitEnemy] ✅ Sprite initialized successfully:', enemyName, idleGif);
+    console.log('[InitEnemy] Sprite element src:', spriteElement.src);
+    console.log('[InitEnemy] Sprite element visible:', spriteElement.style.display, spriteElement.style.visibility);
 }
 
 // Export to global scope

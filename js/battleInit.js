@@ -180,7 +180,7 @@ function renderHeroSprite() {
     heroSprite.style.width = '32px';
     heroSprite.style.height = '32px';
     heroSprite.style.objectFit = 'contain';
-    heroSprite.style.transform = 'scale(3.5)';
+    heroSprite.style.transform = 'scale(2.5)';  // Reduced from 3.5x to 2.5x
     heroSprite.style.transformOrigin = 'bottom center';
     heroSprite.style.imageRendering = 'pixelated';
     heroSprite.style.opacity = '1';

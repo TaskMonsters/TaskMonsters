@@ -195,13 +195,20 @@ class BattleManager {
         showBattle(this.hero, this.enemy);
 
         // Render hero sprite
+        console.log('[Battle] Rendering hero sprite...');
         if (typeof renderHeroSprite === 'function') {
             renderHeroSprite();
+        } else {
+            console.error('[Battle] renderHeroSprite function not found!');
         }
 
         // Initialize enemy sprite with correct size class
+        console.log('[Battle] Initializing enemy sprite with enemy:', this.enemy);
         if (typeof initEnemySprite === 'function') {
             initEnemySprite(this.enemy);
+            console.log('[Battle] initEnemySprite called successfully');
+        } else {
+            console.error('[Battle] initEnemySprite function not found!');
         }
 
         // Play wake up sequence

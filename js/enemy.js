@@ -543,26 +543,37 @@ function playWakeUpSequence(enemy, callback) {
     return new Promise((resolve) => {
         const spriteElement = document.getElementById('enemySprite');
         if (!spriteElement || !enemy) {
+            console.warn('[WakeUp] Sprite element or enemy not found');
             if (callback) callback();
             resolve();
             return;
         }
         
+        console.log('[WakeUp] Enemy:', enemy.name, 'Sprites:', enemy.sprites);
+        
+        // FIX: Use img src instead of backgroundImage (element is <img> not <div>)
         // Play wake-up animation if available
-        if (enemy.sprites.wakeup) {
+        if (enemy.sprites && enemy.sprites.wakeup) {
             enemy.setSprite('wakeup');
-            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            spriteElement.src = enemy.currentSprite;
+            console.log('[WakeUp] Playing wake-up animation:', enemy.currentSprite);
             
             setTimeout(() => {
                 enemy.setSprite('idle');
-                spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+                spriteElement.src = enemy.currentSprite;
+                console.log('[WakeUp] Switched to idle:', enemy.currentSprite);
                 if (callback) callback();
                 resolve();
             }, 1000);
         } else {
             // No wake-up animation, just set idle
-            enemy.setSprite('idle');
-            spriteElement.style.backgroundImage = `url('${enemy.currentSprite}')`;
+            if (enemy.sprites && enemy.sprites.idle) {
+                enemy.setSprite('idle');
+                spriteElement.src = enemy.currentSprite;
+                console.log('[WakeUp] Set idle sprite:', enemy.currentSprite);
+            } else {
+                console.warn('[WakeUp] No idle sprite found for enemy:', enemy.name);
+            }
             if (callback) callback();
             resolve();
         }
