@@ -57,11 +57,20 @@ class BattleManager {
         if (window.battleTutorial && BattleTutorial.shouldShowTutorial()) {
             console.log('⚔️ First battle detected, showing tutorial');
             window.battleTutorial.show();
-            // Wait for tutorial to complete before starting battle
+            // Wait for tutorial to complete before starting battle (with 30s timeout)
             await new Promise(resolve => {
+                let elapsed = 0;
                 const checkTutorial = setInterval(() => {
+                    elapsed += 500;
                     if (localStorage.getItem('battleTutorialCompleted') === 'true') {
                         clearInterval(checkTutorial);
+                        console.log('[Battle] Tutorial completed');
+                        resolve();
+                    } else if (elapsed >= 30000) {
+                        // Timeout after 30 seconds
+                        clearInterval(checkTutorial);
+                        console.warn('[Battle] Tutorial timeout, proceeding with battle');
+                        localStorage.setItem('battleTutorialCompleted', 'true');
                         resolve();
                     }
                 }, 500);
@@ -192,7 +201,9 @@ class BattleManager {
         }
 
         // Show battle arena
+        console.log('[Battle] About to call showBattle with hero:', this.hero, 'enemy:', this.enemy);
         showBattle(this.hero, this.enemy);
+        console.log('[Battle] showBattle completed');
 
         // Render hero sprite
         console.log('[Battle] Rendering hero sprite...');
@@ -204,11 +215,19 @@ class BattleManager {
 
         // Initialize enemy sprite with correct size class
         console.log('[Battle] Initializing enemy sprite with enemy:', this.enemy);
+        console.log('[Battle] Enemy name:', this.enemy?.name);
+        console.log('[Battle] initEnemySprite function exists:', typeof initEnemySprite);
+        
         if (typeof initEnemySprite === 'function') {
-            initEnemySprite(this.enemy);
-            console.log('[Battle] initEnemySprite called successfully');
+            try {
+                initEnemySprite(this.enemy);
+                console.log('[Battle] initEnemySprite called successfully');
+            } catch (error) {
+                console.error('[Battle] initEnemySprite error:', error);
+            }
         } else {
             console.error('[Battle] initEnemySprite function not found!');
+            console.error('[Battle] Available window functions:', Object.keys(window).filter(k => k.includes('Enemy') || k.includes('enemy')));
         }
 
         // Play wake up sequence
@@ -220,14 +239,48 @@ class BattleManager {
             console.log('[Battle] playWakeUpSequence completed');
         } catch (error) {
             console.error('[Battle] playWakeUpSequence error:', error);
+            // Emergency fallback: set enemy sprite directly
+            const enemySprite = document.getElementById('enemySprite');
+            if (enemySprite && this.enemy) {
+                const enemyName = this.enemy.name;
+                const idlePath = `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
+                enemySprite.src = idlePath;
+                console.log('[Battle] Emergency fallback: set enemy sprite to', idlePath);
+            }
+        }
+        
+        // CRITICAL FIX: Verify enemy sprite is visible after wake-up
+        const enemySprite = document.getElementById('enemySprite');
+        if (enemySprite && (!enemySprite.src || enemySprite.src === '')) {
+            console.warn('[Battle] Enemy sprite src is empty! Applying emergency fix...');
+            if (this.enemy && this.enemy.name) {
+                const enemyName = this.enemy.name;
+                const idlePath = `assets/enemies/${enemyName}/${enemyName}-IdleFly-animated.gif`;
+                enemySprite.src = idlePath;
+                enemySprite.style.display = 'block';
+                enemySprite.style.visibility = 'visible';
+                enemySprite.style.opacity = '1';
+                console.log('[Battle] ⚠️ Emergency fix applied: enemy sprite set to', idlePath);
+            }
         }
         
         addBattleLog('⚔️ Battle Start!');
         console.log('[Battle] Starting enemy turn');
 
         // Enemy attacks first (stable behavior)
-        await this.enemyTurn();
-        console.log('[Battle] Enemy turn completed, state:', this.state);
+        try {
+            await this.enemyTurn();
+            console.log('[Battle] Enemy turn completed, state:', this.state);
+        } catch (error) {
+            console.error('[Battle] Error during enemyTurn:', error);
+            // Emergency fallback: force PLAYER_TURN state
+            this.state = BattleState.PLAYER_TURN;
+            addBattleLog('⚔️ Your turn!');
+            if (typeof updateActionButtons === 'function') {
+                updateActionButtons(this.hero);
+            }
+            console.log('[Battle] Emergency fallback: forced PLAYER_TURN state');
+        }
     }
 
     // Helper: Apply damage to hero with animation
