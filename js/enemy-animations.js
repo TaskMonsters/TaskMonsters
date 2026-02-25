@@ -164,7 +164,7 @@ function initEnemySprite(enemy) {
     spriteElement.style.width = '32px';
     spriteElement.style.height = '32px';
     spriteElement.style.objectFit = 'contain';
-    spriteElement.style.transform = 'scale(2)'; // Reduced from 4x to 2x per user request to fix cropping
+    spriteElement.style.transform = 'scale(4)'; // Reduced from 6x to 4x to match reference video
     spriteElement.style.imageRendering = 'pixelated';
     spriteElement.style.opacity = '1';
     spriteElement.style.display = 'block';

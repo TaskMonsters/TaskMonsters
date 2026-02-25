@@ -4416,6 +4416,7 @@ input:checked + .toggle-slider:before {
     <!-- Forest Scene with Bird -->
     <div class="quest-scene">
         <div id="questCrowSprite" class="quest-crow-sprite"></div>
+        <img id="merlinGif" class="merlin-gif" src="assets/merlin.gif" alt="Merlin" />
     </div>
     
     <!-- Dialogue Container -->
@@ -4461,7 +4462,7 @@ input:checked + .toggle-slider:before {
                 <div id="taskPalTooltip" class="task-pal-tooltip"></div>
                 <!-- CRITICAL: Wrapper div to contain the scaled sprite, overflow hidden to show only 1 frame -->
                 <div class="monster-container" style="width: 128px; height: 256px; overflow: visible; position: relative; display: flex; align-items: center; justify-content: center; z-index: 100;">
-                    <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Nova_idle.gif" style="width: 32px !important; height: 32px !important; image-rendering: pixelated; object-fit: contain !important; object-position: center; transform: scale(4); transform-origin: center center; opacity: 1; display: block; will-change: transform; backface-visibility: hidden;"/>
+                    <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Nova_idle.gif" style="width: 32px !important; height: 32px !important; image-rendering: pixelated; object-fit: contain !important; object-position: center; transform: scale(2); transform-origin: center center; opacity: 1; display: block; will-change: transform; backface-visibility: hidden;"/>
                 </div>
             </div>
             
@@ -5842,7 +5843,7 @@ input:checked + .toggle-slider:before {
                     mainHeroSprite.style.setProperty('height', '32px', 'important');
                     mainHeroSprite.style.setProperty('object-fit', 'contain', 'important');
                     mainHeroSprite.style.setProperty('object-position', 'center', 'important');
-                    mainHeroSprite.style.setProperty('transform', 'scale(4)', 'important');
+                    mainHeroSprite.style.setProperty('transform', 'scale(2)', 'important');
                     mainHeroSprite.style.setProperty('animation', 'none', 'important');
                     mainHeroSprite.style.setProperty('opacity', '1', 'important');
                     
@@ -10413,7 +10414,7 @@ input:checked + .toggle-slider:before {
                         mainHeroSprite.style.height = '32px';
                         mainHeroSprite.style.maxWidth = '';
                         mainHeroSprite.style.maxHeight = '';
-                        mainHeroSprite.style.transform = 'scale(4)';
+                        mainHeroSprite.style.transform = 'scale(2)';
                         console.log('[Hatching] Applied sprite animation styles to mainHeroSprite');
                     }
                 } else {
@@ -10436,7 +10437,7 @@ input:checked + .toggle-slider:before {
                     heroSprite.style.height = '32px';
                     heroSprite.style.maxWidth = '';
                     heroSprite.style.maxHeight = '';
-                    heroSprite.style.transform = 'scale(4)';
+                    heroSprite.style.transform = 'scale(2)';
                 }
                 
                 // Show re-hatching message
@@ -11650,7 +11651,7 @@ input:checked + .toggle-slider:before {
                         mainHeroSprite.style.height = '32px';
                         mainHeroSprite.style.maxWidth = '';
                         mainHeroSprite.style.maxHeight = '';
-                        mainHeroSprite.style.transform = 'scale(4)';
+                        mainHeroSprite.style.transform = 'scale(2)';
                         console.log('[Hatching] Applied sprite animation styles to mainHeroSprite');
                     }
                 } else {
@@ -11673,7 +11674,7 @@ input:checked + .toggle-slider:before {
                     heroSprite.style.height = '32px';
                     heroSprite.style.maxWidth = '';
                     heroSprite.style.maxHeight = '';
-                    heroSprite.style.transform = 'scale(4)';
+                    heroSprite.style.transform = 'scale(2)';
                 }
                 
                 // Show re-hatching message
@@ -11928,7 +11929,7 @@ input:checked + .toggle-slider:before {
                         mainHeroSprite.style.height = '32px';
                         mainHeroSprite.style.maxWidth = '';
                         mainHeroSprite.style.maxHeight = '';
-                        mainHeroSprite.style.transform = 'scale(4)';
+                        mainHeroSprite.style.transform = 'scale(2)';
                         console.log('[Hatching] Applied sprite animation styles to mainHeroSprite');
                     }
                 } else {
@@ -11951,7 +11952,7 @@ input:checked + .toggle-slider:before {
                     heroSprite.style.height = '32px';
                     heroSprite.style.maxWidth = '';
                     heroSprite.style.maxHeight = '';
-                    heroSprite.style.transform = 'scale(4)';
+                    heroSprite.style.transform = 'scale(2)';
                 }
             } else {
                 // Show rainbow gradient level-up banner for all level ups
@@ -12629,7 +12630,7 @@ input:checked + .toggle-slider:before {
                                 mainHeroSprite.style.height = '32px';
                                 mainHeroSprite.style.objectFit = 'contain';
                                 mainHeroSprite.style.objectPosition = 'center';
-                                mainHeroSprite.style.transform = 'scale(4)';
+                                mainHeroSprite.style.transform = 'scale(2)';
                                 mainHeroSprite.style.animation = 'none';
                                 mainHeroSprite.style.imageRendering = 'pixelated';
                                 mainHeroSprite.style.opacity = '1';
@@ -13086,7 +13087,7 @@ input:checked + .toggle-slider:before {
                         mainHeroSprite.style.setProperty('height', '32px', 'important');
                         mainHeroSprite.style.setProperty('object-fit', 'contain', 'important');
                         mainHeroSprite.style.setProperty('object-position', 'center', 'important');
-                        mainHeroSprite.style.setProperty('transform', 'scale(4)', 'important');
+                        mainHeroSprite.style.setProperty('transform', 'scale(2)', 'important');
                         mainHeroSprite.style.setProperty('animation', 'none', 'important');
                         mainHeroSprite.style.setProperty('max-width', '', 'important');
                         mainHeroSprite.style.setProperty('max-height', '', 'important');

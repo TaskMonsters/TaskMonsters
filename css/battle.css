@@ -145,6 +145,7 @@
     object-fit: contain;
     background: none !important;
     background-image: none !important;
+    transform: scale(4);
     transform-origin: center;
 }
 
@@ -156,7 +157,6 @@
     object-fit: contain;
     background: none !important;
     background-image: none !important;
-    transform: scale(2);
     transform-origin: center;
 }
 
@@ -168,6 +168,7 @@
     object-fit: contain;
     background: none !important;
     background-image: none !important;
+    transform-origin: center;
 }
 
 /* Enemy sprites (32x32 base for ghost) - GIF ONLY (v3.56) */
@@ -178,7 +179,6 @@
     object-fit: contain;
     background: none !important;
     background-image: none !important;
-    transform: scale(2.2);
     transform-origin: center;
 }
 
@@ -190,7 +190,6 @@
     object-fit: contain;
     background: none !important;
     background-image: none !important;
-    transform: scale(1.5);
     transform-origin: center;
 }
 

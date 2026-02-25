@@ -241,7 +241,7 @@ const SKINS_CONFIG = {
         tier: 'standard',
         emoji: '🎸',
         thumbnail: 'assets/skins/Rockstar/Rockstar_.gif',
-        battleScale: 1.015, // 2068x2068 GIF - increased by 1x per user request
+        battleScale: 0.015, // 2068x2068 GIF - slightly increased for visibility
         animations: {
             idle: 'assets/skins/Rockstar/Rockstar_.gif',
             walk: 'assets/skins/Rockstar/Rockstar_.gif',
@@ -393,7 +393,7 @@ const SKINS_CONFIG = {
         tier: 'standard',
         emoji: '👁️',
         thumbnail: 'assets/skins/flying-eye/thumbnail.png',
-        battleScale: 1.6, // 48x48 GIF - increased by 1x per user request
+        battleScale: 0.6, // 48x48 GIF - reduced by 2x for visibility
         animations: {
             idle: 'assets/skins/flying-eye/FlyingEye.gif',
             walk: 'assets/skins/flying-eye/FlyingEye.gif',
@@ -506,7 +506,7 @@ const SKINS_CONFIG = {
         tier: 'premium',
         emoji: '👑',
         thumbnail: 'assets/skins/Warrior Queen/WarriorQueen_Idle.gif',
-        battleScale: 2.25, // 20x44 GIF - increased by 1x per user request
+        battleScale: 1.25, // 20x44 GIF - reduced by 2x for visibility
         animations: {
             idle: 'assets/skins/Warrior Queen/WarriorQueen_Idle.gif',
             walk: 'assets/skins/Warrior Queen/WarriorQueen_Idle.gif',
@@ -545,7 +545,7 @@ const SKINS_CONFIG = {
         tier: 'premium',
         emoji: '👁️',
         thumbnail: 'assets/skins/eye-monster/thumbnail.png',
-        battleScale: 1.9, // 32x32 GIF - increased by 1x per user request
+        battleScale: 0.9, // 32x32 GIF - reduced by 2x for visibility
         animations: {
             idle: 'assets/skins/eye-monster/Idle.gif',
             walk: 'assets/skins/eye-monster/Walk.gif',
@@ -664,7 +664,7 @@ const SKINS_CONFIG = {
         tier: 'legendary',
         emoji: '🧙‍♂️',
         thumbnail: 'assets/skins/Merlin Skin/Merlin Skin Thumbnail Image.png',
-        battleScale: 1.6, // 48x48 GIF - increased by 1x per user request
+        battleScale: 0.6, // 48x48 GIF - reduced by 2x for visibility
         animations: {
             idle: 'assets/skins/Merlin Skin/Merlin Skin.gif',
             walk: 'assets/skins/Merlin Skin/Merlin Skin.gif',
@@ -705,7 +705,7 @@ const SKINS_CONFIG = {
         tier: 'standard',
         emoji: '🧙',
         thumbnail: 'assets/skins/Mage/Mage_Idle_1.gif',
-        battleScale: 2.0, // 29x28 GIF - increased by 1x per user request
+        battleScale: 1.0, // 29x28 GIF - reduced by 2x for visibility
         animations: {
             idle: 'assets/skins/Mage/Mage_Idle_1.gif',
             walk: 'assets/skins/Mage/Mage_Walk.gif',

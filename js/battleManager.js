@@ -2157,13 +2157,10 @@ class BattleManager {
             // Play dust animation and hide enemy
             await this.playDustAnimation();
             
-            // CRITICAL FIX v3.57: Play victory celebration animation
-            // This animation will continue until all modals are closed
-            if (typeof startHeroAnimation === 'function') {
-                startHeroAnimation('celebrate');
-                console.log('[Battle] Victory celebration animation started');
-            }
-            console.log('[Battle] Hero sprite set to celebrate after victory');
+            // CRITICAL FIX v3.55: Restore hero sprite to idle after victory
+            // This ensures the hero sprite remains visible and doesn't break
+            startHeroAnimation('idle');
+            console.log('[Battle] Hero sprite restored to idle after victory');
             
             // Generate and add loot drops
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -2297,21 +2294,19 @@ class BattleManager {
         this.inBattle = false;
         console.log('[Battle] Battle ended, inBattle flag set to false');
         
-        // CRITICAL FIX v3.57: DO NOT hide arena or stop music automatically
-        // Victory animation and music should continue until user closes all modals
-        // The loot modal close handler or navigation will handle cleanup
-        // setTimeout(() => {
-        //     document.getElementById('battleLog').innerHTML = '';
-        //     const arena = document.getElementById('battleArena');
-        //     arena.classList.add('hidden');
-        //     
-        //     // FIXED: Stop all battle music when arena is hidden
-        //     // This ensures music stops even if user navigates away without clicking Continue
-        //     if (window.audioManager) {
-        //         window.audioManager.stopAllBattleMusic();
-        //         window.audioManager.stopBattleOutcomeMusic();
-        //     }
-        // }, 2000);
+        // Fade out after 2 seconds
+        setTimeout(() => {
+            document.getElementById('battleLog').innerHTML = '';
+            const arena = document.getElementById('battleArena');
+            arena.classList.add('hidden');
+            
+            // FIXED: Stop all battle music when arena is hidden
+            // This ensures music stops even if user navigates away without clicking Continue
+            if (window.audioManager) {
+                window.audioManager.stopAllBattleMusic();
+                window.audioManager.stopBattleOutcomeMusic();
+            }
+        }, 2000);
     }
     
     // Play dust animation when enemy is defeated
