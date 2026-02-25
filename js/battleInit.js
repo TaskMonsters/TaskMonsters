@@ -208,6 +208,8 @@ function renderHeroSprite() {
     heroSprite.style.transform = 'none'; // Scale is applied to wrapper, not sprite
     heroSprite.style.transformOrigin = 'bottom center';
     heroSprite.style.imageRendering = 'pixelated';
+    heroSprite.style.imageRendering = '-moz-crisp-edges';
+    heroSprite.style.imageRendering = 'crisp-edges';
     heroSprite.style.opacity = '1';
     heroSprite.style.display = 'block';
     heroSprite.style.visibility = 'visible';

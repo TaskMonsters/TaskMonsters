@@ -108,14 +108,14 @@
 .sprite-container {
     position: absolute;
     width: 45%;
-    top: 50%; /* Center vertically for horizontal alignment */
-    transform: translateY(-50%); /* Center the container */
-    max-height: 70%; /* Ensure container doesn't extend beyond visible area */
+    bottom: 20%; /* Position from bottom for consistent ground alignment */
+    max-height: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-end; /* Align contents to bottom of container */
     gap: 0.5rem;
-    overflow: visible; /* Allow sprites to extend beyond container if needed */
+    overflow: visible;
 }
 
 /* Hero (left side) */
@@ -142,11 +142,15 @@
     width: 32px;
     height: 32px;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     object-fit: contain;
     background: none !important;
     background-image: none !important;
     transform: scale(4);
-    transform-origin: center;
+    transform-origin: bottom center; /* Scale from bottom for ground alignment */
 }
 
 /* Enemy sprites (64x64 base for bats) - GIF ONLY (v3.56) */
@@ -154,6 +158,8 @@
     width: 64px;
     height: 64px;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     object-fit: contain;
     background: none !important;
     background-image: none !important;
@@ -165,6 +171,8 @@
     width: 48px;
     height: 48px;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     object-fit: contain;
     background: none !important;
     background-image: none !important;
@@ -176,6 +184,8 @@
     width: 32px;
     height: 32px;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     object-fit: contain;
     background: none !important;
     background-image: none !important;
@@ -187,6 +197,8 @@
     width: 118px;
     height: 79px;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     object-fit: contain;
     background: none !important;
     background-image: none !important;
@@ -504,6 +516,8 @@ Medusa animations - 32x32 sprites, 4 frames
     background-repeat: no-repeat;
     background-position: center;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     pointer-events: none;
     z-index: 10000;
 }
@@ -522,6 +536,8 @@ Medusa animations - 32x32 sprites, 4 frames
     background-repeat: no-repeat;
     background-position: 0 0;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     pointer-events: none;
     z-index: 10000;
     animation: waveformAnim 0.4s steps(4) infinite;
@@ -546,6 +562,8 @@ Medusa animations - 32x32 sprites, 4 frames
     background-repeat: no-repeat;
     background-position: 0 0;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     pointer-events: none;
     z-index: 10000;
     animation: sparkAnim 0.5s steps(5) infinite;
@@ -576,6 +594,8 @@ Medusa animations - 32x32 sprites, 4 frames
     background-position: center;
     filter: drop-shadow(0 0 10px rgba(255, 100, 0, 0.8));
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
 .explosion-effect {
@@ -586,6 +606,8 @@ Medusa animations - 32x32 sprites, 4 frames
     background-repeat: no-repeat;
     background-position: center;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     pointer-events: none;
     z-index: 10001;
 }
@@ -739,6 +761,8 @@ Medusa animations - 32x32 sprites, 4 frames
     width: 83px;
     height: 64px;
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
     background-size: 83px 64px;
