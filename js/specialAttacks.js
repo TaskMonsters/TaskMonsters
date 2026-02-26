@@ -18,52 +18,58 @@ async function playSpecialAttackProjectile(monsterName, fromElement, toElement) 
             return;
         }
         
-        // Use fixed positioning based on viewport coordinates (works across any container)
-        const fromRect = fromElement.getBoundingClientRect();
-        const toRect = toElement.getBoundingClientRect();
-        
-        // Start: right edge of hero sprite, vertically centered
-        const startX = fromRect.right;
-        const startY = fromRect.top + fromRect.height / 2 - 20;
-        
-        // End: center of enemy sprite
-        const endX = toRect.left + toRect.width / 2 - 20;
-        const endY = toRect.top + toRect.height / 2 - 20;
-        
-        // Create projectile element using fixed positioning
-        const projectile = document.createElement('img');
-        projectile.src = gifPath;
-        projectile.style.position = 'fixed';
-        projectile.style.width = '40px';
-        projectile.style.height = '40px';
-        projectile.style.zIndex = '99999';
-        projectile.style.pointerEvents = 'none';
-        projectile.style.imageRendering = 'pixelated';
-        projectile.style.imageRendering = '-moz-crisp-edges';
-        projectile.style.imageRendering = 'crisp-edges';
-        projectile.style.left = startX + 'px';
-        projectile.style.top = startY + 'px';
-        projectile.style.transition = 'none';
-        
-        document.body.appendChild(projectile);
-        
-        // Animate projectile to enemy center
-        const deltaX = endX - startX;
-        const deltaY = endY - startY;
-        
-        // Trigger transition on next frame
+        // Use rAF to ensure layout is fully painted before measuring positions
         requestAnimationFrame(() => {
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            
+            // Fallback if elements have zero dimensions (not yet visible)
+            const startX = fromRect.width > 0 ? fromRect.right : window.innerWidth * 0.25;
+            const startY = fromRect.height > 0 ? (fromRect.top + fromRect.height / 2 - 24) : window.innerHeight * 0.4;
+            const endX = toRect.width > 0 ? (toRect.left + toRect.width / 2 - 24) : window.innerWidth * 0.75;
+            const endY = toRect.height > 0 ? (toRect.top + toRect.height / 2 - 24) : window.innerHeight * 0.4;
+            
+            // Cache-bust the GIF src so the browser always replays from frame 1
+            const cacheBust = `?t=${Date.now()}`;
+            
+            // Create projectile element
+            const projectile = document.createElement('img');
+            projectile.src = gifPath + cacheBust;
+            projectile.style.cssText = [
+                'position: fixed',
+                `left: ${startX}px`,
+                `top: ${startY}px`,
+                'width: 48px',
+                'height: 48px',
+                'z-index: 99999',
+                'pointer-events: none',
+                'image-rendering: pixelated',
+                'image-rendering: -moz-crisp-edges',
+                'image-rendering: crisp-edges',
+                'transition: none',
+                'will-change: left, top',
+                'display: block'
+            ].join('; ');
+            
+            document.body.appendChild(projectile);
+            
+            // Two-frame delay to ensure the element is rendered before transitioning
             requestAnimationFrame(() => {
-                projectile.style.transition = 'transform 0.55s ease-out';
-                projectile.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                requestAnimationFrame(() => {
+                    projectile.style.transition = 'left 0.5s ease-out, top 0.5s ease-out';
+                    projectile.style.left = endX + 'px';
+                    projectile.style.top = endY + 'px';
+                });
             });
+            
+            // Remove after animation + brief flash
+            setTimeout(() => {
+                if (projectile.parentNode) {
+                    projectile.remove();
+                }
+                resolve();
+            }, 700);
         });
-        
-        // Remove projectile after animation completes
-        setTimeout(() => {
-            projectile.remove();
-            resolve();
-        }, 650);
     });
 }
 
@@ -101,6 +107,9 @@ async function playerSpecialAttack() {
     }
     
     // Stop turn timer
+    if (typeof stopTurnTimer === 'function') {
+        stopTurnTimer();
+    }
     if (manager.stopTurnTimer) {
         manager.stopTurnTimer();
     }
@@ -121,7 +130,7 @@ async function playerSpecialAttack() {
         window.startHeroAnimation('attack1');
     }
     
-    // Play projectile animation
+    // Play projectile animation — fire from hero sprite to enemy sprite
     const heroSprite = document.getElementById('heroSprite');
     const enemySprite = document.getElementById('enemySprite');
     await playSpecialAttackProjectile(monsterName, heroSprite, enemySprite);
@@ -186,7 +195,11 @@ async function playerSpecialAttack() {
     addBattleLog(specialEffect);
     
     // Update UI
-    manager.updateBattleUI();
+    if (typeof updateBattleUI === 'function') {
+        updateBattleUI(manager.hero, manager.enemy);
+    } else {
+        manager.updateBattleUI();
+    }
     
     // Return to idle
     if (window.startHeroAnimation) {

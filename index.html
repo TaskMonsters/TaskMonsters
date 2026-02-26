@@ -2952,6 +2952,24 @@
     margin: 0 auto !important;
 }
 
+/* CRISP PIXEL ART FIX: Force mainHeroSprite to native 128px display size.
+   Eliminates blur on high-DPI mobile caused by scale() upsampling.
+   The GIF is 32px native; rendered at 128px = 4x pixel-perfect scaling.
+   Overrides all JS inline style attempts via !important. */
+#mainHeroSprite:not(.egg-sprite) {
+    width: 128px !important;
+    height: 128px !important;
+    transform: none !important;
+    transform-origin: center center !important;
+    image-rendering: pixelated !important;
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: crisp-edges !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    display: block !important;
+}
+
 /* Egg sprite wrapper - scales the egg */
 .egg-sprite-wrapper {
     width: 64px !important;
@@ -4460,7 +4478,7 @@ input:checked + .toggle-slider:before {
                 <div id="taskPalTooltip" class="task-pal-tooltip"></div>
                 <!-- CRITICAL: Wrapper div to contain the scaled sprite, overflow hidden to show only 1 frame -->
                 <div class="monster-container" style="width: 128px; height: 256px; overflow: visible; position: relative; display: flex; align-items: center; justify-content: center; z-index: 100;">
-                    <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Nova_idle.gif" style="width: 32px !important; height: 32px !important; image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; object-fit: contain !important; object-position: center; transform: scale(2); transform-origin: center center; opacity: 1; display: block; will-change: transform; backface-visibility: hidden;"/>
+                    <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Nova_idle.gif" style="width: 128px !important; height: 128px !important; image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; image-rendering: -webkit-optimize-contrast; object-fit: contain !important; object-position: center; transform: none; opacity: 1; display: block;"/>
                 </div>
             </div>
             

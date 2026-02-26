@@ -130,10 +130,10 @@ class SpriteAnimationManager {
         if (mainHeroSprite) {
             await this.startAnimation('mainHeroSprite', appearance, 'idle', 800);
             
-            // Ensure proper sizing
-            mainHeroSprite.style.width = '32px';
-            mainHeroSprite.style.height = '32px';
-            mainHeroSprite.style.transform = 'scale(3)';
+            // Ensure proper sizing — use 128px native display (no scale transform = no blur on mobile)
+            mainHeroSprite.style.width = '128px';
+            mainHeroSprite.style.height = '128px';
+            mainHeroSprite.style.transform = 'none';
             mainHeroSprite.style.transformOrigin = 'center center';
         }
 

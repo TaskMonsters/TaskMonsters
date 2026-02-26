@@ -3338,7 +3338,7 @@ class BattleManager {
         
         // Heal player
         const healAmount = 100;
-        this.hero.hp = Math.min(this.hero.maxHp, this.hero.hp + healAmount);
+        this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
         
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);

@@ -265,18 +265,27 @@ function updateBattleUI(hero, enemy) {
     const heroHPBar = document.getElementById('heroHPBar');
     const heroHPText = document.getElementById('heroHPText');
     if (heroHPBar && heroHPText && hero) {
-        const heroHPPercent = (hero.hp / hero.maxHP) * 100;
+        // NaN guard: sanitize hp and maxHP before display
+        const heroHp = isNaN(hero.hp) ? 0 : Math.max(0, Math.floor(hero.hp));
+        const heroMaxHP = isNaN(hero.maxHP) || !hero.maxHP ? 100 : Math.floor(hero.maxHP);
+        // Also fix the hero object itself if NaN crept in
+        if (isNaN(hero.hp)) hero.hp = heroHp;
+        const heroHPPercent = Math.min(100, (heroHp / heroMaxHP) * 100);
         heroHPBar.style.width = heroHPPercent + '%';
-        heroHPText.textContent = `${hero.hp}/${hero.maxHP}`;
+        heroHPText.textContent = `${heroHp}/${heroMaxHP}`;
     }
 
     // Update enemy HP
     const enemyHPBar = document.getElementById('enemyHPBar');
     const enemyHPText = document.getElementById('enemyHPText');
     if (enemyHPBar && enemyHPText && enemy) {
-        const enemyHPPercent = (enemy.hp / enemy.maxHP) * 100;
+        // NaN guard: sanitize hp and maxHP before display
+        const enemyHp = isNaN(enemy.hp) ? 0 : Math.max(0, Math.floor(enemy.hp));
+        const enemyMaxHP = isNaN(enemy.maxHP) || !enemy.maxHP ? 100 : Math.floor(enemy.maxHP);
+        if (isNaN(enemy.hp)) enemy.hp = enemyHp;
+        const enemyHPPercent = Math.min(100, (enemyHp / enemyMaxHP) * 100);
         enemyHPBar.style.width = enemyHPPercent + '%';
-        enemyHPText.textContent = `${enemy.hp}/${enemy.maxHP}`;
+        enemyHPText.textContent = `${enemyHp}/${enemyMaxHP}`;
     }
 
     // Update gauges
