@@ -1,7 +1,14 @@
 /**
  * Task Notifications Manager
- * Handles background checking and sending notifications for tasks approaching due time
- * Notifications sent at: 20, 15, 10, 5, and 2 minutes before due time
+ * Handles background polling and sending notifications for tasks approaching due time.
+ * Notifications sent at: 20, 15, 10, 5, and 2 minutes before due time.
+ *
+ * This manager works alongside notificationManager.js:
+ *   - notificationManager  → setTimeout-based precise scheduling (primary)
+ *   - taskNotificationsManager → setInterval polling fallback (safety net)
+ *
+ * The polling approach catches edge cases where setTimeout was cleared
+ * (e.g., page reload, task edit) and ensures no threshold is missed.
  */
 
 class TaskNotificationsManager {
@@ -10,6 +17,10 @@ class TaskNotificationsManager {
         this.notificationThresholds = [20, 15, 10, 5, 2]; // Minutes before due time
         this.sentNotifications = new Map(); // Track sent notifications to avoid duplicates
         this.isInitialized = false;
+        // Polling window: how many seconds on either side of a threshold counts as a hit.
+        // With a 30s poll interval, a ±45s window guarantees every threshold is caught
+        // even if the timer fires slightly early or late.
+        this.WINDOW_SECONDS = 45;
     }
 
     /**
@@ -20,16 +31,10 @@ class TaskNotificationsManager {
 
         console.log('[TaskNotifications] Initializing...');
 
-        // Initialize Firebase if available
-        if (window.initializeFirebase) {
-            await window.initializeFirebase();
-            window.setupForegroundMessageHandler();
-        }
-
-        // Load sent notifications from localStorage
+        // Load previously sent notifications from localStorage
         this.loadSentNotifications();
 
-        // Start background checking
+        // Start the background polling loop
         this.startBackgroundCheck();
 
         this.isInitialized = true;
@@ -37,48 +42,51 @@ class TaskNotificationsManager {
     }
 
     /**
-     * Start background timer to check tasks every minute
+     * Start background timer to check tasks every 30 seconds
      */
     startBackgroundCheck() {
-        // Clear existing interval if any
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
         }
 
-        // Check immediately
+        // Run an immediate check, then every 30 seconds
         this.checkTasksAndNotify();
 
-        // Then check every 30 seconds (more responsive than 1 minute)
         this.checkInterval = setInterval(() => {
             this.checkTasksAndNotify();
-        }, 30000); // 30 seconds
+        }, 30 * 1000); // 30 seconds
 
-        console.log('[TaskNotifications] Background checking started (every 30s)');
+        console.log('[TaskNotifications] Background polling started (every 30s)');
     }
 
     /**
-     * Stop background checking
+     * Stop background polling
      */
     stopBackgroundCheck() {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
             this.checkInterval = null;
-            console.log('[TaskNotifications] Background checking stopped');
+            console.log('[TaskNotifications] Background polling stopped');
         }
     }
 
     /**
-     * Check all tasks and send notifications for those approaching due time
+     * Check all tasks and send notifications for those approaching due time.
+     *
+     * A notification is triggered when the real time remaining until due is
+     * within WINDOW_SECONDS of a threshold value. Using a window (rather than
+     * an exact match) ensures the notification fires even if the 30s timer
+     * fires a few seconds early or late.
      */
     checkTasksAndNotify() {
-        // Check if notifications are enabled
+        // Bail out if notifications are disabled in game settings
         if (!window.gameState || !window.gameState.notifications) {
             return;
         }
 
-        // Get all active tasks with due dates
         const tasks = window.gameState.tasks || [];
-        const now = new Date();
+        const now = Date.now();
+        const windowMs = this.WINDOW_SECONDS * 1000;
 
         tasks.forEach((task, index) => {
             // Skip completed tasks or tasks without due dates
@@ -86,17 +94,23 @@ class TaskNotificationsManager {
                 return;
             }
 
-            const dueDate = new Date(task.dueDate);
-            const timeDiff = dueDate.getTime() - now.getTime();
-            const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+            const dueTime = new Date(task.dueDate).getTime();
+            const msRemaining = dueTime - now;
 
-            // Check if task is within any notification threshold
+            // Skip overdue tasks and clean up their records
+            if (msRemaining < 0) {
+                this.cleanupTaskNotifications(task.id || index);
+                return;
+            }
+
             this.notificationThresholds.forEach(threshold => {
-                // Only notify if exactly at threshold (within 1 minute window)
-                if (minutesDiff === threshold || (minutesDiff <= threshold && minutesDiff > threshold - 1)) {
+                const thresholdMs = threshold * 60 * 1000;
+                const diff = msRemaining - thresholdMs; // positive = not yet at threshold
+
+                // Fire if we are within ±WINDOW_SECONDS of the threshold
+                if (Math.abs(diff) <= windowMs) {
                     const notificationKey = `${task.id || index}_${threshold}`;
-                    
-                    // Check if we've already sent this notification
+
                     if (!this.sentNotifications.has(notificationKey)) {
                         this.sendTaskNotification(task, threshold);
                         this.sentNotifications.set(notificationKey, Date.now());
@@ -104,70 +118,81 @@ class TaskNotificationsManager {
                     }
                 }
             });
-
-            // Clean up old notification records for completed/overdue tasks
-            if (minutesDiff < 0) {
-                this.cleanupTaskNotifications(task.id || index);
-            }
         });
     }
 
     /**
-     * Send notification for a specific task
+     * Send a notification for a specific task
      */
     sendTaskNotification(task, minutesRemaining) {
-        const title = `⏰ Task Due in ${minutesRemaining} Minutes!`;
+        const title = `\u23F0 Task Due in ${minutesRemaining} Minute${minutesRemaining === 1 ? '' : 's'}!`;
         const body = `"${task.title}" is due soon. Time to get it done!`;
 
-        console.log('[TaskNotifications] Sending notification:', title, body);
+        console.log('[TaskNotifications] Sending notification:', title);
 
-        // Send local notification (works even without Firebase)
+        // Prefer the primary notificationManager if available
+        if (window.notificationManager) {
+            const taskId = task.id || task.title;
+            const uniqueTag = `task-monsters-poll-${taskId}-${minutesRemaining}min`;
+            window.notificationManager.sendNotification(
+                title,
+                body,
+                'assets/logo/favicon.png',
+                uniqueTag
+            );
+            return;
+        }
+
+        // Fallback: use sendLocalNotification from firebase-config.js if loaded
         if (window.sendLocalNotification) {
             window.sendLocalNotification(title, body);
-        } else {
-            // Fallback to basic notification
-            this.sendBasicNotification(title, body);
+            return;
         }
 
-        // Play notification sound if audio is enabled
-        if (window.audioManager && window.gameState.soundEnabled) {
-            window.audioManager.playSound('notification');
-        }
+        // Last-resort fallback: direct Notification API
+        this.sendBasicNotification(title, body);
     }
 
     /**
-     * Fallback basic notification
+     * Last-resort basic notification (no dependency on other modules)
      */
     sendBasicNotification(title, body) {
-        if ('Notification' in window && Notification.permission === 'granted') {
-            try {
-                const notification = new Notification(title, {
-                    body: body,
-                    icon: 'assets/Pink_Monster_idle.gif',
-                    tag: 'task-reminder'
-                });
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
 
-                setTimeout(() => notification.close(), 10000);
-                
-                notification.onclick = function() {
-                    window.focus();
-                    notification.close();
-                };
-            } catch (error) {
-                console.error('[TaskNotifications] Error sending basic notification:', error);
-            }
+        try {
+            const notification = new Notification(title, {
+                body: body,
+                icon: 'assets/Pink_Monster_idle.gif',
+                tag: `task-reminder-basic-${Date.now()}` // unique tag to avoid replacement
+            });
+
+            setTimeout(() => {
+                try { notification.close(); } catch (_) {}
+            }, 10000);
+
+            notification.onclick = function () {
+                window.focus();
+                notification.close();
+            };
+        } catch (error) {
+            console.error('[TaskNotifications] Error sending basic notification:', error);
         }
     }
 
     /**
-     * Clean up notification records for a specific task
+     * Remove sent-notification records for a specific task (called when task is overdue/completed)
      */
     cleanupTaskNotifications(taskId) {
+        let changed = false;
         this.notificationThresholds.forEach(threshold => {
             const key = `${taskId}_${threshold}`;
-            this.sentNotifications.delete(key);
+            if (this.sentNotifications.has(key)) {
+                this.sentNotifications.delete(key);
+                changed = true;
+            }
         });
-        this.saveSentNotifications();
+        if (changed) this.saveSentNotifications();
     }
 
     /**
@@ -179,8 +204,8 @@ class TaskNotificationsManager {
             if (saved) {
                 const data = JSON.parse(saved);
                 this.sentNotifications = new Map(Object.entries(data));
-                
-                // Clean up old entries (older than 24 hours)
+
+                // Purge entries older than 24 hours
                 const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
                 for (const [key, timestamp] of this.sentNotifications.entries()) {
                     if (timestamp < oneDayAgo) {
@@ -195,7 +220,7 @@ class TaskNotificationsManager {
     }
 
     /**
-     * Save sent notifications to localStorage
+     * Persist sent notifications to localStorage
      */
     saveSentNotifications() {
         try {
@@ -207,7 +232,7 @@ class TaskNotificationsManager {
     }
 
     /**
-     * Clear all sent notification records
+     * Clear all sent-notification records (used when notifications are disabled)
      */
     clearAllNotifications() {
         this.sentNotifications.clear();
@@ -216,30 +241,26 @@ class TaskNotificationsManager {
     }
 
     /**
-     * Request notification permission
+     * Request notification permission (delegates to notificationManager if available)
      */
     async requestPermission() {
-        try {
-            if (!('Notification' in window)) {
-                console.warn('[TaskNotifications] Notifications not supported');
-                return false;
-            }
+        if (window.notificationManager) {
+            return window.notificationManager.requestPermission();
+        }
 
+        if (!('Notification' in window)) {
+            console.warn('[TaskNotifications] Notifications not supported');
+            return false;
+        }
+
+        try {
             const permission = await Notification.requestPermission();
-            
             if (permission === 'granted') {
                 console.log('[TaskNotifications] Permission granted');
-                
-                // Initialize Firebase if available
-                if (window.requestNotificationPermission) {
-                    await window.requestNotificationPermission();
-                }
-                
                 return true;
-            } else {
-                console.warn('[TaskNotifications] Permission denied');
-                return false;
             }
+            console.warn('[TaskNotifications] Permission denied');
+            return false;
         } catch (error) {
             console.error('[TaskNotifications] Permission error:', error);
             return false;
@@ -253,8 +274,9 @@ window.taskNotificationsManager = new TaskNotificationsManager();
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        window.taskNotificationsManager.init();
+        // Small delay to ensure gameState is loaded first
+        setTimeout(() => window.taskNotificationsManager.init(), 2000);
     });
 } else {
-    window.taskNotificationsManager.init();
+    setTimeout(() => window.taskNotificationsManager.init(), 2000);
 }
