@@ -164,7 +164,11 @@ function initEnemySprite(enemy) {
     spriteElement.style.width = '32px';
     spriteElement.style.height = '32px';
     spriteElement.style.objectFit = 'contain';
-    spriteElement.style.transform = 'scale(4)'; // Reduced from 6x to 4x to match reference video
+    
+    // Energy Vampire Bat is oversized - reduce by 1.5x (4 / 1.5 ≈ 2.67)
+    const batScale = (enemyName === 'Energy Vampire Bat') ? 2.67 : 4;
+    spriteElement.style.transform = `scale(${batScale})`;
+    
     spriteElement.style.imageRendering = 'pixelated';
     spriteElement.style.opacity = '1';
     spriteElement.style.display = 'block';

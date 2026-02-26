@@ -206,7 +206,7 @@ function renderHeroSprite() {
     heroSprite.style.maxHeight = '100%';
     heroSprite.style.objectFit = 'contain';
     heroSprite.style.transform = 'none'; // Scale is applied to wrapper, not sprite
-    heroSprite.style.transformOrigin = 'bottom center';
+    heroSprite.style.transformOrigin = 'center';
     heroSprite.style.imageRendering = 'pixelated';
     heroSprite.style.imageRendering = '-moz-crisp-edges';
     heroSprite.style.imageRendering = 'crisp-edges';
@@ -219,7 +219,7 @@ function renderHeroSprite() {
     if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
         const scale = (appearance && appearance.battleScale) ? appearance.battleScale : 1.9;
         spriteWrapper.style.transform = `scale(${scale})`;
-        spriteWrapper.style.transformOrigin = 'bottom center';
+        spriteWrapper.style.transformOrigin = 'center';
         console.log('[Battle] Hero wrapper scale set to:', scale);
     }
     
@@ -643,3 +643,87 @@ function maybeTriggerBattle(sourceType) {
 // Expose globally for use in index.html
 window.maybeTriggerBattle = maybeTriggerBattle;
 
+
+// =====================================================================
+// === window.enemyAI - Enemy AI decision-making object ===
+// Called by battleManager.js enemyTurn() for heal and defend decisions.
+// The can* flag special abilities are handled directly in enemyTurn().
+// =====================================================================
+window.enemyAI = {
+    /**
+     * Attempt to heal the enemy if HP is low enough and canHeal is set.
+     * Returns { healed: bool, amount: number }
+     * Called at the start of every enemy turn.
+     */
+    attemptEnemyHeal(enemy, playerLevel) {
+        if (!enemy || !enemy.canHeal) return { healed: false, amount: 0 };
+        
+        const hpPercent = enemy.hp / enemy.maxHP;
+        
+        // Heal thresholds:
+        //   - Below 30% HP: always heal (100% chance)
+        //   - Below 50% HP: 60% chance to heal
+        //   - Below 70% HP: 25% chance to heal
+        let healChance = 0;
+        if (hpPercent < 0.30) {
+            healChance = 1.0;
+        } else if (hpPercent < 0.50) {
+            healChance = 0.60;
+        } else if (hpPercent < 0.70) {
+            healChance = 0.25;
+        }
+        
+        if (healChance === 0 || Math.random() > healChance) {
+            return { healed: false, amount: 0 };
+        }
+        
+        // Calculate heal amount from enemy data, scaled slightly by player level
+        const baseHeal = enemy.healAmount || 20;
+        const levelBonus = Math.floor(playerLevel * 0.5);
+        const healAmount = baseHeal + levelBonus;
+        
+        // Apply heal (capped at maxHP)
+        const oldHp = enemy.hp;
+        enemy.hp = Math.min(enemy.maxHP, enemy.hp + healAmount);
+        const actualHeal = enemy.hp - oldHp;
+        
+        return { healed: actualHeal > 0, amount: actualHeal };
+    },
+    
+    /**
+     * Attempt to make the enemy defend (set isDefending flag).
+     * Returns true if the enemy decides to defend.
+     * Called each enemy turn. Enemies with canDefend will defend
+     * when their HP is above 50% (tactical defense, not desperation).
+     */
+    attemptEnemyDefense(enemy) {
+        if (!enemy || !enemy.canDefend) return false;
+        
+        // Don't defend if already defending
+        if (enemy.isDefending) return false;
+        
+        const hpPercent = enemy.hp / enemy.maxHP;
+        
+        // Defense logic:
+        //   - Above 70% HP: 20% chance to defend (proactive)
+        //   - 50-70% HP: 15% chance to defend
+        //   - Below 50% HP: 8% chance to defend (prefer attacking/healing when low)
+        let defendChance = 0;
+        if (hpPercent > 0.70) {
+            defendChance = 0.20;
+        } else if (hpPercent > 0.50) {
+            defendChance = 0.15;
+        } else {
+            defendChance = 0.08;
+        }
+        
+        if (Math.random() < defendChance) {
+            enemy.isDefending = true;
+            return true;
+        }
+        
+        return false;
+    }
+};
+
+console.log('[EnemyAI] window.enemyAI initialized with attemptEnemyHeal and attemptEnemyDefense');

@@ -1640,7 +1640,55 @@ window.increaseSpecialGauge = function(amount) {
     if (specialGaugeBar) specialGaugeBar.style.width = window.gameState.specialAttackGauge + '%';
     if (specialGaugeText) specialGaugeText.textContent = `${window.gameState.specialAttackGauge}/100`;
     
+    // FIX: Refresh action buttons so the special attack button enables/highlights when gauge hits 100
+    if (window.battleManager && typeof updateActionButtons === 'function') {
+        updateActionButtons(window.battleManager.hero);
+    }
+    
     console.log(`[Special Gauge] Increased by ${amount}, now at ${window.gameState.specialAttackGauge}/100`);
+};
+
+// Reset special attack gauge to 0 after use
+window.resetSpecialGauge = function() {
+    window.gameState.specialAttackGauge = 0;
+    
+    const specialGaugeBar = document.getElementById('specialGaugeBar');
+    const specialGaugeText = document.getElementById('specialGaugeText');
+    if (specialGaugeBar) specialGaugeBar.style.width = '0%';
+    if (specialGaugeText) specialGaugeText.textContent = '0/100';
+    
+    // Refresh action buttons so the special attack button disables again
+    if (window.battleManager && typeof updateActionButtons === 'function') {
+        updateActionButtons(window.battleManager.hero);
+    }
+    
+    console.log('[Special Gauge] Reset to 0 after special attack use');
+};
+
+// Initialize the special attack gauge UI at the start of a battle
+window.initSpecialAttackGauge = function() {
+    const userLevel = window.gameState?.jerryLevel || 1;
+    const currentGauge = window.gameState?.specialAttackGauge || 0;
+    
+    const specialGaugeContainer = document.getElementById('specialAttackGaugeContainer');
+    const specialGaugeBar = document.getElementById('specialGaugeBar');
+    const specialGaugeText = document.getElementById('specialGaugeText');
+    const specialAttackBtn = document.getElementById('btnSpecialAttack');
+    
+    // Show/hide based on level
+    if (userLevel >= 10) {
+        if (specialGaugeContainer) specialGaugeContainer.style.display = 'block';
+        if (specialAttackBtn) specialAttackBtn.style.display = 'block';
+    } else {
+        if (specialGaugeContainer) specialGaugeContainer.style.display = 'none';
+        if (specialAttackBtn) specialAttackBtn.style.display = 'none';
+    }
+    
+    // Sync gauge bar to current value
+    if (specialGaugeBar) specialGaugeBar.style.width = currentGauge + '%';
+    if (specialGaugeText) specialGaugeText.textContent = `${currentGauge}/100`;
+    
+    console.log(`[Special Gauge] Initialized at ${currentGauge}/100, level ${userLevel}`);
 };
 
 // Medusa projectile animation (gaze beam)

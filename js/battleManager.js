@@ -26,6 +26,12 @@ class BattleManager {
         this.reflectTurns = 0;  // Luna's reflect effect turns remaining
         this.reflectActive = false;  // Luna's reflect effect active flag
         this.enemyFrozenTurns = 0;  // Freeze effect turns remaining
+        this.heroStunnedTurns = 0;   // Enemy stun/daze effect turns remaining
+        this.burnTurns = 0;           // Nova special: burn DoT turns remaining
+        this.burnDamage = 0;          // Nova special: burn damage per turn
+        this.deflectActive = false;   // Luna special: deflect next enemy attack
+        this.defenseImmune = 0;       // Benny special: defense immunity turns remaining
+        this.overthinkBackfire = false; // Overthinker: next hero attack backfires
         this.focusAttackUsed = false;  // Track if focus timer special attack has been used this battle
         
         // Turn timer system
@@ -114,7 +120,8 @@ class BattleManager {
         }
         
         // Hide special attack gauge and button if below Level 10
-        const userLevel = parseInt(localStorage.getItem('level')) || 1;
+        // Use gameState.jerryLevel — the level is stored inside gameState, not as a standalone localStorage key
+        const userLevel = window.gameState?.jerryLevel || parseInt(localStorage.getItem('level')) || 1;
         const specialGaugeContainer = document.getElementById('specialAttackGaugeContainer');
         const specialAttackBtn = document.getElementById('btnSpecialAttack');
         
@@ -134,6 +141,18 @@ class BattleManager {
         this.mushroomMissChance = 0;
         this.mushroomSkipChance = 0;
         this.mushroomGaugeDrain = 0;
+        this.heroStunnedTurns = 0;   // Reset hero stun/daze on new battle
+        this.burnTurns = 0;           // Nova special: reset burn DoT
+        this.burnDamage = 0;
+        this.deflectActive = false;   // Luna special: reset deflect
+        this.defenseImmune = 0;       // Benny special: reset defense immunity
+        this.overthinkBackfire = false; // Overthinker: reset backfire flag
+        this._morphTurnsLeft = 0;      // Morph defense boost turns remaining
+        this._morphRestoreCallback = null;
+        this._charmTurnsLeft = 0;      // Charm defense reduction turns remaining
+        this._charmOriginalDefense = undefined;
+        this._superDefenseTurnsLeft = 0; // Super defense boost turns remaining
+        this._superDefenseOriginal = undefined;
 
         // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');
@@ -385,6 +404,17 @@ class BattleManager {
             stopTurnTimer();
         }
         
+        // === STUN / DAZE CHECK ===
+        // If hero is stunned by an enemy ability, skip this turn
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
+        
         // Process poison effect
         if (this.poisonTurns > 0) {
             this.hero.hp = Math.max(0, this.hero.hp - this.poisonDamage);
@@ -415,6 +445,34 @@ class BattleManager {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await this.enemyTurn();
                 return;
+            }
+        }
+        
+        // === TICK DOWN TEMPORARY ENEMY BUFFS / HERO DEBUFFS ===
+        // Morph: restore enemy defense after morphDuration turns
+        if (this._morphTurnsLeft > 0 && this._morphRestoreCallback) {
+            this._morphRestoreCallback();
+            this._morphTurnsLeft--;
+            if (this._morphTurnsLeft <= 0) {
+                this._morphRestoreCallback = null;
+            }
+        }
+        // Charm: restore hero defense after 2 turns
+        if (this._charmTurnsLeft > 0) {
+            this._charmTurnsLeft--;
+            if (this._charmTurnsLeft <= 0 && this._charmOriginalDefense !== undefined) {
+                this.hero.defense = this._charmOriginalDefense;
+                this._charmOriginalDefense = undefined;
+                addBattleLog('✨ Charm effect faded. Your defense is restored!');
+            }
+        }
+        // Super Defense: restore enemy defense after 2 turns
+        if (this._superDefenseTurnsLeft > 0) {
+            this._superDefenseTurnsLeft--;
+            if (this._superDefenseTurnsLeft <= 0 && this._superDefenseOriginal !== undefined) {
+                this.enemy.defense = this._superDefenseOriginal;
+                this._superDefenseOriginal = undefined;
+                addBattleLog(`🛡️ ${this.enemy.name}'s Super Defense faded.`);
             }
         }
         
@@ -491,6 +549,24 @@ class BattleManager {
             }
         }
         
+        // === OVERTHINK BACKFIRE: Attack hits the hero instead of the enemy ===
+        if (this.overthinkBackfire) {
+            this.overthinkBackfire = false;
+            addBattleLog(`🧠 Overthink backfire! Your attack dealt ${damage} damage to yourself!`);
+            this.applyHeroDamage(damage);
+            startHeroAnimation('hurt');
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            startHeroAnimation('idle');
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                await this.enemyTurn();
+            }
+            return;
+        }
+        
         const isDead = this.enemy.takeDamage(damage);
         
         // Increase special attack gauge by 15 per attack
@@ -547,6 +623,16 @@ class BattleManager {
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
         
         if (this.attackGauge < 25) {
@@ -620,6 +706,16 @@ class BattleManager {
             stopTurnTimer();
         }
         
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
+        
         if (this.defendBlocked > 0) {
             addBattleLog(`❌ Defend is blocked for ${this.defendBlocked} more turn(s)!`);
             return;
@@ -659,6 +755,16 @@ class BattleManager {
 
     // Player uses fireball
     async playerFireball() {
+        // === STUN / DAZE CHECK ===
+        if (this.state === BattleState.PLAYER_TURN && this.heroStunnedTurns > 0) {
+            if (typeof stopTurnTimer === 'function') stopTurnTimer();
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
         if (this.state !== BattleState.PLAYER_TURN) return;
         
         // FIX: Stop turn timer when player takes action
@@ -739,6 +845,16 @@ class BattleManager {
             stopTurnTimer();
         }
         
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
+        
         if (this.attackGauge < 15) {
             addBattleLog('❌ Need 15 attack gauge for asteroid!');
             return;
@@ -803,6 +919,16 @@ class BattleManager {
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
         
         if (this.attackGauge < 20) {
@@ -877,6 +1003,16 @@ class BattleManager {
             stopTurnTimer();
         }
         
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
+        
         if (this.attackGauge < 35) {
             addBattleLog('❌ Need 35 attack gauge for freeze!');
             return;
@@ -940,10 +1076,6 @@ class BattleManager {
             addBattleLog('❄️ Enemy is frozen for 2 turns!');
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Refill gauges slightly for next turn
-            this.attackGauge = Math.min(100, this.attackGauge + 15);
-            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
-            
             this.state = BattleState.PLAYER_TURN;
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
@@ -971,6 +1103,17 @@ class BattleManager {
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        // Note: potions are blocked while stunned (stun prevents all actions)
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
 
         const potionCount = gameState.battleInventory?.health_potion || 0;
@@ -1042,6 +1185,16 @@ class BattleManager {
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
 
         const hyperPotionCount = gameState.battleInventory?.hyper_potion || 0;
@@ -1124,6 +1277,16 @@ class BattleManager {
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
         }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
 
         const refillCount = gameState.battleInventory?.attack_refill || 0;
         if (refillCount <= 0) {
@@ -1165,6 +1328,16 @@ class BattleManager {
         // FIX: Stop turn timer when player takes action
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
 
         const refillCount = gameState.battleInventory?.defense_refill || 0;
@@ -1423,10 +1596,6 @@ class BattleManager {
             addBattleLog('👻 Enemy is procrastinating and skips their turn!');
             await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Refill gauges slightly for next turn
-            this.attackGauge = Math.min(100, this.attackGauge + 15);
-            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
-            
             this.state = BattleState.PLAYER_TURN;
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
@@ -1455,10 +1624,6 @@ class BattleManager {
             
             // Skip enemy turn and return to player turn
             this.state = BattleState.PLAYER_TURN;
-            
-            // Refill gauges slightly
-            this.attackGauge = Math.min(100, this.attackGauge + 15);
-            this.defenseGauge = Math.min(100, this.defenseGauge + 15);
             
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
@@ -1492,6 +1657,32 @@ class BattleManager {
             }
             
             await new Promise(resolve => setTimeout(resolve, 800));
+        }
+        
+        // === NOVA SPECIAL: Burn DoT — applied at start of each enemy turn ===
+        if (this.burnTurns > 0) {
+            const burnDmg = this.burnDamage || 20;
+            const burnDead = this.enemy.takeDamage(burnDmg);
+            addBattleLog(`🔥 Burn dealt ${burnDmg} damage! (${this.burnTurns} turns left)`);
+            this.burnTurns--;
+            if (this.burnTurns <= 0) {
+                addBattleLog('✨ Burn effect ended!');
+            }
+            updateBattleUI(this.hero, this.enemy);
+            if (burnDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 700));
+        }
+        
+        // === BENNY SPECIAL: Defense Immunity — tick down each enemy turn ===
+        if (this.defenseImmune > 0) {
+            this.defenseImmune--;
+            if (this.defenseImmune <= 0) {
+                addBattleLog('🛡️ Defense immunity expired!');
+            }
         }
         
         // === ADAPTIVE HEALING AI ===
@@ -1599,6 +1790,303 @@ class BattleManager {
             await this.enemyTurn();
             return;
         }
+        
+        // =====================================================================
+        // === ENEMY SPECIAL ABILITIES (can* flags from enemy/boss-enemies.js) ===
+        // =====================================================================
+        
+        // Helper to return to player turn
+        const returnToPlayerTurn = async () => {
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            this.state = BattleState.PLAYER_TURN;
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+        };
+        
+        // --- STUN (canStun) ---
+        // Enemy stuns hero, causing them to skip their next turn
+        if (this.enemy.canStun && Math.random() < (this.enemy.stunChance || 0.30)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const stunDuration = this.enemy.stunDuration || 1;
+            this.heroStunnedTurns = stunDuration;
+            addBattleLog(`⚡ ${this.enemy.name} stunned you! You will skip ${stunDuration} turn(s)!`);
+            const heroSprite = document.getElementById('heroSprite');
+            if (heroSprite) {
+                heroSprite.style.filter = 'brightness(2) saturate(0)';
+                setTimeout(() => { heroSprite.style.filter = ''; }, 1500);
+            }
+            updateBattleUI(this.hero, this.enemy);
+            await returnToPlayerTurn();
+            return;
+        }
+        
+        // --- DAZE (canDaze) ---
+        // Enemy dazes hero, causing them to skip their next turn (1 turn)
+        if (this.enemy.canDaze && Math.random() < (this.enemy.dazeChance || 0.25)) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            this.heroStunnedTurns = 1;
+            addBattleLog(`💫 ${this.enemy.name} dazed you! You will skip your next turn!`);
+            const heroSprite = document.getElementById('heroSprite');
+            if (heroSprite) {
+                heroSprite.style.filter = 'brightness(2) hue-rotate(180deg)';
+                setTimeout(() => { heroSprite.style.filter = ''; }, 1500);
+            }
+            updateBattleUI(this.hero, this.enemy);
+            await returnToPlayerTurn();
+            return;
+        }
+        
+        // --- POISON (canPoison) ---
+        // Enemy poisons hero, dealing damage over multiple turns
+        if (this.enemy.canPoison && !this.poisonTurns && Math.random() < 0.35) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const poisonDmg = this.enemy.poisonDamage || 8;
+            const poisonDur = this.enemy.poisonDuration || 3;
+            const baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                : Math.max(3, Math.floor(this.enemy.attack * 0.5));
+            this.applyHeroDamage(baseDamage);
+            this.poisonTurns = poisonDur;
+            this.poisonDamage = poisonDmg;
+            this.poisonGaugeDrain = 8;
+            addBattleLog(`☠️ ${this.enemy.name} attacked for ${baseDamage} damage and poisoned you!`);
+            addBattleLog(`🧪 Poison will drain ${poisonDmg} HP per turn for ${poisonDur} turns!`);
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            startHeroAnimation('idle');
+            updateBattleUI(this.hero, this.enemy);
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                await returnToPlayerTurn();
+            }
+            return;
+        }
+        
+        // --- ABSORB (canAbsorb) ---
+        // Enemy absorbs HP from hero (life drain)
+        if (this.enemy.canAbsorb && Math.random() < 0.30) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const absorbMin = this.enemy.absorbMin || 20;
+            const absorbMax = this.enemy.absorbMax || 35;
+            const absorbAmt = Math.floor(Math.random() * (absorbMax - absorbMin + 1)) + absorbMin;
+            this.applyHeroDamage(absorbAmt);
+            this.healEnemy(absorbAmt);
+            addBattleLog(`🖤 ${this.enemy.name} drained ${absorbAmt} HP from you!`);
+            if (window.showBattleHealAnimation) window.showBattleHealAnimation('enemySprite', absorbAmt);
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            startHeroAnimation('idle');
+            updateBattleUI(this.hero, this.enemy);
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                await returnToPlayerTurn();
+            }
+            return;
+        }
+        
+        // --- BERSERK (canBerserk) ---
+        // Enemy goes berserk and attacks multiple times in one turn
+        if (this.enemy.canBerserk && Math.random() < 0.25) {
+            const berserkHits = this.enemy.berserkAttacks || 3;
+            addBattleLog(`💢 ${this.enemy.name} goes BERSERK! ${berserkHits} rapid attacks!`);
+            let totalDamage = 0;
+            for (let i = 0; i < berserkHits; i++) {
+                await playEnemyAnimation(this.enemy, 'attack1', 300);
+                const hitDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                    ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                    : Math.max(3, Math.floor(this.enemy.attack * 0.6));
+                const reducedHit = Math.floor(hitDamage * 0.5); // Each berserk hit is 50% damage
+                this.applyHeroDamage(reducedHit);
+                totalDamage += reducedHit;
+                startHeroAnimation('hurt');
+                await new Promise(resolve => setTimeout(resolve, 400));
+                startHeroAnimation('idle');
+                if (this.hero.hp <= 0) break;
+            }
+            addBattleLog(`💥 Berserk dealt ${totalDamage} total damage!`);
+            updateBattleUI(this.hero, this.enemy);
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                await returnToPlayerTurn();
+            }
+            return;
+        }
+        
+        // --- PICKPOCKET (canPickpocket) ---
+        // Enemy steals battle items from inventory and deals damage
+        if (this.enemy.canPickpocket && Math.random() < 0.30) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const pickpocketCount = this.enemy.pickpocketCount || 2;
+            const baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
+                : Math.max(3, Math.floor(this.enemy.attack * 0.7));
+            this.applyHeroDamage(baseDamage);
+            // Steal actual battle items from inventory
+            const battleItemKeys = [
+                'health_potion', 'hyper_potion', 'attack_refill', 'defense_refill',
+                'spark', 'fireball', 'freeze', 'asteroid_attack', 'prickler',
+                'invisibility_cloak', 'mirror_attack', 'blue_flame', 'procrastination_ghost',
+                'throwing_stars', 'battle_glove', 'jade_dagger', 'wizards_wand'
+            ];
+            const stolenItems = [];
+            let itemsToSteal = pickpocketCount;
+            // Shuffle and steal from items that have quantity > 0
+            const availableItems = battleItemKeys.filter(k => (gameState.battleInventory?.[k] || 0) > 0);
+            for (let i = availableItems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableItems[i], availableItems[j]] = [availableItems[j], availableItems[i]];
+            }
+            for (let i = 0; i < Math.min(itemsToSteal, availableItems.length); i++) {
+                const key = availableItems[i];
+                gameState.battleInventory[key] = Math.max(0, (gameState.battleInventory[key] || 0) - 1);
+                stolenItems.push(key.replace(/_/g, ' '));
+            }
+            const stolenMsg = stolenItems.length > 0 ? `Stole: ${stolenItems.join(', ')}!` : 'Nothing to steal!';
+            addBattleLog(`👜 ${this.enemy.name} pickpocketed you! ${baseDamage} damage. ${stolenMsg}`);
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            startHeroAnimation('idle');
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                await returnToPlayerTurn();
+            }
+            return;
+        }
+        
+        // --- MORPH (canMorph) ---
+        // Enemy morphs, temporarily boosting its defense
+        if (this.enemy.canMorph && Math.random() < 0.25) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const morphDur = this.enemy.morphDuration || 2;
+            const originalDefense = this.enemy.defense;
+            this.enemy.defense = Math.floor(this.enemy.defense * 2);
+            addBattleLog(`🌀 ${this.enemy.name} morphed! Defense doubled for ${morphDur} turns!`);
+            // Schedule defense restoration
+            let turnsLeft = morphDur;
+            const morphRestore = () => {
+                turnsLeft--;
+                if (turnsLeft <= 0) {
+                    this.enemy.defense = originalDefense;
+                    addBattleLog(`🌀 ${this.enemy.name}'s morph faded. Defense returned to normal.`);
+                }
+            };
+            // Store restore callback for use in next player actions
+            this._morphRestoreCallback = morphRestore;
+            this._morphTurnsLeft = morphDur;
+            updateBattleUI(this.hero, this.enemy);
+            await returnToPlayerTurn();
+            return;
+        }
+        
+        // --- CHARM (canCharm) ---
+        // Enemy charms hero, reducing their defense
+        if (this.enemy.canCharm && Math.random() < 0.25) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const defReduction = this.enemy.charmDefenseReduction || 0.5;
+            const charmedDefense = Math.floor(this.hero.defense * (1 - defReduction));
+            const originalDefense = this.hero.defense;
+            this.hero.defense = charmedDefense;
+            addBattleLog(`💕 ${this.enemy.name} charmed you! Your defense reduced by ${Math.floor(defReduction * 100)}% for 2 turns!`);
+            // Restore defense after 2 turns
+            this._charmTurnsLeft = 2;
+            this._charmOriginalDefense = originalDefense;
+            const heroSprite = document.getElementById('heroSprite');
+            if (heroSprite) {
+                heroSprite.style.filter = 'hue-rotate(300deg) brightness(1.3)';
+                setTimeout(() => { heroSprite.style.filter = ''; }, 2000);
+            }
+            updateBattleUI(this.hero, this.enemy);
+            await returnToPlayerTurn();
+            return;
+        }
+        
+        // --- OVERTHINK (canOverthink) ---
+        // Enemy overthinks — sets backfire flag so hero's next attack backfires
+        if (this.enemy.canOverthink && Math.random() < 0.35) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            // Set backfire flag: hero's next attack will deal damage to themselves
+            this.overthinkBackfire = true;
+            // Also drain both gauges as a secondary effect
+            const gaugeDrain = Math.floor(Math.random() * 15) + 10;
+            this.attackGauge = Math.max(0, this.attackGauge - gaugeDrain);
+            this.defenseGauge = Math.max(0, this.defenseGauge - gaugeDrain);
+            addBattleLog(`🧠 ${this.enemy.name} used Overthink! Your next attack will backfire!`);
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            await returnToPlayerTurn();
+            return;
+        }
+        
+        // --- TELEPORT (canTeleport) ---
+        // Enemy teleports and delivers a surprise strike from behind
+        if (this.enemy.canTeleport && Math.random() < 0.30) {
+            const enemySpriteEl = document.getElementById('enemySprite');
+            if (enemySpriteEl) {
+                enemySpriteEl.style.opacity = '0';
+                enemySpriteEl.style.transition = 'opacity 0.3s';
+            }
+            await new Promise(resolve => setTimeout(resolve, 400));
+            if (enemySpriteEl) {
+                enemySpriteEl.style.opacity = '1';
+            }
+            await playEnemyAnimation(this.enemy, 'attack1', 400);
+            const teleportDmg = this.enemy.teleportDamage || 20;
+            const teleportDur = this.enemy.teleportDuration || 3;
+            this.applyHeroDamage(teleportDmg);
+            // Apply defense drain for teleportDuration turns
+            this.defenseGauge = Math.max(0, this.defenseGauge - 20);
+            addBattleLog(`⚡ ${this.enemy.name} teleported and struck from behind for ${teleportDmg} damage!`);
+            addBattleLog(`🛡️ Your defense gauge drained!`);
+            startHeroAnimation('hurt');
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            startHeroAnimation('idle');
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            if (this.hero.hp <= 0) {
+                this.state = BattleState.DEFEAT;
+                await this.endBattle('defeat');
+            } else {
+                await returnToPlayerTurn();
+            }
+            return;
+        }
+        
+        // --- SUPER DEFENSE (superDefense) ---
+        // Enemy activates super defense, reducing incoming damage significantly
+        if (this.enemy.superDefense && Math.random() < 0.20) {
+            await playEnemyAnimation(this.enemy, 'attack1', 600);
+            const defRedPct = this.enemy.defenseReduction || 0.35;
+            // Temporarily boost defense
+            const originalDef = this.enemy.defense;
+            this.enemy.defense = Math.floor(this.enemy.defense * (1 + defRedPct * 2));
+            addBattleLog(`🛡️ ${this.enemy.name} activates Super Defense! Damage reduced by ${Math.floor(defRedPct * 100)}%!`);
+            // Restore after 2 turns
+            this._superDefenseTurnsLeft = 2;
+            this._superDefenseOriginal = originalDef;
+            updateBattleUI(this.hero, this.enemy);
+            await returnToPlayerTurn();
+            return;
+        }
+        
+        // =====================================================================
+        // === END ENEMY SPECIAL ABILITIES ===
+        // =====================================================================
         
         // Check for Octopus drench attack (50% chance)
         const useDrench = this.enemy.drenchAttack && Math.random() < 0.5;
@@ -2028,8 +2516,28 @@ class BattleManager {
             damage = Math.min(damage, this.enemy.maxDamage);
         }
         
+        // === LUNA SPECIAL: Deflect — reflect attack back at enemy ===
+        if (this.deflectActive) {
+            this.deflectActive = false;
+            const deflectDmg = Math.floor(damage * 0.75); // reflect 75% back
+            const deflectDead = this.enemy.takeDamage(deflectDmg);
+            addBattleLog(`🌙 Luna's Eclipse deflected the attack! ${deflectDmg} reflected to enemy!`);
+            updateBattleUI(this.hero, this.enemy);
+            if (deflectDead) {
+                this.state = BattleState.VICTORY;
+                await this.endBattle('victory');
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 800));
+            // Skip normal damage application — fall through to end of turn
+        }
+        // === BENNY SPECIAL: Defense Immunity — block all damage while active ===
+        else if (this.defenseImmune > 0) {
+            addBattleLog(`🛡️ Defense Immunity! ${this.enemy.name}'s attack was blocked!`);
+            // No damage applied
+        }
         // Check if defend was active - use defense gauge instead of HP
-        if (this.defendActive && this.defenseGauge > 0) {
+        else if (this.defendActive && this.defenseGauge > 0) {
             const gaugeUsed = Math.min(damage, this.defenseGauge);
             this.defenseGauge -= gaugeUsed;
             const remainingDamage = damage - gaugeUsed;
@@ -2572,6 +3080,16 @@ class BattleManager {
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
         }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
 
         const throwingStarCount = gameState.battleInventory?.throwing_stars || 0;
         if (throwingStarCount <= 0) {
@@ -2633,6 +3151,16 @@ class BattleManager {
         
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
 
         const battleGloveCount = gameState.battleInventory?.battle_glove || 0;
@@ -2697,6 +3225,16 @@ class BattleManager {
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
         }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
 
         const jadeDaggerCount = gameState.battleInventory?.jade_dagger || 0;
         if (jadeDaggerCount <= 0) {
@@ -2756,6 +3294,16 @@ class BattleManager {
         
         if (typeof stopTurnTimer === 'function') {
             stopTurnTimer();
+        }
+        
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
         }
 
         const wizardsWandCount = gameState.battleInventory?.wizards_wand || 0;

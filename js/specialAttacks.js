@@ -13,39 +13,53 @@ async function playSpecialAttackProjectile(monsterName, fromElement, toElement) 
         };
         
         const gifPath = projectileGifs[monsterName];
-        if (!gifPath) {
+        if (!gifPath || !fromElement || !toElement) {
             resolve();
             return;
         }
         
-        // Create projectile element
-        const projectile = document.createElement('img');
-        projectile.src = gifPath;
-        projectile.style.position = 'absolute';
-        projectile.style.width = '40px';
-        projectile.style.height = '40px';
-        projectile.style.zIndex = '10000';
-        projectile.style.pointerEvents = 'none';
-        
-        // Get positions
+        // Use fixed positioning based on viewport coordinates (works across any container)
         const fromRect = fromElement.getBoundingClientRect();
         const toRect = toElement.getBoundingClientRect();
         
-        projectile.style.left = fromRect.right + 'px';
-        projectile.style.top = (fromRect.top + fromRect.height / 2 - 20) + 'px';
+        // Start: right edge of hero sprite, vertically centered
+        const startX = fromRect.right;
+        const startY = fromRect.top + fromRect.height / 2 - 20;
+        
+        // End: center of enemy sprite
+        const endX = toRect.left + toRect.width / 2 - 20;
+        const endY = toRect.top + toRect.height / 2 - 20;
+        
+        // Create projectile element using fixed positioning
+        const projectile = document.createElement('img');
+        projectile.src = gifPath;
+        projectile.style.position = 'fixed';
+        projectile.style.width = '40px';
+        projectile.style.height = '40px';
+        projectile.style.zIndex = '99999';
+        projectile.style.pointerEvents = 'none';
+        projectile.style.imageRendering = 'pixelated';
+        projectile.style.imageRendering = '-moz-crisp-edges';
+        projectile.style.imageRendering = 'crisp-edges';
+        projectile.style.left = startX + 'px';
+        projectile.style.top = startY + 'px';
+        projectile.style.transition = 'none';
         
         document.body.appendChild(projectile);
         
-        // Animate projectile
-        const deltaX = toRect.left - fromRect.right;
-        const deltaY = (toRect.top + toRect.height / 2) - (fromRect.top + fromRect.height / 2);
+        // Animate projectile to enemy center
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
         
-        projectile.style.transition = 'all 0.6s ease-out';
-        setTimeout(() => {
-            projectile.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-        }, 50);
+        // Trigger transition on next frame
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                projectile.style.transition = 'transform 0.55s ease-out';
+                projectile.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            });
+        });
         
-        // Remove projectile after animation
+        // Remove projectile after animation completes
         setTimeout(() => {
             projectile.remove();
             resolve();
@@ -58,7 +72,20 @@ async function playerSpecialAttack() {
     if (!window.battleManager) return;
     
     const manager = window.battleManager;
-    const level = manager.hero.level;
+    
+    // === STUN / DAZE CHECK ===
+    if (manager.heroStunnedTurns > 0) {
+        if (typeof stopTurnTimer === 'function') stopTurnTimer();
+        manager.heroStunnedTurns--;
+        addBattleLog(`😵 You are stunned! Turn skipped! (${manager.heroStunnedTurns} turns remaining)`);
+        updateBattleUI(manager.hero, manager.enemy);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        await manager.enemyTurn();
+        return;
+    }
+    
+    // FIX: Use gameState.jerryLevel (the actual level source), not manager.hero.level
+    const level = window.gameState?.jerryLevel || manager.hero?.level || 1;
     
     // Check if special attack is unlocked (Level 10+)
     if (level < 10) {
@@ -66,8 +93,8 @@ async function playerSpecialAttack() {
         return;
     }
     
-    // Check if special gauge is full
-    const specialGauge = parseInt(document.getElementById('specialAttackValue')?.textContent || '0');
+    // FIX: Read gauge from gameState directly (element ID was 'specialGaugeText', not 'specialAttackValue')
+    const specialGauge = window.gameState?.specialAttackGauge || 0;
     if (specialGauge < 100) {
         addBattleLog('⚠️ Special Attack gauge not full!');
         return;
