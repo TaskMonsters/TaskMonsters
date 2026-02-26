@@ -304,6 +304,18 @@ class BattleManager {
         }
         
         addBattleLog('⚔️ Battle Start!');
+        // Show enemy-specific monster dialogue on battle start
+        try {
+            if (typeof getDialogueForContext === 'function') {
+                const battleGreeting = getDialogueForContext('battle', { enemyName: this.enemy ? this.enemy.name : null });
+                const tooltip = document.getElementById('taskPalTooltip');
+                if (tooltip && battleGreeting) {
+                    tooltip.textContent = battleGreeting;
+                    tooltip.classList.add('visible');
+                    setTimeout(() => tooltip.classList.remove('visible'), 10000);
+                }
+            }
+        } catch (_) {}
         console.log('[Battle] Starting enemy turn');
 
         // Enemy attacks first (stable behavior)
