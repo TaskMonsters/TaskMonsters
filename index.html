@@ -4259,7 +4259,7 @@ input:checked + .toggle-slider:before {
                 <div class="egg-info-icon">🥚</div>
                 <h3 class="egg-info-title">Your Monster Starts as an Egg!</h3>
                 <p class="egg-info-description">
-                    Complete tasks to level up! Your egg will hatch at Level 10!
+                    Complete tasks to level up! Your egg will hatch at Level 5!
                 </p>
             </div>
         </div>
@@ -5441,8 +5441,8 @@ input:checked + .toggle-slider:before {
             // Theme system
             ownedThemes: [],
             activeTheme: null, // Currently active theme URL
-            // Egg system - Start as an egg, hatch at Level 10
-            isEgg: true, // New users start as an egg, hatch at Level 10
+            // Egg system - Start as an egg, hatch at Level 5
+            isEgg: true, // New users start as an egg, hatch at Level 5
             consecutiveLosses: 0,
             eggRevertedAt: null
         };
@@ -5813,8 +5813,8 @@ input:checked + .toggle-slider:before {
                 
                 // Migration: Initialize egg system for new and existing users
                 if (typeof gameState.isEgg === 'undefined') {
-                    // New users (level 1-9) start as eggs, existing users (level 10+) are not eggs
-                    gameState.isEgg = (gameState.jerryLevel < 10);
+                    // New users (level 1-4) start as eggs, existing users (level 5+) are not eggs
+                    gameState.isEgg = (gameState.jerryLevel < 5);
                 }
                 if (typeof gameState.consecutiveLosses === 'undefined') {
                     gameState.consecutiveLosses = 0;
@@ -10772,8 +10772,8 @@ input:checked + .toggle-slider:before {
             gameState.completedTasks++;
             
             // Check for egg re-hatching (when HP reaches 50)
-            // CRITICAL: Only apply to reverted eggs (level 10+), NOT new eggs (level 1-9)
-            if (gameState.isEgg && gameState.jerryLevel >= 10 && oldHealth < 50 && gameState.health >= 50) {
+            // CRITICAL: Only apply to reverted eggs (level 5+), NOT new eggs (level 1-4)
+            if (gameState.isEgg && gameState.jerryLevel >= 5 && oldHealth < 50 && gameState.health >= 50) {
                 gameState.isEgg = false;
                 console.log('[Re-hatching] Egg hatched after reaching 50 HP!');
                 
@@ -12024,8 +12024,8 @@ input:checked + .toggle-slider:before {
             gameState.completedTasks++;
             
             // Check for egg re-hatching (when HP reaches 50)
-            // CRITICAL: Only apply to reverted eggs (level 10+), NOT new eggs (level 1-9)
-            if (gameState.isEgg && gameState.jerryLevel >= 10 && oldHealth < 50 && gameState.health >= 50) {
+            // CRITICAL: Only apply to reverted eggs (level 5+), NOT new eggs (level 1-4)
+            if (gameState.isEgg && gameState.jerryLevel >= 5 && oldHealth < 50 && gameState.health >= 50) {
                 gameState.isEgg = false;
                 console.log('[Re-hatching] Egg hatched after reaching 50 HP!');
                 
@@ -12292,10 +12292,10 @@ input:checked + .toggle-slider:before {
             
             console.log(`📊 Level up! HP fully restored to ${newMaxHP} (Level ${gameState.jerryLevel})`);
             
-            // Check if egg should hatch at Level 10
-            if (gameState.jerryLevel === 10 && gameState.isEgg) {
+            // Check if egg should hatch at Level 5
+            if (gameState.jerryLevel === 5 && gameState.isEgg) {
                 gameState.isEgg = false;
-                console.log('[Hatching] Monster hatched at Level 10!');
+                console.log('[Hatching] Monster hatched at Level 5!');
                 
                 // CRITICAL: Enable battle mode when egg hatches
                 window.battleModeEnabled = true;
@@ -12462,9 +12462,9 @@ input:checked + .toggle-slider:before {
         }
 
         function toggleBattleMode() {
-            // Prevent enabling battle mode for eggs or players below Level 10
-            if ((gameState.isEgg || gameState.jerryLevel < 10) && !window.battleModeEnabled) {
-                showSuccessMessage('🔒 Battle Mode Locked', 'Reach Level 10 to unlock battles!');
+            // Prevent enabling battle mode for eggs or players below Level 5
+            if ((gameState.isEgg || gameState.jerryLevel < 5) && !window.battleModeEnabled) {
+                showSuccessMessage('🔒 Battle Mode Locked', 'Reach Level 5 to unlock battles!');
                 return;
             }
             
@@ -12642,7 +12642,7 @@ input:checked + .toggle-slider:before {
             return messages[Math.floor(Math.random() * messages.length)];
         }
 
-        // Hatching Celebration Modal - Shows when egg hatches at Level 10
+        // Hatching Celebration Modal - Shows when egg hatches at Level 5
         function showHatchingCelebrationModal(monsterName, level) {
             // Create modal overlay
             const modalOverlay = document.createElement('div');
@@ -12963,18 +12963,18 @@ input:checked + .toggle-slider:before {
                 }
                 
                 // Initialize Battle Mode preference
-                // Battle Mode is DISABLED until Level 10 (when egg hatches)
+                // Battle Mode is DISABLED until Level 5 (when egg hatches)
                 const storedBattleMode = localStorage.getItem('battleModeEnabled');
                 const playerLevel = gameState.jerryLevel || 1;
                 const isEgg = gameState.isEgg === true;
                 
-                if (playerLevel < 10 || isEgg) {
-                    // Force OFF for players below Level 10 or with eggs
+                if (playerLevel < 5 || isEgg) {
+                    // Force OFF for players below Level 5 or with eggs
                     window.battleModeEnabled = false;
                     localStorage.setItem('battleModeEnabled', 'false');
-                    console.log('🔒 Battle Mode disabled - player below Level 10 or has egg');
+                    console.log('🔒 Battle Mode disabled - player below Level 5 or has egg');
                 } else if (storedBattleMode === null) {
-                    // Default ON for Level 10+ players without stored preference
+                    // Default ON for Level 5+ players without stored preference
                     window.battleModeEnabled = true;
                     localStorage.setItem('battleModeEnabled', 'true');
                 } else {
@@ -13470,7 +13470,7 @@ input:checked + .toggle-slider:before {
         gameState.jerryXP = 0;
         gameState.xpCoins = 0;
 
-        // New players start as an egg (hatches at level 10)
+        // New players start as an egg (hatches at level 5)
         gameState.isEgg = true;
         gameState.consecutiveLosses = 0;
         gameState.eggRevertedAt = null;
