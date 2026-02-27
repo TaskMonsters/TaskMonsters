@@ -70,9 +70,7 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
             console.error('[EnemyAnimation] Enemy has no sprites defined:', enemy);
             animationPath = 'assets/enemies/Lazy Bat/Lazy Bat-IdleFly-animated.gif'; // Safe fallback
         }
-        
-        console.log('[EnemyAnimation] Playing', animationKey, 'animation:', animationPath);
-        
+
         // CRITICAL FIX: Clear any background image to prevent overlay
         spriteElement.style.backgroundImage = 'none';
         spriteElement.style.background = 'none';
@@ -116,8 +114,7 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
                 spriteElement.style.display = 'block';
                 spriteElement.style.visibility = 'visible';
                 spriteElement.style.opacity = '1';
-                
-                console.log('[EnemyAnimation] Returned to idle:', idleAnimation);
+
             }
             resolve();
         }, duration);
@@ -126,7 +123,7 @@ function playEnemyAnimation(enemy, animationKey, duration = 500) {
 
 // Initialize enemy sprite with idle animation
 function initEnemySprite(enemy) {
-    console.log('[InitEnemy] Called with enemy:', enemy);
+
     const spriteElement = document.getElementById('enemySprite');
     if (!spriteElement) {
         console.error('[InitEnemy] Enemy sprite element not found!');
@@ -138,16 +135,15 @@ function initEnemySprite(enemy) {
     }
     
     const enemyName = enemy.name;
-    console.log('[InitEnemy] Enemy name:', enemyName);
-    
+
     // FIXED: Use enemy.sprites object (already defined in enemy data)
     let idleGif = null;
     if (enemy.sprites && enemy.sprites.idle) {
         idleGif = enemy.sprites.idle;
-        console.log('[InitEnemy] Using enemy.sprites.idle:', idleGif);
+
     } else if (enemy.config && enemy.config.assets && enemy.config.assets.idle) {
         idleGif = enemy.config.assets.idle;
-        console.log('[InitEnemy] Using enemy.config.assets.idle:', idleGif);
+
     } else {
         // Final fallback
         console.warn('[InitEnemy] No sprites defined for enemy, using fallback');
@@ -159,7 +155,7 @@ function initEnemySprite(enemy) {
     spriteElement.style.background = 'none';
     
     // Set as img src (element is now <img> not <div>)
-    console.log('[InitEnemy] Setting sprite src to:', idleGif);
+
     spriteElement.src = idleGif;
     spriteElement.style.width = '32px';
     spriteElement.style.height = '32px';
@@ -173,10 +169,9 @@ function initEnemySprite(enemy) {
     spriteElement.style.opacity = '1';
     spriteElement.style.display = 'block';
     spriteElement.style.visibility = 'visible';
-    
-    console.log('[InitEnemy] ✅ Sprite initialized successfully:', enemyName, idleGif);
-    console.log('[InitEnemy] Sprite element src:', spriteElement.src);
-    console.log('[InitEnemy] Sprite element visible:', spriteElement.style.display, spriteElement.style.visibility);
+
+
+
 }
 
 // Export to global scope

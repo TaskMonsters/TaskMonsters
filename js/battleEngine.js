@@ -66,7 +66,7 @@ class BattleEngine {
     isBattleModeUnlocked() {
         // CRITICAL: Battle mode disabled if monster is in egg state
         if (gameState?.isEgg === true) {
-            console.log('[BattleEngine] Battle mode disabled: Monster is in egg state');
+
             return false;
         }
         
@@ -74,7 +74,7 @@ class BattleEngine {
         const isUnlocked = playerLevel >= this.config.unlockLevel;
         
         if (!isUnlocked) {
-            console.log(`[BattleEngine] Battle mode locked: Level ${playerLevel} < ${this.config.unlockLevel}`);
+
         }
         
         return isUnlocked;
@@ -187,8 +187,7 @@ class BattleEngine {
         
         // Add to log
         this.addLog(`A wild ${enemyConfig.name} appeared!`);
-        
-        console.log('Battle started:', this.currentBattle);
+
     }
     
     /**
@@ -775,8 +774,7 @@ class BattleEngine {
             // Update log UI
             this.updateBattleLog();
         }
-        
-        console.log('[Battle]', message);
+
     }
     
     getItemConfig(itemId) {
@@ -886,9 +884,7 @@ class BattleEngine {
         if (enemySprite) {
             const enemyConfig = this.currentBattle.enemy.config;
             const idleAnimation = enemyConfig.assets?.idle || enemyConfig.sprite || 'assets/battle/enemies/placeholder.gif';
-            
-            console.log('[BattleEngine] Setting enemy sprite:', idleAnimation);
-            
+
             // Set the sprite source
             enemySprite.src = idleAnimation;
             

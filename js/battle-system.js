@@ -9,10 +9,10 @@ const BattleSystem = {
     },
 
     init() {
-        console.log('Battle System Initializing...');
+
         this.injectStyles();
         this.createBattleElements();
-        console.log('Battle System Ready!');
+
     },
 
     injectStyles() {
@@ -358,7 +358,7 @@ const BattleSystem = {
     },
 
     startBattle() {
-        console.log('Starting battle!');
+
         this.state.active = true;
         this.state.turn = 'player';
 

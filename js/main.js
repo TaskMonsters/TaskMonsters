@@ -21,8 +21,7 @@ const heroSprites = {
 
 // Initialize the game
 async function initGame() {
-  console.log('Initializing Daily Quest...');
-  
+
   // Show loading message
   const loadingEl = document.getElementById('loadingMessage');
   if (loadingEl) loadingEl.style.display = 'block';
@@ -61,8 +60,7 @@ async function initGame() {
   
   // Set up battle buttons
   setupBattleButtons();
-  
-  console.log('Daily Quest initialized!');
+
 }
 
 // Handle explore action

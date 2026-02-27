@@ -60,7 +60,7 @@ class QuestTaskManager {
         }
         
         // Fire confetti animation (same as regular tasks)
-        console.log('🎉 Quest task completed, firing confetti...');
+
         if (window.fireConfetti) {
             window.fireConfetti();
         } else {

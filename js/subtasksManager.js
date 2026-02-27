@@ -5,7 +5,7 @@
 
 class SubtasksManager {
     constructor() {
-        console.log('[SubtasksManager] Initialized (ID-based)');
+
     }
 
     // Helper: Find task by ID
@@ -47,7 +47,7 @@ class SubtasksManager {
             const subtaskXP = Math.floor(taskPoints * 0.2);
             if (window.gameState && subtaskXP > 0) {
                 window.gameState.xp = (window.gameState.xp || 0) + subtaskXP;
-                console.log(`[SubtasksManager] Awarded ${subtaskXP} XP for completing subtask`);
+
             }
         }
 
@@ -58,8 +58,7 @@ class SubtasksManager {
         
         // Update the UI for this specific task card immediately
         this.updateCompletionButtons(taskId);
-        
-        console.log(`[SubtasksManager] Subtask ${isChecked ? 'completed' : 'uncompleted'}:`, subtaskId);
+
     }
 
     // Add a new subtask
@@ -88,8 +87,7 @@ class SubtasksManager {
         }
         
         this.updateTaskDisplay(taskId);
-        
-        console.log('[SubtasksManager] Subtask added:', newSubtask);
+
         return newSubtask;
     }
 
@@ -115,8 +113,7 @@ class SubtasksManager {
         }
         
         this.updateTaskDisplay(taskId);
-        
-        console.log('[SubtasksManager] Subtask edited:', subtaskId, newTitle);
+
     }
 
     // Delete a subtask
@@ -141,8 +138,7 @@ class SubtasksManager {
         }
         
         this.updateTaskDisplay(taskId);
-        
-        console.log('[SubtasksManager] Subtask deleted:', subtaskId);
+
     }
 
     // Get subtask progress
@@ -261,13 +257,11 @@ class SubtasksManager {
             }
         });
 
-        console.log(`[SubtasksManager] Updated completion buttons for task ${taskId}, hasIncomplete: ${hasIncomplete}`);
     }
 }
 
 // Initialize the subtasks manager
 window.subtasksManager = new SubtasksManager();
-console.log('[SubtasksManager] Ready (ID-based system)');
 
 // Global helper functions for UI interactions
 window.promptAddSubtask = function(taskId) {

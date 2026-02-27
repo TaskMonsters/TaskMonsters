@@ -323,13 +323,13 @@ class QuestGiver {
     show() {
         // CRITICAL: Prevent quest giver from appearing during battle
         if (window.battleManager && window.battleManager.inBattle) {
-            console.log('[QuestGiver] Battle is active, quest giver will not trigger');
+
             return;
         }
         
         // Check if quest giver onboarding should be shown first
         if (window.questGiverOnboarding && window.QuestGiverOnboarding && window.QuestGiverOnboarding.shouldShow()) {
-            console.log('[QuestGiver] Showing quest giver onboarding first');
+
             window.questGiverOnboarding.start();
             
             // After onboarding completes, show quest giver
@@ -337,7 +337,7 @@ class QuestGiver {
             const checkCompletion = setInterval(() => {
                 if (localStorage.getItem('questGiverOnboardingCompleted') === 'true') {
                     clearInterval(checkCompletion);
-                    console.log('[QuestGiver] Onboarding completed, showing quest giver');
+
                     this.showAfterOnboarding();
                 }
             }, 100);
@@ -351,13 +351,13 @@ class QuestGiver {
     showAfterOnboarding() {
         // CRITICAL: Prevent quest giver from appearing during battle
         if (window.battleManager && window.battleManager.inBattle) {
-            console.log('[QuestGiver] Battle is active, quest giver will not trigger');
+
             return;
         }
         
         // FIX: Prevent duplicate quest giver triggers
         if (this.activeQuest) {
-            console.log('[QuestGiver] Quest already active, ignoring duplicate trigger');
+
             return;
         }
         
@@ -385,7 +385,7 @@ class QuestGiver {
         // This prevents black screen when quest giver UI is displayed
         if (document.documentElement.style.visibility !== 'visible') {
             document.documentElement.style.visibility = 'visible';
-            console.log('✅ [showQuestGiverDirect] Main app UI revealed');
+
         }
         
         const questGiverUI = document.getElementById('questGiverUI');
@@ -417,7 +417,7 @@ class QuestGiver {
             // Small delay to ensure UI is rendered
             setTimeout(() => {
                 if (!questGiverUI.classList.contains('hidden')) {
-                    console.log('🎵 Playing quest giver music');
+
                     window.audioManager.playQuestMusic();
                 }
             }, 100);
@@ -540,7 +540,7 @@ class QuestGiver {
         // This fixes the black screen issue
         if (document.documentElement.style.visibility !== 'visible') {
             document.documentElement.style.visibility = 'visible';
-            console.log('✅ Main app UI revealed after quest accepted');
+
         }
     }
 
@@ -614,7 +614,7 @@ class QuestGiver {
             } else {
                 const oldXP = window.gameState.jerryXP || 0;
                 window.gameState.jerryXP = Math.max(0, oldXP - this.activeQuest.xpPenalty);
-                console.log(`Quiz wrong! Deducted ${this.activeQuest.xpPenalty} XP. Total: ${window.gameState.jerryXP}`);
+
             }
             
             if (typeof window.saveGameState === 'function') {
@@ -723,7 +723,7 @@ class QuestGiver {
         // This ensures no flickering - UI only shows after Quest Giver is handled
         if (document.documentElement.style.visibility === 'hidden') {
             document.documentElement.style.visibility = 'visible';
-            console.log('✅ Main app UI revealed after Quest Giver dismissed');
+
         }
         
         this.activeQuest = null;
@@ -754,7 +754,7 @@ function checkExpiredQuests() {
                 window.addJerryXP(-quest.questPenalty);
             } else {
                 window.gameState.jerryXP = Math.max(0, (window.gameState.jerryXP || 0) - quest.questPenalty);
-                console.log(`Quest expired! Deducted ${quest.questPenalty} XP`);
+
             }
         }
         
@@ -786,25 +786,23 @@ function triggerQuestGiver() {
 
 // Trigger Merlin quest from task completion
 function triggerMerlinQuestFromTaskCompletion() {
-    console.log('[Merlin] Trigger requested from task completion');
-    
+
     // Check if battle is currently active
     if (window.battleManager && window.battleManager.inBattle) {
-        console.log('[Merlin] Battle is active, quest giver will not trigger');
+
         return;
     }
     
     if (!window.questGiver) {
-        console.log('[Merlin] Quest giver not initialized yet');
+
         return;
     }
     
     if (!window.questGiver.shouldAppear()) {
-        console.log('[Merlin] Quest giver not ready or cooldown active');
+
         return;
     }
-    
-    console.log('[Merlin] Showing quest giver from task completion');
+
     window.questGiver.show();
 }
 
@@ -845,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // ENSURE MAIN APP UI IS VISIBLE before showing quest giver
             if (document.documentElement.style.visibility !== 'visible') {
                 document.documentElement.style.visibility = 'visible';
-                console.log('✅ Main app UI revealed before showing quest giver');
+
             }
             
             // Show quest giver
@@ -870,7 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // REVEAL MAIN APP UI after user declines Quest Giver
             if (document.documentElement.style.visibility === 'hidden') {
                 document.documentElement.style.visibility = 'visible';
-                console.log('✅ Main app UI revealed after Quest Giver declined');
+
             }
             
             // Extend habit tracker visibility by 2 minutes

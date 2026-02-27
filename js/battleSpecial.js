@@ -43,8 +43,7 @@ class BattleSpecialSystems {
         
         // Show notification
         this.showFocusChargeNotification(chargeAmount);
-        
-        console.log(`Focus Charge: +${chargeAmount}. Total: ${gameState.focusCharge}`);
+
     }
     
     /**

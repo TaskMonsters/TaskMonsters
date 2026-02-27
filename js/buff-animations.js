@@ -5,8 +5,7 @@
 
 // Play buff animation over hero sprite
 async function playHeroBuffAnimation(type) {
-    console.log('[BuffAnimation] Playing', type, 'animation');
-    
+
     const heroSprite = document.getElementById('heroSprite');
     if (!heroSprite) {
         console.error('[BuffAnimation] Hero sprite not found!');
@@ -54,10 +53,8 @@ async function playHeroBuffAnimation(type) {
     buffOverlay.src = animationPath + '?t=' + Date.now(); // Cache bust
     buffOverlay.style.opacity = '1';
     buffOverlay.style.display = 'block';
-    
-    console.log('[BuffAnimation] Overlay positioned at:', buffOverlay.style.left, buffOverlay.style.top);
-    console.log('[BuffAnimation] Overlay size:', buffOverlay.style.width, buffOverlay.style.height);
-    
+
+
     // Wait for animation to complete (1 second)
     await new Promise(resolve => setTimeout(resolve, 1000));
     
@@ -69,8 +66,7 @@ async function playHeroBuffAnimation(type) {
     
     buffOverlay.style.display = 'none';
     buffOverlay.src = '';
-    
-    console.log('[BuffAnimation] Animation complete');
+
 }
 
 // Export to global scope

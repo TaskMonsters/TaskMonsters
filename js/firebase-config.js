@@ -1,13 +1,9 @@
 /**
  * Firebase Configuration and Initialization
- * Handles Firebase Cloud Messaging for push notifications.
- *
- * NOTE: Firebase SDK scripts are loaded via CDN in index.html before this file.
- * If the Firebase SDK is unavailable, all functions degrade gracefully to
- * local Notification API calls.
+ * Handles Firebase Cloud Messaging for push notifications
  */
 
-// Firebase project configuration
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA_Y5V35a0PPpj1dbFM6-FSWUPgWdGXhiA",
     authDomain: "taskmonsters-d2b42.firebaseapp.com",
@@ -18,32 +14,32 @@ const firebaseConfig = {
     measurementId: "G-40NHKEG48H"
 };
 
-// VAPID key for Web Push
+// VAPID key for push notifications
 const vapidKey = "BG88qdZIOq9bJ1hh6z4eQpaOdKatlPhv2pklxSlKygJQAcbS1icFdTgBDg6bnHad3GA2oSR2Furf0g0BTxPZWmg";
 
+// Initialize Firebase (using modular SDK approach)
 let app, messaging;
 
-/**
- * Initialize Firebase app and Cloud Messaging.
- * Returns true on success, false if Firebase SDK is unavailable or unsupported.
- */
 async function initializeFirebase() {
     try {
+        // Check if Firebase is already loaded
         if (typeof firebase === 'undefined') {
-            console.warn('[Firebase] Firebase SDK not loaded – using local notifications only');
+            console.error('[Firebase] Firebase SDK not loaded');
             return false;
         }
 
-        if (!firebase.apps || !firebase.apps.length) {
+        // Initialize Firebase app
+        if (!firebase.apps.length) {
             app = firebase.initializeApp(firebaseConfig);
-            console.log('[Firebase] App initialized');
+
         } else {
             app = firebase.app();
         }
 
-        if (firebase.messaging && firebase.messaging.isSupported()) {
+        // Initialize Firebase Cloud Messaging
+        if (firebase.messaging.isSupported()) {
             messaging = firebase.messaging();
-            console.log('[Firebase] Messaging initialized');
+
             return true;
         } else {
             console.warn('[Firebase] Messaging not supported in this browser');
@@ -56,39 +52,33 @@ async function initializeFirebase() {
 }
 
 /**
- * Request notification permission and obtain an FCM token.
- * Saves the token to gameState for server-side push delivery.
- * Returns the token string, or null on failure.
+ * Request notification permission and get FCM token
  */
 async function requestNotificationPermission() {
     try {
+        // Check if notifications are supported
         if (!('Notification' in window)) {
             console.warn('[Notifications] Not supported in this browser');
             return null;
         }
 
+        // Request permission
         const permission = await Notification.requestPermission();
-
+        
         if (permission === 'granted') {
-            console.log('[Notifications] Permission granted');
 
+            // Get FCM token
             if (messaging) {
-                try {
-                    const token = await messaging.getToken({ vapidKey });
-                    console.log('[FCM] Token obtained');
+                const token = await messaging.getToken({ vapidKey });
 
-                    if (window.gameState) {
-                        window.gameState.fcmToken = token;
-                        if (window.saveGameState) window.saveGameState();
-                    }
-
-                    return token;
-                } catch (tokenErr) {
-                    console.warn('[FCM] Could not get token:', tokenErr);
+                // Save token to gameState
+                if (window.gameState) {
+                    window.gameState.fcmToken = token;
+                    window.saveGameState();
                 }
+                
+                return token;
             }
-
-            return null;
         } else {
             console.warn('[Notifications] Permission denied');
             return null;
@@ -100,18 +90,11 @@ async function requestNotificationPermission() {
 }
 
 /**
- * Send a local browser notification.
- * Uses a unique tag per call so notifications are never silently replaced
- * by the browser's same-tag deduplication behaviour.
- *
- * @param {string} title  - Notification title
- * @param {string} body   - Notification body text
- * @param {string} [icon] - Icon URL (defaults to Pink_Monster_idle.gif)
- * @param {string} [tag]  - Optional explicit tag; auto-generated if omitted
- * @returns {boolean} true if the notification was created successfully
+ * Send a local notification (fallback when FCM is not available)
  */
-function sendLocalNotification(title, body, icon, tag) {
+function sendLocalNotification(title, body, icon = 'assets/Pink_Monster_idle.gif') {
     try {
+        // Check if notifications are supported and permitted
         if (!('Notification' in window)) {
             console.warn('[Notifications] Not supported');
             return false;
@@ -122,30 +105,27 @@ function sendLocalNotification(title, body, icon, tag) {
             return false;
         }
 
-        const notifIcon = icon || 'assets/Pink_Monster_idle.gif';
-        // Generate a unique tag when none is provided so notifications stack
-        const notifTag = tag || ('task-reminder-' + Date.now());
-
+        // Create notification
         const notification = new Notification(title, {
             body: body,
-            icon: notifIcon,
-            badge: notifIcon,
-            tag: notifTag,
+            icon: icon,
+            badge: icon,
+            tag: 'task-reminder',
             requireInteraction: false,
             silent: false
         });
 
         // Auto-close after 10 seconds
         setTimeout(() => {
-            try { notification.close(); } catch (_) {}
+            notification.close();
         }, 10000);
 
-        notification.onclick = function () {
+        // Handle notification click
+        notification.onclick = function() {
             window.focus();
             notification.close();
         };
 
-        console.log('[Notifications] Local notification sent:', title);
         return true;
     } catch (error) {
         console.error('[Notifications] Error sending local notification:', error);
@@ -154,24 +134,23 @@ function sendLocalNotification(title, body, icon, tag) {
 }
 
 /**
- * Handle incoming FCM messages when the app is in the foreground.
- * Requires messaging to be initialized first via initializeFirebase().
+ * Handle incoming FCM messages when app is in foreground
  */
 function setupForegroundMessageHandler() {
     if (!messaging) return;
 
     messaging.onMessage((payload) => {
-        console.log('[FCM] Foreground message received:', payload);
 
-        const notificationTitle = (payload.notification && payload.notification.title) || 'Task Reminder';
-        const notificationBody  = (payload.notification && payload.notification.body)  || 'A task is due soon!';
-
+        const notificationTitle = payload.notification?.title || 'Task Reminder';
+        const notificationBody = payload.notification?.body || 'A task is due soon!';
+        
+        // Show local notification
         sendLocalNotification(notificationTitle, notificationBody);
     });
 }
 
-// Expose all functions globally
-window.initializeFirebase            = initializeFirebase;
+// Export functions
+window.initializeFirebase = initializeFirebase;
 window.requestNotificationPermission = requestNotificationPermission;
-window.sendLocalNotification         = sendLocalNotification;
+window.sendLocalNotification = sendLocalNotification;
 window.setupForegroundMessageHandler = setupForegroundMessageHandler;

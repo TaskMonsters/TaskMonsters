@@ -5,9 +5,7 @@
 
 (function() {
     'use strict';
-    
-    console.log('🎮 Initializing Battle System v2...');
-    
+
     // Wait for DOM and all modules to load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleSystem);
@@ -30,8 +28,7 @@
         }
         
         // Initialize subsystems
-        console.log('⚙️ Initializing battle subsystems...');
-        
+
         // Create global instances
         window.battleThreatSystem = new ThreatSystem();
         window.battleMemorySystem = new EnemyMemorySystem();
@@ -53,8 +50,7 @@
             
             // Initialize special systems
             window.battleSpecialSystems = new BattleSpecialSystems(window.battleEngine);
-            
-            console.log('✅ Battle Engine connected to all subsystems');
+
         } else {
             console.error('❌ Battle Engine not found');
             return;
@@ -70,10 +66,9 @@
         
         // Hook into focus timer
         hookFocusTimer();
-        
-        console.log('🎮 Battle System v2 initialized successfully!');
-        console.log('📊 Threat Level:', window.battleThreatSystem.getThreatLevel());
-        console.log('⚡ Focus Charge:', gameState?.focusCharge || 0);
+
+
+
     }
     
     
@@ -98,8 +93,7 @@
                 // Award Focus Charge
                 window.battleSpecialSystems.onFocusSessionComplete(duration);
             };
-            
-            console.log('✅ Hooked into focus timer');
+
         }
         
         // Option 2: Listen for custom events
@@ -107,8 +101,7 @@
             const duration = event.detail?.duration || 1500; // Default 25 min
             window.battleSpecialSystems.onFocusSessionComplete(duration);
         });
-        
-        console.log('✅ Listening for focus session events');
+
     }
     
     /**
@@ -117,7 +110,7 @@
     window.battleDebug = {
         // Start test battle
         startTestBattle: function(difficulty = 'standard') {
-            console.log('🎮 Starting test battle...');
+
             window.battleEngine.startBattle(difficulty, { test: true });
         },
         
@@ -148,20 +141,20 @@
         // Reset threat
         resetThreat: function() {
             window.battleThreatSystem.reset();
-            console.log('✅ Threat reset to 50');
+
         },
         
         // Reset all memories
         resetMemories: function() {
             window.battleMemorySystem.reset();
-            console.log('✅ All enemy memories cleared');
+
         },
         
         // List all enemies
         listEnemies: function() {
             const playerLevel = gameState?.level || 5;
             const available = getAvailableEnemies(playerLevel, 'standard');
-            console.log('Available enemies for level', playerLevel, ':', available);
+
             return available;
         },
         
@@ -248,18 +241,16 @@
             window.battleEngine.startBattle('standard', { debug: true });
         }
     };
-    
-    console.log('🐛 Debug functions available: window.battleDebug');
-    console.log('   - startTestBattle(difficulty)');
-    console.log('   - getThreatInfo()');
-    console.log('   - getEnemyMemory(enemyId)');
-    console.log('   - getAllMemories()');
-    console.log('   - addFocusCharge(amount)');
-    console.log('   - resetThreat()');
-    console.log('   - resetMemories()');
-    console.log('   - listEnemies()');
-    console.log('   - fightEnemy(enemyId)');
-    
+
+
+
+
+
+
+
+
+
+
 })();
 
 // Define the missing global function to be called from index.html
@@ -271,5 +262,3 @@ window.maybeTriggerBattle = function(taskType, taskData = {}) {
     // Delegate the trigger check to the battle engine
     return window.battleEngine.checkBattleTrigger(taskType, taskData);
 };
-
-console.log('✅ maybeTriggerBattle function defined and ready');

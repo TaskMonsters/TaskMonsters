@@ -77,8 +77,7 @@ class LootSystem {
                 }
             }
         }
-        
-        console.log(`[Loot] Generated ${lootDrops.length} items from ${enemy.name}`);
+
         return lootDrops;
     }
     
@@ -110,7 +109,7 @@ class LootSystem {
         
         lootDrops.forEach(item => {
             window.inventoryManager.addItem(item.id, item.quantity);
-            console.log(`[Loot] Added ${item.quantity}x ${item.name} to inventory`);
+
         });
     }
     
@@ -369,4 +368,3 @@ class LootSystem {
 
 // Initialize loot system
 window.lootSystem = new LootSystem();
-console.log('🎁 Loot System initialized');

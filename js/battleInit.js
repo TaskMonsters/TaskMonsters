@@ -47,7 +47,7 @@ let arenaIndices = {
 let globalArenaIndex = 0;
 
 function getNextArenaBackground() {
-    const playerLevel = window.gameState?.jerryLevel || 10;
+    const playerLevel = window.gameState?.jerryLevel || 1;
     
     // Build cumulative arena pool based on player level
     // Once unlocked, arenas stay available and alternate
@@ -92,8 +92,7 @@ function getNextArenaBackground() {
     // Get current arena and rotate to next
     const arena = availableArenas[globalArenaIndex % availableArenas.length];
     globalArenaIndex++;
-    
-    console.log(`[Arena] Level ${playerLevel}: ${arena} (${globalArenaIndex}/${availableArenas.length} total arenas available)`);
+
     return arena;
 }
 
@@ -112,17 +111,11 @@ function getActiveHeroAppearance() {
     const equippedSkinId = window.gameState ? window.gameState.equippedSkinId : null;
     
     // CRITICAL FIX v3.52: Defensive logging to detect skin state loss
-    console.log('[Battle] getActiveHeroAppearance:', {
-        equippedSkinId,
-        gameStateExists: !!window.gameState,
-        skinsConfigExists: !!window.SKINS_CONFIG,
-        skinExists: equippedSkinId && window.SKINS_CONFIG && !!window.SKINS_CONFIG[equippedSkinId]
-    });
-    
+
     // Try to use skin if equipped
     if (equippedSkinId && window.SKINS_CONFIG && window.SKINS_CONFIG[equippedSkinId]) {
         const skin = window.SKINS_CONFIG[equippedSkinId];
-        console.log('[Battle] ✅ Using equipped skin:', equippedSkinId);
+
         return {
             animations: skin.animations,
             frameCount: skin.frameCount,
@@ -192,7 +185,7 @@ function renderHeroSprite() {
     } else {
         // Set as img src (element is now <img> not <div>)
         heroSprite.src = appearance.animations.idle;
-        console.log('[Battle] Hero sprite src set to:', appearance.animations.idle);
+
     }
     
     // CRITICAL FIX: Clear any background image to prevent spritesheet overlay
@@ -220,13 +213,12 @@ function renderHeroSprite() {
         const scale = (appearance && appearance.battleScale) ? appearance.battleScale : 1.9;
         spriteWrapper.style.transform = `scale(${scale})`;
         spriteWrapper.style.transformOrigin = 'center';
-        console.log('[Battle] Hero wrapper scale set to:', scale);
+
     }
     
     // Remove any classes that could hide the sprite
     heroSprite.classList.remove('hidden', 'opacity-0', 'fade-out', 'defeated');
-    
-    console.log('[Battle] Hero sprite rendered successfully', { appearance });
+
 }
 
 // Export to global scope
@@ -248,13 +240,7 @@ function startHeroAnimation(animationType = 'idle') {
     // CRITICAL FIX v3.52: Defensive skin state validation
     // Log current skin state to detect when it gets cleared
     const currentSkinId = window.gameState?.equippedSkinId;
-    console.log('[Battle] startHeroAnimation called:', { 
-        animationType, 
-        equippedSkinId: currentSkinId,
-        gameStateExists: !!window.gameState,
-        skinsConfigExists: !!window.SKINS_CONFIG
-    });
-    
+
     // Get current monster appearance using the robust helper
     const appearance = getActiveHeroAppearance();
     const spritePrefix = localStorage.getItem('heroSpritePrefix') || 'Pink_Monster';
@@ -302,9 +288,7 @@ function startHeroAnimation(animationType = 'idle') {
         // CRITICAL: Ensure we're using img src, not background image
         heroSprite.style.backgroundImage = 'none';
         heroSprite.style.background = 'none';
-        
-        console.log('[Battle] Skin GIF animation changed to:', animationType, '→', mappedType, gifPath);
-        
+
         // Ensure sprite is visible and properly sized
         heroSprite.style.display = 'block';
         heroSprite.style.visibility = 'visible';
@@ -315,7 +299,7 @@ function startHeroAnimation(animationType = 'idle') {
         if (spriteWrapper && spriteWrapper.classList.contains('sprite-wrapper')) {
             const scale = appearance.battleScale || 1.9; // Increased by 1x for better visibility
             spriteWrapper.style.transform = `scale(${scale})`;
-            console.log('[Battle] Skin scale set to:', scale);
+
         }
         
         return; // Exit early for GIF animations - DO NOT run spritesheet code below
@@ -340,9 +324,7 @@ function startHeroAnimation(animationType = 'idle') {
         // CRITICAL: Ensure we're using img src, not background image
         heroSprite.style.backgroundImage = 'none';
         heroSprite.style.background = 'none';
-        
-        console.log('[Battle] Hero GIF animation changed to:', animationType, gifPath);
-        
+
         // Ensure sprite is visible and properly sized
         heroSprite.style.display = 'block';
         heroSprite.style.visibility = 'visible';
@@ -370,10 +352,10 @@ function startHeroAnimation(animationType = 'idle') {
     
     if (appearance && appearance.animations && appearance.animations.idle) {
         heroSprite.src = appearance.animations.idle;
-        console.log('[Battle] Emergency fallback: Using idle GIF');
+
     } else {
         heroSprite.src = 'assets/heroes/Nova_idle.gif';
-        console.log('[Battle] Emergency fallback: Using Nova idle GIF');
+
     }
     return;
     
@@ -386,7 +368,7 @@ function startHeroAnimation(animationType = 'idle') {
 function stopHeroAnimation() {
     // No-op for GIF animations (they loop automatically)
     // This function is kept for compatibility with existing code
-    console.log('[Battle] stopHeroAnimation called (no-op for GIF animations)');
+
 }
 
 // Export to global scope for use in battleManager
@@ -412,7 +394,7 @@ function initializeHeroSprite() {
 function startTestBattle() {
     // Check if Battle Mode is enabled
     if (window.battleModeEnabled === false) {
-        console.log('⚙️ Battle Mode is OFF — skipping encounter.');
+
         return;
     }
     
@@ -428,7 +410,7 @@ function startTestBattle() {
     // Level-based attack damage scaling (grows with level)
     // Hero damage scaling according to gameplay mechanics:
     // Level 5: 5-15 damage
-    // Throwing Stars: 50-80 damage
+    // Level 10: 15-25 damage
     // Level 20: 30-45 damage
     // Level 30: 45-65 damage
     // Level 40: 60-85 damage
@@ -494,7 +476,7 @@ function startTestBattle() {
             // Retry after a short delay
             setTimeout(() => {
                 if (typeof window.createRandomEnemy === 'function') {
-                    console.log('✅ enemy.js loaded, retrying battle start');
+
                     startTestBattle();
                 } else {
                     console.error('❌ createRandomEnemy still not defined after wait. Make sure enemy.js is loaded.');
@@ -542,10 +524,10 @@ function attachBattleButton() {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Battle button clicked via event listener!');
+
                 startTestBattle();
             });
-            console.log('Battle button event listener attached successfully');
+
         } else {
             console.warn('Start Battle button not found (this is normal if not in battle mode)');
         }
@@ -604,7 +586,7 @@ if (originalStartBattle && window.battleManager) {
 function maybeTriggerBattle(sourceType) {
     // Check if Battle Mode is enabled
     if (window.battleModeEnabled === false) {
-        console.log('⚙️ Battle Mode is OFF — skipping encounter.');
+
         return false;
     }
     
@@ -622,20 +604,19 @@ function maybeTriggerBattle(sourceType) {
         chance = 0.25; // 25% probability for regular tasks (reduced from 50%)
     } else {
         // Any other source should never trigger battle
-        console.log(`🚫 Battle trigger blocked for source: ${sourceType}`);
+
         return false;
     }
     
     // Roll the dice
     const roll = Math.random();
-    console.log(`🎲 Battle probability check: ${(chance * 100)}% chance, rolled ${(roll * 100).toFixed(1)}%`);
-    
+
     if (roll < chance) {
-        console.log('⚔️ Battle triggered!');
+
         startTestBattle();
         return true; // Battle was triggered
     } else {
-        console.log('✨ No battle this time');
+
         return false; // No battle triggered
     }
 }
@@ -725,5 +706,3 @@ window.enemyAI = {
         return false;
     }
 };
-
-console.log('[EnemyAI] window.enemyAI initialized with attemptEnemyHeal and attemptEnemyDefense');

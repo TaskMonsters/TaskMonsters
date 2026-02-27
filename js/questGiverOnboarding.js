@@ -42,7 +42,7 @@ class QuestGiverOnboarding {
 
     // Start onboarding
     start() {
-        console.log('🦅 Starting quest giver onboarding');
+
         this.currentPage = 0;
         this.showPage(0);
     }
@@ -294,8 +294,7 @@ class QuestGiverOnboarding {
     // Complete onboarding
     complete() {
         localStorage.setItem('questGiverOnboardingCompleted', 'true');
-        console.log('🎉 Quest giver onboarding completed');
-        
+
         // Remove overlay now that onboarding is complete
         const overlay = document.getElementById('questGiverOnboardingOverlay');
         if (overlay) {
@@ -311,5 +310,3 @@ class QuestGiverOnboarding {
 
 // Initialize global quest giver onboarding
 window.questGiverOnboarding = new QuestGiverOnboarding();
-
-console.log('[QuestGiverOnboarding] Quest giver onboarding system loaded');

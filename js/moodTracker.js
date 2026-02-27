@@ -22,8 +22,7 @@ class MoodTracker {
     }
     
     init() {
-        console.log('[MoodTracker] Initializing...');
-        
+
         // Create tooltip HTML
         this.createTooltip();
         
@@ -38,14 +37,13 @@ class MoodTracker {
         if (saved) {
             this.lastPopupTime = parseInt(saved);
         }
-        
-        console.log('[MoodTracker] Initialized successfully');
+
     }
     
     createTooltip() {
         // Check if tooltip already exists
         if (document.getElementById('moodTrackerTooltip')) {
-            console.log('[MoodTracker] Tooltip already exists');
+
             return;
         }
         
@@ -156,8 +154,7 @@ class MoodTracker {
                     this.saveMood(mood);
                 });
             });
-            
-            console.log('[MoodTracker] Tooltip created and attached to monster container');
+
         } else {
             console.warn('[MoodTracker] Monster container not found, retrying in 1s');
             setTimeout(() => this.createTooltip(), 1000);
@@ -165,7 +162,7 @@ class MoodTracker {
     }
     
     showTooltip() {
-        console.log('[MoodTracker] Showing tooltip');
+
         const tooltip = document.getElementById('moodTrackerTooltip');
         if (tooltip) {
             tooltip.style.display = 'block';
@@ -187,7 +184,7 @@ class MoodTracker {
     }
     
     hideTooltip() {
-        console.log('[MoodTracker] Hiding tooltip');
+
         const tooltip = document.getElementById('moodTrackerTooltip');
         if (tooltip) {
             tooltip.style.opacity = '0';
@@ -199,8 +196,7 @@ class MoodTracker {
     }
     
     saveMood(moodValue) {
-        console.log('[MoodTracker] Saving mood:', moodValue);
-        
+
         const note = document.getElementById('moodNoteTooltip')?.value || '';
         const moodData = this.moods.find(m => m.value === moodValue);
         
@@ -238,8 +234,7 @@ class MoodTracker {
         
         // Show confirmation message
         this.showConfirmation(moodData.emoji, moodData.name);
-        
-        console.log('[MoodTracker] Mood saved successfully');
+
     }
     
     showConfirmation(emoji, name) {
@@ -281,10 +276,10 @@ class MoodTracker {
         if (mainHeroSprite) {
             mainHeroSprite.style.cursor = 'pointer';
             mainHeroSprite.addEventListener('click', () => {
-                console.log('[MoodTracker] Monster clicked, showing tooltip');
+
                 this.showTooltip();
             });
-            console.log('[MoodTracker] Monster click listener added');
+
         } else {
             console.warn('[MoodTracker] mainHeroSprite not found, retrying in 1s');
             setTimeout(() => this.addMonsterClickListener(), 1000);
@@ -292,8 +287,7 @@ class MoodTracker {
     }
     
     startAutoPopup() {
-        console.log('[MoodTracker] Starting auto-popup timer (1 hour)');
-        
+
         // Clear existing interval
         if (this.intervalId) {
             clearInterval(this.intervalId);
@@ -301,7 +295,7 @@ class MoodTracker {
         
         // Set up interval
         this.intervalId = setInterval(() => {
-            console.log('[MoodTracker] Auto-popup triggered');
+
             this.showTooltip();
         }, this.autoPopupInterval);
     }
@@ -310,13 +304,12 @@ class MoodTracker {
         if (this.intervalId) {
             clearInterval(this.intervalId);
             this.intervalId = null;
-            console.log('[MoodTracker] Auto-popup stopped');
+
         }
     }
     
     playMoodAnimation(moodValue) {
-        console.log('[MoodTracker] Playing animation for mood:', moodValue);
-        
+
         const sprite = document.getElementById('mainHeroSprite');
         if (!sprite) {
             console.warn('[MoodTracker] Main hero sprite not found');
@@ -335,15 +328,13 @@ class MoodTracker {
         
         // HAPPY MOOD: Jump animation
         if (moodValue === 'happy') {
-            console.log('[MoodTracker] Playing JUMP animation for happy mood');
-            console.log('[MoodTracker] Equipped skin:', equippedSkinId);
-            console.log('[MoodTracker] Is egg:', isEgg);
-            
+
+
+
             if (equippedSkinId || isEgg) {
                 // SKIN EQUIPPED OR EGG FORM: Keep current visual, just add jump transform
                 const visualType = equippedSkinId ? 'skin' : 'egg';
-                console.log(`[MoodTracker] ${visualType} equipped - applying jump transform only`);
-                
+
                 // Add jump transform effect WITHOUT changing sprite src
                 sprite.style.setProperty('transition', 'transform 0.3s ease', 'important');
                 sprite.style.setProperty('transform', 'scale(4) translateY(-20px)', 'important');
@@ -356,12 +347,11 @@ class MoodTracker {
                 setTimeout(() => {
                     sprite.style.setProperty('transform', originalTransform || 'scale(4)', 'important');
                     sprite.style.setProperty('transition', '', 'important');
-                    console.log(`[MoodTracker] Jump animation complete - ${visualType} maintained`);
+
                 }, 600);
             } else {
                 // NO SKIN AND NOT EGG: Use default monster jump GIF
-                console.log('[MoodTracker] No skin/egg - using default monster jump GIF');
-                
+
                 // Normalize monster name: capitalize first letter for file path
                 const monsterName = selectedMonster.charAt(0).toUpperCase() + selectedMonster.slice(1).toLowerCase();
                 const jumpGif = `assets/${monsterName}_jump.gif`;
@@ -386,7 +376,7 @@ class MoodTracker {
                             sprite.src = originalSrc;
                             sprite.style.animation = originalAnimation;
                             sprite.style.transition = '';
-                            console.log('[MoodTracker] Jump GIF animation complete');
+
                         }, 2000);
                     });
                 };
@@ -407,8 +397,7 @@ class MoodTracker {
         } 
         // OTHER MOODS: Flicker/fade effect
         else {
-            console.log('[MoodTracker] Playing FLICKER animation for', moodValue, 'mood');
-            
+
             // Create flicker effect using opacity
             let flickerCount = 0;
             const maxFlickers = 6; // 3 full cycles (on/off) over 2 seconds
@@ -419,7 +408,7 @@ class MoodTracker {
                     clearInterval(flickerEffect);
                     // CRITICAL: Always restore to full opacity
                     sprite.style.setProperty('opacity', '1', 'important');
-                    console.log('[MoodTracker] Flicker animation complete, opacity restored to 1');
+
                     return;
                 }
                 
@@ -432,7 +421,7 @@ class MoodTracker {
             setTimeout(() => {
                 if (sprite) {
                     sprite.style.setProperty('opacity', '1', 'important');
-                    console.log('[MoodTracker] Safety timeout: opacity forced to 1');
+
                 }
             }, 3000);
         }
@@ -450,9 +439,7 @@ window.updateMoodHistoryDisplay = function() {
     // Get moods directly from localStorage (more reliable)
     const saved = localStorage.getItem('moodHistory');
     let moods = saved ? JSON.parse(saved) : [];
-    
-    console.log('[MoodTracker] Filtering moods - Date:', dateFilter, 'Mood:', moodFilter, 'Total:', moods.length);
-    
+
     // Apply date filter
     if (dateFilter !== 'all') {
         const now = new Date();
@@ -475,7 +462,7 @@ window.updateMoodHistoryDisplay = function() {
             }
             return true;
         });
-        console.log('[MoodTracker] After date filter:', moods.length);
+
     }
     
     // Apply mood type filter
@@ -483,7 +470,7 @@ window.updateMoodHistoryDisplay = function() {
         moods = moods.filter(entry => {
             return entry.mood && entry.mood.toLowerCase() === moodFilter.toLowerCase();
         });
-        console.log('[MoodTracker] After mood filter:', moods.length);
+
     }
     
     // Render mood history
@@ -497,9 +484,7 @@ window.updateMoodHistoryDisplay = function() {
         `;
         return;
     }
-    
-    console.log('[MoodTracker] Rendering', moods.length, 'mood entries');
-    
+
     container.innerHTML = moods.map(entry => {
         const date = new Date(entry.timestamp);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -547,29 +532,28 @@ if (document.readyState === 'loading') {
 
 // Initialize mood history display when Habits tab is shown
 window.initMoodHistoryFilters = function() {
-    console.log('[MoodTracker] Initializing mood history filters');
-    
+
     // Add event listeners to filters
     const dateFilter = document.getElementById('moodDateFilter');
     const moodFilter = document.getElementById('moodTypeFilter');
     
     if (dateFilter) {
         dateFilter.addEventListener('change', () => {
-            console.log('[MoodTracker] Date filter changed:', dateFilter.value);
+
             window.updateMoodHistoryDisplay();
         });
     }
     
     if (moodFilter) {
         moodFilter.addEventListener('change', () => {
-            console.log('[MoodTracker] Mood filter changed:', moodFilter.value);
+
             window.updateMoodHistoryDisplay();
         });
     }
     
     // Initial display
     window.updateMoodHistoryDisplay();
-    console.log('[MoodTracker] Filters initialized and display updated');
+
 };
 
 // Auto-initialize when switching to Habits tab

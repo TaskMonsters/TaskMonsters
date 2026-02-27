@@ -691,9 +691,7 @@ function getAvailableEnemies(playerLevel, difficulty = 'standard') {
         
         // Advance rotation for next battle
         window.battleEnemyRotationIndex[bracketKey] = (currentIndex + 1) % enemies.length;
-        
-        console.log(`[EnemyRotation] Level ${playerLevel}, Difficulty ${difficulty}: Selected ${selectedEnemy} (${currentIndex % enemies.length + 1}/${enemies.length})`);
-        
+
         // Return array with single selected enemy for compatibility
         return [selectedEnemy];
     }

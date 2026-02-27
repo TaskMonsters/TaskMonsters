@@ -7,7 +7,7 @@
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>Task Monsters v3.32</title>
 <!-- PWA Manifest -->
-<link href="manifest.json?v=1757559779" rel="manifest"/>
+<link href="manifest.json" rel="manifest"/>
 <!-- PWA Meta Tags -->
 <meta content="#111111" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
@@ -20,7 +20,7 @@
 <link href="assets/logo/favicon.png" rel="icon" sizes="32x32" type="image/png"/>
 <link href="assets/logo/favicon.png" rel="icon" sizes="48x48" type="image/png"/>
 <link href="assets/logo/favicon.png" rel="icon" sizes="96x96" type="image/png"/>
-<link href="assets/logo/favicon.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="assets/logo/icon-192.png" rel="icon" sizes="192x192" type="image/png"/>
 <link href="assets/logo/favicon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="assets/logo/favicon.png" rel="shortcut icon"/>
 <!-- SEO Meta Tags -->
@@ -3319,6 +3319,148 @@
     }
 }
 
+/* ============================================================
+   EGG MODE STYLES (Levels 1-4)
+   ============================================================ */
+
+/* Egg status badge shown below the egg in the main header */
+#eggStatusBadge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(236, 72, 153, 0.25) 100%);
+    border: 1.5px solid rgba(139, 92, 246, 0.5);
+    border-radius: 20px;
+    padding: 8px 18px;
+    margin: 8px auto 0;
+    max-width: 280px;
+    animation: eggPulse 2.5s ease-in-out infinite;
+}
+#eggStatusBadge.visible {
+    display: flex;
+}
+#eggStatusBadge .egg-badge-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+#eggStatusBadge .egg-badge-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+#eggStatusBadge .egg-badge-level {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+}
+@keyframes eggPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(139, 92, 246, 0); }
+}
+
+/* Egg mode: make the main hero sprite larger and centered */
+#mainHeroSprite.egg-sprite {
+    width: 96px !important;
+    height: 96px !important;
+    max-width: 96px !important;
+    max-height: 96px !important;
+    transform: none !important;
+    image-rendering: pixelated !important;
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: crisp-edges !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* Egg locked overlay for skins shop */
+#skinsEggLockedOverlay {
+    display: none;
+    position: relative;
+    z-index: 10;
+}
+#skinsEggLockedOverlay.visible {
+    display: block;
+}
+.egg-locked-banner {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(236, 72, 153, 0.18) 100%);
+    border: 2px solid rgba(139, 92, 246, 0.4);
+    border-radius: 16px;
+    padding: 28px 20px 24px;
+    margin: 12px 0 20px;
+    text-align: center;
+}
+.egg-locked-banner .egg-locked-icon {
+    font-size: 52px;
+    line-height: 1;
+    margin-bottom: 14px;
+    display: block;
+    animation: eggWobble 2s ease-in-out infinite;
+}
+.egg-locked-banner .egg-locked-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+}
+.egg-locked-banner .egg-locked-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 16px;
+}
+.egg-locked-banner .egg-locked-progress {
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+@keyframes eggWobble {
+    0%, 100% { transform: rotate(-3deg) scale(1); }
+    25% { transform: rotate(3deg) scale(1.05); }
+    50% { transform: rotate(-2deg) scale(1); }
+    75% { transform: rotate(2deg) scale(1.03); }
+}
+
+/* Battle mode locked banner */
+#battleLockedBanner {
+    display: none;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(245, 158, 11, 0.12) 100%);
+    border: 2px solid rgba(239, 68, 68, 0.35);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin: 12px 0;
+    text-align: center;
+}
+#battleLockedBanner.visible {
+    display: block;
+}
+#battleLockedBanner .battle-locked-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+    display: block;
+}
+#battleLockedBanner .battle-locked-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+}
+#battleLockedBanner .battle-locked-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
     </style>
 
 </head>
@@ -4259,7 +4401,7 @@ input:checked + .toggle-slider:before {
                 <div class="egg-info-icon">🥚</div>
                 <h3 class="egg-info-title">Your Monster Starts as an Egg!</h3>
                 <p class="egg-info-description">
-                    Complete tasks to level up! Your egg will hatch at Level 10!
+                    Complete tasks to level up! Your egg will hatch at Level 5!
                 </p>
             </div>
         </div>
@@ -4415,9 +4557,6 @@ input:checked + .toggle-slider:before {
         <button id="btnWizardsWand" class="btn-action" onclick="battleManager.playerWizardsWand()" style="display: none;">
             🪄 Wizard's Wand <span class="item-count" id="wizardsWandCount">(0)</span>
         </button>
-        <button id="btnSpecialDefense" class="btn-action" onclick="battleManager.playerSpecialDefense()" style="display: none;">
-            📖 Special Defense <span class="item-count" id="specialDefenseCount">(0)</span>
-        </button>
         <button id="btnFlee" class="btn-flee" onclick="battleManager.playerFlee()">
             🏃 Flee
         </button>
@@ -4486,35 +4625,15 @@ input:checked + .toggle-slider:before {
             </div>
             
             <!-- RPG Stat Gauges -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px auto 0; max-width: 500px; padding: 0 10px;">
-                <!-- Energy Gauge -->
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 16px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);">
+            <div style="display: flex; justify-content: center; margin: 16px auto 0; max-width: 500px; padding: 0 10px;">
+                <!-- HP Gauge Only -->
+                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 16px 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); min-width: 180px; text-align: center;">
                     <div style="font-size: 28px; text-align: center; margin-bottom: 8px;">⚡</div>
                     <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">HP</div>
                     <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
                         <div id="energyFill" style="height: 100%; background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); width: 75%; transition: width 0.3s ease-in-out;"></div>
                     </div>
                     <div id="energyText" style="font-size: 14px; font-weight: 700; color: #fff; text-align: center;">75/100</div>
-                </div>
-                
-                <!-- Attack Gauge -->
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 16px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 28px; text-align: center; margin-bottom: 8px;">⚔️</div>
-                    <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">ATTACK</div>
-                    <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
-                        <div id="attackFill" style="height: 100%; background: linear-gradient(90deg, #ef4444 0%, #f97316 50%, #ec4899 100%); width: 60%; transition: width 0.3s ease-in-out;"></div>
-                    </div>
-                    <div id="attackText" style="font-size: 14px; font-weight: 700; color: #fff; text-align: center;">60/100</div>
-                </div>
-                
-                <!-- Defense Gauge -->
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 16px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 28px; text-align: center; margin-bottom: 8px;">🛡️</div>
-                    <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;">DEFENSE</div>
-                    <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
-                        <div id="defenseFill" style="height: 100%; background: linear-gradient(90deg, #8b5cf6 0%, #3b82f6 100%); width: 85%; transition: width 0.3s ease-in-out;"></div>
-                    </div>
-                    <div id="defenseText" style="font-size: 14px; font-weight: 700; color: #fff; text-align: center;">85/100</div>
                 </div>
             </div>
             
@@ -4533,7 +4652,13 @@ input:checked + .toggle-slider:before {
                 </div>
             </div>
             
-            <!-- Battle system triggers automatically after completing tasks (40% chance) -->
+            <!-- Egg Status Badge (visible only during egg mode, levels 1-4) -->
+            <div id="eggStatusBadge">
+                <span class="egg-badge-icon">🥚</span>
+                <span class="egg-badge-text">EGG MODE</span>
+                <span class="egg-badge-level" id="eggBadgeLevelText">Hatches at Level 5</span>
+            </div>
+
         </div>
     </div>
 
@@ -4622,16 +4747,7 @@ input:checked + .toggle-slider:before {
                     <div class="stat-value" id="achievementsDisplay">0/10</div>
                     <div class="stat-label">Achievements</div>
                 </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">⚔️</div>
-                    <div class="stat-value" id="battlesWonDisplay">0</div>
-                    <div class="stat-label">Battles Won</div>
-                </div>
-                <div class="stat-tile">
-                    <div class="stat-icon">💥</div>
-                    <div class="stat-value" id="battlesLostDisplay">0</div>
-                    <div class="stat-label">Battles Lost</div>
-                </div>
+
                 <div class="stat-tile">
                     <div class="stat-icon">🧠</div>
                     <div class="stat-value" id="quizPassedDisplay">0</div>
@@ -4689,8 +4805,8 @@ input:checked + .toggle-slider:before {
                         <div id="focusTimerInfoBox" style="display: none; background: linear-gradient(135deg, rgba(255, 69, 0, 0.15) 0%, rgba(255, 140, 0, 0.15) 100%); border: 2px solid rgba(255, 69, 0, 0.4); border-radius: 8px; padding: 14px 50px 14px 14px; margin-bottom: 16px; text-align: center; box-shadow: 0 0 15px rgba(255, 69, 0, 0.2); position: relative;">
                             <button id="toggleFocusInfo" onclick="toggleFocusTimerInfo()" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255, 69, 0, 0.5); color: var(--text-primary); border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; transition: all 0.2s; z-index: 10;" onmouseover="this.style.background='rgba(0,0,0,0.5)'" onmouseout="this.style.background='rgba(0,0,0,0.3)'">Hide</button>
                             <div style="font-size: 14px; color: var(--text-primary); line-height: 1.6; font-weight: 500;">
-                                🔥 <strong style="color: #ff6b35;">FOCUS POWER:</strong> Temporarily increases your monster's <strong style="color: #ff4500;">attack strength</strong> in battle!<br>
-                                <span style="font-size: 12px; opacity: 0.9;">Using the Focus Timer builds up power that randomly triggers during battle for a devastating <strong>25-35 damage</strong> special attack (one-time use per battle)</span>
+                                🔥 <strong style="color: #ff6b35;">FOCUS POWER:</strong> Boost your monster's energy with focused work sessions!<br>
+                                <span style="font-size: 12px; opacity: 0.9;">Complete the Focus Timer to earn bonus XP and help restore your monster's HP through productivity!</span>
                             </div>
                         </div>
                         <button id="showFocusInfo" onclick="toggleFocusTimerInfo()" style="display: block; background: rgba(255, 69, 0, 0.2); border: 2px solid rgba(255, 69, 0, 0.4); color: var(--text-primary); border-radius: 8px; padding: 10px; margin-bottom: 16px; font-size: 13px; cursor: pointer; width: 100%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 69, 0, 0.3)'" onmouseout="this.style.background='rgba(255, 69, 0, 0.2)'">ℹ️ Show Focus Power Info</button>
@@ -4701,6 +4817,8 @@ input:checked + .toggle-slider:before {
                             <div style="width: 64px; height: 128px; overflow: visible; display: flex; align-items: center; justify-content: center; transform: scale(1); transform-origin: center center;">
                                 <img id="focusTimerMonsterSprite" src="assets/heroes/Nova_idle.gif" alt="Monster" style="width: 32px; height: 32px; max-width: 64px; max-height: 128px; image-rendering: pixelated; object-fit: contain; object-position: center; display: block; animation: none;">
                             </div>
+                            <!-- Egg mode label shown inside the focus timer when monster is in egg form -->
+                            <div id="focusTimerEggLabel" style="display: none; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); background: rgba(139,92,246,0.25); border: 1px solid rgba(139,92,246,0.5); border-radius: 12px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.9); white-space: nowrap; letter-spacing: 0.3px;">🥚 Egg Mode</div>
                         </div>
                         <div id="focusTimerDisplay" style="font-size: 48px; font-weight: 700; text-align: center; margin: 20px 0; color: var(--text-primary);">25:00</div>
                         <div style="display: flex; gap: 12px;">
@@ -4800,7 +4918,7 @@ input:checked + .toggle-slider:before {
                         <span id="shopItemCount" class="item-count-badge">0 items</span>
                     </div>
                     <div style="padding: 0 0 20px 0;">
-                        <p style="text-align: center; color: #666; margin-bottom: 10px;">Power up your hero with XP!</p>
+                        <p style="text-align: center; color: #666; margin-bottom: 10px;">Buy potions to restore your monster's HP!</p>
                         <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsShop">0</span></p>
                         <div id="shopItemsGrid" class="shop-items-grid">
                             <!-- Shop items will be rendered here -->
@@ -4813,11 +4931,11 @@ input:checked + .toggle-slider:before {
             <div id="ownedSubTabContent" class="shop-sub-content">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title">🎒 Battle Items</div>
+                        <div class="card-title">🎒 Potions</div>
                         <span id="ownedItemCount" class="item-count-badge">0 items</span>
                     </div>
                     <div style="padding: 0 0 20px 0;">
-                        <p style="text-align: center; color: #666; margin-bottom: 10px;">Use your items in battle!</p>
+                        <p style="text-align: center; color: #666; margin-bottom: 10px;">Use potions to restore your monster's HP!</p>
                         <p style="text-align: center; color: #4CAF50; font-weight: bold; margin-bottom: 20px;">XP Coins: <span id="xpCoinsOwned">0</span></p>
                     </div>
                     <div id="ownedItemsGrid" class="owned-items-grid">
@@ -4828,6 +4946,16 @@ input:checked + .toggle-slider:before {
 
             <!-- Skins Sub-Tab Content -->
             <div id="skinsSubTabContent" class="shop-sub-content">
+                <!-- Egg Mode Locked Overlay (shown when isEgg === true, levels 1-4) -->
+                <div id="skinsEggLockedOverlay">
+                    <div class="egg-locked-banner">
+                        <span class="egg-locked-icon">🥚</span>
+                        <h3 class="egg-locked-title">Skins Locked Until Hatched!</h3>
+                        <p class="egg-locked-desc">Your monster is still growing inside its egg. Skins can only be applied once your monster hatches at <strong>Level 5</strong>. Keep completing tasks to level up!</p>
+                        <div class="egg-locked-progress" id="skinsEggProgressText">Level 1 → Level 5 to unlock</div>
+                    </div>
+                </div>
+                <div id="skinsShopWrapper">
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">🎨 Monster Skins - Shop</div>
@@ -4840,6 +4968,7 @@ input:checked + .toggle-slider:before {
                             <!-- Skins shop will be rendered here -->
                         </div>
                     </div>
+                </div>
                 </div>
                 
                 <!-- Inventory section removed - equip/unequip now happens directly on shop cards -->
@@ -5042,6 +5171,12 @@ input:checked + .toggle-slider:before {
 
         <!-- Settings tab content -->
         <div id="settingsTab" class="tab-content">
+            <!-- Battle Mode Locked Banner (shown during egg mode, levels 1-4) -->
+            <div id="battleLockedBanner">
+                <span class="battle-locked-icon">🔒</span>
+                <div class="battle-locked-title">Battle Mode Locked</div>
+                <div class="battle-locked-desc">Battle mode unlocks when your monster hatches at <strong>Level 5</strong>. Complete tasks to level up your egg!</div>
+            </div>
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">⚙️ Settings</div>
@@ -5059,12 +5194,7 @@ input:checked + .toggle-slider:before {
                         <div class="settings-toggle-slider"></div>
                     </div>
                 </div>
-                <div class="settings-item">
-                    <div class="settings-label">Battle Mode</div>
-                    <div class="settings-toggle active" id="battleModeToggle" onclick="toggleBattleMode()">
-                        <div class="settings-toggle-slider"></div>
-                    </div>
-                </div>
+
                 <div class="settings-item">
                     <div class="settings-label">Share Etsy Store</div>
                     <button class="btn-secondary" onclick="shareEtsyStore()">Share</button>
@@ -5365,10 +5495,10 @@ input:checked + .toggle-slider:before {
             health: 100,
             attack: 5,
             defense: 5,
-            jerryLevel: 1,
-            jerryXP: 0,
+            jerryLevel: 1, // Level 1 for new players
+            jerryXP: 0, // Starting XP
             jerryCurrentXP: 0,
-            jerryXPToNext: Math.floor(100 * Math.pow(1.2, 1 - 1)), // XP needed for level 2
+            jerryXPToNext: 100, // XP needed for level 2
             taskPoints: 0,
             tasks: [],
             completedTasks: 0,
@@ -5384,7 +5514,7 @@ input:checked + .toggle-slider:before {
             notifications: false,
             selectedQuickTasks: [],
             completedQuickTasks: [],
-            ownedSkins: [],
+            ownedSkins: [], // Unlocked through shop
             equippedSkinId: null,
             lastQuickTasksDate: null,
             dailyChallenge: null,
@@ -5421,28 +5551,19 @@ input:checked + .toggle-slider:before {
                 paint: null
             },
             battleInventory: {
-                fireball: 0,
-                spark: 0,
                 health_potion: 0,
-                attack_refill: 0,
-                defense_refill: 0,
-                invisibility_cloak: 0,
-                prickler: 0,
-                freeze: 0,
-                blue_flame: 0,
-                procrastination_ghost: 0,
-                special_defense: 0
+                hyper_potion: 0
             },
-            unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'],
+            unlockedBattleItems: ['health_potion', 'hyper_potion'],
             xp: 0,
-            xpCoins: 0,
+            xpCoins: 0, // Starting coins
             // Focus timer tracking
             totalFocusMinutes: 0, // Total minutes spent using focus timer
             // Theme system
-            ownedThemes: [],
+            ownedThemes: [], // Unlocked through shop
             activeTheme: null, // Currently active theme URL
-            // Egg system - Start as an egg, hatch at Level 10
-            isEgg: true, // New users start as an egg, hatch at Level 10
+            // Egg system - Start as an egg, hatch at Level 5
+            isEgg: true, // New players start as egg, hatch at Level 5
             consecutiveLosses: 0,
             eggRevertedAt: null
         };
@@ -5554,9 +5675,9 @@ input:checked + .toggle-slider:before {
             { id: 'quickfire_pro', name: 'Quickfire Pro', desc: 'Complete 10 quick tasks total', icon: '⚡', requirement: 10, type: 'quick_total', tier: 'starter' },
             { id: 'balanced_start', name: 'Balanced Start', desc: 'Complete 1 quick task and 1 regular task in same day', icon: '⚖️', requirement: 1, type: 'balanced_day', tier: 'starter' },
             
-            // Starter Tier (💚) - Battle Achievements
-            { id: 'first_victory', name: 'First Victory', desc: 'Defeat your first enemy in battle mode', icon: '⚔️', requirement: 1, type: 'battles', tier: 'starter' },
-            { id: 'battle_ready', name: 'Battle Ready', desc: 'Win 5 battles total', icon: '🛡️', requirement: 5, type: 'battles', tier: 'starter' },
+            // Starter Tier (💚) - HP Achievements
+            { id: 'first_victory', name: 'Full Health', desc: 'Reach 100 HP for the first time', icon: '❤️', requirement: 100, type: 'hp', tier: 'starter' },
+            { id: 'task_warrior', name: 'Task Warrior', desc: 'Complete 5 tasks total', icon: '🛡️', requirement: 5, type: 'tasks', tier: 'starter' },
             
             // Starter Tier (💚) - Quest Achievements
             { id: 'quest_beginner', name: 'Quest Beginner', desc: 'Pass your first Merlin quiz', icon: '📜', requirement: 1, type: 'quests', tier: 'starter' },
@@ -5572,9 +5693,9 @@ input:checked + .toggle-slider:before {
             { id: 'time_keeper', name: 'Time Keeper', desc: 'Complete a task within 5 minutes of due time', icon: '⏰', requirement: 1, type: 'on_time', tier: 'intermediate' },
             { id: 'first_flame', name: 'First Flame', desc: 'Earn 100 XP total', icon: '✨', requirement: 100, type: 'xp', tier: 'intermediate' },
             
-            // Intermediate Tier (💙) - Battle Achievements
-            { id: 'combat_veteran', name: 'Combat Veteran', desc: 'Win 10 battles total', icon: '⚔️', requirement: 10, type: 'battles', tier: 'intermediate' },
-            { id: 'undefeated_streak', name: 'Undefeated Streak', desc: 'Win 3 battles in a row', icon: '🔥', requirement: 3, type: 'battle_streak', tier: 'intermediate' },
+            // Intermediate Tier (💙) - HP Achievements
+            { id: 'combat_veteran', name: 'HP Guardian', desc: 'Complete 10 tasks to restore HP', icon: '❤️', requirement: 10, type: 'tasks', tier: 'intermediate' },
+            { id: 'undefeated_streak', name: 'Healing Streak', desc: 'Complete tasks 3 days in a row', icon: '🔥', requirement: 3, type: 'streak', tier: 'intermediate' },
             
             // Intermediate Tier (💙) - Quest Achievements
             { id: 'quest_enthusiast', name: 'Quest Enthusiast', desc: 'Pass 5 Merlin quizzes', icon: '📚', requirement: 5, type: 'quests', tier: 'intermediate' },
@@ -5591,10 +5712,10 @@ input:checked + .toggle-slider:before {
             { id: 'unstoppable_force', name: 'Unstoppable Force', desc: 'Complete 100 regular tasks total', icon: '🚀', requirement: 100, type: 'tasks', tier: 'advanced' },
             { id: 'legend_of_focus', name: 'Legend of Focus', desc: 'Complete tasks 30 days in a row', icon: '🔥', requirement: 30, type: 'streak', tier: 'advanced' },
             
-            // Advanced Tier (💛) - Battle Achievements
-            { id: 'battle_master', name: 'Battle Master', desc: 'Win 25 battles total', icon: '⚔️', requirement: 25, type: 'battles', tier: 'advanced' },
-            { id: 'unstoppable', name: 'Unstoppable', desc: 'Win 10 battles in a row', icon: '🔥', requirement: 10, type: 'battle_streak', tier: 'advanced' },
-            { id: 'battle_legend', name: 'Battle Legend', desc: 'Win 50 battles total', icon: '👑', requirement: 50, type: 'battles', tier: 'advanced' },
+            // Advanced Tier (📛) - HP/Task Achievements
+            { id: 'task_master', name: 'Task Master', desc: 'Complete 25 tasks total', icon: '⚔️', requirement: 25, type: 'tasks', tier: 'advanced' },
+            { id: 'unstoppable', name: 'Unstoppable', desc: 'Complete tasks 10 days in a row', icon: '🔥', requirement: 10, type: 'streak', tier: 'advanced' },
+            { id: 'productivity_legend', name: 'Productivity Legend', desc: 'Complete 50 tasks total', icon: '👑', requirement: 50, type: 'tasks', tier: 'advanced' },
             
             // Advanced Tier (💛) - Quest Achievements
             { id: 'quest_master', name: 'Quest Master', desc: 'Pass 10 Merlin quizzes', icon: '🧙‍♂️', requirement: 10, type: 'quests', tier: 'advanced' },
@@ -5766,28 +5887,15 @@ input:checked + .toggle-slider:before {
                 const isLegacyUser = hasNoBattleInventory && hasPlayedBefore;
                 
                 if (isLegacyUser) {
-                    // Legacy user - give them starter items
+                    // Legacy user - give them starter potions
                     gameState.battleInventory = {
-                        fireball: 0,
-                        spark: 0,
-                        health_potion: 2,
-                        attack_refill: 2,
-                        defense_refill: 2,
-                        invisibility_cloak: 0,
-                        prickler: 0,
-                        freeze: 0,
-                        blue_flame: 0,
-                        procrastination_ghost: 0,
-                        special_defense: 0
+                        health_potion: 0,
+                        hyper_potion: 0
                     };
-                    gameState.unlockedBattleItems = ['health_potion', 'attack_refill', 'defense_refill'];
+                    gameState.unlockedBattleItems = ['health_potion', 'hyper_potion'];
                 } else {
-                    // New user or existing user with battleInventory - just ensure all item keys exist with 0
-                    const allBattleItemKeys = [
-                        'fireball', 'spark', 'health_potion', 'attack_refill', 'defense_refill',
-                        'invisibility_cloak', 'prickler', 'freeze', 'blue_flame', 'procrastination_ghost',
-                        'throwing_stars', 'special_defense'
-                    ];
+                    // New user or existing user with battleInventory - ensure only potion keys exist
+                    const allBattleItemKeys = ['health_potion', 'hyper_potion'];
                     
                     // Only add missing keys with 0 (don't override existing values)
                     allBattleItemKeys.forEach(itemKey => {
@@ -5796,9 +5904,9 @@ input:checked + .toggle-slider:before {
                         }
                     });
                     
-                    // Initialize unlockedBattleItems if not present - new users can buy potions
+                    // Initialize unlockedBattleItems if not present
                     if (typeof gameState.unlockedBattleItems === 'undefined') {
-                        gameState.unlockedBattleItems = ['health_potion', 'attack_refill', 'defense_refill'];
+                        gameState.unlockedBattleItems = ['health_potion', 'hyper_potion'];
                     }
                 }
                 
@@ -5813,8 +5921,8 @@ input:checked + .toggle-slider:before {
                 
                 // Migration: Initialize egg system for new and existing users
                 if (typeof gameState.isEgg === 'undefined') {
-                    // New users (level 1-9) start as eggs, existing users (level 10+) are not eggs
-                    gameState.isEgg = (gameState.jerryLevel < 10);
+                    // New users (level 1-4) start as eggs, existing users (level 5+) are not eggs
+                    gameState.isEgg = (gameState.jerryLevel < 5);
                 }
                 if (typeof gameState.consecutiveLosses === 'undefined') {
                     gameState.consecutiveLosses = 0;
@@ -5880,7 +5988,14 @@ input:checked + .toggle-slider:before {
                 }
             }
             
-
+            // TEST MODE DISABLED - Egg progression feature enabled
+            // gameState.jerryLevel = 50;
+            // gameState.jerryCurrentXP = 0;
+            // gameState.jerryXPToNext = Math.floor(100 * Math.pow(1.2, 50 - 1));
+            // gameState.jerryXP = 50000;
+            // gameState.health = 100;
+            // gameState.isEgg = false;
+            // console.log('[TEST MODE] Level set to 50 with 50000 XP Coins');
             
             // CRITICAL FIX: Initialize skinsManager AFTER gameState is fully loaded
             // This ensures equippedSkinId is available when skinsManager.init() runs
@@ -5893,6 +6008,74 @@ input:checked + .toggle-slider:before {
         // Save game state to localStorage
         function saveGameState() {
             localStorage.setItem('taskRockGameState', JSON.stringify(gameState));
+        }
+
+        /**
+         * updateEggModeUI
+         * Synchronises all egg-mode-specific UI elements with the current gameState.
+         * Called from updateUI() on every state change and from levelUpJerry() after hatching.
+         *
+         * Rules:
+         *  - Levels 1-4 (isEgg === true):  show egg badge, skins locked overlay, battle locked banner
+         *  - Level 5+  (isEgg === false): hide all egg-mode elements, show normal skins shop
+         */
+        function updateEggModeUI() {
+            const isEgg = gameState.isEgg === true;
+            const level  = gameState.jerryLevel || 1;
+
+            // ── 1. Egg status badge in the main header ─────────────────────────────
+            const eggBadge = document.getElementById('eggStatusBadge');
+            if (eggBadge) {
+                if (isEgg) {
+                    eggBadge.classList.add('visible');
+                    const badgeLevelText = document.getElementById('eggBadgeLevelText');
+                    if (badgeLevelText) {
+                        badgeLevelText.textContent = `Level ${level} → Hatches at Level 5`;
+                    }
+                } else {
+                    eggBadge.classList.remove('visible');
+                }
+            }
+
+            // ── 2. Skins shop locked overlay ───────────────────────────────────────
+            const skinsOverlay  = document.getElementById('skinsEggLockedOverlay');
+            const skinsWrapper  = document.getElementById('skinsShopWrapper');
+            const skinsProgress = document.getElementById('skinsEggProgressText');
+            if (skinsOverlay) {
+                if (isEgg) {
+                    skinsOverlay.classList.add('visible');
+                    if (skinsWrapper) skinsWrapper.style.display = 'none';
+                    if (skinsProgress) skinsProgress.textContent = `Level ${level} → Level 5 to unlock`;
+                } else {
+                    skinsOverlay.classList.remove('visible');
+                    if (skinsWrapper) skinsWrapper.style.display = '';
+                }
+            }
+
+            // ── 3. Battle mode locked banner (in Settings tab) ─────────────────────
+            const battleBanner = document.getElementById('battleLockedBanner');
+            if (battleBanner) {
+                if (isEgg) {
+                    battleBanner.classList.add('visible');
+                } else {
+                    battleBanner.classList.remove('visible');
+                }
+            }
+
+            // ── 4. Ensure main hero sprite shows egg GIF (guard against skin overrides) ─
+            const mainHeroSprite = document.getElementById('mainHeroSprite');
+            if (isEgg && mainHeroSprite) {
+                const selectedMonster = localStorage.getItem('selectedMonster');
+                if (selectedMonster) {
+                    const eggSrc = `assets/eggs/${selectedMonster}_egg.gif`;
+                    // Only update src if it's not already showing the egg
+                    if (!mainHeroSprite.src.includes('_egg.gif')) {
+                        mainHeroSprite.src = eggSrc;
+                        console.log('[EggModeUI] Restored egg sprite for:', selectedMonster);
+                    }
+                    mainHeroSprite.classList.add('egg-sprite');
+                }
+            }
         }
 
         // Check and update energy based on pending/overdue tasks
@@ -6001,16 +6184,6 @@ input:checked + .toggle-slider:before {
                 }
             }
             
-            // Attack (fixed at 100)
-            const attack = 100;
-            document.getElementById('attackFill').style.width = `${attack}%`;
-            document.getElementById('attackText').textContent = `${attack}/100`;
-            
-            // Defense (fixed at 100)
-            const defense = 100;
-            document.getElementById('defenseFill').style.width = `${defense}%`;
-            document.getElementById('defenseText').textContent = `${defense}/100`;
-            
             // Level text (now handled in unified levelLabel above)
             
             // XP Bar - Simple display (XP resets on level-up)
@@ -6085,15 +6258,11 @@ input:checked + .toggle-slider:before {
             if (experienceEl) experienceEl.textContent = `${Math.floor(currentXP)}/${Math.floor(xpToNext)} XP`;
             if (achievementsEl) achievementsEl.textContent = `${unlockedAchievements}/${achievements.length}`;
             
-            // Update new battle and quest stats
-            const battlesWonEl = document.getElementById('battlesWonDisplay');
-            const battlesLostEl = document.getElementById('battlesLostDisplay');
+            // Update quest stats
             const quizPassedEl = document.getElementById('quizPassedDisplay');
             const quizFailedEl = document.getElementById('quizFailedDisplay');
             const questAcceptanceEl = document.getElementById('questAcceptanceDisplay');
             
-            if (battlesWonEl) battlesWonEl.textContent = gameState.battlesWon || 0;
-            if (battlesLostEl) battlesLostEl.textContent = gameState.battlesLost || 0;
             if (quizPassedEl) quizPassedEl.textContent = gameState.questQuizzesPassed || 0;
             if (quizFailedEl) quizFailedEl.textContent = gameState.questQuizzesFailed || 0;
             if (questAcceptanceEl) {
@@ -6122,6 +6291,9 @@ input:checked + .toggle-slider:before {
             if (typeof window.refreshBackground === 'function') {
                 window.refreshBackground();
             }
+            
+            // Update egg mode UI elements
+            updateEggModeUI();
         }
 
         // ===============================
@@ -6133,43 +6305,43 @@ input:checked + .toggle-slider:before {
         const categoryPhrases = {
             work: [
                 "Let's get that productivity flowing 💼",
-                "Another win for the team, {name}!",
                 "You're bossing this project 💻",
-                "Emails, meetings, and progress—let's go!",
+                "Emails, meetings, and progress — let's go!",
                 "A focused mind is your best tool 🔧",
                 "Work vibes are strong today ⚡",
-                "You're making moves, {name}!",
                 "Great things come from small, consistent effort.",
                 "Keep that workflow rolling!",
-                "Time to show your skills, {name}!"
+                "Every task completed is a win for the team!",
+                "You're showing up and that's everything 💼",
+                "Steady progress beats perfection every time!"
             ],
             learning: [
                 "Knowledge boost incoming 🎓",
                 "Brains loading... complete! 🧠",
-                "Smart move, {name} — every study counts.",
+                "Every study session counts — keep going!",
                 "Curiosity looks good on you 👀",
                 "Each page turns you into a powerhouse 📘",
                 "Let's learn something amazing today!",
                 "You're leveling up your brain XP 📚",
                 "Stay curious, stay sharp ✨",
-                "Knowledge is your weapon today!",
-                "Your focus is unmatched, {name}!"
+                "Knowledge is your superpower today!",
+                "Your focus is absolutely unmatched!"
             ],
             home: [
                 "Home base needs your magic 🏠",
                 "Clean space, clear mind 🧺",
                 "Small chores, big peace ✨",
-                "That's how a champion does it, {name}!",
+                "That's how a champion handles it!",
                 "Order brings calm 🕯️",
                 "Your environment is leveling up 💫",
                 "Tidying today = peaceful tomorrow.",
                 "You're turning home into a haven 💖",
                 "Every task brings comfort closer.",
-                "Smells like progress, {name}!"
+                "Your space is a reflection of your strength!"
             ],
             finance: [
                 "Let's secure that bag 💰",
-                "Smart money move, {name}! 🧮",
+                "Smart money moves today! 🧮",
                 "Every dollar has a mission.",
                 "Budgeting = self-care 💳",
                 "You're building future freedom!",
@@ -6177,23 +6349,23 @@ input:checked + .toggle-slider:before {
                 "That's wealth-builder energy 💎",
                 "Financial XP gained!",
                 "Money discipline unlocks power 💼",
-                "Keep stacking smart wins, {name}!"
+                "Keep stacking those smart wins!"
             ],
             goals: [
                 "Goal mode: activated 🎯",
-                "Another step toward greatness, {name}!",
+                "Another step toward greatness!",
                 "Dreams → Action → Progress 💫",
                 "Focus on the horizon 🌅",
                 "Every tap brings you closer.",
                 "Small goals stack into big wins 🪨",
                 "You're unstoppable when you plan 💪",
-                "Keep aiming true, {name}!",
+                "Keep aiming true and steady!",
                 "Success is compounding 🔁",
-                "Future you is proud already."
+                "Future you is already proud of this."
             ],
             projects: [
                 "Blueprints of success loading 🛠️",
-                "You're building something amazing, {name}!",
+                "You're building something truly amazing!",
                 "Creativity meets focus 🔥",
                 "Every block builds the bigger picture 🧩",
                 "Let's make progress visible today.",
@@ -6201,10 +6373,10 @@ input:checked + .toggle-slider:before {
                 "Keep crafting your vision!",
                 "Project momentum: 100% ⚙️",
                 "The details matter — and you're nailing them.",
-                "You're a maker of great things, {name}!"
+                "You are a maker of great things!"
             ],
             generic: [
-                "Keep going, {name}! ⚡",
+                "Keep going! ⚡",
                 "Every task fuels your growth!",
                 "You're doing great work!",
                 "Another win on your quest! 🗺️",
@@ -6235,8 +6407,7 @@ input:checked + .toggle-slider:before {
                 console.warn('[getRandomPhrase] No phrases available for category:', category);
                 return 'Keep going! ⚡';
             }
-            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
-            return userName ? phrase.replace("{name}", userName) : phrase.replace("{name}", "");
+            return phrases[Math.floor(Math.random() * phrases.length)];
         }
 
         function showCategoryTooltip(category) {
@@ -6264,8 +6435,15 @@ input:checked + .toggle-slider:before {
             userName = value.trim();
         }
 
-        // Fallback: show a generic tooltip every few minutes
-        setInterval(() => showCategoryTooltip('generic'), 180000);
+        // Idle timer: show a personalized tooltip every 3 minutes
+        setInterval(() => {
+            const tooltip = document.getElementById('taskPalTooltip');
+            if (!tooltip) return;
+            const msg = getPersonalizedDialogue ? getPersonalizedDialogue() : getRandomPhrase('generic');
+            tooltip.textContent = msg;
+            tooltip.classList.add('visible');
+            setTimeout(() => tooltip.classList.remove('visible'), 10000);
+        }, 180000);
 
         // ===============================
         // 😊 UPGRADED MOOD TRACKER SYSTEM WITH PERSONALITY VARIATIONS
@@ -6524,6 +6702,251 @@ input:checked + .toggle-slider:before {
             // Mood tracker auto-show removed - will be rebuilt
         });
 
+        // ===============================
+        // 🎯 PERSONALIZED DIALOGUE SYSTEM
+        // Picks messages based on user's dominant mood + top habit category
+        // ===============================
+
+        function getDominantMood() {
+            try {
+                const history = JSON.parse(localStorage.getItem('moodHistory') || '[]');
+                if (!history.length) return null;
+                const counts = {};
+                history.forEach(e => { counts[e.mood] = (counts[e.mood] || 0) + 1; });
+                return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+            } catch (e) { return null; }
+        }
+
+        // Personalized message pools: [dominantMood][topHabitCategory]
+        // Each entry is an array of encouraging messages
+        const personalizedMessages = {
+
+            // ── HAPPY MOOD ──────────────────────────────────────────────────
+            happy: {
+                work: [
+                    "Your good mood + work focus is an unstoppable combo today! 💼",
+                    "You're glowing AND productive — that's the dream! ✨",
+                    "Happy vibes make the best work days. Keep it rolling! 🚀",
+                    "When you're this happy, everything flows. Let's go! 🌟",
+                    "That positive energy is making your work shine 💪"
+                ],
+                learning: [
+                    "Happy minds absorb knowledge like a sponge 🧠✨",
+                    "You're in the best headspace to learn something new today!",
+                    "Joy + curiosity = your superpower combo 🎓",
+                    "This happy energy is perfect for leveling up your skills!",
+                    "Learning feels effortless when you're this bright 💫"
+                ],
+                home: [
+                    "Happy energy makes even chores feel like a win 🏠✨",
+                    "Your good mood is turning the home into a sanctuary today!",
+                    "Joyful tidying hits different — you're crushing it! 💖",
+                    "A happy home starts with a happy you. You've got both! 🌈",
+                    "This good mood is contagious — even your space feels it! ✨"
+                ],
+                finance: [
+                    "Happy and financially focused? That's a winning combo 💰",
+                    "Good vibes + smart money moves = future freedom 💎",
+                    "You're in a great headspace to make powerful financial decisions!",
+                    "That happiness is your secret weapon for wealth-building today! 📊",
+                    "Positive energy and smart budgeting — you're unstoppable! 🚀"
+                ],
+                goals: [
+                    "You're happy AND chasing your goals — nothing can stop you! 🎯",
+                    "This joy is rocket fuel for your biggest dreams 🚀",
+                    "Happy people achieve more. You're proving it right now! ⭐",
+                    "Your smile and your ambition are both shining today 🌟",
+                    "Chase those goals with this energy and watch what happens! 💫"
+                ],
+                projects: [
+                    "Happy and creative — your project is going to be amazing! 🎨",
+                    "This joy is the spark that makes great projects come alive 🔥",
+                    "You're building something wonderful with the best energy today! 🛠️",
+                    "Creative flow + happy mood = pure magic ✨",
+                    "Your project is lucky to have your bright energy today! 💡"
+                ],
+                default: [
+                    "Your happiness is contagious — keep spreading it! 😊",
+                    "That smile is your superpower today ✨",
+                    "Good vibes and great tasks — you're on fire! 🔥",
+                    "Happy and productive is the best version of you! 🌟",
+                    "This energy is everything. Let's make today count! 🚀"
+                ]
+            },
+
+            // ── SAD MOOD ─────────────────────────────────────────────────────
+            sad: {
+                work: [
+                    "Even on tough days, showing up for work is a real win 💼",
+                    "You don't have to feel great to do great things. One step at a time.",
+                    "Working through the hard days makes you stronger than you know 💪",
+                    "I'm proud of you for pushing through today. That takes courage.",
+                    "Heavy days are part of the journey. You're still here — that matters. ❤️"
+                ],
+                learning: [
+                    "Learning something new on a hard day? That's real resilience 📚",
+                    "Even when you're down, your curiosity keeps you growing 🌱",
+                    "Gentle progress is still progress. Be kind to yourself today.",
+                    "You're still showing up to learn — that's quietly incredible. ✨",
+                    "Hard days teach us things easy days never could. You've got this."
+                ],
+                home: [
+                    "Even small home tasks on a hard day are worth celebrating 🏠",
+                    "A cozy, tidy space can be a gentle comfort right now 🕯️",
+                    "You're taking care of your space even when it's hard. That's love.",
+                    "One small task at a time. You don't have to do it all today. ❤️",
+                    "Your home is your safe space — let's make it a little brighter. ✨"
+                ],
+                finance: [
+                    "Taking care of finances even on a tough day? That's self-respect 💳",
+                    "Future you will thank you for showing up today, even when it's hard.",
+                    "Financial care is a form of self-love. You're doing it. 💖",
+                    "One small money win today can lift your spirits. You've got this.",
+                    "Even on hard days, your financial future is worth protecting. 💎"
+                ],
+                goals: [
+                    "Pursuing your goals on a sad day is one of the bravest things you can do. 🎯",
+                    "Your dreams don't disappear when you're sad. Neither do I. ❤️",
+                    "One tiny step toward your goal today is enough. I mean it.",
+                    "Hard days remind us why our goals matter. You're still going. 🌟",
+                    "Even slow progress is progress. Be gentle with yourself today."
+                ],
+                projects: [
+                    "Creating something on a hard day takes real courage 🎨",
+                    "Your project will carry the strength it took to build it today. ❤️",
+                    "Even a small creative act can lift the spirit. You've got this.",
+                    "Making things is healing. Your work matters, especially today. ✨",
+                    "I see you showing up for your project even now. That's beautiful."
+                ],
+                default: [
+                    "It's okay to not be okay. I'm here with you. ❤️",
+                    "Even on hard days, you're still showing up. That's enough.",
+                    "Be gentle with yourself today. Small wins count. ✨",
+                    "You don't have to be at 100% to make progress. Just keep going.",
+                    "I believe in you, even on the days you find it hard to believe in yourself."
+                ]
+            },
+
+            // ── MEH MOOD ─────────────────────────────────────────────────────
+            meh: {
+                work: [
+                    "Not every day is exciting — but you're still showing up for work! 💼",
+                    "Meh days are where consistency is built. You've got this.",
+                    "Even when motivation is low, your work ethic carries you ⚡",
+                    "Neutral energy can still produce great results. Watch! 💪",
+                    "Steady and reliable beats flashy every time. That's you today."
+                ],
+                learning: [
+                    "Even a meh mood can't stop a curious mind 🧠",
+                    "Low-key learning is still learning. Every bit adds up! 📚",
+                    "You're here and you're trying — that's more than enough. ✨",
+                    "Meh days are great for quiet, focused study. You've got this.",
+                    "Progress doesn't need excitement — just consistency. Keep going!"
+                ],
+                home: [
+                    "A meh day is the perfect excuse to make your space a little cozier 🏠",
+                    "Small home wins on a neutral day still count! 🧺",
+                    "Tidying up can actually shift your mood. Give it a try! ✨",
+                    "Even when you're meh, your space deserves some love. 🕯️",
+                    "One small chore at a time. You might surprise yourself!"
+                ],
+                finance: [
+                    "Meh mood, smart money moves — that's discipline! 💰",
+                    "You don't need to feel inspired to make good financial choices.",
+                    "Quiet, consistent financial habits build real wealth. That's you. 💎",
+                    "Even on a meh day, your future self is grateful for this. 📊",
+                    "Steady and sensible is a superpower. Keep it up!"
+                ],
+                goals: [
+                    "Meh days are where real goal-getters separate themselves 🎯",
+                    "You don't need to feel fired up to take the next step. Just take it.",
+                    "Quiet progress is still progress. Your goals are getting closer. 💫",
+                    "Even a neutral day can move you forward. One task at a time. 💪",
+                    "Consistency on meh days is what makes the good days feel earned."
+                ],
+                projects: [
+                    "Even meh energy can produce something great. Start and see! 🎨",
+                    "Low-key creative sessions often produce the best surprises. 💡",
+                    "Your project doesn't need your best mood — just your best effort. 🛠️",
+                    "Meh today, proud tomorrow. Keep building! ⚙️",
+                    "Sometimes the most honest work comes from the quietest days. ✨"
+                ],
+                default: [
+                    "Not every day has to be amazing to be worth it. Keep going! ⚡",
+                    "Meh is just the calm before your next win. 🌟",
+                    "Steady progress on a quiet day is still a win. 💪",
+                    "You showed up today. That's already a victory. ✨",
+                    "Low energy, high character. That's you today. 😊"
+                ]
+            },
+
+            // ── ANGRY MOOD ───────────────────────────────────────────────────
+            angry: [
+                "Channel that fire into your tasks — you'll crush them! 🔥",
+                "That energy is powerful. Let's direct it somewhere amazing! ⚡",
+                "Frustration is just motivation in disguise. Use it! 💪",
+                "Turn that intensity into your biggest win today. 🎯",
+                "I feel the fire in you. Let's make it productive! 🔥",
+                "Angry energy + focused tasks = unstoppable force. Let's go! 🚀",
+                "Let the frustration fuel you. You've got something to prove. ⭐",
+                "Take a breath, then take on the world. You've got this. 💪"
+            ],
+
+            // ── NO MOOD DATA (new user) ──────────────────────────────────────
+            none: [
+                "💪 I'm feeling strong — keep the streak going!",
+                "✨ You're on fire! Let's keep this momentum!",
+                "🚀 Crushing it! Your productivity is amazing!",
+                "🌟 You're unstoppable! Keep up the great work!",
+                "⚡ Energy levels maxed! You're doing fantastic!",
+                "🎯 Focused and fierce! Nothing can stop us now!",
+                "🔥 On a roll! Your dedication is inspiring!",
+                "💎 Shining bright! Your progress is incredible!",
+                "🏆 Champion mode activated! You're crushing your goals!",
+                "🌈 Feeling amazing! Your consistency is paying off!",
+                "⭐ Stellar work! We make an awesome team!",
+                "🎊 Thriving together! Your energy is contagious!",
+                "💫 Radiating success! Keep this energy flowing!",
+                "🦸 Superhero status! You're absolutely crushing it!",
+                "🎨 Creating magic! Your effort is truly inspiring!"
+            ]
+        };
+
+        function getPersonalizedDialogue() {
+            const dominantMood = getDominantMood(); // 'happy' | 'sad' | 'meh' | 'angry' | null
+
+            // If no mood data yet, use default pool
+            if (!dominantMood) {
+                const pool = personalizedMessages.none;
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+
+            // For angry mood, use flat array (no category split)
+            if (dominantMood === 'angry') {
+                const pool = personalizedMessages.angry;
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+
+            // Get top habit category
+            let topCategory = 'default';
+            if (typeof getMostCompletedCategory === 'function') {
+                const result = getMostCompletedCategory();
+                if (result && result.category && result.count > 0) {
+                    topCategory = result.category;
+                }
+            }
+
+            // Get the message pool for this mood + category combination
+            const moodPool = personalizedMessages[dominantMood];
+            if (!moodPool) {
+                const pool = personalizedMessages.none;
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+
+            const pool = moodPool[topCategory] || moodPool['default'] || personalizedMessages.none;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
         // Update Task Pal Tooltip
         function updateTooltip(energy, tasks) {
             const tooltip = document.getElementById("taskPalTooltip");
@@ -6540,25 +6963,8 @@ input:checked + .toggle-slider:before {
             else if (energy <= 25) message = "🥱 I need a boost — finish a task to help me recover!";
             else if (energy < 60) message = "🙂 I'm doing okay, but a few wins would help!";
             else {
-                // Random motivational messages for high energy
-                const highEnergyMessages = [
-                    "💪 I'm feeling strong — keep the streak going!",
-                    "✨ You're on fire! Let's keep this momentum!",
-                    "🚀 Crushing it! Your productivity is amazing!",
-                    "🌟 You're unstoppable! Keep up the great work!",
-                    "⚡ Energy levels maxed! You're doing fantastic!",
-                    "🎯 Focused and fierce! Nothing can stop us now!",
-                    "🔥 On a roll! Your dedication is inspiring!",
-                    "💎 Shining bright! Your progress is incredible!",
-                    "🏆 Champion mode activated! You're crushing your goals!",
-                    "🌈 Feeling amazing! Your consistency is paying off!",
-                    "⭐ Stellar work! We make an awesome team!",
-                    "🎊 Thriving together! Your energy is contagious!",
-                    "💫 Radiating success! Keep this energy flowing!",
-                    "🦸 Superhero status! You're absolutely crushing it!",
-                    "🎨 Creating magic! Your effort is truly inspiring!"
-                ];
-                message = highEnergyMessages[Math.floor(Math.random() * highEnergyMessages.length)];
+                // Personalized messages based on dominant mood and top habit category
+                message = getPersonalizedDialogue();
             }
 
             tooltip.textContent = message;
@@ -6628,19 +7034,19 @@ input:checked + .toggle-slider:before {
         const DIALOGUE_DATABASE = {
             // General phrases by level ranges
             level1to5: [
-                "Hey there! I'm still getting to know you.",
+                "Hey there, [UserName]! I'm still getting to know you.",
                 "Thanks for taking care of me! I'm learning so much.",
                 "You're doing great with those tasks!",
                 "I love watching you work on your goals.",
                 "Keep it up! We make a great team.",
                 "Every task completed makes me stronger!",
-                "I'm so proud of your progress!",
+                "I'm so proud of your progress, [UserName].",
                 "You're building such good habits!",
                 "I feel myself growing with each task you complete.",
                 "Your dedication is inspiring!"
             ],
             level6to10: [
-                "We're really getting into a groove!",
+                "We're really getting into a groove, [UserName]!",
                 "I can feel myself getting stronger every day.",
                 "Your consistency is amazing to watch.",
                 "I love how focused you've become!",
@@ -6652,7 +7058,7 @@ input:checked + .toggle-slider:before {
                 "Together we're unstoppable!"
             ],
             level11to14: [
-                "Look at us go! We're on fire!",
+                "Look at us go! We're on fire, [UserName]!",
                 "I feel so much more alive at this level.",
                 "Your productivity skills are next level now.",
                 "I'm bursting with energy thanks to you!",
@@ -6664,7 +7070,7 @@ input:checked + .toggle-slider:before {
                 "I'm so energized by your success!"
             ],
             level15plus: [
-                "We're legends now! Absolutely legendary!",
+                "We're legends now, [UserName]! Absolutely legendary!",
                 "I feel incredibly powerful at this level!",
                 "Your mastery of productivity is inspiring to witness.",
                 "We've achieved something truly special together.",
@@ -6679,7 +7085,7 @@ input:checked + .toggle-slider:before {
             // Task completion responses by category
             taskComplete: {
                 'Physical Activity': [
-                    "Great workout! I can feel the energy boost!",
+                    "Great workout, [UserName]! I can feel the energy boost!",
                     "Physical activity completed! Your body and I both thank you.",
                     "Nice movement session! Keeping active keeps us both strong.",
                     "Exercise done! I love when you take care of your body.",
@@ -6697,7 +7103,7 @@ input:checked + .toggle-slider:before {
                 ],
                 'Self-Care & Wellness': [
                     "Self-care complete! Taking care of yourself helps me too.",
-                    "Wellness task done! You're absolutely glowing!",
+                    "Wellness task done! You're glowing, [UserName]!",
                     "Great self-care choice! We both feel refreshed now.",
                     "Wellness achieved! Your well-being is my well-being.",
                     "Self-care success! You deserve all this good energy.",
@@ -6774,10 +7180,10 @@ input:checked + .toggle-slider:before {
             // Time-based contextual responses
             timeOfDay: {
                 morning: [
-                    "Good morning! Ready to rock this day?",
+                    "Good morning, [UserName]! Ready to rock this day?",
                     "Morning energy is the best energy! Let's do this!",
                     "Rise and shine! I'm excited for today's adventures.",
-                    "Morning! Your early productivity inspires me.",
+                    "Morning, [UserName]! Your early productivity inspires me.",
                     "Good morning! Starting strong sets the tone for success.",
                     "Early bird gets the worm! Great morning start!",
                     "Morning magic! You're crushing it before noon.",
@@ -6794,7 +7200,7 @@ input:checked + .toggle-slider:before {
                     "Afternoon productivity session! I love your consistency.",
                     "Midday momentum! You're keeping the energy flowing.",
                     "Afternoon tasks are my favorite - steady and focused!",
-                    "Great afternoon work! Keep it rolling.",
+                    "Great afternoon work, [UserName]! Keep it rolling.",
                     "Afternoon achievement unlocked! You're on fire today.",
                     "Midday mastery! You're maintaining great momentum.",
                     "Afternoon excellence! Your consistency is remarkable.",
@@ -6811,7 +7217,7 @@ input:checked + .toggle-slider:before {
                     "Evening tasks! Ending the day productively feels great.",
                     "Night owl productivity! I admire your dedication.",
                     "Evening completion! What a satisfying way to wrap up.",
-                    "Late day tasks done! You're finishing strong!",
+                    "Late day tasks done! You're finishing strong, [UserName].",
                     "Evening success! Perfect way to close out the day.",
                     "Sunset productivity! You're ending on a high note.",
                     "Evening excellence! Your dedication extends all day.",
@@ -6829,7 +7235,7 @@ input:checked + .toggle-slider:before {
             // Equipment responses
             equipment: {
                 equip: {
-                    'Classic Cap': "Looking sharp with that classic cap!",
+                    'Classic Cap': "Looking sharp with that classic cap, [UserName]!",
                     'Beanie': "Cozy beanie! I feel so warm and stylish now.",
                     'Cowboy Hat': "Yeehaw! This cowboy hat makes me feel adventurous!",
                     'Top Hat': "Fancy! This top hat makes me feel distinguished.",
@@ -6889,7 +7295,7 @@ input:checked + .toggle-slider:before {
             
             // Idle conversation starters
             idle: [
-                "How's your day going?",
+                "How's your day going, [UserName]?",
                 "I've been thinking about your goals lately.",
                 "Ready to tackle some more tasks together?",
                 "I love our productive partnership!",
@@ -7016,292 +7422,7 @@ input:checked + .toggle-slider:before {
                 "Rock fact: I've been alive longer than your Wi-Fi connection.",
                 "Sometimes I hum 'We Will Rock You' for motivation.",
                 "If you finish this next task, I'll tell you a geological secret."
-            ],
-
-            // ─── Mood-linked contextual dialogue ──────────────────────────────────
-            // Shown when the user's most-tracked mood matches the key.
-            moods: {
-                happy: [
-                    "You've been feeling happy a lot lately — that energy is contagious!",
-                    "Your good vibes are literally powering me up. Keep smiling!",
-                    "Happiness looks incredible on you. Let's channel it into something great!",
-                    "You're in a great headspace today. Let's make the most of it!",
-                    "That happy streak of yours? I'm here for every second of it.",
-                    "When you're happy, I'm happy. Let's keep this momentum going!",
-                    "Your positive energy is the best fuel. Let's crush some tasks!",
-                    "Good mood detected — optimal conditions for peak productivity!"
-                ],
-                sad: [
-                    "I see you've been feeling down lately. That's okay — I'm right here with you.",
-                    "Even on hard days, showing up is a win. I'm proud of you.",
-                    "You don't have to be okay all the time. But I'll be here when you're ready.",
-                    "One small task at a time. That's all we need to do right now.",
-                    "You're stronger than you know. I've watched you push through before.",
-                    "Cloudy days don't last forever. I'll be here when the sun comes back.",
-                    "It's okay to feel sad. Let's just do one tiny thing together.",
-                    "I care about you, not just your productivity. Take it easy today."
-                ],
-                meh: [
-                    "Feeling a bit 'meh'? Even a small win can flip the whole day around.",
-                    "Neutral mode activated. No pressure — let's just do one thing.",
-                    "'Meh' days are still days. And you're still here. That counts.",
-                    "Not every day has to be amazing. Sometimes 'fine' is perfectly fine.",
-                    "I get it. Some days are just beige. Let's add a little color together.",
-                    "Even on a meh day, you're still making progress just by being here.",
-                    "Low energy? Let's start with the easiest task on the list.",
-                    "Meh is just the warm-up. Let's see what comes next."
-                ],
-                angry: [
-                    "Feeling fired up? Let's channel that energy into crushing a task!",
-                    "That intensity is a superpower — let's aim it at something productive.",
-                    "Anger is just passion looking for a direction. Let's give it one.",
-                    "Take a breath. Then let's tackle something and turn that frustration into fuel.",
-                    "You're allowed to be mad. Let's focus on what we can control.",
-                    "Fierce mode: on. Let's show those tasks who's boss.",
-                    "That fire in you? It's going to make today's tasks regret existing.",
-                    "Use the energy. Don't let it use you. We've got this."
-                ]
-            },
-
-            // ─── Habit-linked contextual dialogue ────────────────────────────────
-            // Shown when the user's most-completed task category matches the key.
-            habits: {
-                work: [
-                    "You're a work task powerhouse! Your professional focus is incredible.",
-                    "Career goals? You're not just chasing them — you're catching them.",
-                    "Another work win in the books. Your dedication is building something real.",
-                    "You show up for your work like a champion. That consistency is rare.",
-                    "Work mode is basically your superpower at this point.",
-                    "Your professional drive is inspiring. Keep stacking those wins!"
-                ],
-                learning: [
-                    "Your love of learning is one of your greatest strengths.",
-                    "Another knowledge drop! Your brain must be enormous by now.",
-                    "You're getting smarter every single day. That's genuinely exciting.",
-                    "Curiosity is your secret weapon, and you wield it beautifully.",
-                    "Every study session is an investment in your future self.",
-                    "Learning tasks are your jam — and honestly? It shows."
-                ],
-                fitness: [
-                    "You're a fitness machine! Every rep makes us both stronger.",
-                    "Look at you, prioritizing your health. That's champion behavior.",
-                    "Your commitment to fitness is seriously impressive. Keep moving!",
-                    "Body and mind in sync — that's the kind of balance that wins.",
-                    "Every workout you log is a vote for the person you're becoming.",
-                    "Physical goals? You're not just meeting them — you're exceeding them."
-                ],
-                wellness: [
-                    "Your focus on wellness is something to be genuinely proud of.",
-                    "Taking care of yourself is the foundation of everything else. Well done.",
-                    "Self-care isn't selfish — it's strategic. And you've mastered it.",
-                    "Your wellness habits are building a stronger, happier you every day.",
-                    "I love that you make time for wellness. It makes a real difference.",
-                    "Glowing from the inside out — that's what consistent self-care looks like."
-                ],
-                home: [
-                    "A tidy space, a tidy mind. You're creating the perfect environment to thrive.",
-                    "Home tasks done! Your space is your sanctuary, and you treat it that way.",
-                    "You take pride in your environment, and it shows. That's a great habit.",
-                    "Every home task completed is a little act of self-respect.",
-                    "Your living space reflects your mindset — and yours is looking great.",
-                    "Nest goals! You're building a space that supports your best self."
-                ],
-                creative: [
-                    "Your creative energy is one of the most exciting things about you.",
-                    "Another creative task done! You're building something beautiful.",
-                    "Creativity is a muscle, and yours is seriously strong.",
-                    "You make things that didn't exist before. That's kind of magical.",
-                    "Your creative streak is inspiring. Never stop making things.",
-                    "Art, ideas, expression — you bring it all to life. Keep going!"
-                ],
-                goals: [
-                    "Goal-getter mode: permanently activated. You never stop pushing.",
-                    "You set goals and you actually hit them. That's rarer than you think.",
-                    "Every goal you complete is proof that you follow through. That matters.",
-                    "Big dreams, consistent action — that's your formula and it works.",
-                    "Your goal-setting game is elite. I'm proud to be on your team.",
-                    "You're not just dreaming about the future — you're building it right now."
-                ],
-                mindfulness: [
-                    "Your mindfulness practice is quietly making everything else better.",
-                    "Pausing to be present is one of the most powerful things you can do.",
-                    "You're building inner calm one session at a time. That's real strength.",
-                    "Mindful and mighty — that's you in a nutshell.",
-                    "Your peace of mind is worth protecting. Keep nurturing it.",
-                    "Stillness is a skill, and you're getting really good at it."
-                ],
-                finance: [
-                    "Your financial discipline is building real security. Keep it up!",
-                    "Money goals? You're tackling them head-on. That takes courage.",
-                    "Every financial task is a step toward the freedom you deserve.",
-                    "You're playing the long game with your finances, and it's paying off.",
-                    "Smart with your money, smart with your time — you're winning on all fronts.",
-                    "Financial wellness is wellness too. And you're nailing it."
-                ],
-                social: [
-                    "You invest in your relationships, and that makes you richer than any task list.",
-                    "Social tasks done! Connection is the real currency of a good life.",
-                    "You show up for the people in your life. That's something special.",
-                    "Your social energy is a gift — to yourself and everyone around you.",
-                    "Relationships take work, and you put in the effort. That's admirable.",
-                    "Community, connection, belonging — you're building all of it."
-                ],
-                personal: [
-                    "Personal growth is the most important kind, and you're all in.",
-                    "You invest in yourself every single day. That compounds over time.",
-                    "Your commitment to becoming a better version of yourself is inspiring.",
-                    "Personal tasks are the ones that matter most — and you never skip them.",
-                    "You're doing the inner work. That's the hardest and most rewarding kind.",
-                    "Every personal goal you hit is a step toward the life you want."
-                ],
-                errands: [
-                    "Errands done! The boring stuff handled means more space for the exciting stuff.",
-                    "You tackle the mundane with the same energy as the big stuff. Respect.",
-                    "Life admin conquered! You're clearing the path for what really matters.",
-                    "Every errand crossed off is one less thing living rent-free in your head.",
-                    "You don't let the small stuff pile up. That's a seriously underrated skill.",
-                    "Boring tasks, brilliant results. You make it look easy."
-                ],
-                digital: [
-                    "Digital tasks done! Your online life is as organized as your real one.",
-                    "Tech-savvy and task-savvy — you're operating on another level.",
-                    "Your digital discipline is keeping everything running smoothly.",
-                    "Inbox zero? Organized files? You're a digital legend.",
-                    "You manage your digital world like a pro. That's a real skill.",
-                    "Online tasks handled! Your virtual space is as sharp as your focus."
-                ],
-                default: [
-                    "You're really building a great habit here. Consistency is everything!",
-                    "I'm so impressed with your dedication to this. Keep it up!",
-                    "Another one in the books! You're creating real momentum.",
-                    "Your consistency is your superpower. Never underestimate it.",
-                    "Habit by habit, you're becoming the person you want to be.",
-                    "Small actions, repeated daily — that's how legends are made."
-                ]
-            },
-
-            // ─── Battle-mode contextual dialogue ─────────────────────────────────
-            // Shown when battle mode is active. Enemy-specific lines fire when
-            // window.battleManager.enemy.name matches the key.
-            battle: {
-                // Generic battle-mode messages (no specific enemy)
-                general: [
-                    "Battle mode is ON! Let's show these distractions who's boss.",
-                    "An enemy approaches! Stay sharp and focused — we've got this.",
-                    "Time to fight for your focus! Every task completed is a hit!",
-                    "Warriors don't quit. Neither do we.",
-                    "The battlefield is set. Your weapon? Pure productivity.",
-                    "Complete tasks to deal damage. Let's make every action count!",
-                    "Enemies fear a focused mind. Let's show them why.",
-                    "Battle stations! Your determination is our greatest weapon."
-                ],
-                // Enemy-specific messages
-                'Lazy Bat': [
-                    "A Lazy Bat! Don't let its sluggish energy rub off on you. Stay active!",
-                    "This bat wants to drain your momentum. Let's send it packing with a finished task!",
-                    "Lazy Bat detected! The best counter-attack is a burst of productivity.",
-                    "Don't let this bat's laziness become contagious. One task at a time!"
-                ],
-                'Energy Vampire Bat': [
-                    "An Energy Vampire Bat! It feeds on procrastination — starve it with action!",
-                    "This creature drains energy from the unfocused. Stay sharp and it can't touch you.",
-                    "Energy Vampire Bat! The antidote is a completed task. Let's go!",
-                    "Don't let it sink its fangs into your focus. Finish something and watch it wither."
-                ],
-                'Land Alien': [
-                    "A Land Alien! It's confused by your world — show it how humans get things done.",
-                    "This alien has never seen focus like yours. Let's give it a demonstration!",
-                    "Land Alien spotted! It came to observe. Let's make it witness something legendary.",
-                    "Alien invader! Your productivity is the one weapon it didn't prepare for."
-                ],
-                'Flying Procrastinator': [
-                    "A Flying Procrastinator! The irony of fighting procrastination by doing tasks is not lost on me.",
-                    "This creature lives off delays. Every task you finish is a direct hit!",
-                    "Flying Procrastinator incoming! The best offense is getting things done — now.",
-                    "Don't let this one talk you into 'doing it later.' Later is now!"
-                ],
-                'Sentry Drone': [
-                    "A Sentry Drone! It's scanning for weakness. Show it there isn't any.",
-                    "This drone is cold, calculated, and relentless. So are you. Let's go.",
-                    "Sentry Drone on patrol! Your focus is the firewall it can't breach.",
-                    "Mechanical and merciless — but no match for your determination."
-                ],
-                'Self Doubt Drone': [
-                    "A Self Doubt Drone! Don't listen to its whispers. You are absolutely capable of this.",
-                    "This drone feeds on uncertainty. Let's starve it with confident, decisive action!",
-                    "Self Doubt Drone! Every task you complete is a direct counter to its signal.",
-                    "It wants you to hesitate. Don't. You've handled harder things than this.",
-                    "The only way to defeat self-doubt is to act anyway. Let's do it together."
-                ],
-                '2Face': [
-                    "2Face! It plays both sides. Stay true to your goals and it has no power over you.",
-                    "This enemy thrives on indecision. Pick a task and commit — that's how we win.",
-                    "2Face is all about confusion. Your clarity is the ultimate weapon here.",
-                    "Don't let it split your focus. One thing at a time, and we'll come out on top."
-                ],
-                'Naughty Nova': [
-                    "Naughty Nova! Chaotic and unpredictable — but so is your determination.",
-                    "This one's full of mischief. Stay grounded and focused; chaos can't touch you.",
-                    "Naughty Nova incoming! Your steady routine is the perfect counter.",
-                    "It thrives on disruption. Your consistency is the shield that blocks it."
-                ],
-                'Slothful Ogre': [
-                    "A Slothful Ogre! Big, slow, and hoping you'll give up. Prove it wrong.",
-                    "This ogre is betting on your inertia. Let's defy every expectation.",
-                    "Slothful Ogre! It moves slow, but it's tough. Chip away with every task.",
-                    "Don't let its sluggish energy become yours. Keep moving, keep completing!"
-                ],
-                'Overthinker': [
-                    "The Overthinker! It wants you spiraling in your own head. Action is the antidote.",
-                    "Stop analyzing, start acting. That's how we beat the Overthinker.",
-                    "This enemy is powered by 'what ifs.' Shut it down with a decisive move.",
-                    "The Overthinker can't survive in a mind that's busy doing things. Let's stay busy.",
-                    "Done is better than perfect. The Overthinker hates that phrase. Use it."
-                ],
-                'Treant': [
-                    "A Treant! Ancient and stubborn — like a bad habit. But habits can be changed.",
-                    "This tree-creature is deeply rooted. Uproot it with consistent effort!",
-                    "Treant incoming! It's slow but powerful. Steady progress will bring it down.",
-                    "Old habits die hard, but they do die. Keep chipping away!"
-                ],
-                'Little Cthulhu': [
-                    "Little Cthulhu! Don't let its cosmic chaos overwhelm you. Focus on one task.",
-                    "This creature wants to make everything feel impossible. It's not. Start small.",
-                    "Little Cthulhu is all about dread. The cure? Action. Always action.",
-                    "Eldritch energy detected! Your calm, focused mind is the one thing it fears."
-                ],
-                'Medusa': [
-                    "Medusa! Don't freeze up — that's exactly what she wants.",
-                    "Keep moving, keep completing tasks. Medusa's power is paralysis. Deny her that.",
-                    "Medusa incoming! Your momentum is the shield that keeps you moving forward.",
-                    "She turns the hesitant to stone. Stay decisive and she's powerless."
-                ],
-                'Slime': [
-                    "A Slime! Sticky and persistent — like procrastination itself.",
-                    "This slime wants to slow you down. The only way through is to push forward!",
-                    "Slime incoming! Messy and annoying, but no match for your focus.",
-                    "Don't get stuck. Keep the tasks flowing and this slime doesn't stand a chance."
-                ],
-                'Ice Bully': [
-                    "Ice Bully! It wants to freeze your progress. Stay warm with consistent action.",
-                    "This bully is cold and intimidating. Your warmth and determination melt it.",
-                    "Ice Bully detected! Don't let it chill your momentum. Keep the fire burning!",
-                    "It thrives in the cold of inaction. Your activity is the heat that beats it."
-                ],
-                'Mushroom Guard': [
-                    "A Mushroom Guard! Stubborn and defensive — but every defense has a weakness.",
-                    "This guard won't move easily. Persistent effort is the key to breaking through.",
-                    "Mushroom Guard on duty! It's tough, but so is your work ethic.",
-                    "Chip away at it task by task. Even the toughest guard falls eventually."
-                ],
-                'Distraction Dragon': [
-                    "The Distraction Dragon! The most dangerous enemy of all — it makes everything else seem more interesting.",
-                    "This dragon breathes shiny distractions. Keep your eyes on the prize!",
-                    "Distraction Dragon incoming! Your focus is the one thing it can't burn.",
-                    "Don't chase the shiny things it breathes. Stay locked in. We've got this.",
-                    "The Distraction Dragon is powerful, but a focused mind is dragonproof."
-                ]
-            }
+            ]
         };
 
         // Dialogue system state
@@ -7411,62 +7532,29 @@ input:checked + .toggle-slider:before {
             return selected;
         }
 
-        // ─── Helper: derive the user's dominant mood from moodHistory ───────────────
-        function getDominantMood() {
-            try {
-                const saved = localStorage.getItem('moodHistory');
-                if (!saved) return null;
-                const history = JSON.parse(saved);
-                if (!Array.isArray(history) || history.length === 0) return null;
-                const counts = {};
-                history.forEach(entry => {
-                    if (entry && entry.mood) counts[entry.mood] = (counts[entry.mood] || 0) + 1;
-                });
-                return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-            } catch (_) { return null; }
-        }
-
-        // ─── Helper: derive the user's most-completed habit category ─────────────
-        function getDominantHabit() {
-            try {
-                if (!window.getMostCompletedCategory) return null;
-                const result = window.getMostCompletedCategory();
-                return (result && result.count > 0) ? result.category : null;
-            } catch (_) { return null; }
-        }
-
-        // ─── Helper: get the name of the current battle enemy ────────────────────
-        function getCurrentEnemyName() {
-            try {
-                if (window.battleModeEnabled && window.battleManager && window.battleManager.enemy) {
-                    return window.battleManager.enemy.name || null;
-                }
-            } catch (_) {}
-            return null;
-        }
-
         function getDialogueForContext(context, data = {}) {
             const level = gameState.level || 1;
             let selectedDialogue = null;
             
             switch (context) {
-                case 'taskComplete': {
+                case 'taskComplete':
                     const category = data.category || 'default';
                     const timeOfDay = getTimeOfDay();
                     const categoryPhrases = DIALOGUE_DATABASE.taskComplete[category] || DIALOGUE_DATABASE.taskComplete.default;
                     const timePhrases = DIALOGUE_DATABASE.timeOfDay[timeOfDay] || [];
+                    
                     // Mix task completion with time-based responses
                     const taskAllPhrases = [...categoryPhrases, ...timePhrases];
                     return getRandomWithoutRepeat(taskAllPhrases);
-                }
-                case 'equipment': {
+                
+                case 'equipment':
                     const action = data.action; // 'equip' or 'unequip'
                     const itemName = data.itemName;
                     selectedDialogue = DIALOGUE_DATABASE.equipment[action][itemName] || `${action === 'equip' ? 'Thanks for the new look!' : 'Back to my natural self!'}`;
                     lastDialogue = selectedDialogue;
                     return selectedDialogue;
-                }
-                case 'levelUp': {
+                
+                case 'levelUp':
                     let levelPhrases;
                     if (level >= 15) {
                         levelPhrases = DIALOGUE_DATABASE.level15plus;
@@ -7478,31 +7566,12 @@ input:checked + .toggle-slider:before {
                         levelPhrases = DIALOGUE_DATABASE.level1to5;
                     }
                     return getRandomWithoutRepeat(levelPhrases);
-                }
+                
                 case 'funFact':
                     return getRandomWithoutRepeat(DIALOGUE_DATABASE.funFacts);
-
-                case 'mood': {
-                    const moodKey = data.mood || getDominantMood();
-                    const moodPhrases = (moodKey && DIALOGUE_DATABASE.moods[moodKey]) || null;
-                    if (moodPhrases) return getRandomWithoutRepeat(moodPhrases);
-                    // Fall through to idle if no mood data
-                    return getDialogueForContext('idle');
-                }
-                case 'habit': {
-                    const habitKey = data.habit || getDominantHabit();
-                    const habitPhrases = (habitKey && DIALOGUE_DATABASE.habits[habitKey])
-                        || DIALOGUE_DATABASE.habits.default;
-                    return getRandomWithoutRepeat(habitPhrases);
-                }
-                case 'battle': {
-                    const enemyName = data.enemyName || getCurrentEnemyName();
-                    const enemyPhrases = (enemyName && DIALOGUE_DATABASE.battle[enemyName])
-                        || DIALOGUE_DATABASE.battle.general;
-                    return getRandomWithoutRepeat(enemyPhrases);
-                }
+                
                 case 'idle':
-                default: {
+                default:
                     // Choose based on level
                     let phrases;
                     if (level >= 15) {
@@ -7514,10 +7583,10 @@ input:checked + .toggle-slider:before {
                     } else {
                         phrases = DIALOGUE_DATABASE.level1to5;
                     }
+                    
                     // Mix with idle phrases
                     const allPhrases = [...phrases, ...DIALOGUE_DATABASE.idle];
                     return getRandomWithoutRepeat(allPhrases);
-                }
             }
         }
 
@@ -7529,40 +7598,28 @@ input:checked + .toggle-slider:before {
         }
 
         // Periodic dialogue system
-        // Context rotation: cycles through mood, habit, battle (if active), idle, and fun facts
-        let _dialogueRotationIndex = 0;
-        function _pickPeriodicContext() {
-            const level = gameState.level || 1;
-            const inBattle = window.battleModeEnabled && window.battleManager && window.battleManager.inBattle;
-            const hasMood  = !!getDominantMood();
-            const hasHabit = !!getDominantHabit();
-
-            // Build a weighted pool of context types based on what data is available
-            const pool = ['idle'];
-            if (hasMood)  pool.push('mood',  'mood');   // 2x weight
-            if (hasHabit) pool.push('habit', 'habit');  // 2x weight
-            if (inBattle) pool.push('battle','battle'); // 2x weight when in battle
-            if (level >= 15) pool.push('funFact');      // bonus for high-level
-
-            // Pick from pool using rotation index to avoid pure randomness
-            _dialogueRotationIndex = (_dialogueRotationIndex + 1) % pool.length;
-            return pool[_dialogueRotationIndex];
-        }
         function startDialogueSystem() {
             setInterval(() => {
                 const now = Date.now();
                 if (now - dialogueState.lastDialogueTime >= dialogueState.dialogueInterval) {
-                    const context  = _pickPeriodicContext();
-                    const dialogue = getDialogueForContext(context);
-
-                    // Show dialogue using tooltip system
-                    const tooltip = document.getElementById('taskPalTooltip');
-                    if (tooltip) {
-                        tooltip.textContent = dialogue;
-                        tooltip.classList.add('visible');
-                        setTimeout(() => tooltip.classList.remove('visible'), 10000);
-                    }
-                    dialogueState.lastDialogueTime = now;
+                    const level = gameState.level || 1;
+                    let dialogue;
+                    
+                    // Level 15+ gets fun facts 30% of the time
+                    if (level >= 15 && Math.random() < 0.3) {
+                        dialogue = getDialogueForContext('funFact');
+                    } else {
+                    dialogue = getDialogueForContext('idle');
+                }
+                
+                // Show dialogue using tooltip system
+                const tooltip = document.getElementById('taskPalTooltip');
+                if (tooltip) {
+                    tooltip.textContent = dialogue;
+                    tooltip.classList.add('visible');
+                    setTimeout(() => tooltip.classList.remove('visible'), 10000);
+                }
+                dialogueState.lastDialogueTime = now;
                 }
             }, 30000); // Check every 30 seconds
         }
@@ -7657,6 +7714,11 @@ input:checked + .toggle-slider:before {
             updateOwnedItemsDisplay();
             updateThemesDisplay();
             updateSettingsDisplay();
+            
+            // Initialize egg mode UI on app load
+            if (typeof updateEggModeUI === 'function') {
+                updateEggModeUI();
+            }
             
             // Initialize habits display
             if (window.updateHabitsDisplay) {
@@ -8167,10 +8229,10 @@ input:checked + .toggle-slider:before {
             
             grid.innerHTML = '';
             
-            // Sort battle items by cost (lowest to highest)
+            // Sort items by cost (lowest to highest)
             const sortedBattleItems = Object.values(battleItems).sort((a, b) => a.cost - b.cost);
             
-            // Render each battle item as a shop card
+            // Render each item as a shop card
             sortedBattleItems.forEach(item => {
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
@@ -8225,8 +8287,6 @@ input:checked + .toggle-slider:before {
             const darkModeToggle = document.getElementById('darkModeToggle');
             const notificationsToggle = document.getElementById('notificationsToggle');
             const soundToggle = document.getElementById('soundToggle');
-            const battleModeToggle = document.getElementById('battleModeToggle');
-            
             if (darkModeToggle) {
                 darkModeToggle.classList.toggle('active', gameState.darkMode);
             }
@@ -8239,9 +8299,6 @@ input:checked + .toggle-slider:before {
                 soundToggle.classList.toggle('active', window.audioManager.soundEnabled);
             }
             
-            if (battleModeToggle) {
-                battleModeToggle.classList.toggle('active', window.battleModeEnabled !== false);
-            }
         }
         
         // Toggle sound effects
@@ -8748,6 +8805,7 @@ input:checked + .toggle-slider:before {
             
             if (gameState.isEgg && selectedMonster) {
                 // Show egg in focus timer
+                const focusTimerEggLabel = document.getElementById('focusTimerEggLabel');
                 if (state === 'active') {
                     const eggPath = `assets/eggs/${selectedMonster}_egg.gif`;
                     console.log('[Focus Timer] Loading egg:', eggPath);
@@ -8767,14 +8825,21 @@ input:checked + .toggle-slider:before {
                     focusTimerMonsterSprite.style.width = '';
                     focusTimerMonsterSprite.style.height = '';
                     focusTimerMonsterSprite.style.transform = '';
+                    // Show egg mode label
+                    if (focusTimerEggLabel) focusTimerEggLabel.style.display = 'block';
                 } else {
                     focusTimerMonsterContainer.style.display = 'none';
                     if (spriteWrapper) {
                         spriteWrapper.classList.remove('egg-sprite-wrapper');
                     }
+                    // Hide egg mode label
+                    if (focusTimerEggLabel) focusTimerEggLabel.style.display = 'none';
                 }
                 return; // Exit early for eggs
             }
+            // Ensure egg label is hidden for non-egg monsters
+            const focusTimerEggLabel = document.getElementById('focusTimerEggLabel');
+            if (focusTimerEggLabel) focusTimerEggLabel.style.display = 'none';
             
             // Remove egg-sprite class if not an egg
             focusTimerMonsterSprite.classList.remove('egg-sprite');
@@ -9384,6 +9449,11 @@ input:checked + .toggle-slider:before {
             if (window.skinsManager) {
                 window.skinsManager.renderSkinsShop();
             }
+            
+            // Ensure egg mode overlay is in sync when skins tab is opened
+            if (typeof updateEggModeUI === 'function') {
+                updateEggModeUI();
+            }
         }
         
         // Update themes display
@@ -9642,13 +9712,13 @@ input:checked + .toggle-slider:before {
             alert('✅ Theme equipped!');
         }
 
-        // Battle items definition (synced with battle system)
+        // Shop items definition (potions only)
         const battleItems = {
             health_potion: {
                 id: 'health_potion',
                 name: 'Health Potion',
                 emoji: '🧪',
-                description: 'Instantly restores 20 HP in battle',
+                description: 'Instantly restores 20 HP to your monster',
                 cost: 20,
                 effect: 'heal',
                 value: 20,
@@ -9658,12 +9728,14 @@ input:checked + .toggle-slider:before {
                 id: 'hyper_potion',
                 name: 'Hyper Potion',
                 emoji: '❤️‍🩹',
-                description: 'Instantly restores 50 HP in battle',
+                description: 'Instantly restores 50 HP',
                 cost: 40,
                 effect: 'heal',
                 value: 50,
                 levelRequired: 1
-            },
+            }
+        };
+        const _unusedBattleItems = {
             defense_refill: {
                 id: 'defense_refill',
                 name: 'Shield',
@@ -9809,12 +9881,12 @@ input:checked + .toggle-slider:before {
                 name: 'Throwing Stars',
                 image: 'assets/items/throwing_star_icon.png',
                 projectileImage: 'assets/projectiles/ThrowingStarProjectile.gif',
-                description: 'Rotating projectile dealing 50-80 damage (Max: 12)',
+                description: 'Rotating projectile dealing 15-25 damage (Max: 12)',
                 cost: 150,
                 effect: 'throwing_star_attack',
-                value: 80,
-                minDamage: 50,
-                maxDamage: 80,
+                value: 25,
+                minDamage: 15,
+                maxDamage: 25,
                 levelRequired: 1,
                 maxQuantity: 12
             },
@@ -9840,7 +9912,7 @@ input:checked + .toggle-slider:before {
                 levelRequired: 1,
                 maxQuantity: 8
             },
-             wizards_wand: {
+            wizards_wand: {
                 id: 'wizards_wand',
                 name: "Wizard's Wand",
                 emoji: '🪄',
@@ -9851,18 +9923,9 @@ input:checked + .toggle-slider:before {
                 healValue: 100,
                 levelRequired: 1,
                 maxQuantity: 5
-            },
-            special_defense: {
-                id: 'special_defense',
-                name: 'Special Defense',
-                emoji: '📖',
-                description: 'Blocks ANY enemy special attack for 1 use. 📖 appears over your monster when activated! (Max: 5)',
-                cost: 350,
-                effect: 'special_defense',
-                levelRequired: 30,
-                maxQuantity: 5
             }
-        };
+        }; // end _unusedBattleItems
+
         // Update shop items display
         function updateShopDisplay() {
             const grid = document.getElementById('shopItemsGrid');
@@ -9883,10 +9946,10 @@ input:checked + .toggle-slider:before {
             
             grid.innerHTML = '';
             
-            // Sort battle items by cost (lowest to highest)
+            // Sort items by cost (lowest to highest)
             const sortedBattleItems = Object.values(battleItems).sort((a, b) => a.cost - b.cost);
             
-            // Render each battle item as a shop card
+            // Render each item as a shop card
             sortedBattleItems.forEach(item => {
                 const currentQuantity = gameState.battleInventory[item.id] || 0;
                 const isLocked = item.levelRequired && gameState.jerryLevel < item.levelRequired;
@@ -9964,7 +10027,7 @@ input:checked + .toggle-slider:before {
             });
         }
 
-        // Update owned items display (synced with battleInventory) - matches shop styling
+        // Update owned items display (synced with inventory) - matches shop styling
         function updateOwnedItemsDisplay() {
             const grid = document.getElementById('ownedItemsGrid');
             const countBadge = document.getElementById('ownedItemCount');
@@ -9988,7 +10051,7 @@ input:checked + .toggle-slider:before {
                 countBadge.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
             }
             
-            // Render each owned battle item using same style as shop
+            // Render each owned item using same style as shop
             Object.keys(gameState.battleInventory).forEach(itemId => {
                 const count = gameState.battleInventory[itemId];
                 if (count > 0) {
@@ -10023,7 +10086,7 @@ input:checked + .toggle-slider:before {
                 grid.innerHTML = `
                     <div style="text-align: center; padding: 40px 20px; color: #999;">
                         <p style="font-size: 16px;">🎒 No items yet!</p>
-                        <p style="font-size: 14px; margin-top: 12px;">Buy items from the Shop tab to use in battles.</p>
+                        <p style="font-size: 14px; margin-top: 12px;">Buy potions from the Shop tab to restore HP.</p>
                     </div>
                 `;
             }
@@ -10065,13 +10128,13 @@ input:checked + .toggle-slider:before {
             // Deduct XP (ensure it doesn't go negative)
             gameState.jerryXP = Math.max(0, (gameState.jerryXP || 0) - item.cost);
             
-            // Add item to battle inventory
+            // Add item to inventory
             if (!gameState.battleInventory[itemId]) {
                 gameState.battleInventory[itemId] = 0;
             }
             gameState.battleInventory[itemId]++;
             
-            // Track that this item has been unlocked (for battle button visibility)
+            // Track that this item has been unlocked (for inventory tracking)
             if (!gameState.unlockedBattleItems) {
                 gameState.unlockedBattleItems = [];
             }
@@ -10090,7 +10153,7 @@ input:checked + .toggle-slider:before {
             alert(`✅ ${item.name} purchased!${remaining} Check the Owned tab to use it.`);
         }
 
-        // Use item from shop (opens battle or uses immediately)
+        // Use item from inventory (potions only)
         function useItemFromShop(itemId) {
             const item = battleItems[itemId];
             if (!item || !gameState.battleInventory[itemId] || gameState.battleInventory[itemId] <= 0) {
@@ -10100,7 +10163,7 @@ input:checked + .toggle-slider:before {
             
             // Handle healing items (can be used outside of battle)
             if (item.effect === 'heal') {
-                // Calculate maxHP based on level (same formula as battleInit.js and updateUI)
+                // Calculate maxHP based on level (same formula as updateUI)
                 const level = gameState.jerryLevel || 1;
                 const baseHP = 100;
                 const hpPerLevel = 10;
@@ -10182,14 +10245,8 @@ input:checked + .toggle-slider:before {
                 return;
             }
             
-            // Handle battle items (attack, defense, etc.)
-            if (item.effect === 'attack' || item.effect === 'defense' || item.effect === 'attack_gauge') {
-                alert(`🎮 ${item.name} is ready!\n\nThis item will be automatically available in your next battle.\n\nComplete a task to trigger a battle and use it!`);
-                return;
-            }
-            
             // Default message for other items
-            alert(`🎮 ${item.name} will be available in your next battle!`);
+            alert(`ℹ️ ${item.name} has no effect in this mode.`);
         }
 
         // Modal functions
@@ -10706,15 +10763,9 @@ input:checked + .toggle-slider:before {
                 }
                 
             // Schedule notifications for the new/updated task
-            if (task.dueDate && window.gameState && window.gameState.notifications) {
+            if (window.notificationManager && task.dueDate) {
                 const taskIndex = editingTaskIndex !== null ? editingTaskIndex : gameState.tasks.length - 1;
-                if (window.notificationManager) {
-                    window.notificationManager.scheduleTaskNotifications(task, taskIndex);
-                }
-                // Reset polling-manager sent-records so the new due date is picked up
-                if (window.taskNotificationsManager) {
-                    window.taskNotificationsManager.cleanupTaskNotifications(task.id || taskIndex);
-                }
+                window.notificationManager.scheduleTaskNotifications(task, taskIndex);
             }
             
             saveGameState();
@@ -10742,11 +10793,6 @@ input:checked + .toggle-slider:before {
             if (window.notificationManager) {
                 window.notificationManager.clearTaskNotifications(index);
             }
-            if (window.taskNotificationsManager && gameState.tasks[index]) {
-                window.taskNotificationsManager.cleanupTaskNotifications(
-                    gameState.tasks[index].id || index
-                );
-            }
             
             // Store old level for level up detection
             const oldLevel = gameState.level;
@@ -10772,8 +10818,8 @@ input:checked + .toggle-slider:before {
             gameState.completedTasks++;
             
             // Check for egg re-hatching (when HP reaches 50)
-            // CRITICAL: Only apply to reverted eggs (level 10+), NOT new eggs (level 1-9)
-            if (gameState.isEgg && gameState.jerryLevel >= 10 && oldHealth < 50 && gameState.health >= 50) {
+            // CRITICAL: Only apply to reverted eggs (level 5+), NOT new eggs (level 1-4)
+            if (gameState.isEgg && gameState.jerryLevel >= 5 && oldHealth < 50 && gameState.health >= 50) {
                 gameState.isEgg = false;
                 console.log('[Re-hatching] Egg hatched after reaching 50 HP!');
                 
@@ -10830,16 +10876,14 @@ input:checked + .toggle-slider:before {
                         window.fireConfetti();
                     }
                 }, 500);
+                
+                // Update egg mode UI elements immediately on re-hatch
+                if (typeof updateEggModeUI === 'function') {
+                    updateEggModeUI();
+                }
             }
             
-            // Refill battle gauges when completing tasks
-            if (window.battleManager) {
-                // Refill 20 points to attack gauge (max 100)
-                window.battleManager.attackGauge = Math.min(100, window.battleManager.attackGauge + 20);
-                // Refill 15 points to defense gauge (max 100)
-                window.battleManager.defenseGauge = Math.min(100, window.battleManager.defenseGauge + 15);
-                console.log(`⚔️ Battle gauges refilled! Attack: ${window.battleManager.attackGauge}/100, Defense: ${window.battleManager.defenseGauge}/100`);
-            }
+
             
             // Add XP (with boost if active)
             // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio, rounded up)
@@ -10942,26 +10986,12 @@ input:checked + .toggle-slider:before {
                 }
             }
             
-            // Trigger battle with 50% probability for regular tasks
+            // Trigger quest giver after task completion
             setTimeout(() => {
-                let battleTriggered = false;
-                if (typeof window.maybeTriggerBattle === 'function') {
-                    battleTriggered = window.maybeTriggerBattle('regularTask', { taskId: task.id });
-                } else {
-                    console.warn('Battle trigger system not loaded yet');
+                if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
+                    window.triggerMerlinQuestFromTaskCompletion();
                 }
-                
-                // Only trigger quest giver if battle did NOT start
-                if (!battleTriggered) {
-                    setTimeout(() => {
-                        if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
-                            window.triggerMerlinQuestFromTaskCompletion();
-                        } else {
-                            console.warn('Quest giver trigger system not loaded yet');
-                        }
-                    }, 3000); // Wait 3 seconds after no battle
-                }
-            }, 2000); // Wait 2 seconds after confetti
+            }, 2000);
             
             // Show dialogue after a brief delay using tooltip system
             setTimeout(() => {
@@ -11027,16 +11057,11 @@ input:checked + .toggle-slider:before {
             openCreateTaskModal();
         }
 
-            function deleteTask(index) {
+        function deleteTask(index) {
             if (confirm('Are you sure you want to delete this task?')) {
                 // Clear notifications for this task
                 if (window.notificationManager) {
                     window.notificationManager.clearTaskNotifications(index);
-                }
-                if (window.taskNotificationsManager && gameState.tasks[index]) {
-                    window.taskNotificationsManager.cleanupTaskNotifications(
-                        gameState.tasks[index].id || index
-                    );
                 }
                 
                 gameState.tasks.splice(index, 1);
@@ -11727,11 +11752,6 @@ input:checked + .toggle-slider:before {
             if (window.notificationManager) {
                 window.notificationManager.clearTaskNotifications(index);
             }
-            if (window.taskNotificationsManager && gameState.tasks[index]) {
-                window.taskNotificationsManager.cleanupTaskNotifications(
-                    gameState.tasks[index].id || index
-                );
-            }
             
             // Calculate points based on difficulty
             const pointsMap = { easy: 2, medium: 5, hard: 10 };
@@ -11861,11 +11881,6 @@ input:checked + .toggle-slider:before {
             if (window.notificationManager) {
                 window.notificationManager.clearTaskNotifications(index);
             }
-            if (window.taskNotificationsManager && gameState.tasks[index]) {
-                window.taskNotificationsManager.cleanupTaskNotifications(
-                    gameState.tasks[index].id || index
-                );
-            }
             
             // Store old level for level up detection
             const oldLevel = gameState.level;
@@ -11890,12 +11905,7 @@ input:checked + .toggle-slider:before {
             gameState.health = Math.min(100, gameState.health + 10);
             gameState.completedTasks++;
             
-            // Refill battle gauges
-            if (window.battleManager) {
-                window.battleManager.attackGauge = Math.min(100, window.battleManager.attackGauge + 20);
-                window.battleManager.defenseGauge = Math.min(100, window.battleManager.defenseGauge + 15);
-                console.log(`⚔️ Battle gauges refilled! Attack: ${window.battleManager.attackGauge}/100, Defense: ${window.battleManager.defenseGauge}/100`);
-            }
+
             
             // Add XP
             let xpToAdd = Math.ceil(basePoints * 0.8);
@@ -12024,8 +12034,8 @@ input:checked + .toggle-slider:before {
             gameState.completedTasks++;
             
             // Check for egg re-hatching (when HP reaches 50)
-            // CRITICAL: Only apply to reverted eggs (level 10+), NOT new eggs (level 1-9)
-            if (gameState.isEgg && gameState.jerryLevel >= 10 && oldHealth < 50 && gameState.health >= 50) {
+            // CRITICAL: Only apply to reverted eggs (level 5+), NOT new eggs (level 1-4)
+            if (gameState.isEgg && gameState.jerryLevel >= 5 && oldHealth < 50 && gameState.health >= 50) {
                 gameState.isEgg = false;
                 console.log('[Re-hatching] Egg hatched after reaching 50 HP!');
                 
@@ -12082,16 +12092,14 @@ input:checked + .toggle-slider:before {
                         window.fireConfetti();
                     }
                 }, 500);
+                
+                // Update egg mode UI elements immediately on re-hatch
+                if (typeof updateEggModeUI === 'function') {
+                    updateEggModeUI();
+                }
             }
             
-            // Refill battle gauges when completing tasks
-            if (window.battleManager) {
-                // Refill 20 points to attack gauge (max 100)
-                window.battleManager.attackGauge = Math.min(100, window.battleManager.attackGauge + 20);
-                // Refill 15 points to defense gauge (max 100)
-                window.battleManager.defenseGauge = Math.min(100, window.battleManager.defenseGauge + 15);
-                console.log(`⚔️ Battle gauges refilled! Attack: ${window.battleManager.attackGauge}/100, Defense: ${window.battleManager.defenseGauge}/100`);
-            }
+
             
             // Add XP (with boost if active)
             // Base conversion: 10 XP points = 8 XP Coins (0.8 ratio, rounded up)
@@ -12168,26 +12176,12 @@ input:checked + .toggle-slider:before {
                 console.warn('Confetti function not available');
             }
             
-            // Trigger battle with 20% probability for quick tasks
+            // Trigger quest giver after quick task completion
             setTimeout(() => {
-                let battleTriggered = false;
-                if (typeof window.maybeTriggerBattle === 'function') {
-                    battleTriggered = window.maybeTriggerBattle('quickTask', { taskId: taskId });
-                } else {
-                    console.warn('Battle trigger system not loaded yet');
+                if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
+                    window.triggerMerlinQuestFromTaskCompletion();
                 }
-                
-                // Only trigger quest giver if battle did NOT start
-                if (!battleTriggered) {
-                    setTimeout(() => {
-                        if (typeof window.triggerMerlinQuestFromTaskCompletion === 'function') {
-                            window.triggerMerlinQuestFromTaskCompletion();
-                        } else {
-                            console.warn('Quest giver trigger system not loaded yet');
-                        }
-                    }, 3000); // Wait 3 seconds after no battle
-                }
-            }, 2000); // Wait 2 seconds after confetti
+            }, 2000);
         }
 
         function removeQuickTask(taskId) {
@@ -12242,23 +12236,11 @@ input:checked + .toggle-slider:before {
             gameState.jerryXP += xp;
             gameState.jerryCurrentXP = (gameState.jerryCurrentXP || 0) + xp;
             
-            // Snapshot level BEFORE any level-up so post-battle map can animate movement
-            const _levelBeforeXP = gameState.jerryLevel || 1;
-            
             // Check for level ups
             let leveledUp = false;
             while (gameState.jerryCurrentXP >= gameState.jerryXPToNext) {
                 levelUpJerry();
                 leveledUp = true;
-            }
-            
-            // Record level-up state so battleManager endBattle can read it
-            if (leveledUp) {
-                gameState.justLeveledUp = true;
-                gameState.previousLevel = _levelBeforeXP;
-            } else {
-                gameState.justLeveledUp = false;
-                gameState.previousLevel = null;
             }
             
             // Refresh shop display to update affordability
@@ -12292,19 +12274,16 @@ input:checked + .toggle-slider:before {
             
             console.log(`📊 Level up! HP fully restored to ${newMaxHP} (Level ${gameState.jerryLevel})`);
             
-            // Check if egg should hatch at Level 10
-            if (gameState.jerryLevel === 10 && gameState.isEgg) {
+            // Check if egg should hatch at Level 5
+            if (gameState.jerryLevel === 5 && gameState.isEgg) {
                 gameState.isEgg = false;
-                console.log('[Hatching] Monster hatched at Level 10!');
+                console.log('[Hatching] Monster hatched at Level 5!');
                 
-                // CRITICAL: Enable battle mode when egg hatches
-                window.battleModeEnabled = true;
-                localStorage.setItem('battleModeEnabled', 'true');
-                console.log('[Hatching] Battle Mode ENABLED!');
+                // Battle mode is disabled in this version
                 
                 // Play victory sound for hatching celebration
-                if (window.audioManager && window.audioManager.playBattleWinMusic) {
-                    window.audioManager.playBattleWinMusic();
+                if (window.audioManager && window.audioManager.playSound) {
+                    window.audioManager.playSound('levelUp', 0.8);
                     console.log('[Hatching] Playing victory sound!');
                 }
                 
@@ -12364,6 +12343,12 @@ input:checked + .toggle-slider:before {
                     heroSprite.style.maxHeight = '';
                     heroSprite.style.transform = 'scale(2)';
                 }
+                
+                // Update egg mode UI elements immediately on hatch
+                // (updateUI() will also call this, but we call it here for instant feedback)
+                if (typeof updateEggModeUI === 'function') {
+                    updateEggModeUI();
+                }
             } else {
                 // Show rainbow gradient level-up banner for all level ups
                 showRainbowLevelUpBanner(gameState.jerryLevel);
@@ -12414,64 +12399,59 @@ input:checked + .toggle-slider:before {
         }
 
         async function toggleNotifications() {
-            gameState.notifications = !gameState.notifications;
-            
-            if (gameState.notifications) {
+            const enabling = !gameState.notifications;
+
+            if (enabling) {
                 // Request permission when enabling
-                let granted = false;
                 if (window.notificationManager) {
-                    granted = await window.notificationManager.requestPermission();
-                } else if ('Notification' in window) {
-                    const perm = await Notification.requestPermission();
-                    granted = (perm === 'granted');
-                }
-
-                if (!granted) {
-                    gameState.notifications = false;
-                    showSuccessMessage('Notification permission denied. Please enable notifications in your browser/device settings.');
-                    saveGameState();
-                    updateSettingsDisplay();
-                    return;
-                }
-
-                // Reschedule all setTimeout-based notifications
-                if (window.notificationManager) {
+                    const granted = await window.notificationManager.requestPermission();
+                    if (!granted) {
+                        gameState.notifications = false;
+                        // Give the user helpful guidance depending on browser
+                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                        let msg = 'Notification permission denied.';
+                        if (isIOS || isSafari) {
+                            msg += ' On iOS: Add to Home Screen first, then enable in Settings > Notifications.';
+                        } else {
+                            msg += ' Click the lock icon in your browser address bar to enable notifications.';
+                        }
+                        showSuccessMessage(msg);
+                        saveGameState();
+                        updateSettingsDisplay();
+                        return;
+                    }
+                    gameState.notifications = true;
+                    // Reschedule all existing tasks
                     window.notificationManager.rescheduleAllNotifications();
-                }
-
-                // Start the polling safety-net loop
-                if (window.taskNotificationsManager) {
-                    window.taskNotificationsManager.loadSentNotifications();
-                    window.taskNotificationsManager.startBackgroundCheck();
+                    // Also kick the polling layer
+                    if (window.taskNotificationsManager) {
+                        window.taskNotificationsManager.startBackgroundCheck();
+                    }
+                    showSuccessMessage('\u2705 Notifications enabled! You\'ll get reminders at 20, 15, 10, 5 & 2 min before tasks are due.');
+                } else {
+                    gameState.notifications = true;
+                    showSuccessMessage('\u2705 Notifications enabled!');
                 }
             } else {
                 // Clear all notifications when disabling
+                gameState.notifications = false;
                 if (window.notificationManager) {
                     window.notificationManager.clearAllNotifications();
                 }
-                // Stop the polling loop and clear its records
                 if (window.taskNotificationsManager) {
                     window.taskNotificationsManager.stopBackgroundCheck();
                     window.taskNotificationsManager.clearAllNotifications();
                 }
+                showSuccessMessage('\uD83D\uDD15 Notifications disabled.');
             }
-            
+
             saveGameState();
             updateSettingsDisplay();
-            showSuccessMessage(`Notifications ${gameState.notifications ? 'enabled' : 'disabled'}!`);
         }
 
         function toggleBattleMode() {
-            // Prevent enabling battle mode for eggs or players below Level 10
-            if ((gameState.isEgg || gameState.jerryLevel < 10) && !window.battleModeEnabled) {
-                showSuccessMessage('🔒 Battle Mode Locked', 'Reach Level 10 to unlock battles!');
-                return;
-            }
-            
-            window.battleModeEnabled = !window.battleModeEnabled;
-            localStorage.setItem('battleModeEnabled', window.battleModeEnabled);
-            updateSettingsDisplay();
-            showSuccessMessage(`Battle Mode ${window.battleModeEnabled ? 'enabled' : 'disabled'}!`);
+            // Battle mode is disabled in this version
         }
 
         async function shareEtsyStore() {
@@ -12528,15 +12508,6 @@ input:checked + .toggle-slider:before {
 
         // Tab navigation function
         function showTab(tabName) {
-            // CRITICAL FIX: Stop all battle music when navigating away from battle
-            if (window.audioManager && window.battleManager) {
-                // If battle is not active, stop all battle-related music
-                if (!window.battleManager.inBattle) {
-                    window.audioManager.stopAllBattleMusic();
-                    window.audioManager.stopBattleOutcomeMusic();
-                    console.log('[Tab Navigation] Battle music stopped');
-                }
-            }
             
             // CRITICAL FIX: Auto-pause focus timer when navigating away from home tab
             if (tabName !== 'home' && typeof focusActive !== 'undefined' && focusActive && !focusPaused) {
@@ -12716,7 +12687,7 @@ input:checked + .toggle-slider:before {
                         font-size: 16px;
                         color: rgba(255, 255, 255, 0.7);
                         margin: 0 0 24px 0;
-                    ">Level ${level} • Ready for Battle!</p>
+                    ">Level ${level} • Keep it up!</p>
                     
                     <div style="
                         background: rgba(124, 58, 237, 0.2);
@@ -12730,7 +12701,7 @@ input:checked + .toggle-slider:before {
                             color: rgba(255, 255, 255, 0.8);
                             margin: 0;
                             line-height: 1.5;
-                        ">⚔️ <strong>Battle Mode Unlocked!</strong><br>Complete tasks to trigger epic battles!</p>
+                        ">Keep completing tasks to grow stronger!</p>
                     </div>
                     
                     <button id="hatchingContinueBtn" style="
@@ -12790,10 +12761,6 @@ input:checked + .toggle-slider:before {
                 continueBtn.style.boxShadow = '0 4px 15px rgba(124, 58, 237, 0.4)';
             });
             continueBtn.addEventListener('click', () => {
-                // Stop victory music when closing modal
-                if (window.audioManager && window.audioManager.stopBattleOutcomeMusic) {
-                    window.audioManager.stopBattleOutcomeMusic();
-                }
                 modalOverlay.style.animation = 'fadeIn 0.3s ease reverse';
                 setTimeout(() => modalOverlay.remove(), 300);
             });
@@ -12962,24 +12929,9 @@ input:checked + .toggle-slider:before {
                     document.documentElement.setAttribute('data-theme', 'dark');
                 }
                 
-                // Initialize Battle Mode preference
-                // Battle Mode is DISABLED until Level 10 (when egg hatches)
-                const storedBattleMode = localStorage.getItem('battleModeEnabled');
-                const playerLevel = gameState.jerryLevel || 1;
-                const isEgg = gameState.isEgg === true;
-                
-                if (playerLevel < 10 || isEgg) {
-                    // Force OFF for players below Level 10 or with eggs
-                    window.battleModeEnabled = false;
-                    localStorage.setItem('battleModeEnabled', 'false');
-                    console.log('🔒 Battle Mode disabled - player below Level 10 or has egg');
-                } else if (storedBattleMode === null) {
-                    // Default ON for Level 10+ players without stored preference
-                    window.battleModeEnabled = true;
-                    localStorage.setItem('battleModeEnabled', 'true');
-                } else {
-                    window.battleModeEnabled = storedBattleMode === 'true';
-                }
+                // Battle Mode is permanently disabled in this version
+                window.battleModeEnabled = false;
+                localStorage.setItem('battleModeEnabled', 'false');
 
                 // Initialize audio manager
                 if (window.audioManager) {
@@ -13014,15 +12966,13 @@ input:checked + .toggle-slider:before {
                 
                 // Reschedule notifications for all tasks on app load
                 if (gameState.notifications) {
-                    setTimeout(() => {
-                        // Re-sync permission state (no prompt)
+                    setTimeout(async () => {
                         if (window.notificationManager) {
-                            window.notificationManager._syncPermissionState();
-                            if (window.notificationManager.permissionGranted) {
+                            const granted = await window.notificationManager.requestPermission();
+                            if (granted) {
                                 window.notificationManager.rescheduleAllNotifications();
                             }
                         }
-                        // Start the polling safety-net loop
                         if (window.taskNotificationsManager) {
                             window.taskNotificationsManager.startBackgroundCheck();
                         }
@@ -13168,26 +13118,12 @@ input:checked + .toggle-slider:before {
     <script src="js/skinsConfig.js?v=3"></script>
     <script src="js/skinsManager.js?v=3"></script>
     
-    <!-- Battle System Modules -->
-    <!-- New Battle System (v2) -->
-    <script src="js/battleEffects.js?v=1768715883"></script>
-    <script src="js/battleEngine.js?v=1768715883"></script>
-    <script src="js/battleSystemInit.js?v=1768715883"></script>
-    <script src="js/battleUI.js?v=1768715883"></script>
-    <script src="js/enemy-animations.js?v=1768715883"></script>
-    <script src="js/battleHPAnimations.js?v=1768715883"></script>
-    <script src="js/specialAttacks.js?v=1768715883"></script>
-    <script src="js/enemy.js?v=1768715883"></script>
-    <script src="js/lootSystem.js"></script>
-    <script src="js/battleManager.js?v=1768715883"></script>
-    <script src="js/buff-animations.js"></script>
-    <script src="js/battleTutorial.js?v=1768715883"></script>
-    <script src="js/boss-enemies.js?v=1768715883"></script>
-    <script src="js/battleInit.js?v=1768715883"></script>
-    <script src="js/guardianNarrator.js"></script>
-    <script src="js/guardian.js"></script>
+    <!-- Battle System Modules - ALL DISABLED (no battle mode in this version) -->
+    <!-- battleEffects.js, battleEngine.js, battleSystemInit.js, battleUI.js,
+         enemy-animations.js, battleHPAnimations.js, specialAttacks.js, enemy.js,
+         lootSystem.js, battleManager.js, buff-animations.js, battleTutorial.js,
+         boss-enemies.js, battleInit.js, guardianNarrator.js, guardian.js - all removed -->
     
-    <!-- Removed missing script: js/battleInit.js -->
     <script src="js/questTaskManager.js"></script>
     <script src="js/questGiver.js?v=7"></script>
 
@@ -13197,8 +13133,6 @@ input:checked + .toggle-slider:before {
     <script src="js/questGiverOnboarding.js"></script>
     <script src="js/moodFilter.js"></script>
     <script src="js/merlinModal.js"></script>
-    <!-- Notification system: firebase-config must load before notificationManager and task-notifications -->
-    <script src="js/firebase-config.js"></script>
     <script src="js/notificationManager.js"></script>
     <script src="js/task-notifications.js"></script>
     <script src="js/achievementTracker.js"></script>
@@ -13216,43 +13150,6 @@ input:checked + .toggle-slider:before {
     
     <!-- Mood Tracker - Standalone System -->
     <script src="js/moodTracker.js?v=1768748859"></script>
-
-    <!-- Service Worker Registration for PWA background notifications -->
-    <script>
-    (function() {
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js?v=3')
-                    .then(function(reg) {
-                        console.log('[SW] Registered v3, scope:', reg.scope);
-                        // Force the new SW to activate immediately
-                        if (reg.waiting) { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }
-                        reg.addEventListener('updatefound', function() {
-                            var newSW = reg.installing;
-                            if (newSW) {
-                                newSW.addEventListener('statechange', function() {
-                                    if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-                                        newSW.postMessage({ type: 'SKIP_WAITING' });
-                                    }
-                                });
-                            }
-                        });
-                        // Once the SW is controlling the page, sync tasks to it
-                        navigator.serviceWorker.ready.then(function() {
-                            setTimeout(function() {
-                                if (window.notificationManager) {
-                                    window.notificationManager.syncTasksToSW();
-                                }
-                            }, 2500);
-                        });
-                    })
-                    .catch(function(err) {
-                        console.warn('[SW] Registration failed (non-fatal):', err);
-                    });
-            });
-        }
-    })();
-    </script>
     
     <!-- Hide loading screen after page loads -->
     <script>
@@ -13464,14 +13361,17 @@ input:checked + .toggle-slider:before {
         console.log('[Onboarding] Saved to localStorage - selectedMonster:', selectedMonster);
         
         // Initialize new player at Level 1 with egg state
-        gameState.jerryLevel = 1;
-        gameState.jerryCurrentXP = 0;
-        gameState.jerryXPToNext = Math.floor(100 * Math.pow(1.2, 0)); // XP needed for level 2
-        gameState.jerryXP = 0;
-        gameState.xpCoins = 0;
-
-        // New players start as an egg (hatches at level 10)
-        gameState.isEgg = true;
+       : Comment out level reset to preserve level 10 start
+        // if (!gameState.level) {
+        //     gameState.level = 1;
+        //     gameState.jerryLevel = 1;
+        //     gameState.jerryCurrentXP = 0;
+        //     gameState.jerryTotalXP = 0;
+        // }
+        
+        // New players start with egg (hatches at level 5)
+       : Keep egg hatched at level 10
+        gameState.isEgg = true; // Start as egg
         gameState.consecutiveLosses = 0;
         gameState.eggRevertedAt = null;
         
@@ -13644,6 +13544,14 @@ input:checked + .toggle-slider:before {
     });
 })();
 
+    </script>
+
+    <!-- Service Worker is registered by notificationManager.js to avoid duplicate registration -->
+    <script>
+        // Ensure SW is registered early so it can take control before DOMContentLoaded
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function() {});
+        }
     </script>
 
 </body>

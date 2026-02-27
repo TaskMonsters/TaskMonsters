@@ -10,7 +10,7 @@ class GuardianOfTaskWorld {
     init() {
         if (this.initialized) return;
         this.initialized = true;
-        console.log('[Guardian] Guardian of Task World initialized');
+
     }
 
     // Get contextual message based on battle result and player progress
@@ -148,7 +148,6 @@ class GuardianOfTaskWorld {
             }
         }, duration);
 
-        console.log('[Guardian] Message shown:', message);
     }
 
     // Show Guardian message after battle victory
@@ -221,5 +220,3 @@ document.addEventListener('battleVictory', (event) => {
         }, 3000);
     }
 });
-
-console.log('[Guardian] Guardian of Task World system loaded');

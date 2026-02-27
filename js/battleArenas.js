@@ -214,8 +214,7 @@ class BattleArenasManager {
         if (arenaNameElement) {
             arenaNameElement.textContent = arena.name;
         }
-        
-        console.log(`[ArenaManager] Arena set: ${arena.name} (${arena.background})`);
+
     }
     
     /**

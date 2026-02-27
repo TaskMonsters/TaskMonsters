@@ -13,8 +13,7 @@ class GuardianNarrative {
             { name: 'Frozen Mountain Pass', minLevel: 27, maxLevel: 39 },
             { name: 'Dark Castle', minLevel: 40, maxLevel: 50 }
         ];
-        
-        console.log('[Guardian] Guardian Narrative System initialized');
+
     }
     
     /**
@@ -173,7 +172,7 @@ class GuardianNarrative {
      * Show Guardian message on map page
      */
     showMapMessage(message, duration = 5000) {
-        console.log('[Guardian] Showing map message (disabled):', message);
+
         // DISABLED: User requested removal of this modal
         return;
         
@@ -290,9 +289,7 @@ window.guardianNarrative = new GuardianNarrative();
 document.addEventListener('battleVictory', (event) => {
     const { level, enemy, isFirstBattle, justLeveledUp, previousLevel } = event.detail;
     const petName = window.gameState?.petName || '';
-    
-    console.log('[Guardian] Battle victory event received:', event.detail);
-    
+
     // Get contextual message
     const message = window.guardianNarrative.getMapMessage({
         level,
@@ -306,5 +303,3 @@ document.addEventListener('battleVictory', (event) => {
     // Show message on map page (triggered after loot modal closes)
     window.guardianNarrative.showMapMessage(message);
 });
-
-console.log('[Guardian] Guardian Narrative System loaded');
