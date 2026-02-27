@@ -22,6 +22,12 @@ class BattleManager {
         this.battleLog = [];
         this.hasEvade = false;
         this.hasReflect = false;
+        this.hasSpecialDefense = false;
+        // Gauntlet fields
+        this._gauntletOnComplete      = null;
+        this._gauntletWave            = 0;
+        this._gauntletIsBoss          = false;
+        this._gauntletBossSlayerActive = false; // Special Defense item: blocks next enemy special attack
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
         this.reflectTurns = 0;  // Luna's reflect effect turns remaining
         this.reflectActive = false;  // Luna's reflect effect active flag
@@ -31,6 +37,8 @@ class BattleManager {
         this.burnDamage = 0;          // Nova special: burn damage per turn
         this.deflectActive = false;   // Luna special: deflect next enemy attack
         this.defenseImmune = 0;       // Benny special: defense immunity turns remaining
+        this.enemyAttackDebuffTurns = 0; // Benny special: enemy attack reduction turns remaining
+        this.enemyAttackDebuffMult  = 1; // Benny special: enemy attack damage multiplier (0.5 = -50%)
         this.overthinkBackfire = false; // Overthinker: next hero attack backfires
         this.focusAttackUsed = false;  // Track if focus timer special attack has been used this battle
         
@@ -42,7 +50,7 @@ class BattleManager {
     }
 
     // Initialize battle with hero and enemy
-    async startBattle(heroData, enemyData) {
+    async startBattle(heroData, enemyData, options = {}) {
         // CRITICAL: Prevent battle from starting if quest giver is active
         if (window.questGiver && window.questGiver.activeQuest) {
             console.log('[Battle] Quest giver is active, battle will not start');
@@ -86,6 +94,16 @@ class BattleManager {
         this.state = BattleState.INITIALIZING;
         this.hero = heroData;
         this.enemy = enemyData;
+        // Gauntlet options
+        this._gauntletOnComplete = options.onComplete || null;
+        this._gauntletWave       = options.gauntletWave || 0;
+        this._gauntletIsBoss     = options.isBossWave   || false;
+        // Apply boss_slayer effect (3× player damage) if flagged
+        if (enemyData && enemyData._gauntletBossSlayer) {
+            this._gauntletBossSlayerActive = true;
+        } else {
+            this._gauntletBossSlayerActive = false;
+        }
         this.attackGauge = 100;  // Start with full attack gauge
         this.defenseGauge = 100; // Start with full defense gauge
         this.battleLog = [];
@@ -145,7 +163,10 @@ class BattleManager {
         this.burnTurns = 0;           // Nova special: reset burn DoT
         this.burnDamage = 0;
         this.deflectActive = false;   // Luna special: reset deflect
+        this.hasSpecialDefense = false; // Special Defense item: reset on new battle
         this.defenseImmune = 0;       // Benny special: reset defense immunity
+        this.enemyAttackDebuffTurns = 0; // Benny special: reset enemy attack debuff
+        this.enemyAttackDebuffMult  = 1; // Benny special: reset enemy attack multiplier
         this.overthinkBackfire = false; // Overthinker: reset backfire flag
         this._morphTurnsLeft = 0;      // Morph defense boost turns remaining
         this._morphRestoreCallback = null;
@@ -336,7 +357,19 @@ class BattleManager {
 
     // Helper: Apply damage to hero with animation
     applyHeroDamage(damage) {
-        this.hero.hp = Math.max(0, this.hero.hp - damage);
+        const hpAfter = this.hero.hp - damage;
+        // Gauntlet shield_rune: survive a killing blow at 1 HP (once per run)
+        if (hpAfter <= 0 && this._gauntletWave > 0) {
+            const inv = window.gameState && window.gameState.battleInventory;
+            if (inv && (inv.shield_rune || 0) > 0) {
+                inv.shield_rune--;
+                this.hero.hp = 1;
+                if (typeof addBattleLog === 'function') addBattleLog('🛡 Shield Rune activated! You survived with 1 HP!');
+                if (typeof updateBattleUI === 'function') updateBattleUI(this.hero, this.enemy);
+                return;
+            }
+        }
+        this.hero.hp = Math.max(0, hpAfter);
         if (window.showBattleDamageAnimation) {
             window.showBattleDamageAnimation('heroSprite', damage);
         }
@@ -534,10 +567,14 @@ class BattleManager {
         }
         
         // Calculate damage using base attack (level-based) with randomization
-        // Damage range: baseDamage to baseDamage + 10 (e.g., Level 10: 15-25 damage)
+        // Damage range: 50-80 damage
         const baseDamage = this.hero.attack;
         const maxDamage = baseDamage + 10;
-        const randomDamage = Math.floor(Math.random() * (maxDamage - baseDamage + 1)) + baseDamage;
+        let randomDamage = Math.floor(Math.random() * (maxDamage - baseDamage + 1)) + baseDamage;
+        // Gauntlet: boss_slayer triples player damage on boss waves
+        if (this._gauntletBossSlayerActive && this._gauntletIsBoss) {
+            randomDamage = Math.round(randomDamage * 3);
+        }
         
         // Enemy defense reduces damage slightly
         const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
@@ -1466,17 +1503,79 @@ class BattleManager {
             await window.showMirrorAttackAnimation('heroSprite');
         }
         
-        addBattleLog('🪞 Mirror Attack activated! Enemy\'s next attack will be reflected!');
+         addBattleLog('🪞 Mirror Attack activated! Enemy\'s next attack will be reflected!');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
-
         // Save game state
         saveGameState();
-
         await new Promise(resolve => setTimeout(resolve, 1000));
         await this.enemyTurn();
     }
+    // Player uses Special Defense (blocks any enemy special attack)
+    async playerSpecialDefense() {
+        if (this.state !== BattleState.PLAYER_TURN) return;
 
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+        const sdCount = gameState.battleInventory?.special_defense || 0;
+        if (sdCount <= 0) {
+            addBattleLog('❌ No Special Defense items left!');
+            return;
+        }
+        this.state = BattleState.ANIMATING;
+        gameState.battleInventory.special_defense = Math.max(0, gameState.battleInventory.special_defense - 1);
+        this.hasSpecialDefense = true;
+
+        // Play shield sound
+        if (window.audioManager) {
+            window.audioManager.playSound('cloak_use', 0.8);
+        }
+
+        // Show 📖 emoji floating over the hero sprite
+        const heroSprite = document.getElementById('heroSprite');
+        if (heroSprite) {
+            const bookEmoji = document.createElement('div');
+            bookEmoji.textContent = '📖';
+            bookEmoji.style.cssText = [
+                'position:absolute',
+                'font-size:2.5rem',
+                'top:-50px',
+                'left:50%',
+                'transform:translateX(-50%)',
+                'pointer-events:none',
+                'z-index:9999',
+                'animation:specialDefenseFloat 1.6s ease-out forwards'
+            ].join(';');
+            // Inject keyframe if not already present
+            if (!document.getElementById('sdFloatStyle')) {
+                const style = document.createElement('style');
+                style.id = 'sdFloatStyle';
+                style.textContent = `@keyframes specialDefenseFloat {
+                    0%   { opacity:1; transform:translateX(-50%) translateY(0); }
+                    60%  { opacity:1; transform:translateX(-50%) translateY(-30px); }
+                    100% { opacity:0; transform:translateX(-50%) translateY(-50px); }
+                }`;
+                document.head.appendChild(style);
+            }
+            const heroRect = heroSprite.getBoundingClientRect();
+            const parentRect = heroSprite.offsetParent ? heroSprite.offsetParent.getBoundingClientRect() : heroRect;
+            bookEmoji.style.top = (heroSprite.offsetTop - 50) + 'px';
+            bookEmoji.style.left = (heroSprite.offsetLeft + heroSprite.offsetWidth / 2) + 'px';
+            bookEmoji.style.transform = 'translateX(-50%)';
+            heroSprite.offsetParent
+                ? heroSprite.offsetParent.appendChild(bookEmoji)
+                : document.body.appendChild(bookEmoji);
+            setTimeout(() => bookEmoji.remove(), 1700);
+        }
+
+        addBattleLog('📖 Special Defense activated! The next enemy special attack will be completely blocked!');
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+        saveGameState();
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        await this.enemyTurn();
+    }
     // Player uses Blue Flame
     async playerBlueFlame() {
         if (this.state !== BattleState.PLAYER_TURN) return;
@@ -1696,6 +1795,15 @@ class BattleManager {
                 addBattleLog('🛡️ Defense immunity expired!');
             }
         }
+
+        // === BENNY SPECIAL: Enemy Attack Debuff — tick down each enemy turn ===
+        if (this.enemyAttackDebuffTurns > 0) {
+            this.enemyAttackDebuffTurns--;
+            if (this.enemyAttackDebuffTurns <= 0) {
+                this.enemyAttackDebuffMult = 1;
+                addBattleLog('💚 Benny’s attack debuff expired! Enemy attack restored.');
+            }
+        }
         
         // === ADAPTIVE HEALING AI ===
         if (window.enemyAI && this.enemy.hp < this.enemy.maxHP) {
@@ -1741,6 +1849,70 @@ class BattleManager {
                 }
                 return;
             }
+        }
+
+        // === SPECIAL DEFENSE ITEM: Block any enemy special attack ===
+        // Determine if the enemy is about to use a special ability this turn
+        const _enemyWillUseSpecial = (
+            (this.enemy.canPetrify && Math.random() < (this.enemy.petrifyChance || 0.3)) ||
+            (this.enemy.canSleep && Math.random() < 0.3) ||
+            (this.enemy.canStun && Math.random() < (this.enemy.stunChance || 0.30)) ||
+            (this.enemy.canDaze && Math.random() < (this.enemy.dazeChance || 0.25)) ||
+            (this.enemy.canPoison && !this.poisonTurns && Math.random() < 0.35) ||
+            (this.enemy.canAbsorb && Math.random() < 0.30) ||
+            (this.enemy.canBerserk && Math.random() < 0.25) ||
+            (this.enemy.canPickpocket && Math.random() < 0.30) ||
+            (this.enemy.canMorph && Math.random() < 0.25) ||
+            (this.enemy.canCharm && Math.random() < 0.25) ||
+            (this.enemy.canOverthink && Math.random() < 0.35) ||
+            (this.enemy.canTeleport && Math.random() < 0.30) ||
+            (this.enemy.isBoss && (this.enemy.poisonAttack || this.enemy.drainAttackGauge || this.enemy.mushroomAttack))
+        );
+        if (this.hasSpecialDefense && _enemyWillUseSpecial) {
+            this.hasSpecialDefense = false;
+            // Show the 📖 emoji over the hero sprite as a block animation
+            const heroSpriteSD = document.getElementById('heroSprite');
+            if (heroSpriteSD) {
+                const bookBlock = document.createElement('div');
+                bookBlock.textContent = '📖';
+                bookBlock.style.cssText = [
+                    'position:absolute',
+                    'font-size:3rem',
+                    'pointer-events:none',
+                    'z-index:9999',
+                    'animation:specialDefenseFloat 1.6s ease-out forwards'
+                ].join(';');
+                if (!document.getElementById('sdFloatStyle')) {
+                    const sdStyle = document.createElement('style');
+                    sdStyle.id = 'sdFloatStyle';
+                    sdStyle.textContent = `@keyframes specialDefenseFloat {
+                        0%   { opacity:1; transform:translateX(-50%) translateY(0); }
+                        60%  { opacity:1; transform:translateX(-50%) translateY(-30px); }
+                        100% { opacity:0; transform:translateX(-50%) translateY(-50px); }
+                    }`;
+                    document.head.appendChild(sdStyle);
+                }
+                bookBlock.style.top = (heroSpriteSD.offsetTop - 50) + 'px';
+                bookBlock.style.left = (heroSpriteSD.offsetLeft + heroSpriteSD.offsetWidth / 2) + 'px';
+                bookBlock.style.transform = 'translateX(-50%)';
+                heroSpriteSD.offsetParent
+                    ? heroSpriteSD.offsetParent.appendChild(bookBlock)
+                    : document.body.appendChild(bookBlock);
+                setTimeout(() => bookBlock.remove(), 1700);
+            }
+            addBattleLog(`📖 Special Defense blocked ${this.enemy.name}'s special attack! The attack was completely negated!`);
+            updateBattleUI(this.hero, this.enemy);
+            updateActionButtons(this.hero);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Skip to basic attack instead
+            // (fall through to basic attack section below by jumping past all specials)
+            this.state = BattleState.PLAYER_TURN;
+            if (typeof startTurnTimer === 'function') {
+                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
+                startTurnTimer(timerDuration);
+                this.turnTimerReduced = false;
+            }
+            return;
         }
 
         // Check if enemy can petrify (Medusa)
@@ -1859,9 +2031,12 @@ class BattleManager {
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const poisonDmg = this.enemy.poisonDamage || 8;
             const poisonDur = this.enemy.poisonDuration || 3;
-            const baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+            let baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
                 ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
                 : Math.max(3, Math.floor(this.enemy.attack * 0.5));
+            if (this.enemyAttackDebuffTurns > 0 && this.enemyAttackDebuffMult < 1) {
+                baseDamage = Math.max(1, Math.floor(baseDamage * this.enemyAttackDebuffMult));
+            }
             this.applyHeroDamage(baseDamage);
             this.poisonTurns = poisonDur;
             this.poisonDamage = poisonDmg;
@@ -1913,9 +2088,12 @@ class BattleManager {
             let totalDamage = 0;
             for (let i = 0; i < berserkHits; i++) {
                 await playEnemyAnimation(this.enemy, 'attack1', 300);
-                const hitDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                let hitDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
                     ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
                     : Math.max(3, Math.floor(this.enemy.attack * 0.6));
+                if (this.enemyAttackDebuffTurns > 0 && this.enemyAttackDebuffMult < 1) {
+                    hitDamage = Math.max(1, Math.floor(hitDamage * this.enemyAttackDebuffMult));
+                }
                 const reducedHit = Math.floor(hitDamage * 0.5); // Each berserk hit is 50% damage
                 this.applyHeroDamage(reducedHit);
                 totalDamage += reducedHit;
@@ -1940,9 +2118,12 @@ class BattleManager {
         if (this.enemy.canPickpocket && Math.random() < 0.30) {
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const pickpocketCount = this.enemy.pickpocketCount || 2;
-            const baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+            let baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
                 ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
                 : Math.max(3, Math.floor(this.enemy.attack * 0.7));
+            if (this.enemyAttackDebuffTurns > 0 && this.enemyAttackDebuffMult < 1) {
+                baseDamage = Math.max(1, Math.floor(baseDamage * this.enemyAttackDebuffMult));
+            }
             this.applyHeroDamage(baseDamage);
             // Steal actual battle items from inventory
             const battleItemKeys = [
@@ -2164,9 +2345,12 @@ class BattleManager {
                 await playEnemyAnimation(this.enemy, 'attack1', 600);
                 
                 // Use correct damage range
-                const damage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                let damage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
                     ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
                     : Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                if (this.enemyAttackDebuffTurns > 0 && this.enemyAttackDebuffMult < 1) {
+                    damage = Math.max(1, Math.floor(damage * this.enemyAttackDebuffMult));
+                }
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
                 
                 // Apply poison effect for 2 turns
@@ -2254,9 +2438,12 @@ class BattleManager {
                 await playMushroomProjectile(enemySprite, heroSprite);
                 
                 // Use correct damage range
-                const damage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
+                let damage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
                     ? Math.floor(Math.random() * (this.enemy.attackDamageMax - this.enemy.attackDamageMin + 1)) + this.enemy.attackDamageMin
                     : Math.max(3, Math.floor(this.enemy.attack - this.hero.defense / 2));
+                if (this.enemyAttackDebuffTurns > 0 && this.enemyAttackDebuffMult < 1) {
+                    damage = Math.max(1, Math.floor(damage * this.enemyAttackDebuffMult));
+                }
                 this.hero.hp = Math.max(0, this.hero.hp - damage);
                 
                 // Apply mushroom effect for 2 turns
@@ -2527,6 +2714,13 @@ class BattleManager {
         if (this.enemy.maxDamage) {
             damage = Math.min(damage, this.enemy.maxDamage);
         }
+
+        // === BENNY SPECIAL: Enemy Attack Debuff — reduce damage by debuff multiplier ===
+        if (this.enemyAttackDebuffTurns > 0 && this.enemyAttackDebuffMult < 1) {
+            const reducedDamage = Math.max(1, Math.floor(damage * this.enemyAttackDebuffMult));
+            addBattleLog(`💚 Benny’s debuff weakened ${this.enemy.name}’s attack! ${damage} → ${reducedDamage} damage (${Math.round((1 - this.enemyAttackDebuffMult) * 100)}% reduced, ${this.enemyAttackDebuffTurns} turn${this.enemyAttackDebuffTurns === 1 ? '' : 's'} left)`);
+            damage = reducedDamage;
+        }
         
         // === LUNA SPECIAL: Deflect — reflect attack back at enemy ===
         if (this.deflectActive) {
@@ -2702,25 +2896,52 @@ class BattleManager {
                 }
                 
                 console.log(`[Battle] Showing loot modal with XP: ${xpGained}`);
-                
-                // Show loot modal
+
+                // --- LEVEL-UP MAP FLOW ---
+                // addJerryXP (called above) sets gameState.justLeveledUp and gameState.previousLevel.
+                // We store the world-map context NOW so that when the loot modal's OK button is
+                // pressed, closeLootModal() can immediately show the map with the walk animation.
+                const _didLevelUp   = window.gameState?.justLeveledUp  || false;
+                const _prevLevel    = window.gameState?.previousLevel   || null;
+                const _currentLevel = window.gameState?.jerryLevel      || 1;
+                const _petName      = window.gameState?.rockName        || 'Your Monster';
+
+                // Always queue the world-map context; justLeveledUp controls whether the
+                // walk animation plays inside taskWorldMap.show().
+                window._pendingWorldMapContext = {
+                    level:          _currentLevel,
+                    previousLevel:  _didLevelUp ? _prevLevel : null,
+                    petName:        _petName,
+                    isFirstBattle:  (window.gameState?.battlesWon === 1),
+                    enemyName:      this.enemy.name,
+                    justLeveledUp:  _didLevelUp
+                };
+
+                console.log(`[Battle] World-map context queued: level=${_currentLevel}, justLeveledUp=${_didLevelUp}, previousLevel=${_prevLevel}`);
+
+                // Show loot modal — when user taps OK, closeLootModal() will show the map
                 window.lootSystem.showLootModal(lootDrops, xpGained, this.enemy.name);
-                
-                // Dispatch Guardian event after loot modal (Guardian appears on map page)
-                // The loot modal should handle showing the map page after it closes
+
+                // Dispatch Guardian event (Guardian reads justLeveledUp from the context)
                 setTimeout(() => {
                     const guardianEvent = new CustomEvent('battleVictory', {
                         detail: {
-                            level: window.gameState.jerryLevel || 1,
-                            enemy: this.enemy.name,
-                            isFirstBattle: (window.gameState.battlesWon === 1),
-                            justLeveledUp: window.gameState.justLeveledUp || false,
-                            previousLevel: window.gameState.previousLevel || null
+                            level:          _currentLevel,
+                            enemy:          this.enemy.name,
+                            isFirstBattle:  (window.gameState?.battlesWon === 1),
+                            justLeveledUp:  _didLevelUp,
+                            previousLevel:  _didLevelUp ? _prevLevel : null
                         }
                     });
                     document.dispatchEvent(guardianEvent);
                     console.log('[Guardian] Battle victory event dispatched');
                 }, 100);
+
+                // Clear the level-up flags so they don't bleed into the next battle
+                if (window.gameState) {
+                    window.gameState.justLeveledUp = false;
+                    window.gameState.previousLevel = null;
+                }
             } else {
                 // Fallback to alert if loot system not loaded
                 alert(`🎉 Victory!\n\nYou defeated the ${this.enemy.name}!\n\n✨ +${xpGained} XP earned!\n\nGreat job, keep it up! 💪`);
@@ -2814,6 +3035,13 @@ class BattleManager {
         this.inBattle = false;
         console.log('[Battle] Battle ended, inBattle flag set to false');
         
+        // Gauntlet: fire onComplete callback so GauntletManager can advance the wave
+        if (this._gauntletOnComplete) {
+            const _cb = this._gauntletOnComplete;
+            this._gauntletOnComplete = null;
+            // Small delay so the victory/defeat UI is visible briefly
+            setTimeout(() => _cb(result), 800);
+        }
         // Fade out after 2 seconds
         setTimeout(() => {
             document.getElementById('battleLog').innerHTML = '';
@@ -3129,8 +3357,8 @@ class BattleManager {
             window.audioManager.playSound('spark_attack', 0.7);
         }
 
-        // Calculate damage (15-25 range)
-        const damage = Math.floor(Math.random() * 11) + 15;
+        // Calculate damage (50-80 range)
+        const damage = Math.floor(Math.random() * 31) + 50;
         const isDead = this.enemy.takeDamage(damage);
         
         // Play enemy hurt animation
@@ -3274,7 +3502,8 @@ class BattleManager {
             window.audioManager.playSound('prickler_attack', 0.8);
         }
 
-        const damage = 100;
+        // Calculate damage (60-90 range)
+        const damage = Math.floor(Math.random() * 31) + 60;
         const isDead = this.enemy.takeDamage(damage);
         
         // Play enemy hurt animation
@@ -3351,11 +3580,14 @@ class BattleManager {
         // Heal player
         const healAmount = 100;
         this.hero.hp = Math.min(this.hero.maxHP, this.hero.hp + healAmount);
+
+        // Drain the player's full attack gauge to 0 as the cost of this powerful magic
+        this.attackGauge = 0;
         
         // Play enemy hurt animation
         await playEnemyAnimation(this.enemy, 'hurt', 300);
         
-        addBattleLog(`🪄 Wizard's Wand dealt ${damage} damage and healed ${healAmount} HP!`);
+        addBattleLog(`🪄 Wizard's Wand dealt ${damage} damage and healed ${healAmount} HP! (Attack gauge drained!)`);
         updateBattleUI(this.hero, this.enemy);
 
         // Reset hero sprite to idle

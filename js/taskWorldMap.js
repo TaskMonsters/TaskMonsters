@@ -173,10 +173,38 @@ class TaskWorldMap {
         const monsterSprite = this.createMonsterSprite(position, petName);
         mapContainer.appendChild(monsterSprite);
         
-        // If just leveled up, animate from previous position
+        // If just leveled up, show a "LEVEL UP!" banner and animate the walk to new position
         if (justLeveledUp && previousLevel) {
             const previousPosition = this.getPositionForLevel(previousLevel);
-            this.animateMonsterMovement(monsterSprite, previousPosition, position);
+
+            // "LEVEL UP!" banner above the map
+            const levelUpBanner = document.createElement('div');
+            levelUpBanner.textContent = `⭐ LEVEL UP! ⭐  Level ${level}`;
+            levelUpBanner.style.cssText = `
+                color: #fbbf24;
+                font-size: 28px;
+                font-weight: 900;
+                text-shadow: 0 0 16px rgba(251,191,36,0.8), 0 2px 4px rgba(0,0,0,0.6);
+                letter-spacing: 2px;
+                margin-bottom: 12px;
+                animation: levelUpPulse 0.6s ease-in-out infinite alternate;
+            `;
+            // Insert banner just before the map container
+            container.insertBefore(levelUpBanner, mapContainer);
+
+            // Inject the keyframe if not already present
+            if (!document.getElementById('levelUpPulseStyle')) {
+                const s = document.createElement('style');
+                s.id = 'levelUpPulseStyle';
+                s.textContent = '@keyframes levelUpPulse { from { transform: scale(1); } to { transform: scale(1.06); } }';
+                document.head.appendChild(s);
+            }
+
+            // Animate the walk — pass continueButton so it's locked during the walk
+            this.animateMonsterMovement(monsterSprite, previousPosition, position, continueButton);
+
+            // Dim the Continue button visually while locked
+            continueButton.style.opacity = '0.5';
         }
         
         container.appendChild(mapContainer);
@@ -317,17 +345,44 @@ class TaskWorldMap {
     /**
      * Animate monster movement from previous position to new position
      */
-    animateMonsterMovement(sprite, fromPosition, toPosition) {
-        // Start at previous position
+    /**
+     * Animate monster walking from previousLevel position to currentLevel position.
+     * @param {HTMLElement} sprite  - The monster img element
+     * @param {Object} fromPosition - { x, y } percentages
+     * @param {Object} toPosition   - { x, y } percentages
+     * @param {HTMLElement} [continueBtn] - Optional button to disable during walk and re-enable after
+     */
+    animateMonsterMovement(sprite, fromPosition, toPosition, continueBtn) {
+        // Disable the Continue button so the user watches the walk
+        if (continueBtn) continueBtn.disabled = true;
+
+        // Remove the idle bounce so it doesn't fight the translate transition
+        sprite.style.animation = 'none';
+
+        // Snap to the starting (old) position immediately
+        sprite.style.transition = 'none';
         sprite.style.left = `${fromPosition.x}%`;
-        sprite.style.top = `${fromPosition.y}%`;
-        sprite.style.transition = 'left 1.5s ease-in-out, top 1.5s ease-in-out';
-        
-        // Animate to new position after a brief delay
-        setTimeout(() => {
-            sprite.style.left = `${toPosition.x}%`;
-            sprite.style.top = `${toPosition.y}%`;
-        }, 500);
+        sprite.style.top  = `${fromPosition.y}%`;
+
+        // One rAF to ensure the snap is painted before we start the transition
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                // Smooth walk to new position over 2 s
+                sprite.style.transition = 'left 2s ease-in-out, top 2s ease-in-out';
+                sprite.style.left = `${toPosition.x}%`;
+                sprite.style.top  = `${toPosition.y}%`;
+
+                // After the walk finishes, restore bounce and re-enable button
+                setTimeout(() => {
+                    sprite.style.transition = 'none';
+                    sprite.style.animation  = 'monsterBounce 1.5s ease-in-out infinite';
+                    if (continueBtn) {
+                        continueBtn.disabled = false;
+                        continueBtn.style.opacity = '1';
+                    }
+                }, 2200); // slightly longer than the 2 s transition
+            });
+        });
     }
     
     /**

@@ -473,49 +473,108 @@ const ENEMY_TYPES = [
     DISTRACTION_DRAGON_DATA
 ];
 
-// Enemy rotation system - 7-level tier rotation
-let currentEnemyRotationIndex = 0;
-let lastLevelTier = 0;
+// =====================================================================
+// SMART ENEMY SELECTION SYSTEM
+// Rules:
+//   1. Alternate between "current-level" enemies and "lower-level" enemies.
+//      - Current-level pool: enemies whose minLevel is within 5 levels of playerLevel.
+//      - Lower-level pool:   enemies whose minLevel is at least 6 levels below playerLevel.
+//   2. No enemy may appear more than 2 consecutive times in a row.
+// =====================================================================
 
-function getNextEnemyFromRotation(availableEnemies, playerLevel) {
-    if (!availableEnemies || availableEnemies.length === 0) return null;
-    
-    // Calculate current level tier (changes every 7 levels)
-    const currentLevelTier = Math.floor(playerLevel / 7);
-    
-    // Reset rotation index when entering a new tier
-    if (currentLevelTier !== lastLevelTier) {
-        currentEnemyRotationIndex = 0;
-        lastLevelTier = currentLevelTier;
+/** Persistent state for the alternating selector (survives across battles in a session) */
+let _enemySelectState = {
+    // 'current' or 'lower' — which pool we pick from next
+    nextPool: 'current',
+    // Name of the last enemy selected
+    lastEnemyName: null,
+    // How many times in a row the last enemy has been selected
+    consecutiveCount: 0
+};
+
+/**
+ * Pick one enemy data object from a pool, respecting the 2-consecutive cap.
+ * If every candidate in the pool has been seen twice in a row (single-enemy pool edge case),
+ * falls back to any other available enemy.
+ */
+function _pickFromPool(pool, fallbackPool) {
+    if (!pool || pool.length === 0) pool = fallbackPool || [];
+    if (!pool || pool.length === 0) return null;
+
+    const state = _enemySelectState;
+
+    // Build a list of candidates that won't exceed the consecutive cap
+    let candidates = pool.filter(e => {
+        if (e.name !== state.lastEnemyName) return true;          // different enemy — always ok
+        return state.consecutiveCount < 2;                         // same enemy — ok only if < 2 in a row
+    });
+
+    // If all candidates are blocked (single-enemy pool that was just used twice),
+    // allow any enemy from the combined pools as a safety valve
+    if (candidates.length === 0) {
+        const combined = [...(pool || []), ...(fallbackPool || [])];
+        candidates = combined.filter(e => e.name !== state.lastEnemyName);
+        if (candidates.length === 0) candidates = pool; // absolute last resort
     }
-    
-    // Get next enemy from rotation
-    const selectedEnemy = availableEnemies[currentEnemyRotationIndex % availableEnemies.length];
-    
-    // Increment rotation index for next battle
-    currentEnemyRotationIndex++;
-    
-    return selectedEnemy;
+
+    // Pick randomly from the valid candidates
+    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+
+    // Update state
+    if (chosen.name === state.lastEnemyName) {
+        state.consecutiveCount++;
+    } else {
+        state.lastEnemyName = chosen.name;
+        state.consecutiveCount = 1;
+    }
+
+    return chosen;
+}
+
+/**
+ * Main smart enemy selector.
+ * Alternates current-level ↔ lower-level pools each battle.
+ */
+function selectSmartEnemy(playerLevel) {
+    // Current-level pool: enemies unlocked within the last 5 levels
+    const currentPool = ENEMY_TYPES.filter(e =>
+        playerLevel >= e.minLevel && playerLevel - e.minLevel <= 5
+    );
+
+    // Lower-level pool: enemies unlocked more than 5 levels ago
+    const lowerPool = ENEMY_TYPES.filter(e =>
+        playerLevel >= e.minLevel && playerLevel - e.minLevel > 5
+    );
+
+    const state = _enemySelectState;
+
+    let chosen;
+    if (state.nextPool === 'current' || lowerPool.length === 0) {
+        // Pick from current-level pool (fall back to lower if current is empty)
+        chosen = _pickFromPool(currentPool, lowerPool);
+        // Next battle uses lower-level pool (if it has enemies)
+        state.nextPool = lowerPool.length > 0 ? 'lower' : 'current';
+    } else {
+        // Pick from lower-level pool (fall back to current if lower is empty)
+        chosen = _pickFromPool(lowerPool, currentPool);
+        // Next battle uses current-level pool
+        state.nextPool = 'current';
+    }
+
+    return chosen;
 }
 
 // Create a scaled enemy for battle
 function createRandomEnemy(playerLevel) {
-    // Filter enemies available at current level
-    // Allow all enemies from minLevel up to level 50 (lower level enemies can still appear)
-    let availableEnemies = ENEMY_TYPES.filter(e => {
-        const meetsMinLevel = playerLevel >= e.minLevel;
-        const withinRange = playerLevel <= 50 || e.minLevel >= 40; // Keep all enemies available up to level 50
-        return meetsMinLevel && withinRange;
-    });
-    
-    if (availableEnemies.length === 0) {
-        // Fallback to first enemy if none available
-        availableEnemies = [ENEMY_TYPES[0]];
+    // Use the smart alternating selector
+    let enemyData = selectSmartEnemy(playerLevel);
+
+    // Ultimate fallback: if nothing was selected, use the first available enemy
+    if (!enemyData) {
+        const fallback = ENEMY_TYPES.filter(e => playerLevel >= e.minLevel);
+        enemyData = fallback.length > 0 ? fallback[0] : ENEMY_TYPES[0];
     }
-    
-    // Use rotation system for enemy selection (7-level tier rotation)
-    const enemyData = getNextEnemyFromRotation(availableEnemies, playerLevel);
-    
+
     // Create enemy instance
     const enemy = new Enemy(
         enemyData.name,
@@ -524,17 +583,19 @@ function createRandomEnemy(playerLevel) {
         enemyData.baseDefense,
         enemyData.sprites
     );
-    
+
     // Copy special abilities to enemy instance
     Object.keys(enemyData).forEach(key => {
         if (!['name', 'baseHP', 'baseAttack', 'baseDefense', 'sprites'].includes(key)) {
             enemy[key] = enemyData[key];
         }
     });
-    
+
     // Scale enemy to player level
     enemy.scaleToLevel(playerLevel);
-    
+
+    console.log(`[EnemySelect] Pool: ${_enemySelectState.nextPool === 'current' ? 'lower' : 'current'} → ${enemy.name} (consecutive: ${_enemySelectState.consecutiveCount})`);
+
     return enemy;
 }
 

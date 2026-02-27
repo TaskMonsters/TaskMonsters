@@ -218,6 +218,19 @@ function updateBattleButtonsVisibility() {
             wizardsWandBtn.style.display = 'none';
         }
     }
+
+    // Special Defense button - only show if ever unlocked
+    const specialDefenseBtn = document.getElementById('btnSpecialDefense');
+    const specialDefenseCountEl = document.getElementById('specialDefenseCount');
+    const specialDefenseQty = inventory.special_defense || 0;
+    if (specialDefenseBtn && specialDefenseCountEl) {
+        if (unlockedItems.includes('special_defense')) {
+            specialDefenseBtn.style.display = '';
+            specialDefenseCountEl.textContent = `(${specialDefenseQty})`;
+        } else {
+            specialDefenseBtn.style.display = 'none';
+        }
+    }
     
     // Mirror Attack button - only show if ever unlocked
     const mirrorAttackBtn = document.getElementById('btnMirrorAttack');
@@ -605,6 +618,22 @@ function updateActionButtons(hero) {
             btnWizardsWand.disabled = wizardsWandCount === 0;
         } else {
             btnWizardsWand.style.display = 'none';
+        }
+    }
+
+    // Special Defense button — show if owned or level 30+
+    const btnSpecialDefense = document.getElementById('btnSpecialDefense');
+    if (btnSpecialDefense) {
+        const specialDefenseCount = gameState.battleInventory?.special_defense || 0;
+        if (specialDefenseCount > 0 || hero.level >= 30) {
+            btnSpecialDefense.style.display = '';
+            const specialDefenseCountSpan = btnSpecialDefense.querySelector('.item-count');
+            if (specialDefenseCountSpan) {
+                specialDefenseCountSpan.textContent = `(${specialDefenseCount})`;
+            }
+            btnSpecialDefense.disabled = specialDefenseCount === 0;
+        } else {
+            btnSpecialDefense.style.display = 'none';
         }
     }
 }

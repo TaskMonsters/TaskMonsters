@@ -428,7 +428,7 @@ function startTestBattle() {
     // Level-based attack damage scaling (grows with level)
     // Hero damage scaling according to gameplay mechanics:
     // Level 5: 5-15 damage
-    // Level 10: 15-25 damage
+    // Throwing Stars: 50-80 damage
     // Level 20: 30-45 damage
     // Level 30: 45-65 damage
     // Level 40: 60-85 damage
