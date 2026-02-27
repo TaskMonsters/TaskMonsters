@@ -40,7 +40,7 @@ class SpriteAnimationManager {
             if (intervalId) clearInterval(intervalId);
             if (rafId) cancelAnimationFrame(rafId);
             this.activeAnimations.delete(elementId);
-
+            console.log(`[SpriteAnimationManager] Stopped animation for ${elementId}`);
         }
     }
 
@@ -96,7 +96,7 @@ class SpriteAnimationManager {
         if (frameCount <= 1) {
             element.style.objectPosition = `0 -${yOffset}px`;
             element.style.animation = 'none';
-
+            console.log(`[SpriteAnimationManager] Static frame for ${elementId}: ${animationType}`);
             return;
         }
 
@@ -116,7 +116,7 @@ class SpriteAnimationManager {
         const intervalId = setInterval(animate, frameDuration);
         
         this.activeAnimations.set(elementId, { intervalId, rafId: null });
-
+        console.log(`[SpriteAnimationManager] Started ${animationType} animation for ${elementId}: ${frameCount} frames @ ${frameDuration}ms/frame`);
     }
 
     /**
@@ -149,6 +149,7 @@ class SpriteAnimationManager {
             focusTimerSprite.style.transformOrigin = 'center center';
         }
 
+        console.log('[SpriteAnimationManager] Updated all monster visuals');
     }
 
     /**
@@ -159,7 +160,7 @@ class SpriteAnimationManager {
             this.stopAnimation(elementId);
         }
         this.preloadedImages.clear();
-
+        console.log('[SpriteAnimationManager] Cleaned up all animations');
     }
 }
 

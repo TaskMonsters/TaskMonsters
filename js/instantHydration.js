@@ -20,9 +20,10 @@
             
             // Store hydrated state globally for instant access
             window.__HYDRATED_STATE__ = state;
-
+            
+            console.log('✅ State pre-hydrated successfully');
         } else {
-
+            console.log('ℹ️ No saved state found - using defaults');
         }
     } catch (e) {
         console.warn('⚠️ Pre-hydration failed:', e);

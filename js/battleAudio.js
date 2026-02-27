@@ -68,7 +68,8 @@ class BattleAudioManager {
         this.currentMusic.play().catch(err => {
             console.warn('Failed to play battle music:', err);
         });
-
+        
+        console.log(`[BattleAudio] Playing track ${trackIndex + 1}: ${trackName}`);
     }
     
     /**
@@ -228,7 +229,8 @@ class BattleAudioManager {
             sound.preload = 'auto';
             this.loadedSounds[soundId] = sound;
         }
-
+        
+        console.log('Battle sounds preloaded');
     }
 }
 

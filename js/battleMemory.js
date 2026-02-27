@@ -209,7 +209,8 @@ class EnemyMemorySystem {
         };
         
         this.save();
-
+        
+        console.log(`Enemy ${enemyId} memory updated:`, memory);
     }
     
     /**

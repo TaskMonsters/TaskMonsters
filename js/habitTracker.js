@@ -59,7 +59,7 @@ function initHabitTracker() {
         });
         
         if (needsSave) {
-
+            console.log('📊 [Habit Tracker] Migrated to include new categories');
             saveGameState();
         }
     }
@@ -72,18 +72,20 @@ function trackTaskCompletion(task, isQuickTask = false) {
     if (isQuickTask) {
         // Track quick task
         gameState.habitStats.totalQuickTasks++;
-
+        console.log('📊 [Habit Tracker] Quick task completed:', task.title, 'Category:', task.categoryId);
+        
         // Track by quick task category
         if (task.categoryId && gameState.habitStats.quickTaskCategories[task.categoryId] !== undefined) {
             gameState.habitStats.quickTaskCategories[task.categoryId]++;
-
+            console.log('📊 [Habit Tracker] Category count updated:', task.categoryId, '=', gameState.habitStats.quickTaskCategories[task.categoryId]);
         } else {
             console.warn('📊 [Habit Tracker] Quick task category not found or undefined:', task.categoryId);
         }
     } else {
         // Track regular task
         gameState.habitStats.totalTasks++;
-
+        console.log('📊 [Habit Tracker] Regular task completed:', task.title, 'Category:', task.category, 'Difficulty:', task.difficulty, 'Priority:', task.priority);
+        
         // Track by category
         if (task.category && gameState.habitStats.categories[task.category] !== undefined) {
             gameState.habitStats.categories[task.category]++;
@@ -200,7 +202,8 @@ function resetHabitStats() {
         
         // Reset mood history in localStorage
         localStorage.removeItem('moodHistory');
-
+        console.log('[HabitTracker] Mood history cleared from localStorage');
+        
         // Reset mood history in gameState (if it exists)
         if (gameState.moodHistory) {
             gameState.moodHistory = [];

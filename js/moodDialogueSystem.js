@@ -210,7 +210,8 @@ const MoodDialogueSystem = {
     
     // Initialize the system
     init() {
-
+        console.log('[MoodDialogueSystem] Initializing...');
+        
         // Initialize mood history if not exists
         if (!gameState.moodHistory) {
             gameState.moodHistory = [];
@@ -241,13 +242,13 @@ const MoodDialogueSystem = {
         const onboardingComplete = localStorage.getItem('simpleOnboardingCompleted') === 'true';
         
         if (!onboardingComplete) {
-
+            console.log('[MoodDialogueSystem] Waiting for onboarding to complete');
             return;
         }
         
         // Check if we should show mood tracker today
         if (!this.shouldShowMoodTrackerToday()) {
-
+            console.log('[MoodDialogueSystem] Mood tracker already shown today or past midnight');
             return;
         }
         
@@ -255,7 +256,7 @@ const MoodDialogueSystem = {
         this.clearMoodTrackerTimers();
         
         // Wait 60 seconds after app load, then show mood tracker
-
+        console.log('[MoodDialogueSystem] Scheduling initial mood tracker in 60 seconds');
         this.initialDelayTimeout = setTimeout(() => {
             this.showMoodTracker();
             
@@ -277,7 +278,7 @@ const MoodDialogueSystem = {
                 this.showMoodTracker();
             } else {
                 // Past midnight, stop the interval
-
+                console.log('[MoodDialogueSystem] Past midnight, stopping mood tracker');
                 this.clearMoodTrackerTimers();
             }
         }, 3600000); // 1 hour = 3600000ms
@@ -316,17 +317,19 @@ const MoodDialogueSystem = {
             const isBattleActive = battleContainer && battleContainer.style.display !== 'none';
             
             if (isBattleActive) {
-
+                console.log('[MoodDialogueSystem] Battle active, blocking mood tracker');
                 return;
             }
             
             // Check if modal already exists
             if (document.getElementById('moodTrackerContainer')) {
-
+                console.log('[MoodDialogueSystem] Mood tracker already visible');
                 return;
             }
-
-
+            
+            console.log('[MoodDialogueSystem] Showing mood tracker');
+            console.log('[MoodDialogueSystem] Moods:', this.moods);
+        
         // Create mood tracker container
         const moodContainer = document.createElement('div');
         moodContainer.id = 'moodTrackerContainer';
@@ -475,7 +478,8 @@ const MoodDialogueSystem = {
     
     // Record mood - SYNCED with moodTracker.js localStorage system
     recordMood(mood, note = '') {
-
+        console.log('[MoodDialogueSystem] Recording mood:', mood, 'with note:', note);
+        
         const moodData = {
             mood: mood,
             emoji: this.moods[mood],
@@ -499,7 +503,9 @@ const MoodDialogueSystem = {
         
         // Save to localStorage
         localStorage.setItem('moodHistory', JSON.stringify(moods));
-
+        
+        console.log('[MoodDialogueSystem] Mood saved to localStorage:', mood);
+        
         // Update display if on habits tab
         if (typeof updateMoodHistoryDisplay === 'function') {
             updateMoodHistoryDisplay();
@@ -748,7 +754,9 @@ const MoodDialogueSystem = {
     playMonsterMoodAnimation(mood) {
         const monsterSprite = document.getElementById('mainHeroSprite');
         if (!monsterSprite) return;
-
+        
+        console.log('[MoodDialogueSystem] Playing animation for mood:', mood);
+        
         if (mood === 'happy') {
             // Brief hover animation (fast)
             monsterSprite.style.transition = 'transform 0.3s ease-in-out';

@@ -92,9 +92,6 @@ class AchievementTracker {
                 case 'battle_streak':
                     isUnlocked = this.checkBattleStreakAchievement(achievement);
                     break;
-                case 'hp':
-                    isUnlocked = this.checkHPAchievement(achievement);
-                    break;
                 case 'quests':
                     isUnlocked = this.checkQuestsAchievement(achievement);
                     break;
@@ -237,19 +234,15 @@ class AchievementTracker {
         return highPriorityToday.length >= achievement.requirement;
     }
 
-    // Battle achievement checkers (kept for backward compatibility but battles = 0 always)
+    // Battle achievement checkers
     checkBattlesAchievement(achievement) {
-        return false; // Battle mode removed
+        const battlesWon = window.gameState.battlesWon || 0;
+        return battlesWon >= achievement.requirement;
     }
 
     checkBattleStreakAchievement(achievement) {
-        return false; // Battle mode removed
-    }
-
-    // HP achievement checker
-    checkHPAchievement(achievement) {
-        const currentHP = window.gameState.health || 0;
-        return currentHP >= achievement.requirement;
+        const battleStreak = window.gameState.battleStreak || 0;
+        return battleStreak >= achievement.requirement;
     }
 
     // Quest achievement checkers

@@ -116,7 +116,7 @@ class AudioManager {
 
         try {
             this.initialized = true;
-
+            console.log("[AudioManager] Initialized with sound effects and music");
         } catch (error) {
             console.warn("[AudioManager] Initialization skipped:", error.message);
         }
@@ -218,6 +218,7 @@ class AudioManager {
                 this.battleMusicAudio = null;
             });
 
+            console.log(`[AudioManager] Battle music started: Track ${this.currentBattleTrackIndex}/${this.battleTracks.length}`);
         } catch (error) {
             console.warn("[AudioManager] Error playing battle music:", error.message);
         }
@@ -240,7 +241,7 @@ class AudioManager {
             // FIX: Add ended event handler to ensure continuous looping
             this.currentMusic.addEventListener('ended', () => {
                 if (this.currentMusic && this.enabled) {
-
+                    console.log('[AudioManager] Quest music ended, restarting loop');
                     this.currentMusic.currentTime = 0;
                     this.currentMusic.play().catch(err => {
                         console.warn('[AudioManager] Quest music loop restart failed:', err.message);
@@ -258,6 +259,7 @@ class AudioManager {
                 this.currentMusic = null;
             });
 
+            console.log("[AudioManager] Quest giver music started with loop protection");
         } catch (error) {
             console.warn("[AudioManager] Error playing quest music:", error.message);
         }
@@ -272,7 +274,7 @@ class AudioManager {
                 this.currentMusic.pause();
                 this.currentMusic.currentTime = 0;
                 this.currentMusic = null;
-
+                console.log("[AudioManager] Quest Music stopped");
             } catch (error) {
                 console.warn("[AudioManager] Error stopping quest music:", error.message);
             }
@@ -283,7 +285,7 @@ class AudioManager {
                 this.battleMusicAudio.pause();
                 this.battleMusicAudio.currentTime = 0;
                 this.battleMusicAudio = null;
-
+                console.log("[AudioManager] Battle Music stopped");
             } catch (error) {
                 console.warn("[AudioManager] Error stopping battle music:", error.message);
             }
@@ -313,6 +315,7 @@ class AudioManager {
                 this.focusAlarmAudio = null;
             });
 
+            console.log("[AudioManager] Focus Timer alarm started (looping)");
         } catch (error) {
             console.warn("[AudioManager] Error playing focus alarm:", error.message);
         }
@@ -328,7 +331,7 @@ class AudioManager {
                 this.focusAlarmAudio.pause();
                 this.focusAlarmAudio.currentTime = 0;
                 this.focusAlarmAudio = null;
-
+                console.log("[AudioManager] Focus Timer alarm stopped");
             } catch (error) {
                 console.warn("[AudioManager] Error stopping focus alarm:", error.message);
             }
@@ -366,6 +369,7 @@ class AudioManager {
                 this.battleWinMusic = null;
             });
 
+            console.log("[AudioManager] Battle win music started");
         } catch (error) {
             console.warn("[AudioManager] Error playing battle win music:", error.message);
         }
@@ -402,6 +406,7 @@ class AudioManager {
                 this.battleLoseMusic = null;
             });
 
+            console.log("[AudioManager] Battle lose music started");
         } catch (error) {
             console.warn("[AudioManager] Error playing battle lose music:", error.message);
         }
@@ -417,7 +422,7 @@ class AudioManager {
                 this.battleWinMusic.pause();
                 this.battleWinMusic.currentTime = 0;
                 this.battleWinMusic = null;
-
+                console.log("[AudioManager] Battle win music stopped");
             } catch (error) {
                 console.warn("[AudioManager] Error stopping battle win music:", error.message);
             }
@@ -428,7 +433,7 @@ class AudioManager {
                 this.battleLoseMusic.pause();
                 this.battleLoseMusic.currentTime = 0;
                 this.battleLoseMusic = null;
-
+                console.log("[AudioManager] Battle lose music stopped");
             } catch (error) {
                 console.warn("[AudioManager] Error stopping battle lose music:", error.message);
             }
@@ -500,7 +505,7 @@ class AudioManager {
      * Legacy compatibility - loadAllSounds
      */
     async loadAllSounds() {
-
+        console.log("[AudioManager] Using lazy loading - sounds load on-demand");
         return Object.keys(this.sounds).length + 2; // sounds + 2 music tracks
     }
 
@@ -531,3 +536,5 @@ document.addEventListener("visibilitychange", () => {
 document.addEventListener("click", () => {
     window.audioManager.init();
 }, { once: true });
+
+console.log("[AudioManager] Loaded with sound effects and music.");

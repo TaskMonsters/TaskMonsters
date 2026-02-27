@@ -23,7 +23,13 @@ class SkinsManager {
         
         // Get current base monster
         this.currentBaseMonster = localStorage.getItem('selectedMonster') || 'nova';
-
+        
+        console.log('[SkinsManager] Initialized (GIF-ONLY MODE):', {
+            ownedSkins: this.ownedSkins,
+            equippedSkinId: this.equippedSkinId,
+            baseMonster: this.currentBaseMonster
+        });
+        
         // CRITICAL: Ensure DOM is ready before updating visuals
         this.ensureSpriteReady(() => {
             this.updateAllMonsterVisuals();
@@ -49,41 +55,13 @@ class SkinsManager {
     
     /**
      * Update all monster visuals across the app - GIF ONLY
-     * IMPORTANT: Respects egg mode (levels 1-4). When isEgg === true, the egg GIF
-     * is always shown and skin overrides are blocked.
      */
     updateAllMonsterVisuals() {
-
+        console.log('[SkinsManager] Updating visuals (GIF-ONLY)');
+        
         // Sync state
         this.equippedSkinId = window.gameState?.equippedSkinId || null;
-
-        // ── EGG MODE GUARD ────────────────────────────────────────────────────────
-        // During levels 1-4 (isEgg === true) the monster is still in its egg.
-        // Skins cannot be applied and the egg GIF must always be shown.
-        if (window.gameState && window.gameState.isEgg === true) {
-            const selectedMonster = localStorage.getItem('selectedMonster') || 'nova';
-            const eggSrc = `assets/eggs/${selectedMonster}_egg.gif`;
-
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (mainHeroSprite) {
-                mainHeroSprite.src = eggSrc;
-                mainHeroSprite.classList.add('egg-sprite');
-                // Clear any skin-applied inline transform overrides
-                mainHeroSprite.style.removeProperty('transform');
-                mainHeroSprite.style.removeProperty('transform-origin');
-            }
-
-            const focusTimerSprite = document.getElementById('focusTimerMonsterSprite');
-            if (focusTimerSprite) {
-                focusTimerSprite.src = eggSrc;
-                focusTimerSprite.classList.add('egg-sprite');
-            }
-
-            console.log('[SkinsManager] Egg mode active — skin override blocked, showing egg for:', selectedMonster);
-            return; // Exit early — do not apply any skin
-        }
-        // ── END EGG MODE GUARD ────────────────────────────────────────────────────
-
+        
         // Get appearance (should return GIF paths)
         const appearance = window.getActiveMonsterAppearance(this.currentBaseMonster, this.equippedSkinId);
         const idleGif = appearance.animations.idle;
@@ -140,7 +118,8 @@ class SkinsManager {
         // REMOVE ALL CSS ANIMATIONS - The GIF handles its own animation
         element.style.setProperty('animation', 'none', 'important');
         element.style.setProperty('transition', 'none', 'important');
-
+        
+        console.log(`[SkinsManager] Applied GIF: ${gifPath} to ${element.id}`);
     }
 
     /**
@@ -219,11 +198,6 @@ class SkinsManager {
      * Buy a skin
      */
     buySkin(skinId, price) {
-        // Block skin purchase during egg mode (levels 1-4)
-        if (window.gameState && window.gameState.isEgg === true) {
-            console.warn('[SkinsManager] Cannot purchase skin during egg mode (levels 1-4)');
-            return;
-        }
         if (window.gameState.jerryXP < price) return;
         
         window.gameState.jerryXP -= price;
@@ -242,11 +216,6 @@ class SkinsManager {
      * Equip a skin
      */
     equipSkin(skinId) {
-        // Block skin equipping during egg mode (levels 1-4)
-        if (window.gameState && window.gameState.isEgg === true) {
-            console.warn('[SkinsManager] Cannot equip skin during egg mode (levels 1-4)');
-            return { success: false, reason: 'egg_mode' };
-        }
         if (!this.ownedSkins.includes(skinId)) return { success: false };
         this.equippedSkinId = skinId;
         window.gameState.equippedSkinId = skinId;
@@ -266,11 +235,6 @@ class SkinsManager {
      * Unequip a skin
      */
     unequipSkin() {
-        // Block unequip during egg mode (nothing should be equipped anyway)
-        if (window.gameState && window.gameState.isEgg === true) {
-            console.warn('[SkinsManager] Cannot unequip skin during egg mode (levels 1-4)');
-            return { success: false, reason: 'egg_mode' };
-        }
         this.equippedSkinId = null;
         window.gameState.equippedSkinId = null;
         window.saveGameState();

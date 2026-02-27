@@ -11,7 +11,7 @@ class SimpleOnboarding {
             {
                 icon: '🎮',
                 title: 'Welcome to Task Monsters!',
-                content: 'Turn your to-do list into an adventure! Complete tasks to level up your monster and grow stronger!',
+                content: 'Turn your to-do list into an adventure! Complete tasks to level up your monster and battle enemies.',
                 highlight: 'Gamification makes boring tasks fun! 🧠✨'
             },
             {
@@ -27,9 +27,15 @@ class SimpleOnboarding {
                 highlight: 'Less decision fatigue, more action! 🚀'
             },
             {
+                icon: '⚔️',
+                title: 'Battle Mode',
+                content: 'Completing tasks triggers random battles! Fight enemies, earn XP, and level up your monster. The more tasks you complete, the stronger you become!',
+                highlight: 'Instant rewards = instant motivation! 💪'
+            },
+            {
                 icon: '🎯',
                 title: 'Why This Works',
-                content: '✅ Instant feedback (XP, loot)\n✅ Visual progress (levels, HP gauge)\n✅ Variety (different tasks, challenges)\n✅ Rewards (makes tasks feel worth it!)',
+                content: '✅ Instant feedback (XP, battles, loot)\n✅ Visual progress (levels, gauges)\n✅ Variety (different enemies, abilities)\n✅ Rewards (makes tasks feel worth it!)',
                 useList: true,
                 highlight: 'Your brain will LOVE the instant rewards! 🎉'
             },
@@ -51,7 +57,7 @@ class SimpleOnboarding {
 
     // Start onboarding
     start() {
-
+        console.log('🎓 Starting simple modal onboarding');
         this.currentPage = 0;
         this.showPage(0);
     }
@@ -321,7 +327,8 @@ class SimpleOnboarding {
     // Complete onboarding
     complete() {
         localStorage.setItem('simpleOnboardingCompleted', 'true');
-
+        console.log('🎉 Simple onboarding completed');
+        
         // Remove overlay now that onboarding is complete
         const overlay = document.getElementById('simpleOnboardingOverlay');
         if (overlay) {
@@ -341,7 +348,7 @@ class SimpleOnboarding {
         
         // Start mood tracker scheduling now that tutorial is complete
         if (typeof MoodDialogueSystem !== 'undefined' && MoodDialogueSystem.startMoodTrackerSchedule) {
-
+            console.log('[Tutorial] Starting mood tracker schedule after tutorial completion');
             MoodDialogueSystem.startMoodTrackerSchedule();
         }
     }
@@ -352,7 +359,7 @@ window.simpleOnboarding = new SimpleOnboarding();
 
 // Auto-start after monster selection
 // NOTE: This is now handled by appInitializer.js to prevent conflicts with quest giver onboarding
-// The onboarding will show after:
+// The battle mode onboarding will show after:
 // 1. Monster selection onboarding completes
 // 2. Quest giver onboarding completes (if quest giver is due)
 // 3. Main app is visible

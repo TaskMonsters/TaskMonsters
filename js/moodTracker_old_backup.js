@@ -1,7 +1,7 @@
 /**
  * Mood Tracker System - Tooltip Style
  * Displays a speech bubble tooltip for users to track their mood with emoji buttons
- * Appears every hour and can be triggered by tapping the monster
+ * Appears every 30 minutes and can be triggered by tapping the monster
  * Saves mood history to localStorage and displays on Habits page with filters
  */
 
@@ -14,9 +14,10 @@ class MoodTracker {
             { emoji: '😡', name: 'Angry', value: 'angry' }
         ];
         
-        this.autoPopupInterval = 60 * 60 * 1000; // 1 hour
+        this.autoPopupInterval = 60 * 60 * 1000; // 1 hour (60 minutes)
         this.lastPopupTime = null;
         this.intervalId = null;
+        this.initialPopupShown = false;
         
         this.init();
     }
@@ -30,14 +31,19 @@ class MoodTracker {
         // Add monster click listener
         this.addMonsterClickListener();
         
-        // Start auto-popup timer
-        this.startAutoPopup();
-        
         // Load last popup time from localStorage
         const saved = localStorage.getItem('moodTrackerLastPopup');
         if (saved) {
             this.lastPopupTime = parseInt(saved);
         }
+        
+        // Show mood tracker on page load after modals (wait 3 seconds for modals to complete)
+        setTimeout(() => {
+            this.showInitialMoodTracker();
+        }, 3000);
+        
+        // Start hourly auto-popup timer
+        this.startAutoPopup();
         
         console.log('[MoodTracker] Initialized successfully');
     }
@@ -54,19 +60,19 @@ class MoodTracker {
                 position: fixed;
                 top: 20px;
                 left: 50%;
-                transform: translateX(-50%);
+                transform: translateX(-50%) scale(0.75);
                 margin-bottom: 5px;
                 background-color: #2a2a3e;
-                border: 2px solid #8b5cf6;
-                border-radius: 17px;
-                padding: 13px 16px;
-                max-width: 240px;
-                min-width: 187px;
+                border: 3px solid #8b5cf6;
+                border-radius: 25px;
+                padding: 20px 24px;
+                max-width: 360px;
+                min-width: 280px;
                 box-shadow: 0 4px 16px rgba(0,0,0,0.4);
                 opacity: 0;
                 display: none;
                 transition: opacity 0.3s ease, transform 0.3s ease;
-                transform-origin: bottom center;
+                transform-origin: top center;
                 z-index: 10000;
                 word-wrap: break-word;
                 overflow-wrap: break-word;
@@ -81,7 +87,7 @@ class MoodTracker {
                     background: transparent;
                     border: none;
                     color: #ffffff;
-                    font-size: 14px;
+                    font-size: 20px;
                     cursor: pointer;
                     padding: 4px;
                     line-height: 1;
@@ -92,8 +98,8 @@ class MoodTracker {
                 <h3 style="
                     color: #ffffff;
                     text-align: center;
-                    margin: 0 0 10px 0;
-                    font-size: 12px;
+                    margin: 0 0 15px 0;
+                    font-size: 18px;
                     font-weight: 600;
                 ">How are you feeling?</h3>
                 
@@ -101,16 +107,16 @@ class MoodTracker {
                 <div style="
                     display: grid;
                     grid-template-columns: repeat(4, 1fr);
-                    gap: 7px;
-                    margin-bottom: 10px;
+                    gap: 10px;
+                    margin-bottom: 15px;
                 ">
                     ${this.moods.map(mood => `
                         <button class="mood-btn-tooltip" data-mood="${mood.value}" style="
                             background: rgba(255, 255, 255, 0.1);
                             border: 2px solid rgba(139, 92, 246, 0.3);
-                            border-radius: 8px;
-                            padding: 8px 5px;
-                            font-size: 21px;
+                            border-radius: 12px;
+                            padding: 12px 8px;
+                            font-size: 32px;
                             cursor: pointer;
                             transition: all 0.2s;
                             display: flex;
@@ -119,7 +125,7 @@ class MoodTracker {
                             gap: 4px;
                         " onmouseover="this.style.background='rgba(139, 92, 246, 0.2)'; this.style.borderColor='#8b5cf6'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(139, 92, 246, 0.3)'; this.style.transform='scale(1)'">
                             <span>${mood.emoji}</span>
-                            <span style="font-size: 7px; color: #ccc;">${mood.name}</span>
+                            <span style="font-size: 10px; color: #ccc;">${mood.name}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -127,13 +133,13 @@ class MoodTracker {
                 <!-- Optional Note -->
                 <textarea id="moodNoteTooltip" placeholder="Add a note (optional)..." style="
                     width: 100%;
-                    min-height: 40px;
+                    min-height: 60px;
                     background: rgba(255, 255, 255, 0.05);
                     border: 2px solid rgba(139, 92, 246, 0.3);
                     border-radius: 8px;
-                    padding: 7px;
+                    padding: 10px;
                     color: #ffffff;
-                    font-size: 9px;
+                    font-size: 13px;
                     resize: vertical;
                     font-family: inherit;
                     box-sizing: border-box;
@@ -171,7 +177,7 @@ class MoodTracker {
             tooltip.style.display = 'block';
             setTimeout(() => {
                 tooltip.style.opacity = '1';
-                tooltip.style.transform = 'translateX(-50%) scale(1)';
+                tooltip.style.transform = 'translateX(-50%) scale(0.75)';
             }, 10);
             
             // Clear previous note
@@ -191,7 +197,7 @@ class MoodTracker {
         const tooltip = document.getElementById('moodTrackerTooltip');
         if (tooltip) {
             tooltip.style.opacity = '0';
-            tooltip.style.transform = 'translateX(-50%) scale(0.95)';
+            tooltip.style.transform = 'translateX(-50%) scale(0.7)';
             setTimeout(() => {
                 tooltip.style.display = 'none';
             }, 300);
@@ -284,11 +290,44 @@ class MoodTracker {
                 console.log('[MoodTracker] Monster clicked, showing tooltip');
                 this.showTooltip();
             });
-            console.log('[MoodTracker] Monster click listener added');
+            console.log('[MoodTracker] Monster click listener attached');
         } else {
-            console.warn('[MoodTracker] mainHeroSprite not found, retrying in 1s');
+            console.warn('[MoodTracker] mainHeroSprite not found, retrying in 1 second');
             setTimeout(() => this.addMonsterClickListener(), 1000);
         }
+    }
+    
+    showInitialMoodTracker() {
+        // Check if onboarding is complete
+        const onboardingComplete = localStorage.getItem('simpleOnboardingCompleted') === 'true' || 
+                                   localStorage.getItem('onboardingCompleted') === 'true' ||
+                                   localStorage.getItem('onboardingComplete') === 'true';
+        
+        if (!onboardingComplete) {
+            console.log('[MoodTracker] Skipping initial popup - onboarding not complete');
+            // Retry after onboarding might complete
+            setTimeout(() => this.showInitialMoodTracker(), 2000);
+            return;
+        }
+        
+        // Check if user is on home page (not in battle or other modals)
+        const isBattleActive = document.getElementById('battleContainer')?.style.display !== 'none';
+        const isModalOpen = document.querySelector('.modal-overlay:not([style*="display: none"])');
+        
+        if (isBattleActive || isModalOpen) {
+            console.log('[MoodTracker] Skipping popup - battle or modal is active');
+            // Retry after modals close
+            setTimeout(() => this.showInitialMoodTracker(), 2000);
+            return;
+        }
+        
+        console.log('[MoodTracker] Showing mood tracker on app open/refresh');
+        this.showTooltip();
+        this.initialPopupShown = true;
+        
+        // Update last popup time
+        this.lastPopupTime = Date.now();
+        localStorage.setItem('moodTrackerLastPopup', this.lastPopupTime.toString());
     }
     
     startAutoPopup() {
@@ -299,9 +338,29 @@ class MoodTracker {
             clearInterval(this.intervalId);
         }
         
-        // Set up interval
+        // Set up hourly interval
         this.intervalId = setInterval(() => {
-            console.log('[MoodTracker] Auto-popup triggered');
+            console.log('[MoodTracker] Hourly auto-popup triggered');
+            
+            // Check if user is on home page (not in battle or other modals)
+            const isBattleActive = document.getElementById('battleContainer')?.style.display !== 'none';
+            const isModalOpen = document.querySelector('.modal-overlay:not([style*="display: none"])');
+            
+            if (isBattleActive || isModalOpen) {
+                console.log('[MoodTracker] Skipping hourly popup - battle or modal is active');
+                return;
+            }
+            
+            // Check if on home page
+            const isOnHomePage = document.getElementById('homeTab')?.classList.contains('active') || 
+                                document.getElementById('homeTab')?.style.display !== 'none';
+            
+            if (!isOnHomePage) {
+                console.log('[MoodTracker] Skipping hourly popup - not on home page');
+                return;
+            }
+            
+            console.log('[MoodTracker] Showing hourly mood tracker popup');
             this.showTooltip();
         }, this.autoPopupInterval);
     }
@@ -361,48 +420,24 @@ class MoodTracker {
             } else {
                 // NO SKIN AND NOT EGG: Use default monster jump GIF
                 console.log('[MoodTracker] No skin/egg - using default monster jump GIF');
+                const jumpGif = `assets/${selectedMonster}_jump.gif`;
+                sprite.src = jumpGif;
+                sprite.style.animation = 'none';
                 
-                // Normalize monster name: capitalize first letter for file path
-                const monsterName = selectedMonster.charAt(0).toUpperCase() + selectedMonster.slice(1).toLowerCase();
-                const jumpGif = `assets/${monsterName}_jump.gif`;
+                // Add jump transform effect
+                sprite.style.transition = 'transform 0.3s ease';
+                sprite.style.transform = 'scale(4) translateY(-20px)';
                 
-                // Preload the jump GIF to prevent broken image display
-                const jumpImage = new Image();
-                jumpImage.onload = () => {
-                    sprite.src = jumpGif;
-                    sprite.style.animation = 'none';
-                    
-                    // Wait a frame for the image to render
-                    requestAnimationFrame(() => {
-                        // Add jump transform effect
-                        sprite.style.transition = 'transform 0.3s ease';
-                        sprite.style.transform = 'scale(4) translateY(-20px)';
-                        
-                        setTimeout(() => {
-                            sprite.style.transform = 'scale(4) translateY(0)';
-                        }, 300);
-                        
-                        setTimeout(() => {
-                            sprite.src = originalSrc;
-                            sprite.style.animation = originalAnimation;
-                            sprite.style.transition = '';
-                            console.log('[MoodTracker] Jump GIF animation complete');
-                        }, 2000);
-                    });
-                };
-                jumpImage.onerror = () => {
-                    console.error('[MoodTracker] Failed to load jump GIF:', jumpGif);
-                    // Fallback: just do transform without changing sprite
-                    sprite.style.transition = 'transform 0.3s ease';
-                    sprite.style.transform = 'scale(4) translateY(-20px)';
-                    setTimeout(() => {
-                        sprite.style.transform = 'scale(4) translateY(0)';
-                    }, 300);
-                    setTimeout(() => {
-                        sprite.style.transition = '';
-                    }, 600);
-                };
-                jumpImage.src = jumpGif;
+                setTimeout(() => {
+                    sprite.style.transform = 'scale(4) translateY(0)';
+                }, 300);
+                
+                setTimeout(() => {
+                    sprite.src = originalSrc;
+                    sprite.style.animation = originalAnimation;
+                    sprite.style.transition = '';
+                    console.log('[MoodTracker] Jump GIF animation complete');
+                }, 2000);
             }
         } 
         // OTHER MOODS: Flicker/fade effect
@@ -439,6 +474,42 @@ class MoodTracker {
     }
 }
 
+// 30 Encouraging messages for when user has majority sad/meh moods
+const ENCOURAGING_MESSAGES = [
+    "You're doing better than you think. Every small step counts! 🌟",
+    "Tough times don't last, but tough people do. You've got this! 💪",
+    "Remember: storms don't last forever. Brighter days are ahead! ☀️",
+    "You're stronger than any challenge you're facing right now. 🔥",
+    "It's okay to have difficult days. Tomorrow is a fresh start! 🌅",
+    "Your feelings are valid, and you're not alone in this journey. 🤝",
+    "Small progress is still progress. Be proud of yourself! 🎉",
+    "You've overcome challenges before, and you'll overcome this too. 🎯",
+    "Taking care of yourself isn't selfish—it's essential. You matter! 💚",
+    "Every day may not be good, but there's good in every day. ✨",
+    "You're braver than you believe and stronger than you seem. 🦁",
+    "This feeling is temporary. You're on a journey to better days! 🚀",
+    "Be gentle with yourself. You're doing the best you can. 🌸",
+    "Your story isn't over yet. Keep writing those next chapters! 📖",
+    "You've survived 100% of your worst days. That's impressive! 🏆",
+    "It's okay to rest. You don't have to be productive all the time. 😌",
+    "You're not falling behind. You're exactly where you need to be. 🌿",
+    "Healing isn't linear. Be patient with your progress. 🌱",
+    "You deserve kindness, especially from yourself. 💕",
+    "Your feelings don't define you. You're so much more! 🌈",
+    "One step at a time. You don't have to climb the whole mountain today. ⛰️",
+    "You're allowed to be both a masterpiece and a work in progress. 🎨",
+    "Difficult roads often lead to beautiful destinations. Keep going! 🚶",
+    "You're not alone. Reach out if you need support—people care! 🤗",
+    "Your mental health matters. It's okay to prioritize it. 🧠",
+    "You're resilient. Look how far you've already come! 🌟",
+    "Bad days don't mean a bad life. This too shall pass. 🍃",
+    "You're worthy of love, happiness, and all good things. 💖",
+    "Give yourself credit for showing up today. That takes courage! ⭐",
+    "You're not broken. You're human, and that's perfectly okay. 💛"
+];
+
+let lastEncouragementIndex = -1;
+
 // Global function to update mood history display
 window.updateMoodHistoryDisplay = function() {
     const container = document.getElementById('moodHistoryContainer');
@@ -450,6 +521,7 @@ window.updateMoodHistoryDisplay = function() {
     // Get moods directly from localStorage (more reliable)
     const saved = localStorage.getItem('moodHistory');
     let moods = saved ? JSON.parse(saved) : [];
+    let allMoods = [...moods]; // Keep unfiltered copy for encouragement check
     
     console.log('[MoodTracker] Filtering moods - Date:', dateFilter, 'Mood:', moodFilter, 'Total:', moods.length);
     
@@ -484,6 +556,66 @@ window.updateMoodHistoryDisplay = function() {
             return entry.mood && entry.mood.toLowerCase() === moodFilter.toLowerCase();
         });
         console.log('[MoodTracker] After mood filter:', moods.length);
+    }
+    
+    // Check if majority of moods are sad/meh and show encouragement
+    const encouragementContainer = document.getElementById('moodEncouragementContainer');
+    if (encouragementContainer && allMoods.length >= 3) {
+        const sadMehCount = allMoods.filter(m => m.mood === 'sad' || m.mood === 'meh').length;
+        const percentage = (sadMehCount / allMoods.length) * 100;
+        
+        if (percentage > 50) {
+            // Show encouraging message
+            const dismissedKey = 'moodEncouragementDismissed_' + Date.now();
+            const lastDismissed = localStorage.getItem('lastMoodEncouragementDismissed');
+            const now = Date.now();
+            
+            // Only show if not dismissed in the last hour
+            if (!lastDismissed || (now - parseInt(lastDismissed)) > 3600000) {
+                // Get next message (rotate through all 30)
+                lastEncouragementIndex = (lastEncouragementIndex + 1) % ENCOURAGING_MESSAGES.length;
+                const message = ENCOURAGING_MESSAGES[lastEncouragementIndex];
+                
+                encouragementContainer.innerHTML = `
+                    <div style="
+                        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.15));
+                        border: 2px solid rgba(139, 92, 246, 0.4);
+                        border-radius: 16px;
+                        padding: 20px;
+                        margin-bottom: 20px;
+                        position: relative;
+                    ">
+                        <button onclick="window.dismissMoodEncouragement()" style="
+                            position: absolute;
+                            top: 12px;
+                            right: 12px;
+                            background: transparent;
+                            border: none;
+                            color: #fff;
+                            font-size: 24px;
+                            cursor: pointer;
+                            padding: 4px 8px;
+                            line-height: 1;
+                            transition: color 0.2s;
+                        " onmouseover="this.style.color='#8b5cf6'" onmouseout="this.style.color='#fff'">×</button>
+                        <div style="font-size: 32px; text-align: center; margin-bottom: 12px;">💜</div>
+                        <p style="
+                            color: #fff;
+                            text-align: center;
+                            font-size: 15px;
+                            line-height: 1.6;
+                            margin: 0;
+                            padding-right: 20px;
+                        ">${message}</p>
+                    </div>
+                `;
+                encouragementContainer.style.display = 'block';
+            } else {
+                encouragementContainer.style.display = 'none';
+            }
+        } else {
+            encouragementContainer.style.display = 'none';
+        }
     }
     
     // Render mood history
@@ -534,6 +666,16 @@ window.updateMoodHistoryDisplay = function() {
             </div>
         `;
     }).join('');
+};
+
+// Function to dismiss mood encouragement message
+window.dismissMoodEncouragement = function() {
+    const container = document.getElementById('moodEncouragementContainer');
+    if (container) {
+        container.style.display = 'none';
+        localStorage.setItem('lastMoodEncouragementDismissed', Date.now().toString());
+        console.log('[MoodTracker] Encouragement message dismissed');
+    }
 };
 
 // Initialize mood tracker when DOM is ready

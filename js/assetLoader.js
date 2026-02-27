@@ -41,7 +41,7 @@ export async function preloadAllAssets() {
   
   try {
     await preloadImages(assetPaths);
-
+    console.log('All assets loaded successfully');
     return true;
   } catch (error) {
     console.error('Error loading assets:', error);

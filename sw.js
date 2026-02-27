@@ -1,322 +1,251 @@
-// ===================================
-// TASK MONSTERS - SERVICE WORKER v3.0
-// Handles background push notifications and scheduled task reminders
-//
-// CHANGES in v3.0:
-//  - Version bump forces all clients to pick up the new SW immediately
-//  - Notification checker uses setInterval + immediate check on every wake
-//  - periodicSync event handler added for true background delivery
-//  - notificationclick opens app and passes taskId via URL query param
-//  - Deduplication: fired notifications are deleted from IndexedDB immediately
-//  - Graceful error handling throughout
-// ===================================
+/**
+ * Task Monsters – Service Worker v3
+ *
+ * NOTIFICATION STRATEGY (why this works on mobile):
+ * ─────────────────────────────────────────────────
+ * The browser suspends JavaScript timers (setTimeout/setInterval) in
+ * background tabs and when the phone screen locks. This means in-page
+ * polling CANNOT reliably fire notifications on mobile.
+ *
+ * The ONLY reliable approach is:
+ *   1. Main page stores task due-times in Cache Storage via postMessage.
+ *   2. Service Worker checks those times and calls
+ *      self.registration.showNotification() directly — this works even
+ *      when the page is closed or the screen is locked.
+ *   3. periodicsync wakes the SW every ~15 min on Android Chrome.
+ *   4. While the page IS open, it sends PING messages every 55 s to keep
+ *      the SW alive and trigger extra checks.
+ *
+ * Task data flow:
+ *   Main page → postMessage({type:'SYNC_TASKS', tasks:[...]})
+ *   SW stores tasks in its in-memory cache + Cache Storage
+ *   SW checks tasks every 60 s (SW-side timer)
+ *   SW fires showNotification() for any threshold within ±90 s window
+ */
 
-const SW_VERSION = '3.0.0';
-const CACHE_NAME = 'task-monsters-v3';
+const CACHE_NAME      = 'task-monsters-v3';
+const TASKS_CACHE_KEY = 'task-monsters-tasks-v3';
+const PRECACHE_ASSETS = [
+    './',
+    './index.html',
+    './assets/logo/favicon.png',
+];
 
-// ===================================
-// INSTALL & ACTIVATE
-// ===================================
+// ─── In-memory task store ─────────────────────────────────────────────────────
+let _tasks    = [];           // [{id, title, dueDate, completed}]
+let _sentKeys = new Set();    // "taskId_minutes" already notified this session
+let _checkTimer = null;
+
+const THRESHOLDS_MIN = [20, 15, 10, 5, 2];
+const WINDOW_SEC     = 90; // ±90 s window around each threshold
+
+// ─── Install ──────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
-    console.log('[SW] Service Worker installed v' + SW_VERSION);
-    self.skipWaiting();
+    console.log('[SW] Installing v3...');
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(PRECACHE_ASSETS).catch(() => {}))
+            .then(() => self.skipWaiting())
+    );
 });
 
+// ─── Activate ─────────────────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Service Worker activated v' + SW_VERSION);
-    event.waitUntil(clients.claim());
-});
-
-// ===================================
-// INDEXED DB HELPERS
-// ===================================
-function openDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('TaskMonstersNotifications', 1);
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains('scheduled')) {
-                const store = db.createObjectStore('scheduled', { keyPath: 'id' });
-                store.createIndex('fireAt', 'fireAt', { unique: false });
-                store.createIndex('taskId', 'taskId', { unique: false });
-            }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function saveScheduledNotification(notification) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('scheduled', 'readwrite');
-        tx.objectStore('scheduled').put(notification);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-async function getAllScheduledNotifications() {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('scheduled', 'readonly');
-        const request = tx.objectStore('scheduled').getAll();
-        request.onsuccess = () => resolve(request.result || []);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function deleteScheduledNotification(id) {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('scheduled', 'readwrite');
-        tx.objectStore('scheduled').delete(id);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-async function clearAllScheduledNotifications() {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction('scheduled', 'readwrite');
-        tx.objectStore('scheduled').clear();
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-async function clearNotificationsForTask(taskId) {
-    const db = await openDB();
-    const all = await getAllScheduledNotifications();
-    const toDelete = all.filter(n => n.taskId === taskId);
-    if (toDelete.length === 0) return 0;
-
-    const tx = db.transaction('scheduled', 'readwrite');
-    const store = tx.objectStore('scheduled');
-    for (const n of toDelete) {
-        store.delete(n.id);
-    }
-    return new Promise((resolve, reject) => {
-        tx.oncomplete = () => resolve(toDelete.length);
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-// ===================================
-// NOTIFICATION CHECKER
-// Runs every 30 seconds while the SW is alive.
-// On mobile, the OS may kill the SW - it restarts on the next PING,
-// visibilitychange, or periodicSync event.
-// ===================================
-let checkInterval = null;
-
-function startNotificationChecker() {
-    // Always run an immediate check when we start/restart
-    checkAndFireNotifications();
-    // Only create one interval
-    if (checkInterval) return;
-    checkInterval = setInterval(checkAndFireNotifications, 30000);
-    console.log('[SW] Notification checker started');
-}
-
-async function checkAndFireNotifications() {
-    try {
-        const now = Date.now();
-        const notifications = await getAllScheduledNotifications();
-
-        for (const notif of notifications) {
-            if (notif.fireAt <= now) {
-                try {
-                    await self.registration.showNotification(notif.title, {
-                        body: notif.body,
-                        icon: notif.icon || 'assets/logo/icon-192.png',
-                        badge: 'assets/logo/icon-192.png',
-                        tag: notif.id,
-                        data: {
-                            taskId: notif.taskId,
-                            url: '/?task=' + encodeURIComponent(notif.taskId)
-                        },
-                        requireInteraction: false,
-                        vibrate: [200, 100, 200],
-                        actions: [
-                            { action: 'open', title: '\uD83D\uDCCB Open App' },
-                            { action: 'dismiss', title: 'Dismiss' }
-                        ]
-                    });
-                    console.log('[SW] Fired notification: ' + notif.title);
-                } catch (showErr) {
-                    console.error('[SW] showNotification failed:', showErr);
-                }
-                // Always remove from DB whether or not showNotification succeeded
-                await deleteScheduledNotification(notif.id);
-            }
-        }
-    } catch (err) {
-        console.error('[SW] Error in checkAndFireNotifications:', err);
-    }
-}
-
-// ===================================
-// SCHEDULE A TASK'S NOTIFICATIONS
-// ===================================
-async function handleScheduleNotifications({ task, taskId, intervals }) {
-    if (!task || !task.dueDate) return;
-
-    await clearNotificationsForTask(taskId);
-
-    const dueTime = new Date(task.dueDate).getTime();
-    const now = Date.now();
-    const taskTitle = task.title || 'Task';
-    const minuteIntervals = intervals || [20, 15, 10, 5, 2];
-
-    for (const minutes of minuteIntervals) {
-        const fireAt = dueTime - (minutes * 60 * 1000);
-        if (fireAt > now) {
-            const notifId = taskId + '-' + minutes + 'min';
-            await saveScheduledNotification({
-                id: notifId,
-                taskId: taskId,
-                fireAt: fireAt,
-                title: '\u23F0 Task Due in ' + minutes + ' Minute' + (minutes === 1 ? '' : 's') + '!',
-                body: '"' + taskTitle + '" is due in ' + minutes + ' minute' + (minutes === 1 ? '' : 's'),
-                icon: 'assets/logo/icon-192.png',
-                minutes: minutes
-            });
-        }
-    }
-    console.log('[SW] Scheduled reminders for: "' + taskTitle + '" (' + taskId + ')');
-}
-
-// ===================================
-// MESSAGE HANDLER
-// ===================================
-self.addEventListener('message', async (event) => {
-    const { type, payload } = event.data || {};
-    const port = event.ports[0];
-
-    try {
-        switch (type) {
-            case 'SCHEDULE_NOTIFICATIONS':
-                await handleScheduleNotifications(payload);
-                startNotificationChecker();
-                port && port.postMessage({ success: true });
-                break;
-
-            case 'CLEAR_TASK_NOTIFICATIONS':
-                const cleared = await clearNotificationsForTask(payload.taskId);
-                port && port.postMessage({ success: true, cleared });
-                break;
-
-            case 'CLEAR_ALL_NOTIFICATIONS':
-                await clearAllScheduledNotifications();
-                port && port.postMessage({ success: true });
-                break;
-
-            case 'GET_SCHEDULED':
-                const all = await getAllScheduledNotifications();
-                port && port.postMessage({ success: true, notifications: all });
-                break;
-
-            case 'RESCHEDULE_ALL':
-                await clearAllScheduledNotifications();
-                if (payload && payload.tasks) {
-                    for (const item of payload.tasks) {
-                        await handleScheduleNotifications(item);
-                    }
-                }
-                startNotificationChecker();
-                port && port.postMessage({ success: true });
-                break;
-
-            case 'PING':
-                startNotificationChecker();
-                port && port.postMessage({ success: true, version: SW_VERSION });
-                break;
-
-            default:
-                port && port.postMessage({ success: false, error: 'Unknown message type: ' + type });
-        }
-    } catch (err) {
-        console.error('[SW] Message handler error for type "' + type + '":', err);
-        port && port.postMessage({ success: false, error: err.message });
-    }
-});
-
-// ===================================
-// PUSH EVENT (for server-sent push, future use)
-// ===================================
-self.addEventListener('push', (event) => {
-    if (!event.data) return;
-    try {
-        const data = event.data.json();
-        event.waitUntil(
-            self.registration.showNotification(data.title || '\u23F0 Task Reminder', {
-                body: data.body || 'You have a task due soon!',
-                icon: data.icon || 'assets/logo/icon-192.png',
-                badge: 'assets/logo/icon-192.png',
-                tag: data.tag || 'task-reminder-push',
-                data: { url: data.url || '/' },
-                requireInteraction: false,
-                vibrate: [200, 100, 200]
+    console.log('[SW] Activating v3...');
+    event.waitUntil(
+        caches.keys()
+            .then(names => Promise.all(
+                names.filter(n => n !== CACHE_NAME).map(n => caches.delete(n))
+            ))
+            .then(() => self.clients.claim())
+            .then(() => {
+                // Load any previously cached tasks and start the check loop
+                return loadTasksFromCache().then(() => {
+                    scheduleNextCheck();
+                });
             })
-        );
-    } catch (err) {
-        console.error('[SW] Push event error:', err);
+    );
+});
+
+// ─── Fetch (network-first, cache fallback) ────────────────────────────────────
+self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET') return;
+    const url = new URL(event.request.url);
+    if (url.origin !== self.location.origin) return;
+
+    event.respondWith(
+        fetch(event.request)
+            .then(response => {
+                if (response && response.status === 200) {
+                    const cloned = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
+                }
+                return response;
+            })
+            .catch(() => caches.match(event.request))
+    );
+});
+
+// ─── Messages from the main page ──────────────────────────────────────────────
+self.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || !msg.type) return;
+
+    switch (msg.type) {
+
+        case 'SYNC_TASKS':
+            // Main page sends full task list on load, on task create/edit/delete,
+            // and every 55 s as a keep-alive ping.
+            if (Array.isArray(msg.tasks)) {
+                _tasks = msg.tasks.filter(t => !t.completed && t.dueDate);
+                console.log('[SW] Task sync received:', _tasks.length, 'active tasks');
+                // Persist to Cache Storage so we can reload after SW restart
+                persistTasksToCache(_tasks);
+                // Run an immediate check
+                checkAndNotify();
+            }
+            break;
+
+        case 'CLEAR_TASK':
+            // Task was completed, deleted, or edited — clear its sent-keys
+            if (msg.taskId !== undefined) {
+                THRESHOLDS_MIN.forEach(m => _sentKeys.delete(`${msg.taskId}_${m}`));
+                _tasks = _tasks.filter(t => (t.id || t.title) !== msg.taskId);
+                persistTasksToCache(_tasks);
+            }
+            break;
+
+        case 'CLEAR_ALL':
+            _tasks = [];
+            _sentKeys.clear();
+            persistTasksToCache([]);
+            break;
+
+        case 'PING':
+            // Keep-alive from the main page; run a check while we're awake
+            checkAndNotify();
+            break;
     }
 });
 
-// ===================================
-// NOTIFICATION CLICK HANDLER
-// Opens the app and navigates to the relevant task
-// ===================================
+// ─── Periodic Background Sync (Android Chrome) ────────────────────────────────
+self.addEventListener('periodicsync', (event) => {
+    if (event.tag === 'task-reminder-check') {
+        console.log('[SW] Periodic sync fired');
+        event.waitUntil(
+            loadTasksFromCache().then(() => checkAndNotify())
+        );
+    }
+});
+
+// ─── Server-side FCM push (future use) ────────────────────────────────────────
+self.addEventListener('push', (event) => {
+    let data = {};
+    if (event.data) {
+        try { data = event.data.json(); }
+        catch (_) { data = { title: '\u23F0 Task Reminder', body: event.data.text() }; }
+    }
+    const title   = (data.notification && data.notification.title) || data.title || '\u23F0 Task Reminder';
+    const options = {
+        body:   (data.notification && data.notification.body) || data.body || 'A task is due soon!',
+        icon:   './assets/logo/favicon.png',
+        badge:  './assets/logo/favicon.png',
+        tag:    data.tag || ('push-' + Date.now()),
+        data:   { url: self.location.origin }
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ─── Notification click ───────────────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-
-    const action = event.action;
-    if (action === 'dismiss') return;
-
-    const notifData = event.notification.data || {};
-    const targetUrl = notifData.url || '/';
-
+    const targetUrl = (event.notification.data && event.notification.data.url) || self.location.origin;
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            for (const client of clientList) {
-                if ('focus' in client) {
-                    client.focus();
-                    if ('navigate' in client) {
-                        client.navigate(targetUrl);
-                    }
-                    return;
-                }
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+            for (const client of list) {
+                if ('focus' in client) return client.focus();
             }
-            if (clients.openWindow) {
-                return clients.openWindow(targetUrl);
-            }
+            if (clients.openWindow) return clients.openWindow(targetUrl);
         })
     );
 });
 
-// ===================================
-// PERIODIC BACKGROUND SYNC
-// Fires every ~15 minutes on Chrome/Android even when app is closed
-// ===================================
-self.addEventListener('periodicsync', (event) => {
-    if (event.tag === 'check-task-notifications') {
-        console.log('[SW] Periodic sync fired - checking notifications');
-        event.waitUntil(checkAndFireNotifications());
-    }
-});
+// ─── Core: check tasks and fire notifications ─────────────────────────────────
+function checkAndNotify() {
+    const now      = Date.now();
+    const windowMs = WINDOW_SEC * 1000;
 
-// ===================================
-// BACKGROUND SYNC (one-shot)
-// ===================================
-self.addEventListener('sync', (event) => {
-    if (event.tag === 'check-notifications') {
-        event.waitUntil(checkAndFireNotifications());
-    }
-});
+    _tasks.forEach(task => {
+        if (task.completed) return;
+        const dueMs = new Date(task.dueDate).getTime();
+        if (isNaN(dueMs)) return;
 
-// Start the checker immediately when SW loads
-startNotificationChecker();
-console.log('[SW] Task Monsters Service Worker v' + SW_VERSION + ' loaded');
+        const msRemaining = dueMs - now;
+        if (msRemaining < 0) return; // overdue
+
+        THRESHOLDS_MIN.forEach(minutes => {
+            const thresholdMs = minutes * 60 * 1000;
+            const diff        = msRemaining - thresholdMs; // positive = not yet at threshold
+
+            if (Math.abs(diff) <= windowMs) {
+                const key = `${task.id || task.title}_${minutes}`;
+                if (!_sentKeys.has(key)) {
+                    _sentKeys.add(key);
+                    const title = `\u23F0 Task Due in ${minutes} Minute${minutes === 1 ? '' : 's'}!`;
+                    const body  = `"${task.title}" is due in ${minutes} minute${minutes === 1 ? '' : 's'}. Time to finish up!`;
+                    self.registration.showNotification(title, {
+                        body,
+                        icon:               './assets/logo/favicon.png',
+                        badge:              './assets/logo/favicon.png',
+                        tag:                `task-monsters-${task.id || task.title}-${minutes}min`,
+                        requireInteraction: false,
+                        data:               { url: self.location.origin }
+                    }).then(() => {
+                        console.log('[SW] Notification fired:', title);
+                    }).catch(err => {
+                        console.error('[SW] showNotification error:', err);
+                    });
+                }
+            }
+        });
+    });
+}
+
+// ─── Self-scheduling check loop (runs while SW is alive) ─────────────────────
+function scheduleNextCheck() {
+    if (_checkTimer) clearTimeout(_checkTimer);
+    _checkTimer = setTimeout(() => {
+        checkAndNotify();
+        scheduleNextCheck();
+    }, 60 * 1000); // every 60 seconds
+}
+
+// ─── Persist tasks to Cache Storage ──────────────────────────────────────────
+async function persistTasksToCache(tasks) {
+    try {
+        const cache    = await caches.open(CACHE_NAME);
+        const response = new Response(JSON.stringify(tasks), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        await cache.put(TASKS_CACHE_KEY, response);
+    } catch (err) {
+        console.warn('[SW] Could not persist tasks to cache:', err);
+    }
+}
+
+// ─── Load tasks from Cache Storage (fallback when page is closed) ─────────────
+async function loadTasksFromCache() {
+    try {
+        const cache    = await caches.open(CACHE_NAME);
+        const response = await cache.match(TASKS_CACHE_KEY);
+        if (response) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                _tasks = data.filter(t => !t.completed && t.dueDate);
+                console.log('[SW] Loaded', _tasks.length, 'tasks from cache');
+            }
+        }
+    } catch (err) {
+        console.warn('[SW] Could not load tasks from cache:', err);
+    }
+}

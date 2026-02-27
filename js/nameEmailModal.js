@@ -19,6 +19,8 @@ class NameEmailModal {
             return;
         }
 
+        console.log('📧 Showing Name/Email collection modal');
+
         // Create overlay
         const overlay = document.createElement('div');
         overlay.id = 'nameEmailModalOverlay';
@@ -120,7 +122,7 @@ class NameEmailModal {
                 });
 
                 if (response.ok) {
-
+                    console.log('Formspree submission successful');
                     if (typeof showNotification === 'function') {
                         showNotification('Thanks! Your monster is ready to fight!', 'success');
                     }

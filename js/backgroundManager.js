@@ -61,7 +61,7 @@
       }
       
       const mode = activeTheme ? 'custom theme' : (isNight ? 'night' : 'day');
-
+      console.log(`[BackgroundManager] Pet rock background updated to ${mode} mode (${backgroundUrl})`);
     } else {
       console.warn('[BackgroundManager] Pet rock header not found, retrying...');
       // Retry after a short delay if element not found yet
@@ -70,7 +70,8 @@
   }
   
   function init() {
-
+    console.log('[BackgroundManager] Initializing...');
+    
     // Wait for DOM to be fully loaded, then set initial background
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
@@ -101,7 +102,7 @@
       setTimeout(() => {
         if (window.skinsManager && typeof window.skinsManager.updateAllMonsterVisuals === 'function') {
           window.skinsManager.updateAllMonsterVisuals();
-
+          console.log('[BackgroundManager] Monster animations restarted after theme apply');
         }
       }, 100);
     }
@@ -119,7 +120,7 @@
       setTimeout(() => {
         if (window.skinsManager && typeof window.skinsManager.updateAllMonsterVisuals === 'function') {
           window.skinsManager.updateAllMonsterVisuals();
-
+          console.log('[BackgroundManager] Monster animations restarted after theme unapply');
         }
       }, 100);
     }

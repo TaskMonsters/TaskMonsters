@@ -29,7 +29,8 @@ class GuardianOnboarding {
                 isLastStep: true
             }
         ];
-
+        
+        console.log('[GuardianOnboarding] Guardian Onboarding System initialized');
     }
     
     /**
@@ -47,7 +48,7 @@ class GuardianOnboarding {
      * Start Guardian onboarding
      */
     start() {
-
+        console.log('[GuardianOnboarding] Starting Guardian onboarding');
         this.currentStep = 0;
         this.showStep(0);
     }
@@ -299,7 +300,8 @@ class GuardianOnboarding {
      */
     complete() {
         localStorage.setItem('guardianOnboardingCompleted', 'true');
-
+        console.log('[GuardianOnboarding] Guardian onboarding completed');
+        
         // Remove overlay
         const overlay = document.getElementById('guardianOnboardingOverlay');
         if (overlay) {
@@ -311,7 +313,7 @@ class GuardianOnboarding {
             showNotification('🗺️ Welcome to Task World! Your adventure begins!', 'success');
         }
         
-        // Continue with normal onboarding flow
+        // Continue with normal onboarding flow (battle tutorial, etc.)
         // The simpleOnboarding will handle the rest
         if (window.simpleOnboarding && window.simpleOnboarding.shouldShow && window.simpleOnboarding.shouldShow()) {
             setTimeout(() => {
@@ -346,3 +348,5 @@ window.addEventListener('load', () => {
         }
     }, 1000);
 });
+
+console.log('[GuardianOnboarding] Guardian Onboarding System loaded');

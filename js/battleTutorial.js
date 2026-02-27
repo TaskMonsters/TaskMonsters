@@ -60,7 +60,7 @@ class BattleTutorial {
 
     // Show the battle tutorial
     show() {
-
+        console.log('⚔️ Starting battle tutorial');
         this.currentPage = 0;
         this.showPage(0);
     }
@@ -275,6 +275,7 @@ class BattleTutorial {
     complete() {
         // Mark battle tutorial as completed
         localStorage.setItem('battleTutorialCompleted', 'true');
+        console.log('⚔️ Battle tutorial completed');
 
         // Show notification
         if (typeof showNotification === 'function') {

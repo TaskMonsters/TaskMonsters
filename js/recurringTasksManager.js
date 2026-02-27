@@ -146,7 +146,7 @@ class RecurringTasksManager {
             if (typeof updateTasksDisplay === 'function') {
                 updateTasksDisplay();
             }
-
+            console.log(`✅ Created ${tasksCreated} recurring task(s)`);
         }
     }
 
@@ -181,6 +181,7 @@ class RecurringTasksManager {
             saveGameState();
         }
 
+        console.log('📅 Created recurring task instance:', task.title);
     }
 
     // Calculate when this task instance is due

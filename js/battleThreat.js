@@ -31,7 +31,8 @@ class ThreatSystem {
         }
         
         this.save();
-
+        
+        console.log(`Threat adjusted by ${delta}. New threat: ${this.threatScore}`);
     }
     
     /**

@@ -23,7 +23,7 @@ class GuardianNarrator {
             // Onboarding
             welcome: "Welcome, new Task Master! You've just stepped into Task World, a secret realm that thrives on focus and accomplishment. I'll be your guide on this grand adventure!",
             
-            coreConcept: "This world is powered by your energy! Every task you complete in the real world sends a wave of power here, pushing back the shadows and helping our world flourish.",
+            coreC oncept: "This world is powered by your energy! Every task you complete in the real world sends a wave of power here, pushing back the shadows and helping our world flourish.",
             
             introducePet: "Look! A new Task Pet has been born from your potential. This loyal companion is a reflection of your inner drive. It will grow stronger with every goal you achieve. What will you name your new friend?",
             
@@ -95,7 +95,8 @@ class GuardianNarrator {
     
     init() {
         if (this.initialized) return;
-
+        
+        console.log('[Guardian] Initializing Guardian Narrator...');
         this.initialized = true;
         
         // Create Guardian UI container if it doesn't exist
@@ -103,7 +104,8 @@ class GuardianNarrator {
         
         // Listen for battle victory events
         this.setupEventListeners();
-
+        
+        console.log('[Guardian] Guardian Narrator initialized');
     }
     
     createGuardianUI() {
@@ -255,19 +257,19 @@ class GuardianNarrator {
     setupEventListeners() {
         // Listen for battle victory events
         document.addEventListener('battleVictory', (e) => {
-
+            console.log('[Guardian] Battle victory detected', e.detail);
             this.handleBattleVictory(e.detail);
         });
         
         // Listen for level up events
         document.addEventListener('levelUp', (e) => {
-
+            console.log('[Guardian] Level up detected', e.detail);
             // Level up message will be handled in battle victory
         });
         
         // Listen for region change events
         document.addEventListener('regionChange', (e) => {
-
+            console.log('[Guardian] Region change detected', e.detail);
             // Region change will be handled in battle victory
         });
     }
@@ -355,7 +357,8 @@ class GuardianNarrator {
         if (duration) {
             setTimeout(() => this.hideMessage(), duration);
         }
-
+        
+        console.log('[Guardian] Showing message:', message);
     }
     
     hideMessage() {
@@ -368,7 +371,8 @@ class GuardianNarrator {
         }, 300);
         
         this.currentMessage = null;
-
+        
+        console.log('[Guardian] Message hidden');
     }
     
     // Onboarding methods
@@ -376,7 +380,7 @@ class GuardianNarrator {
         this.showMessage(this.messages.welcome);
     }
     
-    showCoreConcept() {
+    showCoreC oncept() {
         this.showMessage(this.messages.coreConcept);
     }
     
@@ -414,3 +418,5 @@ if (document.readyState === 'loading') {
 } else {
     window.guardianNarrator.init();
 }
+
+console.log('[Guardian] Guardian Narrator module loaded');

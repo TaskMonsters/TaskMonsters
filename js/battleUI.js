@@ -218,6 +218,19 @@ function updateBattleButtonsVisibility() {
             wizardsWandBtn.style.display = 'none';
         }
     }
+
+    // Special Defense button - only show if ever unlocked
+    const specialDefenseBtn = document.getElementById('btnSpecialDefense');
+    const specialDefenseCountEl = document.getElementById('specialDefenseCount');
+    const specialDefenseQty = inventory.special_defense || 0;
+    if (specialDefenseBtn && specialDefenseCountEl) {
+        if (unlockedItems.includes('special_defense')) {
+            specialDefenseBtn.style.display = '';
+            specialDefenseCountEl.textContent = `(${specialDefenseQty})`;
+        } else {
+            specialDefenseBtn.style.display = 'none';
+        }
+    }
     
     // Mirror Attack button - only show if ever unlocked
     const mirrorAttackBtn = document.getElementById('btnMirrorAttack');
@@ -607,6 +620,22 @@ function updateActionButtons(hero) {
             btnWizardsWand.style.display = 'none';
         }
     }
+
+    // Special Defense button — show if owned or level 30+
+    const btnSpecialDefense = document.getElementById('btnSpecialDefense');
+    if (btnSpecialDefense) {
+        const specialDefenseCount = gameState.battleInventory?.special_defense || 0;
+        if (specialDefenseCount > 0 || hero.level >= 30) {
+            btnSpecialDefense.style.display = '';
+            const specialDefenseCountSpan = btnSpecialDefense.querySelector('.item-count');
+            if (specialDefenseCountSpan) {
+                specialDefenseCountSpan.textContent = `(${specialDefenseCount})`;
+            }
+            btnSpecialDefense.disabled = specialDefenseCount === 0;
+        } else {
+            btnSpecialDefense.style.display = 'none';
+        }
+    }
 }
 
 // Add message to battle log
@@ -622,7 +651,7 @@ function addBattleLog(message) {
 
 // Fireball Projectile Animation
 async function playFireballAnimation(startElement, targetElement) {
-
+    console.log('🔥 Fireball animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'fireball-projectile';
     projectile.style.width = '50px';
@@ -637,6 +666,7 @@ async function playFireballAnimation(startElement, targetElement) {
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('🔥 Fireball projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
@@ -740,7 +770,7 @@ async function playWaveformAnimation(startElement, targetElement) {
 
 // Spark Projectile Animation (Player level 7+ attack)
 async function playSparkAnimation(startElement, targetElement) {
-
+    console.log('⚡ Spark animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'spark-projectile';
     projectile.style.width = '40px';
@@ -754,6 +784,7 @@ async function playSparkAnimation(startElement, targetElement) {
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('⚡ Spark projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
@@ -832,7 +863,7 @@ async function playSparkExplosion(targetRect) {
 
 // Asteroid Projectile Animation
 async function playAsteroidAnimation(startElement, targetElement) {
-
+    console.log('🪨 Asteroid animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'asteroid-projectile';
     projectile.style.width = '45px';
@@ -847,17 +878,22 @@ async function playAsteroidAnimation(startElement, targetElement) {
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('🪨 Asteroid projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
-
-
+    
+    console.log('🪨 Start position:', startRect);
+    console.log('🪨 Target position:', targetRect);
+    
     // Position projectile at start
     const startX = startRect.left + startRect.width / 2 - 22.5;
     const startY = startRect.top + startRect.height / 2 - 22.5;
     projectile.style.left = startX + 'px';
     projectile.style.top = startY + 'px';
+    
+    console.log('🪨 Projectile positioned at:', startX, startY);
 
     // Animate projectile movement with arc
     const duration = 700;
@@ -897,7 +933,7 @@ async function playAsteroidAnimation(startElement, targetElement) {
 
 // Asteroid Explosion Animation - 4 frames
 async function playAsteroidExplosion(targetRect) {
-
+    console.log('💥 Asteroid explosion starting');
     const explosion = document.createElement('div');
     explosion.style.width = '80px';
     explosion.style.height = '80px';
@@ -926,7 +962,7 @@ async function playAsteroidExplosion(targetRect) {
 
 // Prickler Projectile Animation
 async function playPricklerAnimation(startElement, targetElement) {
-
+    console.log('⚛️ Prickler animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'prickler-projectile';
     projectile.style.width = '45px';
@@ -941,6 +977,7 @@ async function playPricklerAnimation(startElement, targetElement) {
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('⚛️ Prickler projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
@@ -1025,7 +1062,7 @@ async function playPricklerExplosion(targetRect) {
 
 // Freeze Projectile Animation
 async function playFreezeAnimation(startElement, targetElement) {
-
+    console.log('❄️ Freeze animation starting');
     const projectile = document.createElement('div');
     projectile.className = 'freeze-projectile';
     projectile.style.width = '50px';
@@ -1040,6 +1077,7 @@ async function playFreezeAnimation(startElement, targetElement) {
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
     document.body.appendChild(projectile);
+    console.log('❄️ Freeze projectile created');
 
     // Get positions
     const startRect = startElement.getBoundingClientRect();
@@ -1455,7 +1493,7 @@ window.playFireExplosion = playFireExplosion;
 
 // Blue Flame Animation
 async function playBlueFlameAnimation(startElement, targetElement) {
-
+    console.log('🔵 Blue Flame animation starting');
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
 
@@ -1474,7 +1512,8 @@ async function playBlueFlameAnimation(startElement, targetElement) {
     projectile.style.imageRendering = 'pixelated';
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
-
+    console.log('🔵 Blue Flame projectile created');
+    
     document.body.appendChild(projectile);
 
     // Animate to target manually
@@ -1538,7 +1577,7 @@ async function playBlueFlameExplosion(targetRect) {
 
 // Procrastination Ghost Animation
 async function playProcrastinationGhostAnimation(startElement, targetElement) {
-
+    console.log('👻 Procrastination Ghost animation starting');
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
 
@@ -1556,7 +1595,8 @@ async function playProcrastinationGhostAnimation(startElement, targetElement) {
     projectile.style.zIndex = '10000';
     projectile.style.pointerEvents = 'none';
     projectile.style.opacity = '0.9';
-
+    console.log('👻 Ghost projectile created');
+    
     document.body.appendChild(projectile);
 
     // Animate to target with floating motion
@@ -1642,7 +1682,8 @@ window.increaseSpecialGauge = function(amount) {
     if (window.battleManager && typeof updateActionButtons === 'function') {
         updateActionButtons(window.battleManager.hero);
     }
-
+    
+    console.log(`[Special Gauge] Increased by ${amount}, now at ${window.gameState.specialAttackGauge}/100`);
 };
 
 // Reset special attack gauge to 0 after use
@@ -1658,7 +1699,8 @@ window.resetSpecialGauge = function() {
     if (window.battleManager && typeof updateActionButtons === 'function') {
         updateActionButtons(window.battleManager.hero);
     }
-
+    
+    console.log('[Special Gauge] Reset to 0 after special attack use');
 };
 
 // Initialize the special attack gauge UI at the start of a battle
@@ -1683,7 +1725,8 @@ window.initSpecialAttackGauge = function() {
     // Sync gauge bar to current value
     if (specialGaugeBar) specialGaugeBar.style.width = currentGauge + '%';
     if (specialGaugeText) specialGaugeText.textContent = `${currentGauge}/100`;
-
+    
+    console.log(`[Special Gauge] Initialized at ${currentGauge}/100, level ${userLevel}`);
 };
 
 // Medusa projectile animation (gaze beam)
@@ -1851,7 +1894,8 @@ window.showPotionBoostAnimation = showPotionBoostAnimation;
 
 // Mirror Attack Animation - Shows swirling mirror effect on hero
 async function showMirrorAttackAnimation(targetElementId) {
-
+    console.log('🪞 Mirror Attack projectile animation starting');
+    
     const heroSprite = document.getElementById('heroSprite');
     const enemySprite = document.getElementById('enemySprite');
     const battleContainer = document.querySelector('.battle-container');
@@ -1897,7 +1941,7 @@ async function showMirrorAttackAnimation(targetElementId) {
     return new Promise((resolve) => {
         setTimeout(() => {
             projectile.remove();
-
+            console.log('🪞 Mirror Attack projectile animation complete');
             resolve();
         }, 700);
     });
@@ -1905,7 +1949,7 @@ async function showMirrorAttackAnimation(targetElementId) {
 
 // Poison Leaf Animation - Projectile with explosion
 async function playPoisonLeafAnimation(startElement, targetElement) {
-
+    console.log('🍃 Poison Leaf animation starting');
     const startRect = startElement.getBoundingClientRect();
     const targetRect = targetElement.getBoundingClientRect();
 
@@ -1958,7 +2002,8 @@ async function playPoisonLeafAnimation(startElement, targetElement) {
 
     await new Promise(resolve => setTimeout(resolve, 800));
     explosion.remove();
-
+    
+    console.log('🍃 Poison Leaf animation complete');
 }
 
 // Export new functions
