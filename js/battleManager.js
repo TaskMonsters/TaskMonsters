@@ -22,12 +22,7 @@ class BattleManager {
         this.battleLog = [];
         this.hasEvade = false;
         this.hasReflect = false;
-        this.hasSpecialDefense = false;
-        // Gauntlet fields
-        this._gauntletOnComplete      = null;
-        this._gauntletWave            = 0;
-        this._gauntletIsBoss          = false;
-        this._gauntletBossSlayerActive = false; // Special Defense item: blocks next enemy special attack
+        this.hasSpecialDefense = false; // Special Defense item: blocks next enemy special attack
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
         this.reflectTurns = 0;  // Luna's reflect effect turns remaining
         this.reflectActive = false;  // Luna's reflect effect active flag
@@ -50,7 +45,7 @@ class BattleManager {
     }
 
     // Initialize battle with hero and enemy
-    async startBattle(heroData, enemyData, options = {}) {
+    async startBattle(heroData, enemyData) {
         // CRITICAL: Prevent battle from starting if quest giver is active
         if (window.questGiver && window.questGiver.activeQuest) {
             console.log('[Battle] Quest giver is active, battle will not start');
@@ -94,16 +89,6 @@ class BattleManager {
         this.state = BattleState.INITIALIZING;
         this.hero = heroData;
         this.enemy = enemyData;
-        // Gauntlet options
-        this._gauntletOnComplete = options.onComplete || null;
-        this._gauntletWave       = options.gauntletWave || 0;
-        this._gauntletIsBoss     = options.isBossWave   || false;
-        // Apply boss_slayer effect (3× player damage) if flagged
-        if (enemyData && enemyData._gauntletBossSlayer) {
-            this._gauntletBossSlayerActive = true;
-        } else {
-            this._gauntletBossSlayerActive = false;
-        }
         this.attackGauge = 100;  // Start with full attack gauge
         this.defenseGauge = 100; // Start with full defense gauge
         this.battleLog = [];
@@ -357,19 +342,7 @@ class BattleManager {
 
     // Helper: Apply damage to hero with animation
     applyHeroDamage(damage) {
-        const hpAfter = this.hero.hp - damage;
-        // Gauntlet shield_rune: survive a killing blow at 1 HP (once per run)
-        if (hpAfter <= 0 && this._gauntletWave > 0) {
-            const inv = window.gameState && window.gameState.battleInventory;
-            if (inv && (inv.shield_rune || 0) > 0) {
-                inv.shield_rune--;
-                this.hero.hp = 1;
-                if (typeof addBattleLog === 'function') addBattleLog('🛡 Shield Rune activated! You survived with 1 HP!');
-                if (typeof updateBattleUI === 'function') updateBattleUI(this.hero, this.enemy);
-                return;
-            }
-        }
-        this.hero.hp = Math.max(0, hpAfter);
+        this.hero.hp = Math.max(0, this.hero.hp - damage);
         if (window.showBattleDamageAnimation) {
             window.showBattleDamageAnimation('heroSprite', damage);
         }
@@ -570,11 +543,7 @@ class BattleManager {
         // Damage range: 50-80 damage
         const baseDamage = this.hero.attack;
         const maxDamage = baseDamage + 10;
-        let randomDamage = Math.floor(Math.random() * (maxDamage - baseDamage + 1)) + baseDamage;
-        // Gauntlet: boss_slayer triples player damage on boss waves
-        if (this._gauntletBossSlayerActive && this._gauntletIsBoss) {
-            randomDamage = Math.round(randomDamage * 3);
-        }
+        const randomDamage = Math.floor(Math.random() * (maxDamage - baseDamage + 1)) + baseDamage;
         
         // Enemy defense reduces damage slightly
         const defenseReduction = Math.floor(this.enemy.defense * 0.1); // Only 10% of enemy defense
@@ -3035,13 +3004,6 @@ class BattleManager {
         this.inBattle = false;
         console.log('[Battle] Battle ended, inBattle flag set to false');
         
-        // Gauntlet: fire onComplete callback so GauntletManager can advance the wave
-        if (this._gauntletOnComplete) {
-            const _cb = this._gauntletOnComplete;
-            this._gauntletOnComplete = null;
-            // Small delay so the victory/defeat UI is visible briefly
-            setTimeout(() => _cb(result), 800);
-        }
         // Fade out after 2 seconds
         setTimeout(() => {
             document.getElementById('battleLog').innerHTML = '';

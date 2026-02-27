@@ -3319,137 +3319,7 @@
     }
 }
 
-    
-        /* ═══════════════════════════════════════════════════════════
-           GAUNTLET / MONSTER ARENA STYLES
-           ═══════════════════════════════════════════════════════════ */
-        .gauntlet-card {
-            border: 2px solid #7c3aed;
-            background: linear-gradient(160deg, #0f0f1a 0%, #1a0f2e 100%);
-        }
-        .gauntlet-hero-banner {
-            background: linear-gradient(135deg, #1e0533 0%, #3b0764 50%, #1e0533 100%);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 12px 0 16px;
-            text-align: center;
-            border: 1px solid rgba(124, 58, 237, 0.4);
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
-        }
-        .gauntlet-banner-text h2 {
-            font-size: 22px; font-weight: 800; color: #e9d5ff;
-            margin-bottom: 6px; text-shadow: 0 0 12px rgba(167,139,250,0.6);
-        }
-        .gauntlet-banner-text p { font-size: 13px; color: #c4b5fd; margin: 0; }
-        .gauntlet-stats-row { display: flex; gap: 8px; margin-bottom: 14px; }
-        .gauntlet-stat-box {
-            flex: 1; background: rgba(124,58,237,0.15);
-            border: 1px solid rgba(124,58,237,0.3);
-            border-radius: 10px; padding: 10px 6px; text-align: center;
-        }
-        .gauntlet-stat-label {
-            font-size: 10px; color: #a78bfa; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
-        }
-        .gauntlet-stat-value { font-size: 22px; font-weight: 800; color: #e9d5ff; }
-        .gauntlet-effects-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; min-height: 0; }
-        .gauntlet-effect-chip {
-            background: rgba(124,58,237,0.25); border: 1px solid rgba(167,139,250,0.5);
-            border-radius: 20px; padding: 4px 10px; font-size: 12px; color: #c4b5fd; font-weight: 600;
-        }
-        .gauntlet-wave-info {
-            background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.4);
-            border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 14px;
-        }
-        .gauntlet-wave-label { font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-        .gauntlet-wave-number {
-            font-size: 48px; font-weight: 900; color: #e9d5ff; line-height: 1.1;
-            text-shadow: 0 0 20px rgba(167,139,250,0.8);
-        }
-        .gauntlet-wave-sublabel { font-size: 13px; color: #c4b5fd; margin-top: 2px; }
-        .gauntlet-start-btn {
-            width: 100%; padding: 16px;
-            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-            color: white; border: none; border-radius: 14px; font-size: 18px; font-weight: 800;
-            cursor: pointer; margin-bottom: 18px;
-            box-shadow: 0 4px 20px rgba(124,58,237,0.5);
-            transition: transform 0.15s ease, box-shadow 0.15s ease; letter-spacing: 0.5px;
-        }
-        .gauntlet-start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(124,58,237,0.7); }
-        .gauntlet-start-btn:active { transform: translateY(0); }
-        .gauntlet-start-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .gauntlet-howto {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px; padding: 14px; margin-bottom: 16px;
-        }
-        .gauntlet-howto-title {
-            font-size: 13px; font-weight: 700; color: #a78bfa;
-            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
-        }
-        .gauntlet-howto-grid { display: flex; flex-direction: column; gap: 8px; }
-        .gauntlet-howto-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
-        .gauntlet-howto-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-        .gauntlet-history-section { margin-top: 4px; }
-        .gauntlet-run-history { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-        .gauntlet-run-entry {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px; padding: 8px 12px; font-size: 13px;
-        }
-        .gauntlet-run-wave { font-weight: 700; color: #e9d5ff; }
-        .gauntlet-run-xp { color: #fbbf24; font-weight: 600; }
-        .gauntlet-run-date { color: var(--text-tertiary); font-size: 11px; }
-        .gauntlet-result-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.88);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10005; animation: fadeIn 0.3s ease-out;
-        }
-        .gauntlet-result-modal {
-            background: linear-gradient(135deg, #1a0f2e 0%, #0f0f1a 100%);
-            border: 2px solid #7c3aed; border-radius: 20px; padding: 28px 24px;
-            max-width: 360px; width: 88%; text-align: center;
-            box-shadow: 0 0 40px rgba(124,58,237,0.4); animation: scaleIn 0.3s ease-out;
-        }
-        .gauntlet-result-icon { font-size: 56px; margin-bottom: 12px; display: block; }
-        .gauntlet-result-title { font-size: 26px; font-weight: 900; color: #e9d5ff; margin-bottom: 8px; }
-        .gauntlet-result-wave {
-            font-size: 48px; font-weight: 900; color: #a78bfa; line-height: 1; margin: 8px 0;
-            text-shadow: 0 0 20px rgba(167,139,250,0.6);
-        }
-        .gauntlet-result-sub { font-size: 14px; color: #c4b5fd; margin-bottom: 16px; }
-        .gauntlet-result-rewards {
-            background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
-            border-radius: 12px; padding: 12px; margin-bottom: 20px;
-        }
-        .gauntlet-result-reward-row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; color: #e9d5ff; }
-        .gauntlet-result-reward-val { font-weight: 700; color: #fbbf24; }
-        .gauntlet-result-btn {
-            width: 100%; padding: 14px;
-            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
-            cursor: pointer; box-shadow: 0 4px 16px rgba(124,58,237,0.4);
-        }
-        @keyframes gauntletWavePulse {
-            0%   { transform: scale(0.8); opacity: 0; }
-            30%  { transform: scale(1.05); opacity: 1; }
-            70%  { transform: scale(1.0); opacity: 1; }
-            100% { transform: scale(1.1); opacity: 0; }
-        }
-        .gauntlet-wave-banner {
-            position: fixed; inset: 0; display: flex; align-items: center;
-            justify-content: center; z-index: 10004; pointer-events: none;
-        }
-        .gauntlet-wave-banner-inner {
-            background: linear-gradient(135deg, rgba(124,58,237,0.95) 0%, rgba(79,70,229,0.95) 100%);
-            border-radius: 20px; padding: 24px 40px; text-align: center;
-            box-shadow: 0 0 40px rgba(124,58,237,0.6);
-            animation: gauntletWavePulse 1.8s ease-in-out forwards;
-        }
-        .gauntlet-wave-banner-label { font-size: 14px; color: #c4b5fd; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
-        .gauntlet-wave-banner-number { font-size: 64px; font-weight: 900; color: white; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
-        .gauntlet-wave-banner-enemy { font-size: 16px; color: #e9d5ff; margin-top: 4px; }
-
-        </style>
+    </style>
 
 </head>
 <body>
@@ -4785,7 +4655,6 @@ input:checked + .toggle-slider:before {
             <button class="pill-tab" aria-selected="true" onclick="switchToTab('home')">Home</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('achievements')">Achievements</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('habits')">Habits</button>
-            <button class="pill-tab" aria-selected="false" onclick="switchToTab('arena')">🏟️ Arena</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('mood')">Mood Tracker</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('shop')">Shop</button>
             <button class="pill-tab" aria-selected="false" onclick="switchToTab('settings')">Settings</button>
@@ -4913,66 +4782,6 @@ input:checked + .toggle-slider:before {
             </div>
         </div>
 
-        <!-- Arena (Gauntlet) tab content -->
-        <div id="arenaTab" class="tab-content">
-            <div class="card gauntlet-card">
-                <div class="card-header">
-                    <div class="card-title">🏟️ Monster Arena</div>
-                </div>
-                <div class="gauntlet-hero-banner">
-                    <div class="gauntlet-banner-text">
-                        <h2>⚔️ Gauntlet Mode</h2>
-                        <p>Survive endless waves of enemies. How far can you go?</p>
-                    </div>
-                </div>
-                <!-- Stats Row -->
-                <div class="gauntlet-stats-row">
-                    <div class="gauntlet-stat-box">
-                        <div class="gauntlet-stat-label">🏆 Best Wave</div>
-                        <div class="gauntlet-stat-value" id="gauntletHighestWave">0</div>
-                    </div>
-                    <div class="gauntlet-stat-box">
-                        <div class="gauntlet-stat-label">📅 Weekly Best</div>
-                        <div class="gauntlet-stat-value" id="gauntletWeeklyBest">0</div>
-                    </div>
-                    <div class="gauntlet-stat-box">
-                        <div class="gauntlet-stat-label">🎮 Total Runs</div>
-                        <div class="gauntlet-stat-value" id="gauntletTotalRuns">0</div>
-                    </div>
-                </div>
-                <!-- Active Effects -->
-                <div class="gauntlet-effects-row" id="gauntletActiveEffects"></div>
-                <!-- Wave Info (shown during run) -->
-                <div class="gauntlet-wave-info" id="gauntletWaveInfo" style="display:none;">
-                    <div class="gauntlet-wave-label">Current Wave</div>
-                    <div class="gauntlet-wave-number" id="gauntletCurrentWave">1</div>
-                    <div class="gauntlet-wave-sublabel" id="gauntletWaveSubLabel">Tier 1 Enemy</div>
-                </div>
-                <!-- Start Button -->
-                <button class="gauntlet-start-btn" id="gauntletStartBtn" onclick="window.gauntletManager && window.gauntletManager.startRun()">
-                    ⚔️ Enter the Arena
-                </button>
-                <!-- How to Play -->
-                <div class="gauntlet-howto">
-                    <div class="gauntlet-howto-title">📜 How It Works</div>
-                    <div class="gauntlet-howto-grid">
-                        <div class="gauntlet-howto-item"><span class="gauntlet-howto-icon">🌊</span><span>Fight endless waves of enemies. Each wave gets harder.</span></div>
-                        <div class="gauntlet-howto-item"><span class="gauntlet-howto-icon">👹</span><span>Boss waves appear every 10 waves — much stronger!</span></div>
-                        <div class="gauntlet-howto-item"><span class="gauntlet-howto-icon">💀</span><span>If you lose, the run ends. Your best wave is saved.</span></div>
-                        <div class="gauntlet-howto-item"><span class="gauntlet-howto-icon">✨</span><span>Use Gauntlet items from the Shop to boost your run.</span></div>
-                        <div class="gauntlet-howto-item"><span class="gauntlet-howto-icon">🎁</span><span>Earn XP and coins based on how many waves you clear.</span></div>
-                        <div class="gauntlet-howto-item"><span class="gauntlet-howto-icon">🏟️</span><span>Also triggers randomly (20% chance) when you complete tasks!</span></div>
-                    </div>
-                </div>
-                <!-- Run History -->
-                <div class="gauntlet-history-section">
-                    <div class="gauntlet-howto-title">📊 Run History</div>
-                    <div id="gauntletRunHistory" class="gauntlet-run-history">
-                        <p style="text-align:center;color:var(--text-secondary);padding:16px;">No runs yet. Enter the Arena!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- Shop tab content -->
         <div id="shopTab" class="tab-content">
             <!-- Shop Sub-Tabs -->
@@ -5635,22 +5444,7 @@ input:checked + .toggle-slider:before {
             // Egg system - Start as an egg, hatch at Level 5
             isEgg: true, // New users start as an egg, hatch at Level 5
             consecutiveLosses: 0,
-            eggRevertedAt: null,
-            // Monster Arena Gauntlet system
-            gauntlet: {
-                highestWave: 0,
-                weeklyHighScore: 0,
-                lastRunTimestamp: null,
-                totalRuns: 0,
-                totalWavesCleared: 0,
-                activeEffects: {
-                    xp_boost: false,
-                    death_shield: false,
-                    boss_slayer: false,
-                    revive: false,
-                    loot_boost: false
-                }
-            }
+            eggRevertedAt: null
         };
         
         // Expose gameState to window for external scripts
@@ -5992,8 +5786,7 @@ input:checked + .toggle-slider:before {
                     const allBattleItemKeys = [
                         'fireball', 'spark', 'health_potion', 'attack_refill', 'defense_refill',
                         'invisibility_cloak', 'prickler', 'freeze', 'blue_flame', 'procrastination_ghost',
-                        'throwing_stars', 'special_defense',
-                        'xp_booster', 'shield_rune', 'elemental_orb', 'revive_crystal', 'loot_bag'
+                        'throwing_stars', 'special_defense'
                     ];
                     
                     // Only add missing keys with 0 (don't override existing values)
@@ -6029,34 +5822,6 @@ input:checked + .toggle-slider:before {
                 if (typeof gameState.eggRevertedAt === 'undefined') {
                     gameState.eggRevertedAt = null;
                 }
-                // Migration: Initialize gauntlet system for existing users
-                if (typeof gameState.gauntlet === 'undefined' || gameState.gauntlet === null) {
-                    gameState.gauntlet = {
-                        highestWave: 0,
-                        weeklyHighScore: 0,
-                        lastRunTimestamp: null,
-                        totalRuns: 0,
-                        totalWavesCleared: 0,
-                        activeEffects: {
-                            xp_boost: false,
-                            death_shield: false,
-                            boss_slayer: false,
-                            revive: false,
-                            loot_boost: false
-                        }
-                    };
-                }
-                // Ensure all gauntlet activeEffects keys exist
-                if (!gameState.gauntlet.activeEffects) {
-                    gameState.gauntlet.activeEffects = { xp_boost: false, death_shield: false, boss_slayer: false, revive: false, loot_boost: false };
-                }
-                // Migration: Add gauntlet items to battleInventory
-                const gauntletItemKeys = ['xp_booster', 'shield_rune', 'elemental_orb', 'revive_crystal', 'loot_bag'];
-                gauntletItemKeys.forEach(key => {
-                    if (typeof gameState.battleInventory[key] === 'undefined') {
-                        gameState.battleInventory[key] = 0;
-                    }
-                });
             }
             
             // Sync monster name from onboarding if it exists
@@ -9529,12 +9294,6 @@ input:checked + .toggle-slider:before {
                     window.initMoodFilters();
                 }
             }
-            // Refresh gauntlet stats when switching to arena tab
-            if (tabName === 'arena') {
-                if (window.gauntletManager) {
-                    window.gauntletManager.refreshUI();
-                }
-            }
         }
 
         // Toggle habit section collapse/expand
@@ -10102,62 +9861,6 @@ input:checked + .toggle-slider:before {
                 effect: 'special_defense',
                 levelRequired: 30,
                 maxQuantity: 5
-            },
-            // ─── Monster Arena Gauntlet Items ───────────────────────────────
-            xp_booster: {
-                id: 'xp_booster',
-                name: 'XP Booster',
-                emoji: '✨',
-                description: 'Doubles all XP earned during your next Gauntlet run. (Max: 5)',
-                cost: 100,
-                effect: 'gauntlet_xp_boost',
-                levelRequired: 10,
-                maxQuantity: 5,
-                gauntletOnly: true
-            },
-            shield_rune: {
-                id: 'shield_rune',
-                name: 'Shield Rune',
-                emoji: '🛡',
-                description: 'Blocks one killing blow in the Gauntlet — survive with 1 HP instead of dying. (Max: 5)',
-                cost: 250,
-                effect: 'gauntlet_death_shield',
-                levelRequired: 15,
-                maxQuantity: 5,
-                gauntletOnly: true
-            },
-            elemental_orb: {
-                id: 'elemental_orb',
-                name: 'Elemental Orb',
-                emoji: '🔥',
-                description: 'Deals 3× damage on Gauntlet boss waves (waves 10, 20, 30+). (Max: 5)',
-                cost: 500,
-                effect: 'gauntlet_boss_slayer',
-                levelRequired: 20,
-                maxQuantity: 5,
-                gauntletOnly: true
-            },
-            revive_crystal: {
-                id: 'revive_crystal',
-                name: 'Revive Crystal',
-                emoji: '💎',
-                description: 'Resurrects your monster once per Gauntlet run with 50 HP. (Max: 5)',
-                cost: 1000,
-                effect: 'gauntlet_revive',
-                levelRequired: 25,
-                maxQuantity: 5,
-                gauntletOnly: true
-            },
-            loot_bag: {
-                id: 'loot_bag',
-                name: 'Loot Bag',
-                emoji: '💰',
-                description: 'Doubles all coin rewards earned during your next Gauntlet run. (Max: 5)',
-                cost: 750,
-                effect: 'gauntlet_loot_boost',
-                levelRequired: 18,
-                maxQuantity: 5,
-                gauntletOnly: true
             }
         };
         // Update shop items display
@@ -10485,11 +10188,6 @@ input:checked + .toggle-slider:before {
                 return;
             }
             
-            // Handle gauntlet-only items
-            if (item.effect && item.effect.startsWith('gauntlet_')) {
-                alert(`🏟️ ${item.name} is a Gauntlet item!\n\nThis item activates automatically when you start a Monster Arena Gauntlet run.\n\nHead to the Arena tab to start a run!`);
-                return;
-            }
             // Default message for other items
             alert(`🎮 ${item.name} will be available in your next battle!`);
         }
@@ -11251,10 +10949,6 @@ input:checked + .toggle-slider:before {
                     battleTriggered = window.maybeTriggerBattle('regularTask', { taskId: task.id });
                 } else {
                     console.warn('Battle trigger system not loaded yet');
-                }
-                // 20% chance to trigger Gauntlet (independent of battle trigger)
-                if (!battleTriggered && typeof window.maybeTriggerGauntlet === 'function') {
-                    window.maybeTriggerGauntlet('regularTask');
                 }
                 
                 // Only trigger quest giver if battle did NOT start
@@ -12482,10 +12176,6 @@ input:checked + .toggle-slider:before {
                 } else {
                     console.warn('Battle trigger system not loaded yet');
                 }
-                // 20% chance to trigger Gauntlet (independent of battle trigger)
-                if (!battleTriggered && typeof window.maybeTriggerGauntlet === 'function') {
-                    window.maybeTriggerGauntlet('quickTask');
-                }
                 
                 // Only trigger quest giver if battle did NOT start
                 if (!battleTriggered) {
@@ -13527,8 +13217,6 @@ input:checked + .toggle-slider:before {
     <!-- Mood Tracker - Standalone System -->
     <script src="js/moodTracker.js?v=1768748859"></script>
 
-    <!-- Monster Arena Gauntlet -->
-    <script src="js/gauntletManager.js"></script>
     <!-- Service Worker Registration for PWA background notifications -->
     <script>
     (function() {
