@@ -62,6 +62,12 @@ class SkinsManager {
         // Sync state
         this.equippedSkinId = window.gameState?.equippedSkinId || null;
         
+        // CRITICAL: Do not overwrite egg sprite while monster is still in egg form
+        if (window.gameState && window.gameState.isEgg) {
+            console.log('[SkinsManager] Monster is in egg form - skipping visual update');
+            return;
+        }
+        
         // Get appearance (should return GIF paths)
         const appearance = window.getActiveMonsterAppearance(this.currentBaseMonster, this.equippedSkinId);
         const idleGif = appearance.animations.idle;
@@ -135,9 +141,20 @@ class SkinsManager {
         const allSkins = window.getAllSkins ? window.getAllSkins() : [];
         const userLevel = window.gameState.jerryLevel || 1;
         const userXP = window.gameState.jerryXP || 0;
+        const isEgg = window.gameState && window.gameState.isEgg;
         
         if (allSkins.length === 0) {
             grid.innerHTML = '<div class="no-skins">No skins available in the shop.</div>';
+            return;
+        }
+        
+        // If monster is still in egg form, show locked banner and disable all skins
+        if (isEgg) {
+            grid.innerHTML = `<div style="text-align:center;padding:24px 16px;color:#aaa;">
+                <div style="font-size:2.5rem;margin-bottom:8px;">🥚</div>
+                <div style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:4px;">Skins Locked</div>
+                <div style="font-size:0.85rem;">Your monster must hatch first!<br>Reach <strong>Level 5</strong> to unlock skins.</div>
+            </div>`;
             return;
         }
         
@@ -198,6 +215,14 @@ class SkinsManager {
      * Buy a skin
      */
     buySkin(skinId, price) {
+        // Block purchasing/equipping skins while monster is in egg form (pre-level 5)
+        if (window.gameState && window.gameState.isEgg) {
+            if (window.showSuccessMessage) {
+                window.showSuccessMessage('\uD83D\uDD12 Skins Locked', 'Reach Level 5 to equip skins!');
+            }
+            return;
+        }
+        
         if (window.gameState.jerryXP < price) return;
         
         window.gameState.jerryXP -= price;
@@ -217,6 +242,14 @@ class SkinsManager {
      */
     equipSkin(skinId) {
         if (!this.ownedSkins.includes(skinId)) return { success: false };
+        
+        // Block equipping skins while monster is in egg form (pre-level 5)
+        if (window.gameState && window.gameState.isEgg) {
+            if (window.showSuccessMessage) {
+                window.showSuccessMessage('\uD83D\uDD12 Skins Locked', 'Reach Level 5 to equip skins!');
+            }
+            return { success: false };
+        }
         this.equippedSkinId = skinId;
         window.gameState.equippedSkinId = skinId;
         window.saveGameState();
