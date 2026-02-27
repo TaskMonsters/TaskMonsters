@@ -198,10 +198,37 @@ class AppInitializer {
         document.documentElement.style.visibility = 'visible';
         
         // Initialize skins manager to ensure monster is visible
+        // CRITICAL: Only run skinsManager visuals if monster is NOT in egg form
         if (window.skinsManager) {
             window.skinsManager.init();
             // Force a second update after a short delay to ensure DOM is fully settled
-            setTimeout(() => window.skinsManager.updateAllMonsterVisuals(), 500);
+            // But ONLY if the monster has hatched - egg state takes priority
+            setTimeout(() => {
+                const isEgg = window.gameState && window.gameState.isEgg;
+                if (isEgg) {
+                    // Monster is in egg form - restore egg sprite (skinsManager may have overwritten it)
+                    const selectedMonster = localStorage.getItem('selectedMonster');
+                    if (selectedMonster) {
+                        const mainHeroSprite = document.getElementById('mainHeroSprite');
+                        if (mainHeroSprite) {
+                            mainHeroSprite.src = `assets/eggs/${selectedMonster}_egg.gif`;
+                            mainHeroSprite.classList.add('egg-sprite');
+                            mainHeroSprite.style.setProperty('animation', 'none', 'important');
+                            mainHeroSprite.style.setProperty('object-fit', 'contain', 'important');
+                            mainHeroSprite.style.setProperty('object-position', 'center', 'important');
+                            mainHeroSprite.style.setProperty('width', 'auto', 'important');
+                            mainHeroSprite.style.setProperty('height', 'auto', 'important');
+                            mainHeroSprite.style.setProperty('max-width', '100%', 'important');
+                            mainHeroSprite.style.setProperty('max-height', '100%', 'important');
+                            mainHeroSprite.style.setProperty('transform', 'scale(2)', 'important');
+                            mainHeroSprite.style.setProperty('opacity', '1', 'important');
+                            console.log('[AppInit] Egg sprite restored for:', selectedMonster);
+                        }
+                    }
+                } else {
+                    window.skinsManager.updateAllMonsterVisuals();
+                }
+            }, 500);
         }
         
         // Generate daily challenge if not already done

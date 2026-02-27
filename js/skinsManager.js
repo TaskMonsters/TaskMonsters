@@ -31,6 +31,11 @@ class SkinsManager {
         });
         
         // CRITICAL: Ensure DOM is ready before updating visuals
+        // But ONLY update visuals if monster has hatched - egg state takes priority
+        if (window.gameState && window.gameState.isEgg) {
+            console.log('[SkinsManager] Monster is in egg form - skipping init visual update');
+            return;
+        }
         this.ensureSpriteReady(() => {
             this.updateAllMonsterVisuals();
         });
