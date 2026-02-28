@@ -2803,6 +2803,9 @@
     padding: 20px 0;
     max-height: 100vh;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .step-header {
@@ -2811,6 +2814,7 @@
     margin-top: 0;
     padding-top: 0;
     position: relative;
+    width: 100%;
 }
 
 /* Fix Step 3 header alignment to match step 2 - move closer to top */
@@ -2866,10 +2870,14 @@
 
 .onboarding-step {
     display: none;
+    width: 100%;
 }
 
 .onboarding-step.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .monster-cards {
@@ -2877,6 +2885,7 @@
     flex-direction: column;
     gap: 12px;
     margin-bottom: 80px;
+    width: 100%;
 }
 
 .monster-card {
@@ -2901,8 +2910,10 @@
 
 .monster-card-content {
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    gap: 12px;
     align-items: center;
+    text-align: center;
 }
 
 .monster-avatar {
@@ -2986,6 +2997,8 @@
 
 .monster-info {
     flex: 1;
+    text-align: center;
+    width: 100%;
 }
 
 .monster-name {
@@ -3009,6 +3022,7 @@
 }
 
 .monster-tags {
+    justify-content: center;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -3074,6 +3088,8 @@
 .name-input-container {
     max-width: 500px;
     margin: 0 auto 30px;
+    text-align: center;
+    width: 100%;
 }
 
 .name-input {
@@ -3136,6 +3152,7 @@
     flex-direction: column;
     align-items: center;
     gap: 15px;
+    width: 100%;
 }
 
 .selected-monster-avatar {
@@ -3253,6 +3270,7 @@
     .monster-card-content {
         flex-direction: column;
         text-align: center;
+        align-items: center;
     }
     
     .monster-avatar {
