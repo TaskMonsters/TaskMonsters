@@ -2786,7 +2786,7 @@
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     z-index: 10000;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     overflow-y: auto;
     padding: 20px;
@@ -2817,9 +2817,9 @@
     width: 100%;
 }
 
-/* Fix Step 3 header alignment to match step 2 - move closer to top */
+/* Step 3 header - same alignment as other steps */
 #step3 .step-header {
-    margin-top: -20px;
+    margin-top: 0;
     padding-top: 0;
 }
 
