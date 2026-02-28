@@ -236,6 +236,35 @@ class AppInitializer {
             window.generateDailyChallenge();
         }
         
+        // Show mood tracker prompt on every app open.
+        // Displayed in the monster's dialogue tooltip so users know they can tap the monster.
+        // Waits 4 seconds after app is visible to avoid overlapping with other startup messages.
+        setTimeout(() => {
+            const tooltip = document.getElementById('taskPalTooltip');
+            if (tooltip) {
+                tooltip.textContent = '\uD83D\uDE0A Tap me to open your mood tracker!';
+                tooltip.classList.add('visible', 'mood-prompt');
+                
+                // Clicking the tooltip itself also opens the mood tracker
+                const openMoodOnClick = () => {
+                    tooltip.classList.remove('visible', 'mood-prompt');
+                    tooltip.removeEventListener('click', openMoodOnClick);
+                    if (window.moodTracker) {
+                        window.moodTracker.showTooltip();
+                    }
+                };
+                tooltip.addEventListener('click', openMoodOnClick);
+                
+                // Auto-hide after 8 seconds
+                clearTimeout(window._moodPromptTimer);
+                window._moodPromptTimer = setTimeout(() => {
+                    tooltip.classList.remove('visible', 'mood-prompt');
+                    tooltip.removeEventListener('click', openMoodOnClick);
+                }, 8000);
+            }
+            console.log('[AppInit] Mood tracker prompt shown');
+        }, 4000);
+        
         console.log('[AppInit] Main app visible');
     }
     

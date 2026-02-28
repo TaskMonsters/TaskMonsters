@@ -259,6 +259,17 @@
             display: flex;
             opacity: 1;
         }
+        
+        /* Mood tracker prompt tooltip style - pulsing glow to draw attention */
+        .task-pal-tooltip.mood-prompt {
+            cursor: pointer;
+            border: 1px solid rgba(139, 92, 246, 0.6);
+            animation: moodPromptPulse 2s ease-in-out infinite;
+        }
+        @keyframes moodPromptPulse {
+            0%, 100% { box-shadow: 0 6px 16px rgba(0,0,0,0.5), 0 0 0 2px rgba(139,92,246,0.3); }
+            50%       { box-shadow: 0 6px 16px rgba(0,0,0,0.5), 0 0 0 4px rgba(139,92,246,0.7); }
+        }
 
         .creature-image {
             width: 200px;
@@ -2288,9 +2299,19 @@
     
     /* Hero walk and flicker animations REMOVED - Using GIF animations instead */
     
-    /* Low HP flickering effect for main hero sprite */
+    /* Low HP flickering effect for main hero sprite (HP ≤ 20) */
+    @keyframes lowHpFlicker {
+        0%   { opacity: 1; }
+        15%  { opacity: 0.15; }
+        30%  { opacity: 1; }
+        50%  { opacity: 0.2; }
+        65%  { opacity: 1; }
+        80%  { opacity: 0.1; }
+        100% { opacity: 1; }
+    }
     .low-hp-flicker {
-      opacity: 0.6 !important; /* Static opacity instead of animation */
+        animation: lowHpFlicker 0.9s ease-in-out infinite !important;
+        /* Works on all skins: base monsters, human skins, egg sprites */
     }
 
     /* Native datetime-local input styling is handled by browser */
@@ -4436,6 +4457,9 @@ input:checked + .toggle-slider:before {
         <button id="btnSpecialDefense" class="btn-action" onclick="battleManager.playerSpecialDefense()" style="display: none;">
             📖 Special Defense <span class="item-count" id="specialDefenseCount">(0)</span>
         </button>
+        <button id="btnPoisonLeaf" class="btn-action" onclick="battleManager.playerPoisonLeaf()" style="display: none;">
+            🍃 Poison Leaf <span class="item-count" id="poisonLeafCount">(0)</span>
+        </button>
         <button id="btnFlee" class="btn-flee" onclick="battleManager.playerFlee()">
             🏃 Flee
         </button>
@@ -4499,7 +4523,10 @@ input:checked + .toggle-slider:before {
                 <div id="taskPalTooltip" class="task-pal-tooltip"></div>
                 <!-- CRITICAL: Wrapper div to contain the scaled sprite, overflow hidden to show only 1 frame -->
                 <div class="monster-container" style="width: 128px; height: 256px; overflow: visible; position: relative; display: flex; align-items: center; justify-content: center; z-index: 100;">
-                    <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Nova_idle.gif" style="width: 128px !important; height: 128px !important; image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; image-rendering: -webkit-optimize-contrast; object-fit: contain !important; object-position: center; transform: none; opacity: 1; display: block;"/>
+                    <!-- low-hp-flicker is applied to this wrapper so it works with all skins regardless of inline styles on the img -->
+                    <div id="monsterFlickerWrapper" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                        <img alt="Hero" id="mainHeroSprite" src="assets/heroes/Nova_idle.gif" style="width: 128px !important; height: 128px !important; image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; image-rendering: -webkit-optimize-contrast; object-fit: contain !important; object-position: center; transform: none; opacity: 1; display: block;"/>
+                    </div>
                 </div>
             </div>
             
@@ -5991,21 +6018,20 @@ input:checked + .toggle-slider:before {
             document.getElementById('energyFill').style.width = `${healthPercentage}%`;
             document.getElementById('energyText').textContent = `${Math.round(health)}/${maxHP}`;
             
-            // Add flickering effect to monster sprite when HP < 20
-            const mainHeroSprite = document.getElementById('mainHeroSprite');
-            if (mainHeroSprite) {
-                // Apply flicker effect when HP < 20 (works with all skins and base monsters)
-                if (health < 20) {
-                    // Add flicker class for CSS animation
-                    if (!mainHeroSprite.classList.contains('low-hp-flicker')) {
-                        mainHeroSprite.classList.add('low-hp-flicker');
-                        console.log('⚠️ [HP Flicker] HP below 20, flickering started');
+            // Flickering effect on monster sprite when HP ≤ 20.
+            // Applied to the wrapper div so it works with ALL skins regardless of
+            // inline styles set by skinsManager (which sets animation:none on the img).
+            const flickerWrapper = document.getElementById('monsterFlickerWrapper');
+            if (flickerWrapper) {
+                if (health <= 20) {
+                    if (!flickerWrapper.classList.contains('low-hp-flicker')) {
+                        flickerWrapper.classList.add('low-hp-flicker');
+                        console.log('⚠️ [HP Flicker] HP ≤ 20, flickering started');
                     }
                 } else {
-                    // Remove flicker if HP >= 20
-                    if (mainHeroSprite.classList.contains('low-hp-flicker')) {
-                        mainHeroSprite.classList.remove('low-hp-flicker');
-                        console.log('✅ [HP Flicker] HP above 20, flickering stopped');
+                    if (flickerWrapper.classList.contains('low-hp-flicker')) {
+                        flickerWrapper.classList.remove('low-hp-flicker');
+                        console.log('✅ [HP Flicker] HP > 20, flickering stopped');
                     }
                 }
             }

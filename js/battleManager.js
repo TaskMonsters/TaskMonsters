@@ -22,7 +22,7 @@ class BattleManager {
         this.battleLog = [];
         this.hasEvade = false;
         this.hasReflect = false;
-        this.hasSpecialDefense = false; // Special Defense item: blocks next enemy special attack
+        this.specialDefenseTurns = 0; // Special Defense item: blocks ALL enemy special attacks for 3 turns
         this.enemyAttackCount = 0;  // Track enemy attack count for every 5th attack sound
         this.reflectTurns = 0;  // Luna's reflect effect turns remaining
         this.reflectActive = false;  // Luna's reflect effect active flag
@@ -148,7 +148,7 @@ class BattleManager {
         this.burnTurns = 0;           // Nova special: reset burn DoT
         this.burnDamage = 0;
         this.deflectActive = false;   // Luna special: reset deflect
-        this.hasSpecialDefense = false; // Special Defense item: reset on new battle
+        this.specialDefenseTurns = 0; // Special Defense item: reset on new battle
         this.defenseImmune = 0;       // Benny special: reset defense immunity
         this.enemyAttackDebuffTurns = 0; // Benny special: reset enemy attack debuff
         this.enemyAttackDebuffMult  = 1; // Benny special: reset enemy attack multiplier
@@ -1494,7 +1494,7 @@ class BattleManager {
         }
         this.state = BattleState.ANIMATING;
         gameState.battleInventory.special_defense = Math.max(0, gameState.battleInventory.special_defense - 1);
-        this.hasSpecialDefense = true;
+        this.specialDefenseTurns = 3; // Block ALL enemy special attacks for 3 turns
 
         // Play shield sound
         if (window.audioManager) {
@@ -1538,7 +1538,7 @@ class BattleManager {
             setTimeout(() => bookEmoji.remove(), 1700);
         }
 
-        addBattleLog('📖 Special Defense activated! The next enemy special attack will be completely blocked!');
+        addBattleLog('📖 Special Defense activated! ALL enemy special attacks will be blocked for 3 turns!');
         updateBattleUI(this.hero, this.enemy);
         updateActionButtons(this.hero);
         saveGameState();
@@ -1820,26 +1820,14 @@ class BattleManager {
             }
         }
 
-        // === SPECIAL DEFENSE ITEM: Block any enemy special attack ===
-        // Determine if the enemy is about to use a special ability this turn
-        const _enemyWillUseSpecial = (
-            (this.enemy.canPetrify && Math.random() < (this.enemy.petrifyChance || 0.3)) ||
-            (this.enemy.canSleep && Math.random() < 0.3) ||
-            (this.enemy.canStun && Math.random() < (this.enemy.stunChance || 0.30)) ||
-            (this.enemy.canDaze && Math.random() < (this.enemy.dazeChance || 0.25)) ||
-            (this.enemy.canPoison && !this.poisonTurns && Math.random() < 0.35) ||
-            (this.enemy.canAbsorb && Math.random() < 0.30) ||
-            (this.enemy.canBerserk && Math.random() < 0.25) ||
-            (this.enemy.canPickpocket && Math.random() < 0.30) ||
-            (this.enemy.canMorph && Math.random() < 0.25) ||
-            (this.enemy.canCharm && Math.random() < 0.25) ||
-            (this.enemy.canOverthink && Math.random() < 0.35) ||
-            (this.enemy.canTeleport && Math.random() < 0.30) ||
-            (this.enemy.isBoss && (this.enemy.poisonAttack || this.enemy.drainAttackGauge || this.enemy.mushroomAttack))
-        );
-        if (this.hasSpecialDefense && _enemyWillUseSpecial) {
-            this.hasSpecialDefense = false;
-            // Show the 📖 emoji over the hero sprite as a block animation
+        // === SPECIAL DEFENSE ITEM: Block ALL enemy special attacks for 3 turns ===
+        // This helper is called at the top of every individual special-attack branch.
+        // Returns true (and handles the block animation/log) if the attack is blocked.
+        const _trySpecialDefenseBlock = async () => {
+            if (this.specialDefenseTurns <= 0) return false;
+            // Consume one turn of protection
+            this.specialDefenseTurns = Math.max(0, this.specialDefenseTurns - 1);
+            // Show the 📖 emoji floating over the hero sprite
             const heroSpriteSD = document.getElementById('heroSprite');
             if (heroSpriteSD) {
                 const bookBlock = document.createElement('div');
@@ -1869,25 +1857,24 @@ class BattleManager {
                     : document.body.appendChild(bookBlock);
                 setTimeout(() => bookBlock.remove(), 1700);
             }
-            addBattleLog(`📖 Special Defense blocked ${this.enemy.name}'s special attack! The attack was completely negated!`);
+            const turnsLeft = this.specialDefenseTurns;
+            addBattleLog(`📖 Special Defense blocked ${this.enemy.name}'s special attack!${turnsLeft > 0 ? ` (${turnsLeft} turn${turnsLeft > 1 ? 's' : ''} remaining)` : ' (Protection expired!)'}`);
             updateBattleUI(this.hero, this.enemy);
             updateActionButtons(this.hero);
             await new Promise(resolve => setTimeout(resolve, 1500));
-            // Skip to basic attack instead
-            // (fall through to basic attack section below by jumping past all specials)
-            this.state = BattleState.PLAYER_TURN;
-            if (typeof startTurnTimer === 'function') {
-                const timerDuration = this.turnTimerReduced ? 1000 : 3000;
-                startTurnTimer(timerDuration);
-                this.turnTimerReduced = false;
-            }
-            return;
-        }
+            return true;
+        };
 
         // Check if enemy can petrify (Medusa)
         const canPetrify = this.enemy.canPetrify && Math.random() < (this.enemy.petrifyChance || 0.3);
         
         if (canPetrify) {
+            // Special Defense blocks this attack
+            if (await _trySpecialDefenseBlock()) {
+                this.state = BattleState.PLAYER_TURN;
+                if (typeof startTurnTimer === 'function') { startTurnTimer(this.turnTimerReduced ? 1000 : 3000); this.turnTimerReduced = false; }
+                return;
+            }
             // Petrify attack
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             
@@ -1922,6 +1909,12 @@ class BattleManager {
         const canCastSleep = this.enemy.canSleep && Math.random() < 0.3; // 30% chance
         
         if (canCastSleep) {
+            // Special Defense blocks this attack
+            if (await _trySpecialDefenseBlock()) {
+                this.state = BattleState.PLAYER_TURN;
+                if (typeof startTurnTimer === 'function') { startTurnTimer(this.turnTimerReduced ? 1000 : 3000); this.turnTimerReduced = false; }
+                return;
+            }
             // Sleep attack
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             addBattleLog(`😴 ${this.enemy.name} cast Sleep! You skip your next turn!`);
@@ -1964,6 +1957,7 @@ class BattleManager {
         // --- STUN (canStun) ---
         // Enemy stuns hero, causing them to skip their next turn
         if (this.enemy.canStun && Math.random() < (this.enemy.stunChance || 0.30)) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const stunDuration = this.enemy.stunDuration || 1;
             this.heroStunnedTurns = stunDuration;
@@ -1981,6 +1975,7 @@ class BattleManager {
         // --- DAZE (canDaze) ---
         // Enemy dazes hero, causing them to skip their next turn (1 turn)
         if (this.enemy.canDaze && Math.random() < (this.enemy.dazeChance || 0.25)) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             this.heroStunnedTurns = 1;
             addBattleLog(`💫 ${this.enemy.name} dazed you! You will skip your next turn!`);
@@ -1997,6 +1992,7 @@ class BattleManager {
         // --- POISON (canPoison) ---
         // Enemy poisons hero, dealing damage over multiple turns
         if (this.enemy.canPoison && !this.poisonTurns && Math.random() < 0.35) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const poisonDmg = this.enemy.poisonDamage || 8;
             const poisonDur = this.enemy.poisonDuration || 3;
@@ -2028,6 +2024,7 @@ class BattleManager {
         // --- ABSORB (canAbsorb) ---
         // Enemy absorbs HP from hero (life drain)
         if (this.enemy.canAbsorb && Math.random() < 0.30) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const absorbMin = this.enemy.absorbMin || 20;
             const absorbMax = this.enemy.absorbMax || 35;
@@ -2052,6 +2049,7 @@ class BattleManager {
         // --- BERSERK (canBerserk) ---
         // Enemy goes berserk and attacks multiple times in one turn
         if (this.enemy.canBerserk && Math.random() < 0.25) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             const berserkHits = this.enemy.berserkAttacks || 3;
             addBattleLog(`💢 ${this.enemy.name} goes BERSERK! ${berserkHits} rapid attacks!`);
             let totalDamage = 0;
@@ -2085,6 +2083,7 @@ class BattleManager {
         // --- PICKPOCKET (canPickpocket) ---
         // Enemy steals battle items from inventory and deals damage
         if (this.enemy.canPickpocket && Math.random() < 0.30) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const pickpocketCount = this.enemy.pickpocketCount || 2;
             let baseDamage = this.enemy.attackDamageMin !== undefined && this.enemy.attackDamageMax !== undefined
@@ -2133,6 +2132,7 @@ class BattleManager {
         // --- MORPH (canMorph) ---
         // Enemy morphs, temporarily boosting its defense
         if (this.enemy.canMorph && Math.random() < 0.25) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const morphDur = this.enemy.morphDuration || 2;
             const originalDefense = this.enemy.defense;
@@ -2158,6 +2158,7 @@ class BattleManager {
         // --- CHARM (canCharm) ---
         // Enemy charms hero, reducing their defense
         if (this.enemy.canCharm && Math.random() < 0.25) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             const defReduction = this.enemy.charmDefenseReduction || 0.5;
             const charmedDefense = Math.floor(this.hero.defense * (1 - defReduction));
@@ -2180,6 +2181,7 @@ class BattleManager {
         // --- OVERTHINK (canOverthink) ---
         // Enemy overthinks — sets backfire flag so hero's next attack backfires
         if (this.enemy.canOverthink && Math.random() < 0.35) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             await playEnemyAnimation(this.enemy, 'attack1', 600);
             // Set backfire flag: hero's next attack will deal damage to themselves
             this.overthinkBackfire = true;
@@ -2198,6 +2200,7 @@ class BattleManager {
         // --- TELEPORT (canTeleport) ---
         // Enemy teleports and delivers a surprise strike from behind
         if (this.enemy.canTeleport && Math.random() < 0.30) {
+            if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
             const enemySpriteEl = document.getElementById('enemySprite');
             if (enemySpriteEl) {
                 enemySpriteEl.style.opacity = '0';
@@ -2311,6 +2314,7 @@ class BattleManager {
         if (this.enemy.isBoss) {
             // Treant poison attack
             if (this.enemy.poisonAttack) {
+                if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
                 await playEnemyAnimation(this.enemy, 'attack1', 600);
                 
                 // Use correct damage range
@@ -2356,6 +2360,7 @@ class BattleManager {
             
             // Sunny Dragon attack gauge drain
             if (this.enemy.drainAttackGauge) {
+                if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
                 await playEnemyAnimation(this.enemy, 'attack1', 600);
                 
                 // Show dragon bolt projectile
@@ -2399,6 +2404,7 @@ class BattleManager {
             
             // Mushroom special attack
             if (this.enemy.mushroomAttack) {
+                if (await _trySpecialDefenseBlock()) { await returnToPlayerTurn(); return; }
                 await playEnemyAnimation(this.enemy, 'attack2', 600);
                 
                 // Show mushroom emoji projectiles
@@ -3563,6 +3569,68 @@ class BattleManager {
         } else {
             await this.enemyTurn();
         }
+    }
+
+    // Player uses Poison Leaf - deals 15 damage/turn for 4 turns (DoT)
+    async playerPoisonLeaf() {
+        console.log('🍃 playerPoisonLeaf called');
+
+        if (this.state !== BattleState.PLAYER_TURN) return;
+
+        if (typeof stopTurnTimer === 'function') {
+            stopTurnTimer();
+        }
+
+        // === STUN / DAZE CHECK ===
+        if (this.heroStunnedTurns > 0) {
+            this.heroStunnedTurns--;
+            addBattleLog(`😵 You are stunned! Turn skipped! (${this.heroStunnedTurns} turns remaining)`);
+            updateBattleUI(this.hero, this.enemy);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await this.enemyTurn();
+            return;
+        }
+
+        const poisonLeafCount = gameState.battleInventory?.poison_leaf || 0;
+        if (poisonLeafCount <= 0) {
+            addBattleLog('❌ No Poison Leaf items left!');
+            return;
+        }
+
+        this.state = BattleState.ANIMATING;
+        gameState.battleInventory.poison_leaf = Math.max(0, gameState.battleInventory.poison_leaf - 1);
+        updateBattleUI(this.hero, this.enemy);
+        updateActionButtons(this.hero);
+
+        // Play hero throw animation
+        startHeroAnimation('throw');
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        // Play Poison Leaf projectile + explosion animation
+        const heroSprite = document.getElementById('heroSprite');
+        const enemySprite = document.getElementById('enemySprite');
+        if (heroSprite && enemySprite && typeof playPoisonLeafAnimation === 'function') {
+            await playPoisonLeafAnimation(heroSprite, enemySprite);
+        }
+
+        // Apply poison DoT: 15 damage per turn for 4 turns
+        const poisonDmgPerTurn = 15;
+        const poisonDuration = 4;
+        this.novaPoisonTurns = poisonDuration;
+        this.novaPoisonDamage = poisonDmgPerTurn;
+
+        addBattleLog(`🍃 Poison Leaf hit! Enemy will take ${poisonDmgPerTurn} poison damage for ${poisonDuration} turns!`);
+
+        // Play enemy hurt animation
+        await playEnemyAnimation(this.enemy, 'hurt', 300);
+
+        // Reset hero sprite to idle
+        startHeroAnimation('idle');
+
+        updateBattleUI(this.hero, this.enemy);
+        saveGameState();
+
+        await this.enemyTurn();
     }
 }
 

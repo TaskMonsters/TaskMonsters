@@ -137,8 +137,8 @@ function updateThemesDisplay() {
     
     // Render each theme
     sortedThemes.forEach(theme => {
-        // Check level requirement
-        const playerLevel = window.gameState?.level || 1;
+        // Check level requirement — player level is stored as gameState.jerryLevel
+        const playerLevel = window.gameState?.jerryLevel || 1;
         const levelRequired = theme.levelRequired || 0;
         const meetsLevelReq = playerLevel >= levelRequired;
         

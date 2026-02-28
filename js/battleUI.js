@@ -245,12 +245,12 @@ function updateBattleButtonsVisibility() {
         }
     }
     
-    // Poison Leaf button - only show if ever unlocked
+    // Poison Leaf button - show if ever unlocked OR if quantity > 0 in inventory
     const poisonLeafBtn = document.getElementById('btnPoisonLeaf');
     const poisonLeafCount = document.getElementById('poisonLeafCount');
     const poisonLeafQty = inventory.poison_leaf || 0;
     if (poisonLeafBtn && poisonLeafCount) {
-        if (unlockedItems.includes('poison_leaf')) {
+        if (unlockedItems.includes('poison_leaf') || poisonLeafQty > 0) {
             poisonLeafBtn.style.display = '';
             poisonLeafCount.textContent = `(${poisonLeafQty})`;
         } else {
@@ -634,6 +634,22 @@ function updateActionButtons(hero) {
             btnSpecialDefense.disabled = specialDefenseCount === 0;
         } else {
             btnSpecialDefense.style.display = 'none';
+        }
+    }
+
+    // Poison Leaf button — show if owned (unlocked via shop)
+    const btnPoisonLeaf = document.getElementById('btnPoisonLeaf');
+    if (btnPoisonLeaf) {
+        const poisonLeafCount = gameState.battleInventory?.poison_leaf || 0;
+        if (poisonLeafCount > 0 || gameState.unlockedBattleItems?.includes('poison_leaf')) {
+            btnPoisonLeaf.style.display = '';
+            const poisonLeafCountSpan = btnPoisonLeaf.querySelector('.item-count');
+            if (poisonLeafCountSpan) {
+                poisonLeafCountSpan.textContent = `(${poisonLeafCount})`;
+            }
+            btnPoisonLeaf.disabled = poisonLeafCount === 0;
+        } else {
+            btnPoisonLeaf.style.display = 'none';
         }
     }
 }
