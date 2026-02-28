@@ -155,10 +155,10 @@ class SkinsManager {
         
         // If monster is still in egg form, show locked banner and disable all skins
         if (isEgg) {
-            grid.innerHTML = `<div style="text-align:center;padding:24px 16px;color:#aaa;">
-                <div style="font-size:2.5rem;margin-bottom:8px;">🥚</div>
-                <div style="font-size:1rem;font-weight:600;color:#fff;margin-bottom:4px;">Skins Locked</div>
-                <div style="font-size:0.85rem;">Your monster must hatch first!<br>Reach <strong>Level 5</strong> to unlock skins.</div>
+            grid.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 16px;color:#aaa;width:100%;grid-column:1/-1;">
+                <div style="font-size:3rem;margin-bottom:12px;">🥚</div>
+                <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:8px;">Skins Locked</div>
+                <div style="font-size:0.9rem;line-height:1.6;">Your monster must hatch first!<br>Reach <strong style="color:#fff;">Level 5</strong> to unlock skins.</div>
             </div>`;
             return;
         }
