@@ -26,6 +26,7 @@ class GuardianOnboarding {
                 message: `But Task World is in trouble. A shadowy force called The Gloom is spreading, creating mischievous monsters from everyday challenges. Your Task Pet is our champion against them! Every victory helps reclaim our world from The Gloom. Are you ready?`,
                 animation: 'gloom',
                 showMap: true,
+                showGloomImage: true,
                 isLastStep: true
             }
         ];
@@ -112,8 +113,8 @@ class GuardianOnboarding {
             `;
             
             const mapImg = document.createElement('img');
-            mapImg.src = 'assets/task_world_map.png';
-            mapImg.alt = 'Task World Map';
+            mapImg.src = step.showGloomImage ? 'assets/gloom_villain_castle_background.png' : 'assets/task_world_map.png';
+            mapImg.alt = step.showGloomImage ? 'The Gloom' : 'Task World Map';
             mapImg.style.cssText = `
                 width: 100%;
                 height: auto;
