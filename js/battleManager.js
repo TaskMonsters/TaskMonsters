@@ -159,6 +159,13 @@ class BattleManager {
         this._charmOriginalDefense = undefined;
         this._superDefenseTurnsLeft = 0; // Super defense boost turns remaining
         this._superDefenseOriginal = undefined;
+        // BUG FIX: These were missing from startBattle reset — status effects were bleeding into next battle
+        this.reflectTurns = 0;         // Luna's reflect effect turns remaining
+        this.reflectActive = false;    // Luna's reflect effect active flag
+        this.enemyFrozenTurns = 0;     // Freeze item effect turns remaining
+        this.focusAttackUsed = false;  // Focus timer special attack: reset per battle
+        this.novaPoisonTurns = 0;      // Poison Leaf item DoT turns remaining
+        this.novaPoisonDamage = 0;     // Poison Leaf item DoT damage per turn
 
         // Set battle background based on level with rotation
         const battleContainer = document.querySelector('.battle-container');

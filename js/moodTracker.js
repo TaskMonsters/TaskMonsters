@@ -59,10 +59,10 @@ class MoodTracker {
                 background-color: #2a2a3e;
                 border: 2px solid #8b5cf6;
                 border-radius: 17px;
-                padding: 13px 16px;
-                max-width: 240px;
-                min-width: 187px;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+                padding: 18px 20px;
+                max-width: 320px;
+                min-width: 290px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
                 opacity: 0;
                 display: none;
                 transition: opacity 0.3s ease, transform 0.3s ease;
@@ -92,9 +92,9 @@ class MoodTracker {
                 <h3 style="
                     color: #ffffff;
                     text-align: center;
-                    margin: 0 0 10px 0;
-                    font-size: 12px;
-                    font-weight: 600;
+                    margin: 0 0 14px 0;
+                    font-size: 17px;
+                    font-weight: 700;
                 ">How are you feeling?</h3>
                 
                 <!-- Emoji Buttons -->
@@ -108,18 +108,19 @@ class MoodTracker {
                         <button class="mood-btn-tooltip" data-mood="${mood.value}" style="
                             background: rgba(255, 255, 255, 0.1);
                             border: 2px solid rgba(139, 92, 246, 0.3);
-                            border-radius: 8px;
-                            padding: 8px 5px;
-                            font-size: 21px;
+                            border-radius: 12px;
+                            padding: 14px 8px;
+                            font-size: 32px;
                             cursor: pointer;
                             transition: all 0.2s;
                             display: flex;
                             flex-direction: column;
                             align-items: center;
-                            gap: 4px;
-                        " onmouseover="this.style.background='rgba(139, 92, 246, 0.2)'; this.style.borderColor='#8b5cf6'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(139, 92, 246, 0.3)'; this.style.transform='scale(1)'">
+                            gap: 6px;
+                            min-height: 72px;
+                        " onmouseover="this.style.background='rgba(139, 92, 246, 0.2)'; this.style.borderColor='#8b5cf6'; this.style.transform='scale(1.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(139, 92, 246, 0.3)'; this.style.transform='scale(1)'">
                             <span>${mood.emoji}</span>
-                            <span style="font-size: 7px; color: #ccc;">${mood.name}</span>
+                            <span style="font-size: 11px; color: #ccc; font-weight: 600;">${mood.name}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -127,16 +128,17 @@ class MoodTracker {
                 <!-- Optional Note -->
                 <textarea id="moodNoteTooltip" placeholder="Add a note (optional)..." style="
                     width: 100%;
-                    min-height: 40px;
+                    min-height: 60px;
                     background: rgba(255, 255, 255, 0.05);
                     border: 2px solid rgba(139, 92, 246, 0.3);
-                    border-radius: 8px;
-                    padding: 7px;
+                    border-radius: 10px;
+                    padding: 10px 12px;
                     color: #ffffff;
-                    font-size: 9px;
+                    font-size: 14px;
                     resize: vertical;
                     font-family: inherit;
                     box-sizing: border-box;
+                    margin-top: 4px;
                 "></textarea>
             </div>
         `;

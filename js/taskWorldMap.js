@@ -132,18 +132,7 @@ class TaskWorldMap {
             position: relative;
         `;
         
-        // Title
-        const title = document.createElement('h1');
-        title.textContent = 'TASK WORLD';
-        title.style.cssText = `
-            color: white;
-            font-size: 48px;
-            font-weight: 700;
-            margin: 0 0 24px 0;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            letter-spacing: 2px;
-        `;
-        container.appendChild(title);
+        // Title removed per design — the map image itself is the visual anchor
         
         // Map container (for positioning monster sprite)
         const mapContainer = document.createElement('div');
@@ -173,6 +162,47 @@ class TaskWorldMap {
         const monsterSprite = this.createMonsterSprite(position, petName);
         mapContainer.appendChild(monsterSprite);
         
+        // Add Continue button — declared HERE so it is available to the level-up block below
+        const continueButton = document.createElement('button');
+        continueButton.textContent = 'Continue';
+        continueButton.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 24px;
+        `;
+        continueButton.onmouseover = () => {
+            continueButton.style.transform = 'scale(1.05)';
+            continueButton.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
+        };
+        continueButton.onmouseout = () => {
+            continueButton.style.transform = 'scale(1)';
+            continueButton.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.4)';
+        };
+        continueButton.onclick = () => {
+            // Stop victory music now that the user has acknowledged the win screen
+            if (window.audioManager) {
+                window.audioManager.stopBattleOutcomeMusic();
+            }
+            // Reset isShowing so the map can be shown again in the next battle
+            this.isShowing = false;
+            // Hide the world map overlay
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+            // Call returnToMainApp if it exists
+            if (typeof returnToMainApp === 'function') {
+                returnToMainApp();
+            }
+        };
+
         // If just leveled up, show a "LEVEL UP!" banner and animate the walk to new position
         if (justLeveledUp && previousLevel) {
             const previousPosition = this.getPositionForLevel(previousLevel);
@@ -200,7 +230,7 @@ class TaskWorldMap {
                 document.head.appendChild(s);
             }
 
-            // Animate the walk — pass continueButton so it's locked during the walk
+            // Animate the walk — continueButton is now declared above so this is safe
             this.animateMonsterMovement(monsterSprite, previousPosition, position, continueButton);
 
             // Dim the Continue button visually while locked
@@ -233,40 +263,8 @@ class TaskWorldMap {
         `;
         container.appendChild(levelIndicator);
         
-        // Add Continue button
-        const continueButton = document.createElement('button');
-        continueButton.textContent = 'Continue';
-        continueButton.style.cssText = `
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 16px 48px;
-            font-size: 20px;
-            font-weight: 700;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-            margin-top: 24px;
-        `;
-        continueButton.onmouseover = () => {
-            continueButton.style.transform = 'scale(1.05)';
-            continueButton.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.6)';
-        };
-        continueButton.onmouseout = () => {
-            continueButton.style.transform = 'scale(1)';
-            continueButton.style.boxShadow = '0 4px 16px rgba(102, 126, 234, 0.4)';
-        };
-        continueButton.onclick = () => {
-            // Hide the world map overlay
-            if (overlay && overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
-            }
-            // Call returnToMainApp if it exists
-            if (typeof returnToMainApp === 'function') {
-                returnToMainApp();
-            }
-        };
+        // continueButton was declared earlier (before the justLeveledUp block) so it is
+        // already in scope here — just append it to the container.
         container.appendChild(continueButton);
         
         overlay.appendChild(container);
@@ -302,6 +300,37 @@ class TaskWorldMap {
                 window.guardianNarrative.showMapMessage(message);
             }
         }, 1500);
+
+        // Monster congratulations dialogue — shown in the taskPalTooltip speech bubble.
+        // Fires after the map has faded in so it feels like the monster is reacting.
+        // Victory music continues playing; it is only stopped when the user taps Continue.
+        setTimeout(() => {
+            try {
+                const tooltip = document.getElementById('taskPalTooltip');
+                if (tooltip) {
+                    const petName = (window.gameState && window.gameState.rockName) || 'your monster';
+                    const currentLevel = (window.gameState && window.gameState.jerryLevel) || 1;
+                    const battlesWon = (window.gameState && window.gameState.battlesWon) || 1;
+
+                    // Pool of congratulatory messages that mention Gloom
+                    const congrats = [
+                        `Amazing! We beat ${context.enemyName || 'that enemy'}! Gloom won't know what hit them! 💪`,
+                        `Yes! Another victory! Gloom is getting closer to defeat — keep it up! ⚔️`,
+                        `We did it! Every battle brings us one step closer to defeating Gloom! 🔥`,
+                        `Incredible work! Gloom's power weakens with every win we get! ✨`,
+                        `That's ${battlesWon} battle${battlesWon !== 1 ? 's' : ''} won! Gloom doesn't stand a chance against us! 🌟`,
+                        `We're unstoppable! Gloom can feel us coming — we're Level ${currentLevel} strong! 💥`,
+                        `Another one down! Gloom is trembling — we're getting so close! 🏆`
+                    ];
+                    const msg = congrats[Math.floor(Math.random() * congrats.length)];
+
+                    tooltip.textContent = msg;
+                    tooltip.classList.add('visible');
+                    clearTimeout(window.tooltipTimer);
+                    window.tooltipTimer = setTimeout(() => tooltip.classList.remove('visible'), 10000);
+                }
+            } catch (_) {}
+        }, 800);
     }
     
     /**
@@ -417,7 +446,8 @@ window.taskWorldMap = new TaskWorldMap();
 document.addEventListener('battleVictory', (event) => {
     console.log('[TaskWorldMap] Battle victory event received, showing map');
     
-    // Show map page
+    // Always reset isShowing before show() so repeated victories work correctly
+    window.taskWorldMap.isShowing = false;
     window.taskWorldMap.show(event.detail);
 });
 
@@ -442,9 +472,10 @@ function returnToMainApp() {
         mainApp.classList.remove('hidden');
     }
     
-    // Resume home page music
-    if (window.audioManager) {
-        window.audioManager.resumeHomeMusic();
+    // Resume home page music (victory music was already stopped by the Continue button)
+    if (window.audioManager && typeof window.audioManager.playMusic === 'function') {
+        // Re-start home ambient music if available
+        window.audioManager.playMusic();
     }
 }
 

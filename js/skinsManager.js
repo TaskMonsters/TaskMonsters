@@ -201,9 +201,11 @@ class SkinsManager {
             } else if (isLocked) {
                 buttonHTML = `<div class="skin-locked-text">🔒 Level ${skin.levelRequired || 1}</div>`;
             } else if (canPurchase) {
-                buttonHTML = `<div class="skin-price">${skin.price} XP Coins</div><button class="skin-btn-new buy" onclick="window.skinsManager.buySkin('${skin.id}', ${skin.price})">EQUIP</button>`;
+                // BUG FIX: Button correctly says BUY (not EQUIP) for unowned purchasable skins
+                buttonHTML = `<div class="skin-price">${skin.price} XP Coins</div><button class="skin-btn-new buy" onclick="window.skinsManager.buySkin('${skin.id}', ${skin.price})">BUY</button>`;
             } else {
-                buttonHTML = `<div class="skin-price">${skin.price} XP Coins</div><button class="skin-btn-new locked" disabled>EQUIP</button>`;
+                // Not enough XP — show price and disabled BUY button (tapping shows toast)
+                buttonHTML = `<div class="skin-price">${skin.price} XP Coins</div><button class="skin-btn-new locked" onclick="window.skinsManager.showInsufficientFundsToast(${skin.price})">BUY</button>`;
             }
             
             card.innerHTML = `
@@ -219,6 +221,19 @@ class SkinsManager {
     /**
      * Buy a skin
      */
+    /**
+     * Show insufficient funds toast
+     */
+    showInsufficientFundsToast(price) {
+        const current = window.gameState ? (window.gameState.jerryXP || 0) : 0;
+        const needed = price - current;
+        if (window.showInsufficientFundsMessage) {
+            window.showInsufficientFundsMessage(price, current);
+        } else if (window.showSuccessMessage) {
+            window.showSuccessMessage('❌ Not Enough XP Coins', `You need ${needed} more XP Coins (have ${current}, need ${price})`);
+        }
+    }
+
     buySkin(skinId, price) {
         // Block purchasing/equipping skins while monster is in egg form (pre-level 5)
         if (window.gameState && window.gameState.isEgg) {
@@ -228,7 +243,10 @@ class SkinsManager {
             return;
         }
         
-        if (window.gameState.jerryXP < price) return;
+        if (window.gameState.jerryXP < price) {
+            this.showInsufficientFundsToast(price);
+            return;
+        }
         
         window.gameState.jerryXP -= price;
         this.ownedSkins.push(skinId);

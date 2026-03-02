@@ -550,11 +550,18 @@ class AudioManager {
      */
     handleVisibilityChange() {
         if (document.hidden) {
+            // Pause all active music tracks when app is backgrounded
             if (this.currentMusic) this.currentMusic.pause();
             if (this.battleMusicAudio) this.battleMusicAudio.pause();
+            if (this.battleWinMusic) this.battleWinMusic.pause();
+            if (this.battleLoseMusic) this.battleLoseMusic.pause();
         } else {
+            // Resume all active music tracks when app comes back to foreground
             if (this.currentMusic) this.currentMusic.play().catch(err => console.warn('[AudioManager] Quest music resume failed:', err.message));
             if (this.battleMusicAudio) this.battleMusicAudio.play().catch(err => console.warn('[AudioManager] Battle music resume failed:', err.message));
+            // Only resume outcome music if it hasn't finished yet
+            if (this.battleWinMusic && !this.battleWinMusic.ended) this.battleWinMusic.play().catch(err => console.warn('[AudioManager] Win music resume failed:', err.message));
+            if (this.battleLoseMusic && !this.battleLoseMusic.ended) this.battleLoseMusic.play().catch(err => console.warn('[AudioManager] Lose music resume failed:', err.message));
         }
     }
 }

@@ -485,6 +485,16 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        /* Insufficient funds toast — red variant of success-message */
+        .insufficient-funds-toast {
+            background: #3d1515 !important;
+            border: 2px solid #ef4444;
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35) !important;
+        }
+        .insufficient-funds-toast .success-message-title {
+            color: #fca5a5;
+        }
         
         /* Responsive adjustments for small screens */
         @media (max-width: 480px) {
@@ -5467,7 +5477,15 @@ input:checked + .toggle-slider:before {
                 freeze: 0,
                 blue_flame: 0,
                 procrastination_ghost: 0,
-                special_defense: 0
+                special_defense: 0,
+                // BUG FIX: These keys were missing from the default inventory object
+                asteroid_attack: 0,
+                mirror_attack: 0,
+                poison_leaf: 0,
+                battle_glove: 0,
+                throwing_stars: 0,
+                jade_dagger: 0,
+                wizards_wand: 0
             },
             unlockedBattleItems: ['health_potion', 'attack_refill', 'defense_refill'],
             xp: 0,
@@ -5822,7 +5840,11 @@ input:checked + .toggle-slider:before {
                     const allBattleItemKeys = [
                         'fireball', 'spark', 'health_potion', 'attack_refill', 'defense_refill',
                         'invisibility_cloak', 'prickler', 'freeze', 'blue_flame', 'procrastination_ghost',
-                        'throwing_stars', 'special_defense'
+                        'throwing_stars', 'special_defense',
+                        // BUG FIX: These keys were missing from the migration list — existing users
+                        // would get undefined reads when trying to use these items
+                        'asteroid_attack', 'mirror_attack', 'poison_leaf', 'battle_glove',
+                        'jade_dagger', 'wizards_wand'
                     ];
                     
                     // Only add missing keys with 0 (don't override existing values)
@@ -9457,77 +9479,24 @@ input:checked + .toggle-slider:before {
             }
             
             // Define available themes
+            // Level requirements gate themes across the full progression curve (Lv 5 – 40)
             const themes = [
-                {
-                    id: 'dark_castle',
-                    name: 'Dark Castle',
-                    emoji: '🏰',
-                    description: 'Mysterious old castle interior',
-                    cost: 900,
-                    background: 'assets/backgrounds/castle-dark.png'
-                },
-                {
-                    id: 'night_city',
-                    name: 'Night City',
-                    emoji: '🌃',
-                    description: 'Futuristic cityscape at night',
-                    cost: 900,
-                    background: 'assets/backgrounds/city-night.png'
-                },
-                {
-                    id: 'ocean_depths',
-                    name: 'Ocean Depths',
-                    emoji: '🌊',
-                    description: 'Deep underwater scene',
-                    cost: 900,
-                    background: 'assets/backgrounds/ocean-deep.png'
-                },
-                {
-                    id: 'mystic_temple',
-                    name: 'Mystic Temple',
-                    emoji: '⛩️',
-                    description: 'Ancient temple ruins',
-                    cost: 900,
-                    background: 'assets/backgrounds/temple-ruins.png'
-                },
-                {
-                    id: 'cyber_grid',
-                    name: 'Cyber Grid',
-                    emoji: '🔮',
-                    description: 'Digital cyberspace grid',
-                    cost: 900,
-                    background: 'assets/backgrounds/cyber-grid.png'
-                },
-                {
-                    id: 'synth_city',
-                    name: 'Synth City',
-                    emoji: '🌆',
-                    description: 'Retro synthwave cityscape',
-                    cost: 900,
-                    background: 'assets/backgrounds/themes/synth-city.png'
-                },
-                {
-                    id: 'space',
-                    name: 'Space',
-                    emoji: '🌌',
-                    description: 'Cosmic space vista',
-                    cost: 900,
-                    background: 'assets/backgrounds/themes/space.png'
-                },
                 {
                     id: 'vampire_castle',
                     name: 'Vampire Castle',
                     emoji: '🧛',
                     description: 'Dark vampire castle at night',
                     cost: 400,
+                    levelRequired: 5,   // Unlocks with first enemies
                     background: 'assets/backgrounds/themes/vampire-castle.png'
                 },
                 {
                     id: 'fort_of_illusion',
                     name: 'Fort of Illusion',
-                    emoji: '🏯',
+                    emoji: '🏰',
                     description: 'Mystical fortress of illusions',
                     cost: 500,
+                    levelRequired: 8,   // Unlocks with Sentry Drone & Flying Procrastinator
                     background: 'assets/backgrounds/themes/fort-of-illusion.png'
                 },
                 {
@@ -9536,6 +9505,7 @@ input:checked + .toggle-slider:before {
                     emoji: '🦇',
                     description: 'Gothic castle under moonlight',
                     cost: 700,
+                    levelRequired: 12,  // Unlocks with Self-Doubt Drone & 2Face
                     background: 'assets/backgrounds/themes/vamp-castle-bg.png'
                 },
                 {
@@ -9544,7 +9514,71 @@ input:checked + .toggle-slider:before {
                     emoji: '🌇',
                     description: 'Cyberpunk cityscape at dusk',
                     cost: 800,
+                    levelRequired: 12,  // Unlocks with Self-Doubt Drone & 2Face
                     background: 'assets/backgrounds/themes/neon-city-sunset.png'
+                },
+                {
+                    id: 'dark_castle',
+                    name: 'Dark Castle',
+                    emoji: '🏰',
+                    description: 'Mysterious old castle interior',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/castle-dark.png'
+                },
+                {
+                    id: 'night_city',
+                    name: 'Night City',
+                    emoji: '🌃',
+                    description: 'Futuristic cityscape at night',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/city-night.png'
+                },
+                {
+                    id: 'ocean_depths',
+                    name: 'Ocean Depths',
+                    emoji: '🌊',
+                    description: 'Deep underwater scene',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/ocean-deep.png'
+                },
+                {
+                    id: 'mystic_temple',
+                    name: 'Mystic Temple',
+                    emoji: '⛩️',
+                    description: 'Ancient temple ruins',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/temple-ruins.png'
+                },
+                {
+                    id: 'cyber_grid',
+                    name: 'Cyber Grid',
+                    emoji: '🔮',
+                    description: 'Digital cyberspace grid',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/cyber-grid.png'
+                },
+                {
+                    id: 'synth_city',
+                    name: 'Synth City',
+                    emoji: '🌆',
+                    description: 'Retro synthwave cityscape',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/themes/synth-city.png'
+                },
+                {
+                    id: 'space',
+                    name: 'Space',
+                    emoji: '🌌',
+                    description: 'Cosmic space vista',
+                    cost: 900,
+                    levelRequired: 20,  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
+                    background: 'assets/backgrounds/themes/space.png'
                 },
                 {
                     id: 'bright_town',
@@ -9552,6 +9586,7 @@ input:checked + .toggle-slider:before {
                     emoji: '🏘️',
                     description: 'Colorful medieval town with orange roofs',
                     cost: 1000,
+                    levelRequired: 30,  // Unlocks with Distraction Dragon & Medusa
                     background: 'assets/backgrounds/themes/bright-town.png'
                 },
                 {
@@ -9560,6 +9595,7 @@ input:checked + .toggle-slider:before {
                     emoji: '🏛️',
                     description: 'Purple ruins with ancient castle',
                     cost: 1200,
+                    levelRequired: 30,  // Unlocks with Distraction Dragon & Medusa
                     background: 'assets/backgrounds/themes/stone-ruins.png'
                 },
                 {
@@ -9568,7 +9604,7 @@ input:checked + .toggle-slider:before {
                     emoji: '💀',
                     description: 'Haunted dungeon entrance with skull gateway',
                     cost: 1500,
-                    levelRequired: 1,
+                    levelRequired: 35,  // Unlocks with Naughty Nova
                     background: 'assets/backgrounds/themes/skull-gates.png'
                 },
                 {
@@ -9577,7 +9613,7 @@ input:checked + .toggle-slider:before {
                     emoji: '🏰',
                     description: 'Majestic dark castle silhouette at dusk',
                     cost: 2000,
-                    levelRequired: 1,
+                    levelRequired: 40,  // Unlocks with Little Cthulhu & Slothful Ogre
                     background: 'assets/backgrounds/themes/dark-gothic-castle.png'
                 }
             ];
@@ -9595,6 +9631,8 @@ input:checked + .toggle-slider:before {
                 const isOwned = gameState.ownedThemes && gameState.ownedThemes.includes(theme.id);
                 const isActive = gameState.activeTheme === theme.id;
                 const canAfford = (gameState.jerryXP || 0) >= theme.cost;
+                const playerLevel = gameState.jerryLevel || 1;
+                const isLevelLocked = theme.levelRequired && playerLevel < theme.levelRequired;
                 
                 const card = document.createElement('div');
                 card.className = 'shop-item-card';
@@ -9603,9 +9641,14 @@ input:checked + .toggle-slider:before {
                     card.style.border = '2px solid #4CAF50';
                     card.style.boxShadow = '0 0 10px rgba(76, 175, 80, 0.3)';
                 }
+                if (isLevelLocked) {
+                    card.style.opacity = '0.6';
+                }
                 
                 let buttonHTML = '';
-                if (isOwned) {
+                if (isLevelLocked) {
+                    buttonHTML = `<button class="shop-buy-btn" disabled style="opacity: 0.7; background: #6b7280;">🔒 Level ${theme.levelRequired}</button>`;
+                } else if (isOwned) {
                     if (isActive) {
                         buttonHTML = '<button class="shop-buy-btn" disabled style="opacity: 0.7; background: #4CAF50;">✓ Active</button>';
                     } else {
@@ -9624,6 +9667,7 @@ input:checked + .toggle-slider:before {
                     <div class="shop-item-name">${theme.name}</div>
                     <div class="shop-item-desc">${theme.description}</div>
                     <div class="shop-item-cost">${theme.cost} XP</div>
+                    ${isLevelLocked ? `<div class="shop-item-lock-text">Level ${theme.levelRequired}</div>` : ''}
                     ${buttonHTML}
                 `;
                 
@@ -9662,10 +9706,7 @@ input:checked + .toggle-slider:before {
             
             // Check XP
             if ((gameState.jerryXP || 0) < theme.cost) {
-                if (window.audioManager) {
-                    window.audioManager.playSound('shopPurchase', 0.3);
-                }
-                alert(`Not enough XP! You need ${theme.cost} XP.`);
+                showInsufficientFundsMessage(theme.cost, gameState.jerryXP || 0);
                 return;
             }
             
@@ -9739,7 +9780,7 @@ input:checked + .toggle-slider:before {
                 cost: 25,
                 effect: 'defense',
                 value: 20,
-                levelRequired: 1   // Always available
+                levelRequired: 5   // Unlocks with first enemies (Lazy Bat, Slime)
             },
             attack_refill: {
                 id: 'attack_refill',
@@ -9749,7 +9790,7 @@ input:checked + .toggle-slider:before {
                 cost: 25,
                 effect: 'attack_gauge',
                 value: 30,
-                levelRequired: 1   // Always available
+                levelRequired: 5   // Unlocks with first enemies (Lazy Bat, Slime)
             },
             asteroid_attack: {
                 id: 'asteroid_attack',
@@ -10116,11 +10157,7 @@ input:checked + .toggle-slider:before {
             
             // Check if player has enough XP
             if ((gameState.jerryXP || 0) < item.cost) {
-                // Play error sound
-                if (window.audioManager) {
-                    window.audioManager.playSound('shopPurchase', 0.3);
-                }
-                alert(`Not enough XP! You need ${item.cost} XP to buy ${item.name}.`);
+                showInsufficientFundsMessage(item.cost, gameState.jerryXP || 0);
                 return;
             }
             
@@ -12867,6 +12904,23 @@ input:checked + .toggle-slider:before {
             
             console.log('[Hatching] Celebration modal displayed!');
         }
+
+        // Insufficient funds toast — red-styled, distinct from success messages
+        function showInsufficientFundsMessage(needed, current) {
+            const shortfall = needed - current;
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'success-message insufficient-funds-toast';
+            errorDiv.innerHTML = `
+                <div class="success-message-emoji">💸</div>
+                <div class="success-message-content">
+                    <div class="success-message-title">Not Enough XP Coins</div>
+                    <div class="success-message-subtitle">Need ${needed} — you have ${current} (${shortfall} more needed)</div>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 3500);
+        }
+        window.showInsufficientFundsMessage = showInsufficientFundsMessage;
 
         function showSuccessMessage(message, subtitle = '') {
             const successDiv = document.createElement('div');
