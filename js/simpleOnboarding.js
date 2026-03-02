@@ -33,11 +33,10 @@ class SimpleOnboarding {
                 highlight: 'Instant rewards = instant motivation! 💪'
             },
             {
-                icon: '🎯',
-                title: 'Why This Works',
-                content: '✅ Instant feedback (XP, battles, loot)\n✅ Visual progress (levels, gauges)\n✅ Variety (different enemies, abilities)\n✅ Rewards (makes tasks feel worth it!)',
-                useList: true,
-                highlight: 'Your brain will LOVE the instant rewards! 🎉'
+                icon: '😊',
+                title: 'Your Mood Matters!',
+                content: 'Tap your monster anytime to open the Mood Tracker! Log how you\'re feeling and your monster will respond. Tracking your mood helps you understand your productivity patterns.',
+                highlight: 'Tap your monster to check in! 🐾'
             },
             {
                 icon: '🚀',

@@ -14,7 +14,7 @@ class MoodTracker {
             { emoji: '😡', name: 'Angry', value: 'angry' }
         ];
         
-        this.autoPopupInterval = 60 * 60 * 1000; // 1 hour
+        this.autoPopupInterval = 30 * 60 * 1000; // 30 minutes
         this.lastPopupTime = null;
         this.intervalId = null;
         
@@ -294,7 +294,7 @@ class MoodTracker {
     }
     
     startAutoPopup() {
-        console.log('[MoodTracker] Starting auto-popup timer (1 hour)');
+        console.log('[MoodTracker] Starting auto-popup timer (30 minutes)');
         
         // Clear existing interval
         if (this.intervalId) {

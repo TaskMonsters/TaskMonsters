@@ -4761,8 +4761,13 @@ input:checked + .toggle-slider:before {
             <!-- Quest Tasks -->
             <div class="card quest-tasks-card" id="questTasksCard" style="display: none;">
                 <div class="card-header quest-tasks-header">
-                    <div class="card-title">🏆 Quest Tasks</div>
-                    <div class="quest-tasks-subtitle">Special quests from Merlin</div>
+                    <div class="quest-tasks-title-block">
+                        <span class="quest-tasks-emoji">🏆</span>
+                        <div class="quest-tasks-title-text">
+                            <div class="card-title">Quest Tasks</div>
+                            <div class="quest-tasks-subtitle">Special quests from Merlin</div>
+                        </div>
+                    </div>
                 </div>
                 <div id="questTasksList">
                     <!-- Quest tasks will be populated here -->
@@ -8034,9 +8039,9 @@ input:checked + .toggle-slider:before {
                 // Show completion message with tooltip
                 showSuccessMessage('🎉 Daily Challenge Complete!', `+${challenge.reward} points earned!`);
                 
-                // Show motivational tooltip after a short delay
+                // Show motivational tooltip after a short delay (level 5+ only)
                 setTimeout(() => {
-                    if (typeof showTooltip === 'function') {
+                    if (typeof showTooltip === 'function' && (gameState.jerryLevel || 0) >= 5) {
                         showTooltip(randomMessage);
                     }
                 }, 800);

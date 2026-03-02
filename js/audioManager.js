@@ -230,38 +230,54 @@ class AudioManager {
     playQuestMusic() {
         if (!this.enabled || !this.music.quest_giver) return;
 
+        // Ensure AudioContext is initialized
+        this.init();
+
         // Stop any currently playing music
         this.stopMusic();
 
+        // Clear any pending quest music play request
+        if (this._pendingQuestMusicHandler) {
+            document.removeEventListener('click', this._pendingQuestMusicHandler);
+            document.removeEventListener('touchstart', this._pendingQuestMusicHandler);
+            this._pendingQuestMusicHandler = null;
+        }
+
         try {
             this.currentMusic = new Audio(this.music.quest_giver);
-            this.currentMusic.volume = 0.4; // Lower volume for background music
+            this.currentMusic.volume = 0.4;
             this.currentMusic.loop = true;
-            
-            // FIX: Add ended event handler to ensure continuous looping
-            this.currentMusic.addEventListener('ended', () => {
-                if (this.currentMusic && this.enabled) {
-                    console.log('[AudioManager] Quest music ended, restarting loop');
-                    this.currentMusic.currentTime = 0;
-                    this.currentMusic.play().catch(err => {
-                        console.warn('[AudioManager] Quest music loop restart failed:', err.message);
-                    });
-                }
-            });
-            
-            // FIX: Add error handler to prevent music from stopping on errors
+
             this.currentMusic.addEventListener('error', (e) => {
                 console.warn('[AudioManager] Quest music error:', e);
             });
 
-            this.currentMusic.play().catch((err) => {
-                console.warn("[AudioManager] Quest music playback failed:", err.message);
-                this.currentMusic = null;
-            });
+            const playPromise = this.currentMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('[AudioManager] Quest giver music playing');
+                }).catch((err) => {
+                    console.warn('[AudioManager] Quest music autoplay blocked, queuing for next interaction:', err.message);
+                    // Queue music to play on next user interaction (iOS autoplay policy fix)
+                    const pendingMusic = this.currentMusic;
+                    this._pendingQuestMusicHandler = () => {
+                        if (pendingMusic && this.enabled && pendingMusic === this.currentMusic) {
+                            pendingMusic.play().then(() => {
+                                console.log('[AudioManager] Quest music started after user interaction');
+                            }).catch(e => console.warn('[AudioManager] Quest music retry failed:', e.message));
+                        }
+                        document.removeEventListener('click', this._pendingQuestMusicHandler);
+                        document.removeEventListener('touchstart', this._pendingQuestMusicHandler);
+                        this._pendingQuestMusicHandler = null;
+                    };
+                    document.addEventListener('click', this._pendingQuestMusicHandler, { once: true });
+                    document.addEventListener('touchstart', this._pendingQuestMusicHandler, { once: true });
+                });
+            }
 
-            console.log("[AudioManager] Quest giver music started with loop protection");
+            console.log('[AudioManager] Quest giver music started with autoplay fallback');
         } catch (error) {
-            console.warn("[AudioManager] Error playing quest music:", error.message);
+            console.warn('[AudioManager] Error playing quest music:', error.message);
         }
     }
 
@@ -269,6 +285,12 @@ class AudioManager {
      * Stop current background music (Quest or Battle)
      */
     stopMusic() {
+        // Cancel any pending autoplay-retry handler
+        if (this._pendingQuestMusicHandler) {
+            document.removeEventListener('click', this._pendingQuestMusicHandler);
+            document.removeEventListener('touchstart', this._pendingQuestMusicHandler);
+            this._pendingQuestMusicHandler = null;
+        }
         if (this.currentMusic) {
             try {
                 this.currentMusic.pause();

@@ -304,10 +304,12 @@ class TaskWorldMap {
         // Monster congratulations dialogue — shown in the taskPalTooltip speech bubble.
         // Fires after the map has faded in so it feels like the monster is reacting.
         // Victory music continues playing; it is only stopped when the user taps Continue.
+        // Only shown at level 5+ so early players aren't overwhelmed.
         setTimeout(() => {
             try {
+                const _playerLevel = (window.gameState && window.gameState.jerryLevel) || 0;
                 const tooltip = document.getElementById('taskPalTooltip');
-                if (tooltip) {
+                if (tooltip && _playerLevel >= 5) {
                     const petName = (window.gameState && window.gameState.rockName) || 'your monster';
                     const currentLevel = (window.gameState && window.gameState.jerryLevel) || 1;
                     const battlesWon = (window.gameState && window.gameState.battlesWon) || 1;

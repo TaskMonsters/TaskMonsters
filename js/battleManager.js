@@ -317,9 +317,10 @@ class BattleManager {
         }
         
         addBattleLog('⚔️ Battle Start!');
-        // Show enemy-specific monster dialogue on battle start
+        // Show enemy-specific monster dialogue on battle start (level 5+ only)
         try {
-            if (typeof getDialogueForContext === 'function') {
+            const _lvl = (window.gameState && window.gameState.jerryLevel) || 0;
+            if (_lvl >= 5 && typeof getDialogueForContext === 'function') {
                 const battleGreeting = getDialogueForContext('battle', { enemyName: this.enemy ? this.enemy.name : null });
                 const tooltip = document.getElementById('taskPalTooltip');
                 if (tooltip && battleGreeting) {

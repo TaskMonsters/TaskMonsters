@@ -19,6 +19,27 @@
     font-size: 20px;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
     white-space: nowrap;
+    line-height: 1.2;
+    margin: 0;
+}
+
+/* Title block: emoji left, text stacked right */
+.quest-tasks-title-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quest-tasks-emoji {
+    font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.quest-tasks-title-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .quest-tasks-subtitle {

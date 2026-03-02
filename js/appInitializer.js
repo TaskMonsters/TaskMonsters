@@ -236,7 +236,7 @@ class AppInitializer {
             window.generateDailyChallenge();
         }
         
-        // Show mood tracker prompt on every app open.
+        // Show mood tracker prompt on every app open (all levels).
         // Displayed in the monster's dialogue tooltip so users know they can tap the monster.
         // Waits 4 seconds after app is visible to avoid overlapping with other startup messages.
         setTimeout(() => {

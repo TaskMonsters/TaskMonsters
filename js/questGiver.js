@@ -412,15 +412,17 @@ class QuestGiver {
 
         questGiverUI.classList.remove('hidden');
         
-        // Play quest giver music only if UI is actually visible
-        if (window.audioManager && !questGiverUI.classList.contains('hidden')) {
-            // Small delay to ensure UI is rendered
+        // Play quest giver music — always attempt, with autoplay fallback for iOS
+        if (window.audioManager) {
+            // Ensure AudioContext is unlocked
+            window.audioManager.init();
+            // Slight delay to let the UI render and any prior stopMusic() settle
             setTimeout(() => {
                 if (!questGiverUI.classList.contains('hidden')) {
                     console.log('🎵 Playing quest giver music');
                     window.audioManager.playQuestMusic();
                 }
-            }, 100);
+            }, 150);
         }
     }
 
