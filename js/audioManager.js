@@ -364,15 +364,50 @@ class AudioManager {
             this.battleWinMusic.volume = this.battleOutcomeMusicVolume;
             this.battleWinMusic.loop = false; // Play once only
 
+            // Fire the onended callback when the track finishes naturally
+            this.battleWinMusic.addEventListener('ended', () => {
+                console.log('[AudioManager] Battle win music finished playing');
+                if (typeof this._onBattleWinMusicEnded === 'function') {
+                    this._onBattleWinMusicEnded();
+                    this._onBattleWinMusicEnded = null;
+                }
+            });
+
             this.battleWinMusic.play().catch((err) => {
                 console.warn("[AudioManager] Battle win music playback failed:", err.message);
                 this.battleWinMusic = null;
+                // If playback fails, fire callback immediately so the game doesn't stall
+                if (typeof this._onBattleWinMusicEnded === 'function') {
+                    this._onBattleWinMusicEnded();
+                    this._onBattleWinMusicEnded = null;
+                }
             });
 
             console.log("[AudioManager] Battle win music started");
         } catch (error) {
             console.warn("[AudioManager] Error playing battle win music:", error.message);
+            // Fire callback immediately on error so the game doesn't stall
+            if (typeof this._onBattleWinMusicEnded === 'function') {
+                this._onBattleWinMusicEnded();
+                this._onBattleWinMusicEnded = null;
+            }
         }
+    }
+
+    /**
+     * Register a one-shot callback that fires when the battle win music finishes.
+     * If music is not playing or audio is disabled, the callback fires immediately.
+     * @param {Function} callback
+     */
+    onBattleWinMusicEnded(callback) {
+        if (!this.enabled || !this.battleWinMusic) {
+            // Music not playing — fire immediately
+            callback();
+            return;
+        }
+        // Music is already playing — store callback for the 'ended' event
+        this._onBattleWinMusicEnded = callback;
+        console.log('[AudioManager] Registered onBattleWinMusicEnded callback');
     }
 
     /**

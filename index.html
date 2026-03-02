@@ -9702,6 +9702,14 @@ input:checked + .toggle-slider:before {
         }
 
         // Battle items definition (synced with battle system)
+        // Level requirements are gated to match the enemy progression curve:
+        //   Lv 1+  : Basic consumables (potions, shields) — always available
+        //   Lv 5+  : First enemies appear (Lazy Bat, Slime, Vampire Bat, Land Alien)
+        //   Lv 8+  : Sentry Drone, Flying Procrastinator unlock
+        //   Lv 12+ : Self-Doubt Drone, 2Face unlock
+        //   Lv 20+ : Overthinker, Ice Bully, Mushroom Guard unlock
+        //   Lv 30+ : Distraction Dragon, Medusa, Boss Treant unlock
+        //   Lv 40+ : Little Cthulhu, Slothful Ogre, Naughty Nova, Boss Medusa unlock
         const battleItems = {
             health_potion: {
                 id: 'health_potion',
@@ -9711,7 +9719,7 @@ input:checked + .toggle-slider:before {
                 cost: 20,
                 effect: 'heal',
                 value: 20,
-                levelRequired: 1
+                levelRequired: 1   // Always available
             },
             hyper_potion: {
                 id: 'hyper_potion',
@@ -9721,7 +9729,7 @@ input:checked + .toggle-slider:before {
                 cost: 40,
                 effect: 'heal',
                 value: 50,
-                levelRequired: 1
+                levelRequired: 8   // Unlocks with Sentry Drone & Flying Procrastinator
             },
             defense_refill: {
                 id: 'defense_refill',
@@ -9731,7 +9739,7 @@ input:checked + .toggle-slider:before {
                 cost: 25,
                 effect: 'defense',
                 value: 20,
-                levelRequired: 1
+                levelRequired: 1   // Always available
             },
             attack_refill: {
                 id: 'attack_refill',
@@ -9741,7 +9749,7 @@ input:checked + .toggle-slider:before {
                 cost: 25,
                 effect: 'attack_gauge',
                 value: 30,
-                levelRequired: 1
+                levelRequired: 1   // Always available
             },
             asteroid_attack: {
                 id: 'asteroid_attack',
@@ -9751,7 +9759,7 @@ input:checked + .toggle-slider:before {
                 cost: 20,
                 effect: 'attack',
                 value: 12,
-                levelRequired: 1,
+                levelRequired: 5,  // Unlocks with first enemies (Lazy Bat, Slime)
                 maxQuantity: 15
             },
             prickler: {
@@ -9764,7 +9772,7 @@ input:checked + .toggle-slider:before {
                 value: 17,
                 minDamage: 13,
                 maxDamage: 17,
-                levelRequired: 1,
+                levelRequired: 5,  // Unlocks with first enemies (Lazy Bat, Slime)
                 maxQuantity: 15
             },
             fireball: {
@@ -9777,7 +9785,7 @@ input:checked + .toggle-slider:before {
                 value: 20,
                 minDamage: 15,
                 maxDamage: 20,
-                levelRequired: 1,
+                levelRequired: 8,  // Unlocks with Sentry Drone & Flying Procrastinator
                 maxQuantity: 10
             },
             spark: {
@@ -9790,8 +9798,17 @@ input:checked + .toggle-slider:before {
                 value: 25,
                 minDamage: 18,
                 maxDamage: 25,
-                levelRequired: 1,
+                levelRequired: 8,  // Unlocks with Sentry Drone & Flying Procrastinator
                 maxQuantity: 10
+            },
+            invisibility_cloak: {
+                id: 'invisibility_cloak',
+                name: 'Invisibility Cloak',
+                emoji: '🥷🏼',
+                description: 'Allows your monster to evade the next enemy attack',
+                cost: 40,
+                effect: 'evade',
+                levelRequired: 8   // Unlocks with Sentry Drone (stun beam threat)
             },
             freeze: {
                 id: 'freeze',
@@ -9802,17 +9819,8 @@ input:checked + .toggle-slider:before {
                 effect: 'freeze',
                 value: 20,
                 freezeTurns: 2,
-                levelRequired: 1,
+                levelRequired: 12, // Unlocks with Self-Doubt Drone & 2Face
                 maxQuantity: 8
-            },
-            invisibility_cloak: {
-                id: 'invisibility_cloak',
-                name: 'Invisibility Cloak',
-                emoji: '🥷🏼',
-                description: 'Allows your monster to evade the next enemy attack',
-                cost: 40,
-                effect: 'evade',
-                levelRequired: 1
             },
             mirror_attack: {
                 id: 'mirror_attack',
@@ -9821,7 +9829,7 @@ input:checked + .toggle-slider:before {
                 description: 'Reflects enemy\'s next attack back to them',
                 cost: 80,
                 effect: 'reflect',
-                levelRequired: 1
+                levelRequired: 12  // Unlocks with 2Face (morph/charm abilities)
             },
             blue_flame: {
                 id: 'blue_flame',
@@ -9833,7 +9841,7 @@ input:checked + .toggle-slider:before {
                 value: 35,
                 minDamage: 20,
                 maxDamage: 35,
-                levelRequired: 1,
+                levelRequired: 20, // Unlocks with Overthinker, Ice Bully, Mushroom Guard
                 maxQuantity: 12
             },
             procrastination_ghost: {
@@ -9847,7 +9855,7 @@ input:checked + .toggle-slider:before {
                 minDamage: 30,
                 maxDamage: 35,
                 causeMiss: true,
-                levelRequired: 1,
+                levelRequired: 20, // Unlocks with Overthinker, Ice Bully, Mushroom Guard
                 maxQuantity: 8
             },
             poison_leaf: {
@@ -9860,8 +9868,19 @@ input:checked + .toggle-slider:before {
                 value: 15,
                 poisonDamage: 15,
                 duration: 4,
-                levelRequired: 1,
+                levelRequired: 20, // Unlocks with Mushroom Guard (poison-themed region)
                 maxQuantity: 10
+            },
+            battle_glove: {
+                id: 'battle_glove',
+                name: 'Battle Glove',
+                emoji: '🥊',
+                description: 'Adds +30 damage to all attacks for 5 turns',
+                cost: 200,
+                effect: 'damage_boost',
+                value: 30,
+                duration: 5,
+                levelRequired: 20  // Unlocks with Overthinker, Ice Bully, Mushroom Guard
             },
             throwing_stars: {
                 id: 'throwing_stars',
@@ -9874,19 +9893,8 @@ input:checked + .toggle-slider:before {
                 value: 80,
                 minDamage: 50,
                 maxDamage: 80,
-                levelRequired: 1,
+                levelRequired: 30, // Unlocks with Distraction Dragon & Medusa
                 maxQuantity: 12
-            },
-            battle_glove: {
-                id: 'battle_glove',
-                name: 'Battle Glove',
-                emoji: '🥊',
-                description: 'Adds +30 damage to all attacks for 5 turns',
-                cost: 200,
-                effect: 'damage_boost',
-                value: 30,
-                duration: 5,
-                levelRequired: 1
             },
             jade_dagger: {
                 id: 'jade_dagger',
@@ -9896,10 +9904,10 @@ input:checked + .toggle-slider:before {
                 cost: 200,
                 effect: 'attack',
                 value: 100,
-                levelRequired: 1,
+                levelRequired: 30, // Unlocks with Distraction Dragon & Medusa
                 maxQuantity: 8
             },
-             wizards_wand: {
+            wizards_wand: {
                 id: 'wizards_wand',
                 name: "Wizard's Wand",
                 emoji: '🪄',
@@ -9908,17 +9916,17 @@ input:checked + .toggle-slider:before {
                 effect: 'attack_and_heal',
                 attackValue: 120,
                 healValue: 100,
-                levelRequired: 1,
+                levelRequired: 40, // Unlocks with Little Cthulhu, Slothful Ogre, Naughty Nova
                 maxQuantity: 5
             },
             special_defense: {
                 id: 'special_defense',
                 name: 'Special Defense',
                 emoji: '📖',
-                description: 'Blocks ANY enemy special attack for 1 use. 📖 appears over your monster when activated! (Max: 5)',
+                description: 'Blocks ANY enemy special attack for 3 turns. 📖 appears over your monster when activated! (Max: 5)',
                 cost: 350,
                 effect: 'special_defense',
-                levelRequired: 30,
+                levelRequired: 30, // Unlocks with Boss Treant (first boss with drain)
                 maxQuantity: 5
             }
         };
