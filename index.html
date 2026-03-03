@@ -6302,6 +6302,8 @@ input:checked + .toggle-slider:before {
         }
 
         function showCategoryTooltip(category) {
+            // Monster dialogue only shows at level 5+ (after egg hatches)
+            if (!window.gameState || (window.gameState.jerryLevel || 0) < 5 || window.gameState.isEgg) return;
             const tooltip = document.getElementById('taskPalTooltip');
             if (!tooltip) {
                 console.warn('[showCategoryTooltip] Tooltip element not found');
@@ -6588,6 +6590,8 @@ input:checked + .toggle-slider:before {
 
         // Update Task Pal Tooltip
         function updateTooltip(energy, tasks) {
+            // Monster dialogue only shows at level 5+ (after egg hatches)
+            if (!window.gameState || (window.gameState.jerryLevel || 0) < 5 || window.gameState.isEgg) return;
             const tooltip = document.getElementById("taskPalTooltip");
             if (!tooltip) return;
             
@@ -7612,6 +7616,8 @@ input:checked + .toggle-slider:before {
         }
         function startDialogueSystem() {
             setInterval(() => {
+                // Monster dialogue only shows at level 5+ (after egg hatches)
+                if (!window.gameState || (window.gameState.jerryLevel || 0) < 5 || window.gameState.isEgg) return;
                 const now = Date.now();
                 if (now - dialogueState.lastDialogueTime >= dialogueState.dialogueInterval) {
                     const context  = _pickPeriodicContext();
@@ -7747,8 +7753,9 @@ input:checked + .toggle-slider:before {
                 updateUI();
             }, 60000);
             
-            // Welcome message on load
+            // Welcome message on load (level 5+ only, after egg hatches)
             setTimeout(() => {
+                if (!window.gameState || (window.gameState.jerryLevel || 0) < 5 || window.gameState.isEgg) return;
                 const dialogue = getDialogueForContext('idle');
                 const tooltip = document.getElementById('taskPalTooltip');
                 if (tooltip) {
@@ -13240,6 +13247,8 @@ input:checked + .toggle-slider:before {
 
         // --- Tooltip Function ---
         function showTooltip(message) {
+          // Monster dialogue only shows at level 5+ (after egg hatches)
+          if (!window.gameState || (window.gameState.jerryLevel || 0) < 5 || window.gameState.isEgg) return;
           const tooltip = document.getElementById('taskPalTooltip');
           if (!tooltip) return;
           tooltip.textContent = message;
