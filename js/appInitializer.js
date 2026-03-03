@@ -255,12 +255,12 @@ class AppInitializer {
                 };
                 tooltip.addEventListener('click', openMoodOnClick);
                 
-                // Auto-hide after 10 seconds
+                // Auto-hide after 20 seconds
                 clearTimeout(window._moodPromptTimer);
                 window._moodPromptTimer = setTimeout(() => {
                     tooltip.classList.remove('visible', 'mood-prompt');
                     tooltip.removeEventListener('click', openMoodOnClick);
-                }, 10000);
+                }, 20000);
             }
             console.log('[AppInit] Mood tracker prompt shown');
         }, 4000);
