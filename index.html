@@ -6617,11 +6617,31 @@ input:checked + .toggle-slider:before {
 
         // Update Task Pal Tooltip
         function updateTooltip(energy, tasks) {
-            // Monster dialogue only shows at level 5+ (after egg hatches)
-            if (!window.gameState || (window.gameState.jerryLevel || 0) < 5 || window.gameState.isEgg) return;
+            // Monster dialogue only shows at level 5+ (after egg hatches),
+            // EXCEPT: if HP is below 10 the low-HP warning always shows (even at level 1).
+            const _level = window.gameState ? (window.gameState.jerryLevel || 0) : 0;
+            const _isEgg = window.gameState ? !!window.gameState.isEgg : true;
+            const _isLowHpEmergency = energy < 10;
+
+            if (!window.gameState || (_level < 5 && !_isLowHpEmergency)) return;
+
             const tooltip = document.getElementById("taskPalTooltip");
             if (!tooltip) return;
-            
+
+            // If still in egg mode but HP is critically low, show only the low-HP message
+            if (_isEgg && _isLowHpEmergency) {
+                const lowHpMessages = [
+                    "💔 I'm really hurting… please complete a task to help me!",
+                    "😰 My HP is dangerously low! I need your help!",
+                    "🆘 I'm barely hanging on — finish a task to restore my energy!"
+                ];
+                const msg = lowHpMessages[Math.floor(Math.random() * lowHpMessages.length)];
+                tooltip.textContent = msg;
+                tooltip.classList.add("visible");
+                setTimeout(() => tooltip.classList.remove("visible"), 20000);
+                return;
+            }
+
             const now = Date.now();
             const hasOverdue = tasks.some(t => !t.completed && t.dueDate && new Date(t.dueDate).getTime() < now);
             const dueSoon = tasks.some(t => !t.completed && t.dueDate && new Date(t.dueDate).getTime() - now < 3600000);
@@ -12545,6 +12565,8 @@ input:checked + .toggle-slider:before {
             
             if (window.fireConfetti) {
                 window.fireConfetti();
+                // Fire confetti a second time for extra celebration
+                setTimeout(() => window.fireConfetti && window.fireConfetti(), 1200);
             }
             
             // Trigger level up dialogue
