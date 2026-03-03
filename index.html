@@ -1482,6 +1482,33 @@
             transform: scale(1.05);
         }
 
+        /* Duplicate Task Button - bottom-left of card */
+        .task-duplicate-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            min-width: 44px;
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 18px;
+            padding: 0;
+            background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            color: white;
+            z-index: 5;
+        }
+
+        .task-duplicate-btn:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+            transform: scale(1.05);
+        }
+
         /* Recurring Task Buttons */
         .recurring-btn {
             min-width: auto !important;
@@ -7839,7 +7866,8 @@ input:checked + .toggle-slider:before {
                     
                     return `
 	                        <div class="task-card" data-task-id="${task.id}">
-	                            <button class="task-edit-button" onclick="editTask(${taskIndex})" title="Edit task"></button>
+		                            <button class="task-edit-button" onclick="editTask(${taskIndex})" title="Edit task"></button>
+		                            <button class="task-duplicate-btn" onclick="event.stopPropagation(); duplicateTask(${taskIndex})" title="Duplicate task">⧉</button>
 	                            
 	                            <div class="task-header">
 	                                <div class="task-emoji">${categoryInfo.emoji}</div>
@@ -11163,6 +11191,36 @@ input:checked + .toggle-slider:before {
             }
         }
         
+        // Duplicate a task — creates a copy with a fresh ID and clears completion state
+        function duplicateTask(index) {
+            const original = gameState.tasks[index];
+            if (!original) return;
+            const copy = Object.assign({}, original, {
+                id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                title: original.title + ' (Copy)',
+                completed: false,
+                createdAt: new Date().toISOString(),
+                subtasks: (original.subtasks || []).map(st => Object.assign({}, st, {
+                    id: 'subtask_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    completed: false
+                }))
+            });
+            // Insert the copy directly after the original
+            gameState.tasks.splice(index + 1, 0, copy);
+            gameState.totalTasksCreated = (gameState.totalTasksCreated || 0) + 1;
+            saveGameState();
+            updateUI();
+            updateTasksDisplay();
+            // Schedule notifications for the duplicate if it has a due date
+            if (copy.dueDate && window.gameState && window.gameState.notifications) {
+                const newIndex = index + 1;
+                if (window.notificationManager) {
+                    window.notificationManager.scheduleTaskNotifications(copy, newIndex);
+                }
+            }
+            showSuccessMessage('⧉ Task duplicated!');
+        }
+
         // === MVP WORKFLOW IMPROVEMENTS ===
         
         // Wrapper functions for UI buttons

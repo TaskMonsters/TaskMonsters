@@ -284,6 +284,12 @@ class MoodTracker {
             mainHeroSprite.style.cursor = 'pointer';
             mainHeroSprite.addEventListener('click', () => {
                 console.log('[MoodTracker] Monster clicked, showing tooltip');
+                // Dismiss the "Tap me" mood prompt if it is currently visible
+                const moodPrompt = document.getElementById('taskPalTooltip');
+                if (moodPrompt && moodPrompt.classList.contains('mood-prompt')) {
+                    clearTimeout(window._moodPromptTimer);
+                    moodPrompt.classList.remove('visible', 'mood-prompt');
+                }
                 this.showTooltip();
             });
             console.log('[MoodTracker] Monster click listener added');

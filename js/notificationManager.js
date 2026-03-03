@@ -84,18 +84,18 @@ class NotificationManager {
         // Immediate sync
         this.syncTasksToSW();
 
-        // Sync every 60 s to keep SW task list fresh
+        // Sync every 30 s to keep SW task list fresh
         if (!this._syncInterval) {
             this._syncInterval = setInterval(() => {
                 this.syncTasksToSW();
-            }, 60 * 1000);
+            }, 30 * 1000);
         }
 
-        // Keep-alive PING every 55 s
+        // Keep-alive PING every 25 s
         if (!this._pingInterval) {
             this._pingInterval = setInterval(() => {
                 this._postToSW({ type: 'PING' });
-            }, 55 * 1000);
+            }, 25 * 1000);
         }
 
         // Register for Periodic Background Sync (Android Chrome)

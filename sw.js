@@ -23,8 +23,8 @@
  *   SW fires showNotification() for any threshold within ±90 s window
  */
 
-const CACHE_NAME      = 'task-monsters-v3';
-const TASKS_CACHE_KEY = 'task-monsters-tasks-v3';
+const CACHE_NAME      = 'task-monsters-v4';
+const TASKS_CACHE_KEY = 'task-monsters-tasks-v4';
 const PRECACHE_ASSETS = [
     './',
     './index.html',
@@ -37,7 +37,7 @@ let _sentKeys = new Set();    // "taskId_minutes" already notified this session
 let _checkTimer = null;
 
 const THRESHOLDS_MIN = [20, 15, 10, 5, 2];
-const WINDOW_SEC     = 90; // ±90 s window around each threshold
+const WINDOW_SEC     = 120; // ±120 s window around each threshold (wider = more reliable)
 
 // ─── Install ──────────────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
@@ -217,7 +217,7 @@ function scheduleNextCheck() {
     _checkTimer = setTimeout(() => {
         checkAndNotify();
         scheduleNextCheck();
-    }, 60 * 1000); // every 60 seconds
+    }, 30 * 1000); // every 30 seconds — ensures no threshold window is missed
 }
 
 // ─── Persist tasks to Cache Storage ──────────────────────────────────────────
