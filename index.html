@@ -1482,15 +1482,15 @@
             transform: scale(1.05);
         }
 
-        /* Duplicate Task Button - below the pencil edit icon (top-right) */
+        /* Duplicate Task Button - purple action button in the bottom action row */
         .task-duplicate-btn {
-            position: absolute;
-            top: 44px;
-            right: 10px;
-            width: 28px;
-            height: 28px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            min-width: 44px;
+            width: 44px;
+            height: 44px;
             border: none;
-            background: transparent;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1498,13 +1498,12 @@
             transition: all 0.2s ease;
             font-size: 18px;
             padding: 0;
-            z-index: 10;
-            line-height: 1;
+            flex-shrink: 0;
         }
 
         .task-duplicate-btn:hover {
-            transform: scale(1.2);
-            filter: brightness(1.3);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transform: scale(1.05);
         }
 
         /* Recurring Task Buttons */
@@ -7886,7 +7885,6 @@ input:checked + .toggle-slider:before {
                     return `
 	                        <div class="task-card" data-task-id="${task.id}">
 		                            <button class="task-edit-button" onclick="editTask(${taskIndex})" title="Edit task"></button>
-		                            <button class="task-duplicate-btn" onclick="event.stopPropagation(); duplicateTask(${taskIndex})" title="Duplicate task">⧉</button>
 	                            
 	                            <div class="task-header">
 	                                <div class="task-emoji">${categoryInfo.emoji}</div>
@@ -7907,11 +7905,12 @@ input:checked + .toggle-slider:before {
 				                                ${task.recurring ? `
 				                                    <button class="action-btn action-complete" onclick="event.stopPropagation(); finishRecurringTask(${taskIndex})" title="Complete This Occurrence" style="flex: 1; min-width: 80px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
 				                                    <button class="action-btn finish-recurring-btn" onclick="event.stopPropagation(); completeRecurringTaskPermanently(${taskIndex})" title="Finish Recurring Task" style="flex: 1; min-width: 100px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white !important; font-size: 12px; padding: 8px 4px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>Finish Recurring</button>
-				                                ` : `
-				                                    <button class="action-btn action-complete" onclick="event.stopPropagation(); completeTask(${taskIndex})" title="Mark Complete" style="${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
-				                                `}
-		                                <button class="action-btn action-remove" onclick="event.stopPropagation(); deleteTask(${taskIndex})" title="Delete">×</button>
-		                            </div>
+										` : `
+										    <button class="action-btn action-complete" onclick="event.stopPropagation(); completeTask(${taskIndex})" title="Mark Complete" style="${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
+										`}
+				                        <button class="task-duplicate-btn" onclick="event.stopPropagation(); duplicateTask(${taskIndex})" title="Duplicate task">⧉</button>
+				                        <button class="action-btn action-remove" onclick="event.stopPropagation(); deleteTask(${taskIndex})" title="Delete">×</button>
+				                    </div>
 	                        </div>
 	                    `;
                 }).join('');
