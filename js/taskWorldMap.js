@@ -444,13 +444,12 @@ class TaskWorldMap {
 // Initialize global Task World Map instance
 window.taskWorldMap = new TaskWorldMap();
 
-// Listen for battle victory events to show map
+// NOTE: The world map is shown by lootSystem.closeLootModal() via _pendingWorldMapContext.
+// The battleVictory event is dispatched for the Guardian narrative system only;
+// taskWorldMap.show() must NOT be called here to avoid a double-trigger.
 document.addEventListener('battleVictory', (event) => {
-    console.log('[TaskWorldMap] Battle victory event received, showing map');
-    
-    // Always reset isShowing before show() so repeated victories work correctly
-    window.taskWorldMap.isShowing = false;
-    window.taskWorldMap.show(event.detail);
+    console.log('[TaskWorldMap] Battle victory event received (Guardian only — map shown by lootSystem)');
+    // Do NOT call taskWorldMap.show() here — lootSystem.closeLootModal() handles it.
 });
 
 // Return to main app function

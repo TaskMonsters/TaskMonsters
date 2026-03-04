@@ -908,8 +908,8 @@ class BattleManager {
             document.getElementById('enemySprite')
         );
 
-        // Calculate damage (40-50 base damage - INCREASED)
-        let damage = Math.floor(Math.random() * 11) + 40; // 40-50 damage;
+        // Calculate damage (13-18 range)
+        let damage = Math.floor(Math.random() * 6) + 13; // 13-18 damage
         damage = this.applyDamageBoost(damage); // Apply Battle Glove boost
         const isDead = this.enemy.takeDamage(damage);
         
@@ -989,8 +989,8 @@ class BattleManager {
             window.audioManager.playSound('prickler_attack', 0.8);
         }
 
-        // Calculate damage (20-30 range with nuclear explosion - INCREASED)
-        let damage = Math.floor(Math.random() * 11) + 20; // Random between 20-30
+        // Calculate damage (20-25 range)
+        let damage = Math.floor(Math.random() * 6) + 20; // 20-25 damage
         damage = this.applyDamageBoost(damage); // Apply Battle Glove boost
         const isDead = this.enemy.takeDamage(damage);
         
@@ -2938,10 +2938,13 @@ class BattleManager {
                 window.audioManager.playBattleLoseMusic();
             }
             
-            // Calculate XP loss (smaller penalty)
+            // Calculate XP loss — fluctuates based on enemy level + random variance
             const enemyLevel = this.enemy.level || this.enemy.baseLevel || 1;
-            xpLost = Math.floor(5 + (enemyLevel * 2));
-            console.log(`[Battle] XP Loss Calculation: enemyLevel=${enemyLevel}, xpLost=${xpLost}`);
+            const baseXpLoss = 3 + (enemyLevel * 1.5);
+            // Random multiplier between 0.6 and 1.4 so the loss varies each defeat
+            const variance = 0.6 + (Math.random() * 0.8);
+            xpLost = Math.max(2, Math.floor(baseXpLoss * variance));
+            console.log(`[Battle] XP Loss Calculation: enemyLevel=${enemyLevel}, base=${baseXpLoss.toFixed(1)}, variance=${variance.toFixed(2)}, xpLost=${xpLost}`);
             
             // Deduct XP (but don't go below 0)
             if (window.gameState) {

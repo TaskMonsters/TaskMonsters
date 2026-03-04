@@ -109,9 +109,25 @@ class LootSystem {
         }
         
         lootDrops.forEach(item => {
+            // Add to main inventory (persistent store)
             window.inventoryManager.addItem(item.id, item.quantity);
             console.log(`[Loot] Added ${item.quantity}x ${item.name} to inventory`);
+
+            // Also sync into battleInventory so the item is immediately usable in battle
+            if (window.gameState) {
+                if (!window.gameState.battleInventory) {
+                    window.gameState.battleInventory = {};
+                }
+                window.gameState.battleInventory[item.id] =
+                    (window.gameState.battleInventory[item.id] || 0) + item.quantity;
+                console.log(`[Loot] Synced ${item.quantity}x ${item.name} to battleInventory`);
+            }
         });
+
+        // Persist the updated battleInventory
+        if (typeof window.saveGameState === 'function') {
+            window.saveGameState();
+        }
     }
     
     /**
@@ -356,24 +372,15 @@ class LootSystem {
                 overlay.remove();
                 
                 // Show world map after loot modal closes.
-                // CRITICAL: Wait for the victory music to finish playing all the way through
-                // before showing the Task World map so the music is not cut off.
+                // The victory music continues playing while the map is on screen;
+                // it is stopped only when the user taps the Continue button.
                 if (window._pendingWorldMapContext && window.taskWorldMap) {
                     const showMap = () => {
                         window.taskWorldMap.show(window._pendingWorldMapContext);
                         window._pendingWorldMapContext = null;
                     };
-
-                    if (window.audioManager && typeof window.audioManager.onBattleWinMusicEnded === 'function') {
-                        console.log('[LootSystem] Waiting for victory music to finish before showing Task World map...');
-                        window.audioManager.onBattleWinMusicEnded(() => {
-                            console.log('[LootSystem] Victory music done — showing Task World map');
-                            setTimeout(showMap, 300); // brief pause after music ends
-                        });
-                    } else {
-                        // Fallback: no audio manager, show after 500ms
-                        setTimeout(showMap, 500);
-                    }
+                    // Show immediately (music keeps playing in background)
+                    setTimeout(showMap, 300);
                 }
             }, 200);
         }

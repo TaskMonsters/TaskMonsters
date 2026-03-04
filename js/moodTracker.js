@@ -613,3 +613,31 @@ if (document.readyState === 'loading') {
         }
     }, 500);
 }
+
+// ─── Reset Mood Tracker ────────────────────────────────────────────────────────
+window.resetMoodTracker = function() {
+    if (!confirm('Are you sure you want to reset all mood tracking data? This cannot be undone.')) return;
+
+    // Clear from localStorage
+    localStorage.removeItem('moodHistory');
+    console.log('[MoodTracker] Mood history cleared from localStorage');
+
+    // Clear from gameState
+    if (window.gameState) {
+        window.gameState.moodHistory = [];
+    }
+
+    // Refresh the mood history display
+    if (typeof window.updateMoodHistoryDisplay === 'function') {
+        window.updateMoodHistoryDisplay();
+    }
+
+    // Show success notification
+    if (typeof showSuccessMessage === 'function') {
+        showSuccessMessage('🔄 Mood data reset!', 'All mood history has been cleared');
+    } else if (typeof showNotification === 'function') {
+        showNotification('🔄 Mood history cleared!', 'success');
+    } else {
+        alert('Mood history has been reset.');
+    }
+};
