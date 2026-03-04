@@ -77,7 +77,7 @@ const DIALOGUE_DATABASE = {
     // Time of day based messages
     timeOfDay: {
         morning: [
-            "Good morning! Ready to rock this day?",
+            "Good morning! Let's make today amazing!",
             "Morning! Your early productivity inspires me."
         ],
         afternoon: [
@@ -92,10 +92,16 @@ const DIALOGUE_DATABASE = {
 
     // Fun facts for level 15+
     funFacts: [
-        "Fun fact: The oldest known rock on Earth is over 4 billion years old!",
-        "Fun fact: Diamonds are just carbon atoms arranged in a crystal structure.",
-        "Fun fact: The Great Wall of China used rice as mortar between stones!",
-        "Fun fact: Pumice is the only rock that floats on water."
+        "Fun fact: Honey never spoils — archaeologists found 3,000-year-old honey in Egyptian tombs!",
+        "Fun fact: A group of flamingos is called a flamboyance.",
+        "Fun fact: Octopuses have three hearts and blue blood.",
+        "Fun fact: The shortest war in history lasted only 38–45 minutes.",
+        "Fun fact: Bananas are technically berries, but strawberries are not.",
+        "Fun fact: A day on Venus is longer than a year on Venus.",
+        "Fun fact: Crows can recognize and remember human faces.",
+        "Fun fact: The human brain generates about 20 watts of power — enough to power a dim light bulb.",
+        "Fun fact: Wombat droppings are cube-shaped — the only animal known to produce them.",
+        "Fun fact: There are more possible iterations of a chess game than atoms in the observable universe."
     ],
 
     // Idle conversation starters
@@ -110,45 +116,54 @@ const DIALOGUE_DATABASE = {
     ],
 
     // New contextual dialogue
+    // Keys match moodDialogueSystem.js: happy, anxious, neutral, angry
     moods: {
         happy: [
-            "Your happiness is contagious! Let's keep the good vibes flowing.",
-            "Seeing you happy makes me happy. We're a great team!",
-            "So glad you're feeling good! Let's channel that energy into something awesome."
+            "Your mood tracker shows you've been genuinely happy lately. That energy is contagious.",
+            "Good mood energy is the best fuel. Your tracker is basically a power source right now.",
+            "Peak mental state detected. This is the exact moment to tackle the thing you've been putting off."
         ],
-        sad: [
-            "It's okay to feel sad sometimes. I'm here for you.",
-            "Remember that even on cloudy days, the sun is still shining. We'll get through this together.",
-            "Sending you a virtual hug. We can take it one step at a time."
+        anxious: [
+            "I've noticed you've been logging anxious lately. The fact that you're still here — that's courage.",
+            "Anxiety logged. But also noted: you keep showing up anyway. That's the part that matters.",
+            "When you're anxious, small wins matter more. Let's get you one right now."
         ],
-        meh: [
-            "Feeling a bit 'meh'? Sometimes a small win can turn things around. What's one little thing we can do?",
-            "I get it. Some days are just... beige. No pressure, just know I'm here.",
-            "Even on a 'meh' day, you're still making progress just by being here."
+        neutral: [
+            "Neutral mood logged. Not every day needs to be a highlight reel.",
+            "I see a lot of neutral check-ins from you lately. Sometimes steady is exactly what's needed.",
+            "Neutral days are where real habits get built. No drama, just progress."
         ],
         angry: [
-            "Feeling angry is valid. Let's channel that fire into crushing a task.",
-            "Take a deep breath. We can use that intensity to our advantage.",
-            "It's okay to be mad. Let's focus on what we can control and make some progress."
+            "Your mood tracker has some fire in it recently. That intensity is a resource. Let's use it.",
+            "Anger logged. Now let's turn that frustration into the most productive hour of your week.",
+            "Frustrated energy is still energy. I'd rather you be fired up than checked out. Let's go."
         ]
     },
 
     habits: {
         work: [
-            "You're a powerhouse at work tasks! Your focus is incredible.",
-            "Another work task done! You're making serious professional strides."
+            "Work is your most completed category. That discipline is building something real.",
+            "Your habit data shows work at the top. You're not just doing your job — you're mastering it."
         ],
         learning: [
-            "Your dedication to learning is so inspiring! Your brain must be huge!",
-            "Another knowledge bomb dropped! You're getting smarter by the minute."
+            "Learning leads your tracker. You're the kind of person who never stops growing.",
+            "Every learning task is a deposit into the most important account you have — your mind."
         ],
         fitness: [
-            "You're a fitness machine! Every workout makes us stronger.",
-            "Look at you, prioritizing your health! That's the stuff of champions."
+            "Fitness leads your tracker. The discipline you build there spills into everything else.",
+            "Your most completed category is fitness. Every session is compounding into something real."
+        ],
+        wellness: [
+            "Wellness is your top category. You understand that you can't pour from an empty cup.",
+            "Your wellness habits are building a stronger, more resilient you every single day."
+        ],
+        creative: [
+            "Creative tasks lead your tracker. You're not just consuming — you're making things.",
+            "Creative is where you show up most. That's a gift, and you're using it."
         ],
         default: [
-            "You're really building a great habit here. Consistency is key!",
-            "I'm so impressed with your dedication to this. Keep it up!"
+            "I've been tracking your habits. You're building real consistency — the kind that changes things.",
+            "The tracker doesn't lie — you're showing up. That's the whole game."
         ]
     },
 
