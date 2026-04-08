@@ -339,13 +339,40 @@ class MoodTracker {
         // Store original state
         const originalSrc = sprite.src;
         const originalAnimation = sprite.style.animation;
-        const originalTransform = sprite.style.transform;
+        
+        // BUG FIX: Dynamically detect current scale to avoid shrinking monster after level 5
+        // Level 5+ monsters/skins use scale(4) or scale(5), while egg uses scale(2)
+        // We must preserve the existing transform instead of hard-coding scale(4)
+        let currentTransform = sprite.style.transform || '';
+        
+        // If transform is empty or 'none', try to get it from computed style
+        if (!currentTransform || currentTransform === 'none') {
+            const computedStyle = window.getComputedStyle(sprite);
+            currentTransform = computedStyle.transform;
+        }
+        
+        // If still no transform, fallback to a sensible default based on state
+        if (!currentTransform || currentTransform === 'none') {
+            if (isEgg) {
+                currentTransform = 'scale(2)';
+            } else {
+                const appearance = window.getActiveMonsterAppearance ? 
+                    window.getActiveMonsterAppearance(selectedMonster, equippedSkinId) : null;
+                const isSkin = appearance?.isSkin || !!equippedSkinId;
+                currentTransform = isSkin ? 'scale(5)' : 'scale(4)';
+            }
+        }
+        
+        const originalTransform = currentTransform;
+        console.log('[MoodTracker] Detected original transform:', originalTransform);
         
         // HAPPY MOOD: Jump animation
         if (moodValue === 'happy') {
             console.log('[MoodTracker] Playing JUMP animation for happy mood');
-            console.log('[MoodTracker] Equipped skin:', equippedSkinId);
-            console.log('[MoodTracker] Is egg:', isEgg);
+            
+            // Extract the base transform (everything except translateY)
+            // This ensures we keep the correct scale() even if it's not exactly 4
+            const baseTransform = originalTransform.replace(/translateY\([^)]*\)/g, '').trim() || 'scale(4)';
             
             if (equippedSkinId || isEgg) {
                 // SKIN EQUIPPED OR EGG FORM: Keep current visual, just add jump transform
@@ -354,15 +381,15 @@ class MoodTracker {
                 
                 // Add jump transform effect WITHOUT changing sprite src
                 sprite.style.setProperty('transition', 'transform 0.3s ease', 'important');
-                sprite.style.setProperty('transform', 'scale(4) translateY(-20px)', 'important');
+                sprite.style.setProperty('transform', `${baseTransform} translateY(-20px)`, 'important');
                 
                 setTimeout(() => {
-                    sprite.style.setProperty('transform', 'scale(4) translateY(0)', 'important');
+                    sprite.style.setProperty('transform', `${baseTransform} translateY(0)`, 'important');
                 }, 300);
                 
                 // Restore transform after animation
                 setTimeout(() => {
-                    sprite.style.setProperty('transform', originalTransform || 'scale(4)', 'important');
+                    sprite.style.setProperty('transform', originalTransform, 'important');
                     sprite.style.setProperty('transition', '', 'important');
                     console.log(`[MoodTracker] Jump animation complete - ${visualType} maintained`);
                 }, 600);
@@ -384,16 +411,18 @@ class MoodTracker {
                     requestAnimationFrame(() => {
                         // Add jump transform effect
                         sprite.style.transition = 'transform 0.3s ease';
-                        sprite.style.transform = 'scale(4) translateY(-20px)';
+                        sprite.style.transform = `${baseTransform} translateY(-20px)`;
                         
                         setTimeout(() => {
-                            sprite.style.transform = 'scale(4) translateY(0)';
+                            sprite.style.transform = `${baseTransform} translateY(0)`;
                         }, 300);
                         
                         setTimeout(() => {
                             sprite.src = originalSrc;
                             sprite.style.animation = originalAnimation;
                             sprite.style.transition = '';
+                            // Restore exact original transform
+                            sprite.style.transform = originalTransform;
                             console.log('[MoodTracker] Jump GIF animation complete');
                         }, 2000);
                     });
@@ -402,12 +431,13 @@ class MoodTracker {
                     console.error('[MoodTracker] Failed to load jump GIF:', jumpGif);
                     // Fallback: just do transform without changing sprite
                     sprite.style.transition = 'transform 0.3s ease';
-                    sprite.style.transform = 'scale(4) translateY(-20px)';
+                    sprite.style.transform = `${baseTransform} translateY(-20px)`;
                     setTimeout(() => {
-                        sprite.style.transform = 'scale(4) translateY(0)';
+                        sprite.style.transform = `${baseTransform} translateY(0)`;
                     }, 300);
                     setTimeout(() => {
                         sprite.style.transition = '';
+                        sprite.style.transform = originalTransform;
                     }, 600);
                 };
                 jumpImage.src = jumpGif;
