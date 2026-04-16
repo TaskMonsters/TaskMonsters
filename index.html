@@ -1261,13 +1261,10 @@
         .task-actions {
             position: absolute;
             bottom: 20px;
-            left: 20px;
             right: 20px;
             display: flex;
             gap: 8px;
             align-items: center;
-            justify-content: flex-end;
-            box-sizing: border-box;
         }
 
         /* Edit Button - Just the pencil emoji in Top-Right Corner */
@@ -8009,7 +8006,7 @@ input:checked + .toggle-slider:before {
                             ${task.subtasks && task.subtasks.length > 0 ? (window.subtasksManager ? window.subtasksManager.renderSubtasks(task.id) : '') : ''}
 					                            <div class="task-actions" style="${task.recurring ? 'display: flex; gap: 8px; flex-wrap: wrap;' : ''}">
 				                                ${task.recurring ? `
-				                                    <button class="action-btn action-complete" onclick="event.stopPropagation(); finishRecurringTask(${taskIndex})" title="Complete This Occurrence" style="flex: 1; min-width: 80px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
+				                                    <button class="action-btn action-complete" onclick="event.stopPropagation(); finishRecurringTask(${taskIndex})" title="Complete This Occurrence" style="width: 64px; min-width: 64px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
 				                                    <button class="action-btn finish-recurring-btn" onclick="event.stopPropagation(); completeRecurringTaskPermanently(${taskIndex})" title="Finish Recurring Task" style="flex: 1; min-width: 100px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white !important; font-size: 12px; padding: 8px 4px; ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>Finish Recurring</button>
 										` : `
 										    <button class="action-btn action-complete" onclick="event.stopPropagation(); completeTask(${taskIndex})" title="Mark Complete" style="${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${task.subtasks && task.subtasks.length > 0 && task.subtasks.some(st => !st.completed) ? 'disabled' : ''}>✓</button>
