@@ -757,45 +757,34 @@ const MoodDialogueSystem = {
         
         console.log('[MoodDialogueSystem] Playing animation for mood:', mood);
         
-        // BUG FIX: Dynamically detect current scale to avoid shrinking monster after level 5
-        let currentTransform = monsterSprite.style.transform || '';
-        if (!currentTransform || currentTransform === 'none') {
-            currentTransform = window.getComputedStyle(monsterSprite).transform;
-        }
-        
-        // Fallback to default if no transform detected
-        if (!currentTransform || currentTransform === 'none') {
-            const isEgg = window.gameState?.isEgg || false;
-            if (isEgg) {
-                currentTransform = 'scale(2)';
-            } else {
-                const equippedSkinId = window.gameState?.equippedSkinId || null;
-                currentTransform = equippedSkinId ? 'scale(5)' : 'scale(4)';
-            }
-        }
-        
-        const originalTransform = currentTransform;
-        const baseTransform = originalTransform.replace(/translateY\([^)]*\)/g, '').trim() || 'scale(4)';
-        
+        // Get current transform to preserve it (handles scale(2), scale(4), scale(5), or none)
+        const currentTransform = monsterSprite.style.transform || 'none';
+        const baseTransform = currentTransform.includes('translateY') 
+            ? currentTransform.split('translateY')[0].trim() 
+            : currentTransform;
+        const finalBase = baseTransform === 'none' ? '' : baseTransform;
+
         if (mood === 'happy') {
             // Brief hover animation (fast)
-            monsterSprite.style.transition = 'transform 0.3s ease-in-out';
-            monsterSprite.style.transform = `${baseTransform} translateY(-10px)`;
+            monsterSprite.style.setProperty('transition', 'transform 0.3s ease-in-out', 'important');
+            monsterSprite.style.setProperty('transform', `${finalBase} translateY(-10px)`.trim(), 'important');
             setTimeout(() => {
-                monsterSprite.style.transform = originalTransform;
+                monsterSprite.style.setProperty('transform', `${finalBase} translateY(0)`.trim(), 'important');
             }, 300);
             setTimeout(() => {
-                monsterSprite.style.transition = '';
+                monsterSprite.style.setProperty('transform', baseTransform, 'important');
+                monsterSprite.style.setProperty('transition', '', 'important');
             }, 600);
         } else if (mood === 'anxious') {
             // Slower hover animation
-            monsterSprite.style.transition = 'transform 0.6s ease-in-out';
-            monsterSprite.style.transform = `${baseTransform} translateY(-8px)`;
+            monsterSprite.style.setProperty('transition', 'transform 0.6s ease-in-out', 'important');
+            monsterSprite.style.setProperty('transform', `${finalBase} translateY(-8px)`.trim(), 'important');
             setTimeout(() => {
-                monsterSprite.style.transform = originalTransform;
+                monsterSprite.style.setProperty('transform', `${finalBase} translateY(0)`.trim(), 'important');
             }, 600);
             setTimeout(() => {
-                monsterSprite.style.transition = '';
+                monsterSprite.style.setProperty('transform', baseTransform, 'important');
+                monsterSprite.style.setProperty('transition', '', 'important');
             }, 1200);
         } else if (mood === 'neutral' || mood === 'angry') {
             // Brief flicker animation

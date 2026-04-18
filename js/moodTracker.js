@@ -322,6 +322,20 @@ class MoodTracker {
         }
     }
     
+    applyJumpTransform(sprite, baseTransform, originalTransform) {
+        sprite.style.setProperty('transition', 'transform 0.3s ease', 'important');
+        sprite.style.setProperty('transform', `${baseTransform === 'none' ? '' : baseTransform} translateY(-20px)`.trim(), 'important');
+        
+        setTimeout(() => {
+            sprite.style.setProperty('transform', `${baseTransform === 'none' ? '' : baseTransform} translateY(0)`.trim(), 'important');
+        }, 300);
+        
+        setTimeout(() => {
+            sprite.style.setProperty('transform', originalTransform || baseTransform, 'important');
+            sprite.style.setProperty('transition', '', 'important');
+        }, 600);
+    }
+
     playMoodAnimation(moodValue) {
         console.log('[MoodTracker] Playing animation for mood:', moodValue);
         
@@ -344,77 +358,52 @@ class MoodTracker {
         // HAPPY MOOD: Jump animation
         if (moodValue === 'happy') {
             console.log('[MoodTracker] Playing JUMP animation for happy mood');
-            console.log('[MoodTracker] Equipped skin:', equippedSkinId);
-            console.log('[MoodTracker] Is egg:', isEgg);
             
-            if (equippedSkinId || isEgg) {
-                // SKIN EQUIPPED OR EGG FORM: Keep current visual, just add jump transform
-                const visualType = equippedSkinId ? 'skin' : 'egg';
-                console.log(`[MoodTracker] ${visualType} equipped - applying jump transform only`);
-                
-                // Add jump transform effect WITHOUT changing sprite src
-                const baseTransform = isEgg ? 'scale(2)' : 'none';
-                sprite.style.setProperty('transition', 'transform 0.3s ease', 'important');
-                sprite.style.setProperty('transform', `${baseTransform} translateY(-20px)`, 'important');
-                
-                setTimeout(() => {
-                    sprite.style.setProperty('transform', `${baseTransform} translateY(0)`, 'important');
-                }, 300);
-                
-                // Restore transform after animation
-                setTimeout(() => {
-                    sprite.style.setProperty('transform', originalTransform || baseTransform, 'important');
-                    sprite.style.setProperty('transition', '', 'important');
-                    console.log(`[MoodTracker] Jump animation complete - ${visualType} maintained`);
-                }, 600);
-            } else {
-                // NO SKIN AND NOT EGG: Use default monster jump GIF
-                console.log('[MoodTracker] No skin/egg - using default monster jump GIF');
-                
-                // Normalize monster name: capitalize first letter for file path
-                const monsterName = selectedMonster.charAt(0).toUpperCase() + selectedMonster.slice(1).toLowerCase();
-                const jumpGif = `assets/${monsterName}_jump.gif`;
-                
-                // Preload the jump GIF to prevent broken image display
+            // Get current transform to preserve it (handles scale(2), scale(4), scale(5), or none)
+            const currentTransform = sprite.style.transform || 'none';
+            const baseTransform = currentTransform.includes('translateY') 
+                ? currentTransform.split('translateY')[0].trim() 
+                : currentTransform;
+
+            // Determine jump GIF
+            let jumpGif = null;
+            const appearance = window.getActiveHeroAppearance ? window.getActiveHeroAppearance() : null;
+            
+            if (appearance && appearance.animations && appearance.animations.jump) {
+                jumpGif = appearance.animations.jump;
+            } else if (!isEgg) {
+                // Fallback for default monsters
+                const prefixToName = { 'Pink_Monster': 'Nova', 'Owlet_Monster': 'Luna', 'Dude_Monster': 'Benny' };
+                const monsterName = prefixToName[selectedMonster] || 'Nova';
+                jumpGif = `assets/heroes/${monsterName}_jump.gif`;
+            }
+
+            if (jumpGif) {
+                // Use Jump GIF
                 const jumpImage = new Image();
                 jumpImage.onload = () => {
                     sprite.src = jumpGif;
-                    sprite.style.animation = 'none';
-                    
-                    // Wait a frame for the image to render
-                    requestAnimationFrame(() => {
-                    // Add jump transform effect
                     sprite.style.setProperty('transition', 'transform 0.3s ease', 'important');
-                    sprite.style.setProperty('transform', 'translateY(-20px)', 'important');
+                    sprite.style.setProperty('transform', `${baseTransform === 'none' ? '' : baseTransform} translateY(-20px)`.trim(), 'important');
                     
                     setTimeout(() => {
-                        sprite.style.setProperty('transform', 'translateY(0)', 'important');
+                        sprite.style.setProperty('transform', `${baseTransform === 'none' ? '' : baseTransform} translateY(0)`.trim(), 'important');
                     }, 300);
                     
                     setTimeout(() => {
                         sprite.src = originalSrc;
-                        sprite.style.animation = originalAnimation;
-                        sprite.style.setProperty('transform', originalTransform || 'none', 'important');
-                        sprite.style.setProperty('transition', '', 'important');
-                        console.log('[MoodTracker] Jump GIF animation complete');
-                    }, 2000);
-                    });
-                };
-                jumpImage.onerror = () => {
-                    console.error('[MoodTracker] Failed to load jump GIF:', jumpGif);
-                    // Fallback: just do transform without changing sprite
-                    const baseTransform = isEgg ? 'scale(2)' : 'none';
-                    sprite.style.setProperty('transition', 'transform 0.3s ease', 'important');
-                    sprite.style.setProperty('transform', `${baseTransform} translateY(-20px)`, 'important');
-                    setTimeout(() => {
-                        sprite.style.setProperty('transform', `${baseTransform} translateY(0)`, 'important');
-                    }, 300);
-                    setTimeout(() => {
                         sprite.style.setProperty('transform', originalTransform || baseTransform, 'important');
                         sprite.style.setProperty('transition', '', 'important');
-                    }, 600);
+                    }, 2000);
+                };
+                jumpImage.onerror = () => {
+                    // Fallback to transform only
+                    this.applyJumpTransform(sprite, baseTransform, originalTransform);
                 };
                 jumpImage.src = jumpGif;
+            } else {
+                // Transform only (for eggs or if no jump GIF found)
+                this.applyJumpTransform(sprite, baseTransform, originalTransform);
             }
         } 
         // OTHER MOODS: Flicker/fade effect
