@@ -682,90 +682,10 @@ const MoodDialogueSystem = {
     
     // Update mood history display in habits tab
     updateMoodHistoryDisplay() {
-        const container = document.getElementById('moodHistoryContainer');
-        if (!container) return;
-        
-        // Read from localStorage (single source of truth)
-        const saved = localStorage.getItem('moodHistory');
-        const moodHistory = saved ? JSON.parse(saved) : [];
-        
-        if (!moodHistory || moodHistory.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
-                    <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
-                    <p style="margin: 0;">No mood data yet</p>
-                    <p style="margin: 8px 0 0 0; font-size: 14px;">Track your mood to see insights here</p>
-                </div>
-            `;
-            return;
+        // Redirect to the new filterable display system in moodTracker.js
+        if (typeof window.updateMoodHistoryDisplay === 'function') {
+            window.updateMoodHistoryDisplay();
         }
-        
-        // Calculate most common mood
-        const moodCounts = {};
-        moodHistory.forEach(entry => {
-            moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
-        });
-        
-        const mostCommonMood = Object.entries(moodCounts).reduce((a, b) => 
-            moodCounts[a[0]] > moodCounts[b[0]] ? a : b
-        )[0];
-        
-        const mostCommonEmoji = this.moods[mostCommonMood];
-        const mostCommonCount = moodCounts[mostCommonMood];
-        
-        // Get last 14 days of mood history (reversed to show newest first)
-        const recentMoods = moodHistory.slice(-14).reverse();
-        
-        // Mood colors
-        const moodColors = {
-            happy: '#4ade80',
-            sad: '#fbbf24',
-            meh: '#94a3b8',
-            angry: '#f87171'
-        };
-        
-        const moodLabels = {
-            happy: 'Happy',
-            sad: 'Sad',
-            meh: 'Meh',
-            angry: 'Angry'
-        };
-        
-        container.innerHTML = `
-            <div style="margin-bottom: 24px; text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="font-size: 48px; margin-bottom: 8px;">${mostCommonEmoji}</div>
-                <div style="color: white; font-size: 16px; font-weight: 600; margin-bottom: 4px;">Most Common Mood</div>
-                <div style="color: var(--text-secondary); font-size: 14px;">${mostCommonCount} ${mostCommonCount === 1 ? 'time' : 'times'}</div>
-            </div>
-            
-            <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 12px;">Recent Mood History</div>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                ${recentMoods.map(entry => {
-                    const date = new Date(entry.timestamp);
-                    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                    
-                    return `
-                        <div style="
-                            display: flex;
-                            align-items: center;
-                            gap: 12px;
-                            padding: 12px;
-                            background: rgba(255, 255, 255, 0.05);
-                            border-radius: 8px;
-                            border: 1px solid rgba(255, 255, 255, 0.1);
-                        ">
-                            <div style="font-size: 24px; flex-shrink: 0;">${entry.emoji}</div>
-                            <div style="flex: 1;">
-                                <div style="color: ${moodColors[entry.mood]}; font-weight: 600; font-size: 14px;">${moodLabels[entry.mood]}</div>
-                                <div style="color: var(--text-secondary); font-size: 12px;">${dateStr} at ${timeStr}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
     },
     
     // Play monster animation based on mood selection

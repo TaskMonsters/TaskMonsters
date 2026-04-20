@@ -457,22 +457,21 @@ window.updateMoodHistoryDisplay = function() {
     // Apply date filter
     if (dateFilter !== 'all') {
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        const todayTimestamp = today.getTime();
+        // Set to start of today (00:00:00.000)
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         
         moods = moods.filter(entry => {
-            if (!entry.timestamp) return false;
+            const entryTime = entry.timestamp || (entry.date ? new Date(entry.date).getTime() : 0);
+            if (!entryTime) return false;
             
             if (dateFilter === 'today') {
-                return entry.timestamp >= todayTimestamp;
+                return entryTime >= todayStart;
             } else if (dateFilter === 'week') {
-                const weekAgo = new Date(today);
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return entry.timestamp >= weekAgo.getTime();
+                const weekAgo = todayStart - (7 * 24 * 60 * 60 * 1000);
+                return entryTime >= weekAgo;
             } else if (dateFilter === 'month') {
-                const monthAgo = new Date(today);
-                monthAgo.setDate(monthAgo.getDate() - 30);
-                return entry.timestamp >= monthAgo.getTime();
+                const monthAgo = todayStart - (30 * 24 * 60 * 60 * 1000);
+                return entryTime >= monthAgo;
             }
             return true;
         });
@@ -550,28 +549,25 @@ if (document.readyState === 'loading') {
 window.initMoodHistoryFilters = function() {
     console.log('[MoodTracker] Initializing mood history filters');
     
-    // Add event listeners to filters
     const dateFilter = document.getElementById('moodDateFilter');
     const moodFilter = document.getElementById('moodTypeFilter');
     
-    if (dateFilter) {
-        // Remove existing listeners by cloning and replacing
-        const newDateFilter = dateFilter.cloneNode(true);
-        dateFilter.parentNode.replaceChild(newDateFilter, dateFilter);
-        newDateFilter.addEventListener('change', () => {
-            console.log('[MoodTracker] Date filter changed:', newDateFilter.value);
+    // Use a flag to prevent multiple listener attachments without cloning if possible,
+    // but cloning is safer to ensure clean state.
+    if (dateFilter && !dateFilter.dataset.listenersAttached) {
+        dateFilter.addEventListener('change', () => {
+            console.log('[MoodTracker] Date filter changed:', dateFilter.value);
             window.updateMoodHistoryDisplay();
         });
+        dateFilter.dataset.listenersAttached = 'true';
     }
     
-    if (moodFilter) {
-        // Remove existing listeners by cloning and replacing
-        const newMoodFilter = moodFilter.cloneNode(true);
-        moodFilter.parentNode.replaceChild(newMoodFilter, moodFilter);
-        newMoodFilter.addEventListener('change', () => {
-            console.log('[MoodTracker] Mood filter changed:', newMoodFilter.value);
+    if (moodFilter && !moodFilter.dataset.listenersAttached) {
+        moodFilter.addEventListener('change', () => {
+            console.log('[MoodTracker] Mood filter changed:', moodFilter.value);
             window.updateMoodHistoryDisplay();
         });
+        moodFilter.dataset.listenersAttached = 'true';
     }
     
     // Initial display
@@ -579,7 +575,7 @@ window.initMoodHistoryFilters = function() {
     console.log('[MoodTracker] Filters initialized and display updated');
 };
 
-// Alias for compatibility with showTab() in index.html
+// Ensure it's available globally early
 window.initHabitMoodFilters = window.initMoodHistoryFilters;
 
 // Auto-initialize when switching to Habits tab
