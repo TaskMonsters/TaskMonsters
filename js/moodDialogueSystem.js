@@ -212,10 +212,7 @@ const MoodDialogueSystem = {
     init() {
         console.log('[MoodDialogueSystem] Initializing...');
         
-        // Initialize mood history if not exists
-        if (!gameState.moodHistory) {
-            gameState.moodHistory = [];
-        }
+        // Mood history is now stored only in localStorage (single source of truth)
         
         // Start mood tracker scheduling (only after onboarding)
         this.startMoodTrackerSchedule();
@@ -480,10 +477,27 @@ const MoodDialogueSystem = {
     recordMood(mood, note = '') {
         console.log('[MoodDialogueSystem] Recording mood:', mood, 'with note:', note);
         
+        // Map legacy moods to new system for consistency
+        const moodMap = {
+            'happy': 'happy',
+            'anxious': 'sad',
+            'neutral': 'meh',
+            'angry': 'angry'
+        };
+        const normalizedMood = moodMap[mood] || mood;
+        
+        // Map to new emoji system
+        const emojiMap = {
+            'happy': '😊',
+            'sad': '😢',
+            'meh': '🫤',
+            'angry': '😡'
+        };
+        
         const moodData = {
-            mood: mood,
-            emoji: this.moods[mood],
-            name: mood.charAt(0).toUpperCase() + mood.slice(1),
+            mood: normalizedMood,
+            emoji: emojiMap[normalizedMood] || this.moods[mood],
+            name: normalizedMood.charAt(0).toUpperCase() + normalizedMood.slice(1),
             note: note,
             timestamp: Date.now(),
             date: new Date().toISOString()
@@ -501,14 +515,14 @@ const MoodDialogueSystem = {
             moods.length = 100;
         }
         
-        // Save to localStorage
+        // Save to localStorage only (single source of truth)
         localStorage.setItem('moodHistory', JSON.stringify(moods));
         
-        console.log('[MoodDialogueSystem] Mood saved to localStorage:', mood);
+        console.log('[MoodDialogueSystem] Mood saved to localStorage:', normalizedMood);
         
         // Update display if on habits tab
-        if (typeof updateMoodHistoryDisplay === 'function') {
-            updateMoodHistoryDisplay();
+        if (typeof window.updateMoodHistoryDisplay === 'function') {
+            window.updateMoodHistoryDisplay();
         }
     },
     
@@ -671,7 +685,11 @@ const MoodDialogueSystem = {
         const container = document.getElementById('moodHistoryContainer');
         if (!container) return;
         
-        if (!gameState.moodHistory || gameState.moodHistory.length === 0) {
+        // Read from localStorage (single source of truth)
+        const saved = localStorage.getItem('moodHistory');
+        const moodHistory = saved ? JSON.parse(saved) : [];
+        
+        if (!moodHistory || moodHistory.length === 0) {
             container.innerHTML = `
                 <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
                     <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
@@ -684,7 +702,7 @@ const MoodDialogueSystem = {
         
         // Calculate most common mood
         const moodCounts = {};
-        gameState.moodHistory.forEach(entry => {
+        moodHistory.forEach(entry => {
             moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
         });
         
@@ -696,20 +714,20 @@ const MoodDialogueSystem = {
         const mostCommonCount = moodCounts[mostCommonMood];
         
         // Get last 14 days of mood history (reversed to show newest first)
-        const recentMoods = gameState.moodHistory.slice(-14).reverse();
+        const recentMoods = moodHistory.slice(-14).reverse();
         
         // Mood colors
         const moodColors = {
             happy: '#4ade80',
-            anxious: '#fbbf24',
-            neutral: '#94a3b8',
+            sad: '#fbbf24',
+            meh: '#94a3b8',
             angry: '#f87171'
         };
         
         const moodLabels = {
             happy: 'Happy',
-            anxious: 'Anxious',
-            neutral: 'Neutral',
+            sad: 'Sad',
+            meh: 'Meh',
             angry: 'Angry'
         };
         

@@ -68,8 +68,11 @@ function updateHabitsDisplay() {
     document.getElementById('habitMediumPriorityPercent').textContent = `${priorDist.medium}%`;
     document.getElementById('habitHighPercent').textContent = `${priorDist.high}%`;
     
-    // Update mood history display
-    if (typeof MoodDialogueSystem !== 'undefined' && MoodDialogueSystem.updateMoodHistoryDisplay) {
+    // Update mood history display using new moodTracker system
+    if (typeof window.updateMoodHistoryDisplay === 'function') {
+        window.updateMoodHistoryDisplay();
+    } else if (typeof MoodDialogueSystem !== 'undefined' && MoodDialogueSystem.updateMoodHistoryDisplay) {
+        // Fallback to legacy system if new system not available
         MoodDialogueSystem.updateMoodHistoryDisplay();
     }
 }

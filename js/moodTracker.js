@@ -555,15 +555,21 @@ window.initMoodHistoryFilters = function() {
     const moodFilter = document.getElementById('moodTypeFilter');
     
     if (dateFilter) {
-        dateFilter.addEventListener('change', () => {
-            console.log('[MoodTracker] Date filter changed:', dateFilter.value);
+        // Remove existing listeners by cloning and replacing
+        const newDateFilter = dateFilter.cloneNode(true);
+        dateFilter.parentNode.replaceChild(newDateFilter, dateFilter);
+        newDateFilter.addEventListener('change', () => {
+            console.log('[MoodTracker] Date filter changed:', newDateFilter.value);
             window.updateMoodHistoryDisplay();
         });
     }
     
     if (moodFilter) {
-        moodFilter.addEventListener('change', () => {
-            console.log('[MoodTracker] Mood filter changed:', moodFilter.value);
+        // Remove existing listeners by cloning and replacing
+        const newMoodFilter = moodFilter.cloneNode(true);
+        moodFilter.parentNode.replaceChild(newMoodFilter, moodFilter);
+        newMoodFilter.addEventListener('change', () => {
+            console.log('[MoodTracker] Mood filter changed:', newMoodFilter.value);
             window.updateMoodHistoryDisplay();
         });
     }
@@ -572,6 +578,9 @@ window.initMoodHistoryFilters = function() {
     window.updateMoodHistoryDisplay();
     console.log('[MoodTracker] Filters initialized and display updated');
 };
+
+// Alias for compatibility with showTab() in index.html
+window.initHabitMoodFilters = window.initMoodHistoryFilters;
 
 // Auto-initialize when switching to Habits tab
 const originalShowPage = window.showPage;
@@ -611,14 +620,9 @@ if (document.readyState === 'loading') {
 window.resetMoodTracker = function() {
     if (!confirm('Are you sure you want to reset all mood tracking data? This cannot be undone.')) return;
 
-    // Clear from localStorage
+    // Clear from localStorage (single source of truth)
     localStorage.removeItem('moodHistory');
     console.log('[MoodTracker] Mood history cleared from localStorage');
-
-    // Clear from gameState
-    if (window.gameState) {
-        window.gameState.moodHistory = [];
-    }
 
     // Refresh the mood history display
     if (typeof window.updateMoodHistoryDisplay === 'function') {

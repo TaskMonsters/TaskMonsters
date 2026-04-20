@@ -200,14 +200,9 @@ function resetHabitStats() {
         initHabitTracker();
         updateHabitsDisplay();
         
-        // Reset mood history in localStorage
+        // Reset mood history in localStorage (single source of truth)
         localStorage.removeItem('moodHistory');
         console.log('[HabitTracker] Mood history cleared from localStorage');
-        
-        // Reset mood history in gameState (if it exists)
-        if (gameState.moodHistory) {
-            gameState.moodHistory = [];
-        }
         
         // Update mood display
         if (typeof window.updateMoodHistoryDisplay === 'function') {
