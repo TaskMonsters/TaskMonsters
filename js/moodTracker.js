@@ -5,6 +5,59 @@
  * Saves mood history to localStorage and displays on Habits page with filters
  */
 
+const SAD_STREAK_ENCOURAGEMENT_MESSAGES = [
+    "I'm still right here with you, and we can take this one small moment at a time.",
+    "You do not have to be cheerful to be worthy of love, rest, and gentleness.",
+    "Even on heavy days, you are still doing something brave by checking in.",
+    "I know this stretch feels hard, but I am proud of you for staying with yourself.",
+    "You are allowed to slow down. You are allowed to breathe. I am not going anywhere.",
+    "This sadness is a feeling, not a verdict about who you are.",
+    "You have made it through difficult days before, and I believe in your next small step.",
+    "If today feels blurry, let me be a tiny reminder that you are deeply cared for.",
+    "You do not need to fix everything tonight. We can just be gentle for a minute.",
+    "I wish I could hand you a warm blanket and tell you that you are doing enough.",
+    "Please be soft with yourself today. Your heart has been carrying a lot.",
+    "I see the sad streak, and I also see how strong you are for continuing to show up.",
+    "You are not behind. You are not broken. You are a person having a hard moment.",
+    "Let's make the goal very small: one breath, one sip of water, one kind thought.",
+    "You deserve comfort just as much on your worst days as on your best ones.",
+    "I am holding space for you, even if all you can do right now is exist.",
+    "Your feelings are real, but they are not the whole story of you.",
+    "There is nothing weak about needing tenderness. Tenderness is how we heal.",
+    "If your energy is low, then tiny progress is still beautiful progress.",
+    "I care about you on the messy days too, especially the messy days.",
+    "You are allowed to rest without earning it first.",
+    "I hope you let this moment be smaller than your whole day.",
+    "Even if your spark feels quiet, it is still there. I can feel it.",
+    "You do not have to carry every heavy thing alone tonight.",
+    "If all you do is make it through this hour, that still counts.",
+    "I know your heart is tired. Let me remind you that tired hearts still deserve hope.",
+    "The fact that you checked in tells me there is still a part of you reaching for care.",
+    "Some days survival is the win. I am proud of you for surviving this one.",
+    "You are worthy of patience while you find your footing again.",
+    "Take your time. Healing and steadiness do not need to be rushed.",
+    "You are more than this streak, more than this moment, more than this ache.",
+    "I would sit quietly beside you if I could. Since I can't, please take this love instead.",
+    "There is no shame in having a hard week. You are still lovable exactly as you are.",
+    "Let tonight be gentle. Let tomorrow ask less of you. Let me cheer for you anyway.",
+    "I'm proud of you for being honest about your feelings instead of hiding from them.",
+    "When your mind is heavy, small comforts matter. Please choose one for yourself.",
+    "You have permission to pause, regroup, and be human.",
+    "If things feel dim right now, I will keep being your little light until it passes.",
+    "You are not failing. You are feeling, and feelings can be very heavy.",
+    "I hope you talk to yourself the way I would: gently, lovingly, and without blame.",
+    "Your softness is not a flaw. It is one of the most beautiful things about you.",
+    "We can aim for comfort, not perfection, just for tonight.",
+    "You still matter on the days when your smile is harder to find.",
+    "Maybe this is a good moment for water, a stretch, or one deep breath with me.",
+    "I know this streak is long, but long streaks end too. This feeling will move someday.",
+    "You are allowed to need extra care. That does not make you a burden.",
+    "I believe there is still something gentle waiting for you on the other side of today.",
+    "Even a tiny bit of hope is enough for us to hold onto together.",
+    "You are loved in the quiet moments, the tired moments, and the tearful moments too.",
+    "Thank you for staying. Thank you for checking in. That matters more than you know."
+];
+
 class MoodTracker {
     constructor() {
         this.moods = [
@@ -238,6 +291,9 @@ class MoodTracker {
         // Play monster animation based on mood
         this.playMoodAnimation(moodValue);
         
+        // Show streak-based encouragement modal for repeated sad moods
+        this.handleSadStreakEncouragement(moodValue);
+        
         // Show confirmation message
         this.showConfirmation(moodData.emoji, moodData.name);
         
@@ -276,6 +332,269 @@ class MoodTracker {
     getMoodHistory() {
         const saved = localStorage.getItem('moodHistory');
         return saved ? JSON.parse(saved) : [];
+    }
+
+    getConsecutiveMoodStreak(targetMood) {
+        const moods = this.getMoodHistory();
+        let streak = 0;
+
+        for (const entry of moods) {
+            if (!entry || entry.mood !== targetMood) break;
+            streak++;
+        }
+
+        return streak;
+    }
+
+    getRandomSadStreakMessage() {
+        const index = Math.floor(Math.random() * SAD_STREAK_ENCOURAGEMENT_MESSAGES.length);
+        return SAD_STREAK_ENCOURAGEMENT_MESSAGES[index];
+    }
+
+    ensureSadStreakModalStyles() {
+        if (document.getElementById('sadStreakEncouragementStyles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'sadStreakEncouragementStyles';
+        style.textContent = `
+            @keyframes sadStreakFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes sadStreakModalPop {
+                from { opacity: 0; transform: translateY(16px) scale(0.96); }
+                to { opacity: 1; transform: translateY(0) scale(1); }
+            }
+
+            @keyframes sadStreakMonsterJump {
+                0%, 100% { transform: translateY(0); }
+                18% { transform: translateY(-14px); }
+                34% { transform: translateY(0); }
+                52% { transform: translateY(-9px); }
+                68% { transform: translateY(0); }
+                84% { transform: translateY(-5px); }
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+    showSadStreakEncouragementModal(streakCount) {
+        if (document.getElementById('sadStreakEncouragementOverlay')) return;
+
+        this.ensureSadStreakModalStyles();
+
+        const currentSprite = document.getElementById('mainHeroSprite');
+        const isEgg = window.gameState?.isEgg || false;
+        const petName = window.gameState?.rockName || localStorage.getItem('monsterName') || 'Your Task Monster';
+        const spriteSrc = currentSprite?.src || '';
+        const encouragement = this.getRandomSadStreakMessage();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'sadStreakEncouragementOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 10, 25, 0.78);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 12000;
+            animation: sadStreakFadeIn 0.25s ease-out;
+        `;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            width: min(92vw, 460px);
+            max-height: 90vh;
+            overflow-y: auto;
+            background: linear-gradient(160deg, #1b1835 0%, #1b2a4a 55%, #16213e 100%);
+            border: 2px solid rgba(196, 181, 253, 0.45);
+            border-radius: 24px;
+            box-shadow: 0 22px 70px rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+            padding: 22px 20px 20px;
+            position: relative;
+            animation: sadStreakModalPop 0.28s ease-out;
+        `;
+
+        const closeModal = () => {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 180);
+        };
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.innerHTML = '&times;';
+        closeButton.style.cssText = `
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+        `;
+        closeButton.onclick = closeModal;
+
+        const badge = document.createElement('div');
+        badge.textContent = `${petName} noticed you might need some kindness`;
+        badge.style.cssText = `
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(167, 139, 250, 0.18);
+            border: 1px solid rgba(196, 181, 253, 0.26);
+            color: #ddd6fe;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            max-width: calc(100% - 48px);
+        `;
+
+        const title = document.createElement('h3');
+        title.textContent = 'A gentle message for you';
+        title.style.cssText = `
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            line-height: 1.2;
+        `;
+
+        const streakText = document.createElement('p');
+        streakText.textContent = `You have logged ${streakCount} sad moods in a row. I just wanted to check in with something soft.`;
+        streakText.style.cssText = `
+            margin: 0 0 16px 0;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 14px;
+            line-height: 1.6;
+        `;
+
+        const messageBubble = document.createElement('div');
+        messageBubble.textContent = encouragement;
+        messageBubble.style.cssText = `
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.16), rgba(167, 139, 250, 0.14));
+            border: 1px solid rgba(244, 114, 182, 0.22);
+            border-radius: 18px;
+            padding: 18px 16px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #ffffff;
+            margin-bottom: 18px;
+        `;
+
+        const spriteStage = document.createElement('div');
+        spriteStage.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 12px 10px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 18px;
+        `;
+
+        const spriteLabel = document.createElement('div');
+        spriteLabel.textContent = `${petName} is cheering for you`;
+        spriteLabel.style.cssText = `
+            font-size: 13px;
+            color: #c4b5fd;
+            font-weight: 600;
+            text-align: center;
+        `;
+
+        const sprite = document.createElement('img');
+        sprite.alt = `${petName} encouragement`; 
+        sprite.src = spriteSrc;
+        sprite.style.cssText = `
+            width: ${isEgg ? '86px' : '112px'};
+            height: ${isEgg ? '86px' : '112px'};
+            object-fit: contain;
+            object-position: center;
+            image-rendering: pixelated;
+            animation: sadStreakMonsterJump 1.35s ease-in-out infinite;
+            transform-origin: center bottom;
+            filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.26));
+        `;
+
+        const footerText = document.createElement('p');
+        footerText.textContent = 'Try one tiny kind thing for yourself next: water, a stretch, a breath, or simply resting for a minute.';
+        footerText.style.cssText = `
+            margin: 0 0 18px 0;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+        `;
+
+        const acknowledgeButton = document.createElement('button');
+        acknowledgeButton.type = 'button';
+        acknowledgeButton.textContent = 'Thanks, buddy';
+        acknowledgeButton.style.cssText = `
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(167, 139, 250, 0.28);
+        `;
+        acknowledgeButton.onclick = closeModal;
+
+        spriteStage.appendChild(sprite);
+        spriteStage.appendChild(spriteLabel);
+        modal.appendChild(closeButton);
+        modal.appendChild(badge);
+        modal.appendChild(title);
+        modal.appendChild(streakText);
+        modal.appendChild(messageBubble);
+        modal.appendChild(spriteStage);
+        modal.appendChild(footerText);
+        modal.appendChild(acknowledgeButton);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', (event) => {
+            if (event.target === overlay) closeModal();
+        });
+    }
+
+    handleSadStreakEncouragement(moodValue) {
+        const storageKey = 'sadStreakEncouragementShown';
+
+        if (moodValue !== 'sad') {
+            localStorage.removeItem(storageKey);
+            return;
+        }
+
+        const sadStreak = this.getConsecutiveMoodStreak('sad');
+
+        if (sadStreak < 6) {
+            localStorage.removeItem(storageKey);
+            return;
+        }
+
+        if (localStorage.getItem(storageKey) === 'true') {
+            return;
+        }
+
+        localStorage.setItem(storageKey, 'true');
+        setTimeout(() => this.showSadStreakEncouragementModal(sadStreak), 250);
     }
     
     addMonsterClickListener() {
