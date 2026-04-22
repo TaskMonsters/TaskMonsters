@@ -5064,13 +5064,31 @@ input:checked + .toggle-slider:before {
             </div>
 
             <!-- Encouraging Message Container - REMOVED -->
+
+            <!-- Monthly Mood Graph -->
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <div>
+                        <div style="font-weight: 600; color: #fff; margin-bottom: 4px;">Monthly Mood Graph</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">Defaults to the current month. Use the arrows to view previous months.</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button id="moodChartPrevBtn" class="btn-secondary" onclick="changeMoodChartMonth(-1)" style="font-size: 12px; padding: 8px 12px;">←</button>
+                        <div id="moodChartMonthLabel" style="min-width: 120px; text-align: center; font-size: 14px; font-weight: 600; color: #fff;">Current Month</div>
+                        <button id="moodChartNextBtn" class="btn-secondary" onclick="changeMoodChartMonth(1)" style="font-size: 12px; padding: 8px 12px;">→</button>
+                    </div>
+                </div>
+                <div id="moodChartContainer">
+                    <!-- Monthly mood graph will be rendered here -->
+                </div>
+            </div>
             
             <!-- Filters -->
             <div class="card">
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 150px;">
                         <label style="display: block; color: var(--text-secondary); font-size: 13px; margin-bottom: 6px;">Filter by Date</label>
-                        <select id="moodDateFilter" style="
+                        <select id="moodDateFilter" onchange="updateMoodHistoryDisplay()" style="
                             width: 100%;
                             padding: 10px;
                             background: rgba(255, 255, 255, 0.05);
@@ -5088,7 +5106,7 @@ input:checked + .toggle-slider:before {
                     </div>
                     <div style="flex: 1; min-width: 150px;">
                         <label style="display: block; color: var(--text-secondary); font-size: 13px; margin-bottom: 6px;">Filter by Mood</label>
-                        <select id="moodTypeFilter" style="
+                        <select id="moodTypeFilter" onchange="updateMoodHistoryDisplay()" style="
                             width: 100%;
                             padding: 10px;
                             background: rgba(255, 255, 255, 0.05);
