@@ -584,7 +584,7 @@ class MoodTracker {
 
         const sadStreak = this.getConsecutiveMoodStreak('sad');
 
-        if (sadStreak < 6) {
+        if (sadStreak < 3) {
             localStorage.removeItem(storageKey);
             return;
         }
