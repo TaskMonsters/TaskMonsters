@@ -440,53 +440,139 @@ class MoodTracker {
     }
 }
 
+const MOOD_TRACKER_GRAPH_CONFIG = [
+    { value: 'happy', name: 'Happy', emoji: '😊', color: '#4ade80' },
+    { value: 'sad', name: 'Sad', emoji: '😢', color: '#60a5fa' },
+    { value: 'meh', name: 'Meh', emoji: '🫤', color: '#facc15' },
+    { value: 'angry', name: 'Angry', emoji: '😡', color: '#f87171' }
+];
+
+window.moodChartMonthOffset = 0;
+
+function getStoredMoodHistory() {
+    try {
+        const saved = localStorage.getItem('moodHistory');
+        const moods = saved ? JSON.parse(saved) : [];
+        return Array.isArray(moods) ? moods : [];
+    } catch (error) {
+        console.warn('[MoodTracker] Failed to parse mood history:', error);
+        return [];
+    }
+}
+
+function getMoodEntryTimestamp(entry) {
+    return entry?.timestamp || (entry?.date ? new Date(entry.date).getTime() : 0);
+}
+
+function getMoodChartMonthDate() {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth() + (window.moodChartMonthOffset || 0), 1);
+}
+
+window.renderMoodChart = function() {
+    const container = document.getElementById('moodChartContainer');
+    if (!container) return;
+
+    const monthLabel = document.getElementById('moodChartMonthLabel');
+    const nextButton = document.getElementById('moodChartNextBtn');
+    const monthDate = getMoodChartMonthDate();
+    const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1).getTime();
+    const nextMonthStart = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 1).getTime();
+    const counts = Object.fromEntries(MOOD_TRACKER_GRAPH_CONFIG.map(mood => [mood.value, 0]));
+
+    getStoredMoodHistory().forEach(entry => {
+        const timestamp = getMoodEntryTimestamp(entry);
+        if (timestamp >= monthStart && timestamp < nextMonthStart && counts[entry.mood] !== undefined) {
+            counts[entry.mood] += 1;
+        }
+    });
+
+    const highestCount = Math.max(...Object.values(counts), 0);
+    const totalCount = Object.values(counts).reduce((sum, count) => sum + count, 0);
+
+    if (monthLabel) {
+        monthLabel.textContent = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    if (nextButton) {
+        nextButton.disabled = (window.moodChartMonthOffset || 0) >= 0;
+        nextButton.style.opacity = nextButton.disabled ? '0.5' : '1';
+        nextButton.style.cursor = nextButton.disabled ? 'not-allowed' : 'pointer';
+    }
+
+    if (totalCount === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 28px 16px; color: #999; border: 1px solid rgba(139, 92, 246, 0.16); border-radius: 12px; background: rgba(255, 255, 255, 0.03);">
+                <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
+                <div style="color: #fff; font-weight: 600; margin-bottom: 6px;">No moods logged for this month</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">Log a mood to see your monthly graph here.</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = MOOD_TRACKER_GRAPH_CONFIG.map(mood => {
+        const count = counts[mood.value];
+        const width = highestCount > 0 && count > 0 ? Math.max((count / highestCount) * 100, 12) : 0;
+
+        return `
+            <div style="display: grid; grid-template-columns: 64px 1fr 32px; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; font-size: 14px;">
+                    <span style="font-size: 22px; line-height: 1;">${mood.emoji}</span>
+                    <span>${mood.name}</span>
+                </div>
+                <div style="height: 18px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); overflow: hidden;">
+                    <div style="height: 100%; width: ${width}%; min-width: ${count > 0 ? '18px' : '0'}; border-radius: 999px; background: ${mood.color};"></div>
+                </div>
+                <div style="text-align: right; color: #fff; font-weight: 700; font-size: 14px;">${count}</div>
+            </div>
+        `;
+    }).join('');
+};
+
+window.changeMoodChartMonth = function(delta) {
+    const nextOffset = (window.moodChartMonthOffset || 0) + delta;
+    window.moodChartMonthOffset = nextOffset > 0 ? 0 : nextOffset;
+    window.renderMoodChart();
+};
+
 // Global function to update mood history display
 window.updateMoodHistoryDisplay = function() {
     const container = document.getElementById('moodHistoryContainer');
     if (!container) return;
-    
+
     const dateFilter = document.getElementById('moodDateFilter')?.value || 'all';
     const moodFilter = document.getElementById('moodTypeFilter')?.value || 'all';
-    
-    // Get moods directly from localStorage (more reliable)
-    const saved = localStorage.getItem('moodHistory');
-    let moods = saved ? JSON.parse(saved) : [];
-    
+    let moods = getStoredMoodHistory();
+
+    window.renderMoodChart();
+
     console.log('[MoodTracker] Filtering moods - Date:', dateFilter, 'Mood:', moodFilter, 'Total:', moods.length);
-    
-    // Apply date filter
+
     if (dateFilter !== 'all') {
         const now = new Date();
-        // Set to start of today (00:00:00.000)
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
+
         moods = moods.filter(entry => {
-            const entryTime = entry.timestamp || (entry.date ? new Date(entry.date).getTime() : 0);
+            const entryTime = getMoodEntryTimestamp(entry);
             if (!entryTime) return false;
-            
+
             if (dateFilter === 'today') {
                 return entryTime >= todayStart;
             } else if (dateFilter === 'week') {
-                const weekAgo = todayStart - (7 * 24 * 60 * 60 * 1000);
-                return entryTime >= weekAgo;
+                return entryTime >= todayStart - (7 * 24 * 60 * 60 * 1000);
             } else if (dateFilter === 'month') {
-                const monthAgo = todayStart - (30 * 24 * 60 * 60 * 1000);
-                return entryTime >= monthAgo;
+                return entryTime >= todayStart - (30 * 24 * 60 * 60 * 1000);
             }
+
             return true;
         });
-        console.log('[MoodTracker] After date filter:', moods.length);
     }
-    
-    // Apply mood type filter
+
     if (moodFilter !== 'all') {
-        moods = moods.filter(entry => {
-            return entry.mood && entry.mood.toLowerCase() === moodFilter.toLowerCase();
-        });
-        console.log('[MoodTracker] After mood filter:', moods.length);
+        moods = moods.filter(entry => entry.mood && entry.mood.toLowerCase() === moodFilter.toLowerCase());
     }
-    
-    // Render mood history
+
     if (moods.length === 0) {
         container.innerHTML = `
             <div style="text-align: center; padding: 40px 20px; color: #999;">
@@ -497,14 +583,12 @@ window.updateMoodHistoryDisplay = function() {
         `;
         return;
     }
-    
-    console.log('[MoodTracker] Rendering', moods.length, 'mood entries');
-    
+
     container.innerHTML = moods.map(entry => {
-        const date = new Date(entry.timestamp);
+        const date = new Date(getMoodEntryTimestamp(entry));
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        
+
         return `
             <div style="
                 background: rgba(255, 255, 255, 0.05);
@@ -545,38 +629,32 @@ if (document.readyState === 'loading') {
     window.moodTracker = new MoodTracker();
 }
 
-// Initialize mood history display when Habits tab is shown
 window.initMoodHistoryFilters = function() {
     console.log('[MoodTracker] Initializing mood history filters');
-    
+
     const dateFilter = document.getElementById('moodDateFilter');
     const moodFilter = document.getElementById('moodTypeFilter');
-    
-    // Use a flag to prevent multiple listener attachments without cloning if possible,
-    // but cloning is safer to ensure clean state.
-    if (dateFilter && !dateFilter.dataset.listenersAttached) {
-        dateFilter.addEventListener('change', () => {
+
+    if (dateFilter) {
+        dateFilter.onchange = () => {
             console.log('[MoodTracker] Date filter changed:', dateFilter.value);
             window.updateMoodHistoryDisplay();
-        });
-        dateFilter.dataset.listenersAttached = 'true';
+        };
     }
-    
-    if (moodFilter && !moodFilter.dataset.listenersAttached) {
-        moodFilter.addEventListener('change', () => {
+
+    if (moodFilter) {
+        moodFilter.onchange = () => {
             console.log('[MoodTracker] Mood filter changed:', moodFilter.value);
             window.updateMoodHistoryDisplay();
-        });
-        moodFilter.dataset.listenersAttached = 'true';
+        };
     }
-    
-    // Initial display
+
     window.updateMoodHistoryDisplay();
     console.log('[MoodTracker] Filters initialized and display updated');
 };
 
-// Ensure it's available globally early
 window.initHabitMoodFilters = window.initMoodHistoryFilters;
+window.initMoodFilters = window.initMoodHistoryFilters;
 
 // Auto-initialize when switching to Habits tab
 const originalShowPage = window.showPage;
