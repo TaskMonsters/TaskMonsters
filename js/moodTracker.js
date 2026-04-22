@@ -336,6 +336,31 @@ class MoodTracker {
         }, 600);
     }
 
+    applyEggHappyAnimation(sprite, baseTransform, originalTransform) {
+        const resolvedBase = baseTransform === 'none' ? '' : baseTransform;
+        const jiggleFrames = [
+            `${resolvedBase} translate(-3px, -4px) rotate(-3deg)`.trim(),
+            `${resolvedBase} translate(3px, -8px) rotate(3deg)`.trim(),
+            `${resolvedBase} translate(-2px, -6px) rotate(-2deg)`.trim(),
+            `${resolvedBase} translate(2px, -3px) rotate(2deg)`.trim(),
+            `${resolvedBase} translate(0, 0) rotate(0deg)`.trim()
+        ];
+
+        sprite.style.setProperty('transition', 'transform 0.14s ease-in-out', 'important');
+        sprite.style.setProperty('transform-origin', 'center bottom', 'important');
+
+        jiggleFrames.forEach((frame, index) => {
+            setTimeout(() => {
+                sprite.style.setProperty('transform', frame, 'important');
+            }, index * 140);
+        });
+
+        setTimeout(() => {
+            sprite.style.setProperty('transform', originalTransform || baseTransform, 'important');
+            sprite.style.setProperty('transition', '', 'important');
+        }, jiggleFrames.length * 140);
+    }
+
     playMoodAnimation(moodValue) {
         console.log('[MoodTracker] Playing animation for mood:', moodValue);
         
@@ -365,13 +390,20 @@ class MoodTracker {
                 ? currentTransform.split('translateY')[0].trim() 
                 : currentTransform;
 
+            if (isEgg) {
+                console.log('[MoodTracker] Egg form detected - using egg-only jumble animation');
+                sprite.src = originalSrc;
+                this.applyEggHappyAnimation(sprite, baseTransform, originalTransform);
+                return;
+            }
+
             // Determine jump GIF
             let jumpGif = null;
             const appearance = window.getActiveHeroAppearance ? window.getActiveHeroAppearance() : null;
             
             if (appearance && appearance.animations && appearance.animations.jump) {
                 jumpGif = appearance.animations.jump;
-            } else if (!isEgg) {
+            } else {
                 // Fallback for default monsters
                 const prefixToName = { 'Pink_Monster': 'Nova', 'Owlet_Monster': 'Luna', 'Dude_Monster': 'Benny' };
                 const monsterName = prefixToName[selectedMonster] || 'Nova';
