@@ -449,6 +449,41 @@ const MOOD_TRACKER_GRAPH_CONFIG = [
 
 window.moodChartMonthOffset = 0;
 
+function ensureMoodChartUI() {
+    let container = document.getElementById('moodChartContainer');
+    if (container) return container;
+
+    const moodTab = document.getElementById('moodTab');
+    if (!moodTab) return null;
+
+    const graphCard = document.createElement('div');
+    graphCard.className = 'card';
+    graphCard.id = 'moodChartCard';
+    graphCard.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+            <div>
+                <div style="font-weight: 600; color: #fff; margin-bottom: 4px;">Monthly Mood Graph</div>
+                <div style="font-size: 13px; color: var(--text-secondary);">Defaults to the current month. Use the arrows to view previous months.</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button id="moodChartPrevBtn" class="btn-secondary" onclick="changeMoodChartMonth(-1)" style="font-size: 12px; padding: 8px 12px;">←</button>
+                <div id="moodChartMonthLabel" style="min-width: 120px; text-align: center; font-size: 14px; font-weight: 600; color: #fff;">Current Month</div>
+                <button id="moodChartNextBtn" class="btn-secondary" onclick="changeMoodChartMonth(1)" style="font-size: 12px; padding: 8px 12px;">→</button>
+            </div>
+        </div>
+        <div id="moodChartContainer"></div>
+    `;
+
+    const referenceCard = document.getElementById('moodHistoryContainer')?.closest('.card');
+    if (referenceCard && referenceCard.parentNode) {
+        referenceCard.parentNode.insertBefore(graphCard, referenceCard);
+    } else {
+        moodTab.appendChild(graphCard);
+    }
+
+    return document.getElementById('moodChartContainer');
+}
+
 function getStoredMoodHistory() {
     try {
         const saved = localStorage.getItem('moodHistory');
@@ -470,7 +505,7 @@ function getMoodChartMonthDate() {
 }
 
 window.renderMoodChart = function() {
-    const container = document.getElementById('moodChartContainer');
+    const container = ensureMoodChartUI();
     if (!container) return;
 
     const monthLabel = document.getElementById('moodChartMonthLabel');
@@ -631,6 +666,8 @@ if (document.readyState === 'loading') {
 
 window.initMoodHistoryFilters = function() {
     console.log('[MoodTracker] Initializing mood history filters');
+
+    ensureMoodChartUI();
 
     const dateFilter = document.getElementById('moodDateFilter');
     const moodFilter = document.getElementById('moodTypeFilter');
