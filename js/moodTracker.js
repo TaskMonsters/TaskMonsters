@@ -551,8 +551,8 @@ window.renderMoodChart = function() {
         const width = highestCount > 0 && count > 0 ? Math.max((count / highestCount) * 100, 12) : 0;
 
         return `
-            <div style="display: grid; grid-template-columns: 64px 1fr 32px; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <div style="display: flex; align-items: center; gap: 6px; color: #fff; font-weight: 600; font-size: 14px;">
+            <div style="display: grid; grid-template-columns: minmax(132px, auto) 1fr 32px; align-items: center; column-gap: 20px; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; padding-right: 10px; color: #fff; font-weight: 600; font-size: 14px; white-space: nowrap;">
                     <span style="font-size: 22px; line-height: 1;">${mood.emoji}</span>
                     <span>${mood.name}</span>
                 </div>
