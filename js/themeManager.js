@@ -6,7 +6,7 @@ const availableThemes = {
         name: 'Dark Castle',
         emoji: '🏰',
         description: 'Mysterious old castle interior',
-        price: 400,
+        price: 100,
         preview: 'assets/backgrounds/themes/castle.png'
     },
     dark_gothic_castle: {
@@ -14,7 +14,7 @@ const availableThemes = {
         name: 'Dark Gothic Castle',
         emoji: '🏰',
         description: 'Ominous castle on a cliff at twilight',
-        price: 1000,
+        price: 500,
         preview: 'assets/backgrounds/themes/DarkGothicCastle.png'
     },
     forest: {
@@ -22,7 +22,7 @@ const availableThemes = {
         name: 'Misty Forest',
         emoji: '🌲',
         description: 'Enchanted forest with mist',
-        price: 450,
+        price: 150,
         preview: 'assets/backgrounds/themes/forest.png'
     },
     underwater: {
@@ -30,7 +30,7 @@ const availableThemes = {
         name: 'Underwater Fantasy',
         emoji: '🌊',
         description: 'Deep ocean wonderland',
-        price: 600,
+        price: 250,
         preview: 'assets/backgrounds/themes/underwater.png'
     },
     graveyard: {
@@ -38,7 +38,7 @@ const availableThemes = {
         name: 'Ship Graveyard',
         emoji: '⚓',
         description: 'Abandoned ships in the mist',
-        price: 550,
+        price: 200,
         preview: 'assets/backgrounds/themes/graveyard.png'
     },
     synth_city: {
@@ -46,7 +46,7 @@ const availableThemes = {
         name: 'Synth City',
         emoji: '🌆',
         description: 'Retro synthwave cityscape',
-        price: 650,
+        price: 300,
         preview: 'assets/backgrounds/themes/synth-city.png'
     },
     space: {
@@ -54,7 +54,7 @@ const availableThemes = {
         name: 'Space',
         emoji: '🌌',
         description: 'Cosmic space vista',
-        price: 700,
+        price: 350,
         preview: 'assets/backgrounds/themes/space.png'
     },
     vamp_castle_bg: {
@@ -62,7 +62,7 @@ const availableThemes = {
         name: 'Vampire Castle Night',
         emoji: '🦇',
         description: 'Gothic castle under moonlight',
-        price: 700,
+        price: 400,
         preview: 'assets/backgrounds/themes/vamp-castle-bg.png'
     },
     neon_city_sunset: {
@@ -70,7 +70,7 @@ const availableThemes = {
         name: 'Neon City Sunset',
         emoji: '🌇',
         description: 'Cyberpunk cityscape at dusk',
-        price: 800,
+        price: 450,
         preview: 'assets/backgrounds/themes/neon-city-sunset.png'
     },
     skull_gates: {
@@ -78,7 +78,7 @@ const availableThemes = {
         name: 'Skull Gates',
         emoji: '💀',
         description: 'Haunted dungeon entrance with skull gateway',
-        price: 1100,
+        price: 550,
         preview: 'assets/backgrounds/themes/SkullGates.png'
     },
     bright_town: {
@@ -86,7 +86,7 @@ const availableThemes = {
         name: 'Bright Town',
         emoji: '🏘️',
         description: 'Charming village with colorful houses',
-        price: 1400,
+        price: 600,
         levelRequired: 30,
         preview: 'assets/themes/bright-town.png'
     },
@@ -95,7 +95,7 @@ const availableThemes = {
         name: 'Fort of Illusions',
         emoji: '🏯',
         description: 'Mystical fortress under starry skies',
-        price: 1800,
+        price: 650,
         levelRequired: 30,
         preview: 'assets/themes/FortofIllusionsTheme.gif'
     },
@@ -104,7 +104,7 @@ const availableThemes = {
         name: 'Stone Ruins',
         emoji: '🏛️',
         description: 'Ancient ruins with cherry blossoms',
-        price: 2200,
+        price: 700,
         levelRequired: 30,
         preview: 'assets/themes/StoneRuins.png'
     },
@@ -113,7 +113,7 @@ const availableThemes = {
         name: 'Forest of Illusions',
         emoji: '🌳',
         description: 'Enchanted forest with magical creatures',
-        price: 2500,
+        price: 800,
         levelRequired: 30,
         preview: 'assets/themes/ForestofIllusionsTheme.gif'
     }
@@ -290,4 +290,3 @@ window.updateThemesDisplay = updateThemesDisplay;
 window.buyTheme = buyTheme;
 window.applyThemeFromShop = applyThemeFromShop;
 window.unapplyThemeFromShop = unapplyThemeFromShop;
-
