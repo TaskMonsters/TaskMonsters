@@ -3036,11 +3036,12 @@ class BattleManager {
             const arena = document.getElementById('battleArena');
             arena.classList.add('hidden');
             
-            // FIXED: Stop all battle music when arena is hidden
-            // This ensures music stops even if user navigates away without clicking Continue
+            // Only the looping battle track is stopped here. The win/lose jingle must
+            // be allowed to play all the way through (it was previously cut off after
+            // ~2s by stopBattleOutcomeMusic). Win music is stopped when the user taps
+            // Continue; lose music stops by itself when it finishes.
             if (window.audioManager) {
                 window.audioManager.stopAllBattleMusic();
-                window.audioManager.stopBattleOutcomeMusic();
             }
         }, 2000);
     }
@@ -3197,10 +3198,7 @@ class BattleManager {
         };
 
         okButton.onclick = () => {
-            // Stop defeat music
-            if (window.audioManager) {
-                window.audioManager.stopBattleOutcomeMusic();
-            }
+            // Let the (short) defeat music finish naturally instead of cutting it off.
             overlay.remove();
         };
 

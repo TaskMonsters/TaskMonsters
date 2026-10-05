@@ -77,6 +77,20 @@ class AudioManager {
             battle_win: "assets/audio/battle_win.mp3", // Battle victory music
             battle_lose: "assets/sounds/battle-loss.mp3", // Battle defeat music
         };
+
+        // Fallback sources tried in order if the primary file fails to load
+        this.musicFallbacks = {
+            battle_win: [
+                "assets/audio/When user wins a battle.mp3",
+                "assets/battle/music/When user wins a battle.mp3",
+                "assets/sounds/when user wins any battle.mp3"
+            ],
+            battle_lose: [
+                "assets/audio/battle/WHEN USER LOSES A BATTLE.mp3",
+                "assets/audio/WHEN USER LOSES A BATTLE.mp3",
+                "assets/battle/music/WHEN USER LOSES A BATTLE.mp3"
+            ]
+        };
         
         // Battle music rotation system
         this.battleTracks = [
@@ -361,8 +375,73 @@ class AudioManager {
     }
 
     /**
+     * Internal: build an outcome-music Audio element with fallback sources.
+     * @param {string} key - 'battle_win' | 'battle_lose'
+     * @param {Function} onDone - called once when the track finishes or fails for good
+     */
+    _createOutcomeAudio(key, onDone) {
+        const sources = [this.music[key], ...(this.musicFallbacks[key] || [])];
+        let idx = 0;
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.volume = this.battleOutcomeMusicVolume;
+        audio.loop = false; // Play once, all the way through
+
+        audio.addEventListener('error', () => {
+            idx++;
+            if (idx < sources.length) {
+                console.warn(`[AudioManager] ${key} failed to load, trying fallback:`, sources[idx]);
+                audio.src = sources[idx];
+                audio.load();
+                audio.play().catch(() => {});
+            } else {
+                console.warn(`[AudioManager] ${key}: all sources failed`);
+                onDone();
+            }
+        });
+        audio.addEventListener('ended', () => onDone());
+
+        audio.src = sources[0];
+        return audio;
+    }
+
+    /**
+     * Internal: start an outcome Audio element. If the browser blocks autoplay
+     * (common on iOS when playback starts after async animations), retry on
+     * the very next tap/click instead of silently giving up.
+     */
+    _startOutcomeAudio(audio, label, onDone) {
+        const p = audio.play();
+        if (p === undefined) return;
+        p.then(() => {
+            console.log(`[AudioManager] ${label} playing`);
+        }).catch((err) => {
+            if (err && err.name === 'NotAllowedError') {
+                console.warn(`[AudioManager] ${label} blocked by autoplay policy; will retry on next interaction`);
+                const retry = () => {
+                    document.removeEventListener('pointerdown', retry, true);
+                    document.removeEventListener('touchstart', retry, true);
+                    document.removeEventListener('click', retry, true);
+                    const stillCurrent = (audio === this.battleWinMusic || audio === this.battleLoseMusic);
+                    if (this.enabled && stillCurrent && !audio.ended) {
+                        audio.play().catch(e => console.warn(`[AudioManager] ${label} retry failed:`, e.message));
+                    }
+                };
+                document.addEventListener('pointerdown', retry, { once: true, capture: true });
+                document.addEventListener('touchstart', retry, { once: true, capture: true });
+                document.addEventListener('click', retry, { once: true, capture: true });
+            } else if (err && err.name === 'AbortError') {
+                // Interrupted by a newer load/pause (e.g. fallback source swap) - not fatal
+            } else {
+                console.warn(`[AudioManager] ${label} playback failed:`, err && err.message);
+            }
+        });
+    }
+
+    /**
      * Play battle win music (one-time, non-looping)
-     * Called when player wins a battle
+     * Called when player wins a battle. Plays to the end; only stops early if
+     * stopBattleOutcomeMusic() is called explicitly (e.g. user taps Continue).
      */
     playBattleWinMusic() {
         if (!this.enabled || !this.music.battle_win) return;
@@ -370,48 +449,29 @@ class AudioManager {
         // Stop any currently playing battle outcome music
         this.stopBattleOutcomeMusic();
 
-        // Stop battle music if playing
-        if (this.battleMusicAudio) {
-            try {
-                this.battleMusicAudio.pause();
-                this.battleMusicAudio.currentTime = 0;
-                this.battleMusicAudio = null;
-            } catch (error) {
-                console.warn("[AudioManager] Error stopping battle music:", error.message);
+        // Stop battle loop music if playing
+        this.stopAllBattleMusic();
+
+        const fireEnded = () => {
+            console.log('[AudioManager] Battle win music finished playing');
+            if (typeof this._onBattleWinMusicEnded === 'function') {
+                const cb = this._onBattleWinMusicEnded;
+                this._onBattleWinMusicEnded = null;
+                cb();
             }
-        }
+        };
 
         try {
-            this.battleWinMusic = new Audio(this.music.battle_win);
-            this.battleWinMusic.volume = this.battleOutcomeMusicVolume;
-            this.battleWinMusic.loop = false; // Play once only
-
-            // Fire the onended callback when the track finishes naturally
-            this.battleWinMusic.addEventListener('ended', () => {
-                console.log('[AudioManager] Battle win music finished playing');
-                if (typeof this._onBattleWinMusicEnded === 'function') {
-                    this._onBattleWinMusicEnded();
-                    this._onBattleWinMusicEnded = null;
-                }
-            });
-
-            this.battleWinMusic.play().catch((err) => {
-                console.warn("[AudioManager] Battle win music playback failed:", err.message);
-                this.battleWinMusic = null;
-                // If playback fails, fire callback immediately so the game doesn't stall
-                if (typeof this._onBattleWinMusicEnded === 'function') {
-                    this._onBattleWinMusicEnded();
-                    this._onBattleWinMusicEnded = null;
-                }
-            });
-
-            console.log("[AudioManager] Battle win music started");
+            const audio = this._createOutcomeAudio('battle_win', fireEnded);
+            this.battleWinMusic = audio;
+            this._startOutcomeAudio(audio, 'Battle win music', fireEnded);
         } catch (error) {
             console.warn("[AudioManager] Error playing battle win music:", error.message);
-            // Fire callback immediately on error so the game doesn't stall
+            this.battleWinMusic = null;
             if (typeof this._onBattleWinMusicEnded === 'function') {
-                this._onBattleWinMusicEnded();
+                const cb = this._onBattleWinMusicEnded;
                 this._onBattleWinMusicEnded = null;
+                cb();
             }
         }
     }
@@ -442,59 +502,42 @@ class AudioManager {
         // Stop any currently playing battle outcome music
         this.stopBattleOutcomeMusic();
 
-        // Stop battle music if playing
-        if (this.battleMusicAudio) {
-            try {
-                this.battleMusicAudio.pause();
-                this.battleMusicAudio.currentTime = 0;
-                this.battleMusicAudio = null;
-            } catch (error) {
-                console.warn("[AudioManager] Error stopping battle music:", error.message);
-            }
-        }
+        // Stop battle loop music if playing
+        this.stopAllBattleMusic();
 
         try {
-            this.battleLoseMusic = new Audio(this.music.battle_lose);
-            this.battleLoseMusic.volume = this.battleOutcomeMusicVolume;
-            this.battleLoseMusic.loop = false; // Play once only
-
-            this.battleLoseMusic.play().catch((err) => {
-                console.warn("[AudioManager] Battle lose music playback failed:", err.message);
-                this.battleLoseMusic = null;
+            const audio = this._createOutcomeAudio('battle_lose', () => {
+                console.log('[AudioManager] Battle lose music finished playing');
+                if (this.battleLoseMusic === audio) this.battleLoseMusic = null;
             });
-
-            console.log("[AudioManager] Battle lose music started");
+            this.battleLoseMusic = audio;
+            this._startOutcomeAudio(audio, 'Battle lose music', () => {});
         } catch (error) {
             console.warn("[AudioManager] Error playing battle lose music:", error.message);
+            this.battleLoseMusic = null;
         }
     }
 
     /**
      * Stop battle outcome music (win/loss)
-     * Called when battle ends or user exits battle mode
+     * Called when the user dismisses the win screen or leaves battle mode.
      */
     stopBattleOutcomeMusic() {
-        if (this.battleWinMusic) {
-            try {
-                this.battleWinMusic.pause();
-                this.battleWinMusic.currentTime = 0;
-                this.battleWinMusic = null;
-                console.log("[AudioManager] Battle win music stopped");
-            } catch (error) {
-                console.warn("[AudioManager] Error stopping battle win music:", error.message);
-            }
-        }
+        // Drop any pending win-ended callback so it can't fire for a stopped track
+        this._onBattleWinMusicEnded = null;
 
-        if (this.battleLoseMusic) {
+        ['battleWinMusic', 'battleLoseMusic'].forEach((prop) => {
+            const audio = this[prop];
+            if (!audio) return;
+            this[prop] = null;
             try {
-                this.battleLoseMusic.pause();
-                this.battleLoseMusic.currentTime = 0;
-                this.battleLoseMusic = null;
-                console.log("[AudioManager] Battle lose music stopped");
+                audio.pause();
+                audio.currentTime = 0;
+                console.log(`[AudioManager] ${prop} stopped`);
             } catch (error) {
-                console.warn("[AudioManager] Error stopping battle lose music:", error.message);
+                console.warn(`[AudioManager] Error stopping ${prop}:`, error.message);
             }
-        }
+        });
     }
 
     /**
